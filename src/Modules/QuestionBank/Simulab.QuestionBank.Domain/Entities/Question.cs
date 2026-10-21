@@ -19,6 +19,7 @@ namespace Simulab.QuestionBank.Domain.Entities;
 public sealed class Question : TenantEntity
 {
     private readonly List<QuestionOption> _options = [];
+    private readonly List<QuestionMatchItem> _matchItems = [];
 
     private Question()
     {
@@ -63,6 +64,9 @@ public sealed class Question : TenantEntity
 
     /// <summary>The options in position order.</summary>
     public IReadOnlyList<QuestionOption> Options => _options;
+
+    /// <summary>The left items of a matching question in position order; empty for any other type (F-106, BR1).</summary>
+    public IReadOnlyList<QuestionMatchItem> MatchItems => _matchItems;
 
     public static Result<Question> Create(QuestionContent content)
     {

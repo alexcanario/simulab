@@ -24,6 +24,10 @@ namespace Simulab.QuestionBank.Contracts;
 /// creates a version whose key differs from the latest one; kept as a note on any other version the save creates
 /// and ignored when it creates none.
 /// </param>
+/// <param name="MatchItems">
+/// The left items of a matching question in order, each with the position of the option it matches (F-106, BR1);
+/// null counts as none. Refused on any other type when not empty (BR6).
+/// </param>
 public sealed record SaveQuestionRequest(
     Guid? TopicId = null,
     string? ContentLanguage = null,
@@ -37,4 +41,5 @@ public sealed record SaveQuestionRequest(
     Guid? NoticeSubjectId = null,
     QuestionType? Type = null,
     bool? TrueFalseKey = null,
-    string? ChangeReason = null);
+    string? ChangeReason = null,
+    IReadOnlyList<SaveMatchItemRequest>? MatchItems = null);

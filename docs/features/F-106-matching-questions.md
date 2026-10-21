@@ -1,7 +1,8 @@
 ---
 feature: F-106
 epic: Question bank
-status: approved
+status: building
+Autopilot: approved
 board: 152
 version: 1
 ---
@@ -149,25 +150,25 @@ No mockup (owner, 2026-10-21): the form gains a fourth type card and one new sec
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. Test: the test name(s), `pending` (no test yet) or `validation step <n>` (only checkable on screen). -->
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | pending |
-| AC19 | pending |
+| AC1 | `MatchingQuestionEndpointTests.Create_MatchingWithNoItems_IsStoredAsADraftOfThatType_AndListedWithIt`; `MatchingQuestionTests.Create_MatchingWithNoItems_IsADraftOfThatType` |
+| AC2 | `MatchingQuestionEndpointTests.Create_MatchingDraft_WithEightItemsEachSide_ReturnsTheItemsAndMatchesAsSent`, `.Create_MatchingWithANinthItemOnEitherSide_IsRefusedWithMatchingItemsCount`; `MatchingQuestionTests.Create_MatchingDraftWithEightItemsEachSide_*`, `.Create_MatchingWithANinth*` |
+| AC3 | `MatchingQuestionEndpointTests.Create_MatchingDraft_WithAMissingOrARepeatedRightItem_IsRefused_AndNothingIsStored`; `MatchingQuestionTests.Create_MatchingDraftNamingARightItemThatDoesNotExist_*`, `.Create_MatchingDraftWithTwoItemsOnTheSameRightItem_*` |
+| AC4 | `MatchingQuestionEndpointTests.Publish_Matching_WithOneLeftItemOrTooFewRightItems_IsRefusedWithMatchingItemsCount`, `.Publish_Matching_WithAnEmptyRightOrLeftText_IsRefusedWithTheTextCode`; `MatchingQuestionTests.Publish_MatchingWith*` |
+| AC5 | `MatchingQuestionEndpointTests.Publish_Matching_WithAnItemWithNoMatch_IsRefused_AndWithEveryItemMatchedAndExtras_IsPublished` |
+| AC6 | `MatchingQuestionEndpointTests.Update_PublishedMatching_BreakingTheKey_IsRefused_AndTheStoredQuestionIsUnchanged`, `.Update_PublishedMatching_WithAnotherValidSetAndAReason_StaysPublished` |
+| AC7 | `MatchingQuestionEndpointTests.Create_MatchingWithATrueFalseKeyOrAMarkedRightItem_IsRefusedWithKeyNotAllowed`, `.Create_AnotherTypeWithMatchItems_IsRefusedWithMatchItemsNotAllowed` |
+| AC8 | `MatchingQuestionEndpointTests.Update_NamingAnotherType_Is409TypeChanged_AndNamingItsOwnIsAccepted`; `MatchingQuestionTests.Update_MatchingWithContentOfAnotherType_IsAConflict` |
+| AC9 | `MatchingQuestionEndpointTests.Update_PublishedMatching_ChangingTheMatches_NeedsAReason_AndThenRecordsAKeyChange`; `MatchingQuestionTests.NextVersion_ChangingWhatANumberMatches_*` |
+| AC10 | `MatchingQuestionEndpointTests.Update_PublishedMatching_ChangingOnlyTexts_RecordsAVersionWithNoKeyChange`, `.Update_PublishedMatching_AddingALeftItem_NeedsAReason`, `.UpdateBaseText_LinkedToAPublishedMatching_RecordsAVersionWithNoKeyChange`; the F-98 and F-104 suites unedited |
+| AC11 | `MatchingQuestionEndpointTests.Create_Matching_SanitizesTheLeftAndRightItems`, `.Create_Matching_WithALeftItemOverTheLimit_*`, `.Create_Matching_WithADifficultyOutOfRange_IsRefused`, `.Create_Matching_WithAPaperNumberAlreadyTaken_*`, `.Delete_PublishedMatching_*`, `.DeleteTopic_WithOnlyAMatchingQuestion_*`, `.AnnulAndReinstate_Matching_*`, `.Submit_CompleteMatchingDraft_*`; `MatchingQuestionTests.Create_MatchingWithElevenImages*`, `.AnnulAndReinstate_*`; `MatchingQuestionImageTests.*` |
+| AC12 | `MatchingQuestionEndpointTests.List_QuestionsOfTheFourTypes_*`, `.FindVersion_OfAnotherType_HasAnEmptyMatchItemsList`; `MatchingQuestionPreviewAndListTests.List_NamesTheMatchingType` |
+| AC13 | `MatchingQuestionFormTests.*` (four cards, free letters, save, remove and move of a right row, type switch, read-only type, checklist, refusals, reason, frozen) |
+| AC14 | `MatchingQuestionPreviewAndListTests.Preview_Matching_*`, `.Preview_MatchingDraftWithNoMatches_*`, `.VersionPreview_Matching_ShowsTheLeftItemsOfTheVersion` |
+| AC15 | `AddMatchingQuestionsMigrationTests.Up_AddsTheMatchItemsTableAndColumn_NamesTheFourthType_AndKeepsEveryRow` |
+| AC16 | `MatchingQuestionEndpointTests.CreateAndUpdate_OfAMatchingQuestion_WithoutThePermission_AnswerForbidden` |
+| AC17 | `MatchingQuestionFormTests.Add_Matching_EachControlNamesItsNumberOrLetter`; keyboard pass: validation step (set with the script) |
+| AC18 | `QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements`; `MatchingQuestionFormTests.Add_OffersTheFourTypesWithSingleChoicePreselected` |
+| AC19 | `MatchingQuestionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `ResourceParityTests` |
 
 ## Decisions
 - 2026-10-21 — The type is chosen at creation and fixed after the first save — changing it would drop items or a key without saying so (F-97) — confirmed: F-97, F-104
@@ -189,6 +190,10 @@ No mockup (owner, 2026-10-21): the form gains a fourth type card and one new sec
 - 2026-10-21 — No new package — the item needs nothing the solution lacks — Claude
 - 2026-10-21 — Reuse: the `AnswerKey` seam of F-97, `QuestionRules.CheckEachOption`, kit `AppSelect`, `AppRadioCards`, the F-98 reason field and `NextVersion`, the F-103 image rule, the migration test pattern of F-104 — Claude
 - 2026-10-21 — Size M, fits one session: one domain unit, one table, a migration, a fourth card, one section with two lists, one preview block and the key-change fix — Claude, from the code read
+- 2026-10-21: design passes (system-design, architect) verified against the code: `BaseTextStore.cs:29` loads published linked questions with options only; `TableDescriptionTests.cs:69` and `InitialQuestionBankMigrationTests.cs:38` hold exact lists; `QuestionForm.razor:1463` builds a `QuestionResponse` from a version. Accepted: architect #1 (blocker) include match items in the base-text fan-out, with a test; #2 pass the version's match items to the version preview; #3 `MatchItems` is the last optional parameter (`= null`) of `SaveQuestionRequest`, `QuestionResponse`, `QuestionVersionResponse`, `QuestionContent` and `AnswerKey.From`, the Api always sends a list, the Web reads null as empty; #4 the JSON exemption and the table list gain the new column and table; #5 the plan is vertical slices (below). #6 kept: `MatchItemResponse` carries `position` like `QuestionOptionResponse`, so a reader never derives it from the array order. system-design R1 to R5 accepted (null JSON read as empty, images of the left items owned and scanned, `CheckEachOption` shared, the section in its own component `MatchingKeySection.razor` to keep the F-107/F-108 conflicts small).
+- 2026-10-21: Design coverage — data (migrations, configurations, image scan), contracts (records and their constructors, version preview, base-text fan-out), rules (architecture test lists), layout (plan order), simplicity (one key record, shared option rule) read; trade-offs: none raised.
+- 2026-10-21: traps — T1 right column in a second table: forks the option rules and the version JSON; T2 reuse `OptionsMax` for the right column: caps it at 5 with the wrong code; T3 `CopyAs` without the match items: annulment versions lose the key.
+- 2026-10-21: plan — 1 create and save a matching draft end to end (contract, key, entity, table, migration, handler) → AC1, AC2, AC3, AC7, AC8, AC15; 2 publish and edit rules, shared rules and images → AC4, AC5, AC6, AC11, AC16; 3 versions and the key-change check, base-text fan-out included → AC9, AC10; 4 responses → AC12; 5 form section and transcription → AC13, AC17, AC18; 6 preview, version preview included → AC14; 7 resources and flow page → AC19, techdocs check.
 
 ## Out of scope
 - Scoring: all or nothing, partial credit, penalty — epic E-6 with the edition's scoring rules (owner, 2026-10-09).

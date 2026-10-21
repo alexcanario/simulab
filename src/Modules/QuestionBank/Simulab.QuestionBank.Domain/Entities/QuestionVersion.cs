@@ -12,6 +12,7 @@ namespace Simulab.QuestionBank.Domain.Entities;
 public sealed class QuestionVersion : TenantEntity
 {
     private readonly List<QuestionVersionOption> _options = [];
+    private List<QuestionVersionMatchItem>? _matchItems = [];
 
     // For EF.
     private QuestionVersion()
@@ -92,6 +93,12 @@ public sealed class QuestionVersion : TenantEntity
 
     /// <summary>The options in position order; empty for a true/false question.</summary>
     public IReadOnlyList<QuestionVersionOption> Options => _options;
+
+    /// <summary>
+    /// The left items of a matching question in position order (F-106, BR8); empty for any other type and for a
+    /// version recorded before F-106, whose JSON column is null.
+    /// </summary>
+    public IReadOnlyList<QuestionVersionMatchItem> MatchItems => _matchItems ?? [];
 
     /// <summary>True when the answer key differs from the previous version's (BR4); never true for version 1.</summary>
     public bool AnswerKeyChanged { get; private set; }

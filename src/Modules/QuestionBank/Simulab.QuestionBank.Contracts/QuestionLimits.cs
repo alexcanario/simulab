@@ -27,6 +27,12 @@ public static class QuestionLimits
     /// <summary>The fewest correct options a published multiple-answer question has (F-104, BR4).</summary>
     public const int MultipleAnswerCorrectMin = 2;
 
+    /// <summary>The fewest left items a published matching question has (F-106, BR4).</summary>
+    public const int MatchingItemsMin = 2;
+
+    /// <summary>The most items a matching question has on each side, draft or published (F-106, BR3).</summary>
+    public const int MatchingItemsMax = 8;
+
     public const int DifficultyMin = 1;
     public const int DifficultyMax = 5;
 

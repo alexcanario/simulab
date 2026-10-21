@@ -9,7 +9,11 @@ namespace Simulab.QuestionBank.Domain;
 /// </summary>
 /// <param name="Written">The options as written.</param>
 /// <param name="TrueFalseWritten">A true/false key that came with them; always a refusal.</param>
-public sealed record SingleChoiceKey(IReadOnlyList<OptionDraft> Written, bool? TrueFalseWritten = null) : AnswerKey
+/// <param name="MatchItemsWritten">Left items that came with them; any of them is a refusal (F-106, BR6).</param>
+public sealed record SingleChoiceKey(
+    IReadOnlyList<OptionDraft> Written,
+    bool? TrueFalseWritten = null,
+    IReadOnlyList<MatchItemDraft>? MatchItemsWritten = null) : AnswerKey
 {
     public override QuestionType Type => QuestionType.SingleChoice;
 
