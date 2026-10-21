@@ -116,7 +116,7 @@ public sealed class MatchingQuestionFormTests : QuestionPageTestContext
         await MatchAsync(page, 0, 2);
 
         page.WaitForAssertion(() => Letters(page, 1).Should().Equal("A", "B"));
-        Letters(page, 0).Should().Equal("A", "B", "C", "its own letter stays offered");
+        Letters(page, 0).Should().Equal(["A", "B", "C"], "its own letter stays offered");
         Notes(page).Should().Equal("Extra", "Extra", "Used by item 1");
         page.Markup.Should().Contain("2 of 8 items").And.Contain("3 of 8 matches");
     }

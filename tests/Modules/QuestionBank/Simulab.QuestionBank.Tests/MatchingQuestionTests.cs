@@ -231,7 +231,7 @@ public sealed class MatchingQuestionTests
     [InlineData(QuestionType.MultipleAnswer)]
     public void Create_AnotherTypeWithMatchItems_IsRefusedWithMatchItemsNotAllowed(QuestionType type)
     {
-        var result = Question.Create(Matching([], Lefts(null), type: type));
+        var result = Question.Create(Matching([], Lefts([null]), type: type));
 
         CodeOf(result).Should().Be(QuestionBankErrorCodes.QuestionMatchItemsNotAllowed);
     }
@@ -313,7 +313,7 @@ public sealed class MatchingQuestionTests
 
         result.IsSuccess.Should().BeTrue();
         result.Value!.AnswerKeyChanged.Should().BeFalse();
-        result.Value.MatchItems.First().TextHtml.Should().Be("Outro item");
+        result.Value.MatchItems[0].TextHtml.Should().Be("Outro item");
     }
 
     [Fact]

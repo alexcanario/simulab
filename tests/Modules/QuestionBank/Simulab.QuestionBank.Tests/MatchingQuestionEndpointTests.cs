@@ -226,7 +226,7 @@ public sealed class MatchingQuestionEndpointTests : OriginApiTests
         var topic = await TopicAsync(admin);
 
         var response = await CreateAsync(
-            admin, new SaveQuestionRequest(topic.Id, "pt-BR", "<p>Enunciado</p>", Type: type, MatchItems: Lefts(null)));
+            admin, new SaveQuestionRequest(topic.Id, "pt-BR", "<p>Enunciado</p>", Type: type, MatchItems: Lefts([null])));
 
         (await RefusalAsync(response)).Should().Be(QuestionBankErrorCodes.QuestionMatchItemsNotAllowed);
     }

@@ -217,5 +217,6 @@ Tests locked: ec77fdd9232fac264b5d9c3239a8fcca650da096 (7 files); unlocks: 0
 ## Events
 
 - 2026-10-21 question — asked 6, from context 4
+- 2026-10-21 blocked — test wrong: owner 2026-10-21: three writing defects in locked tests (params null bound as the array, a because text taken as an Equal item, three new warnings); no assertion changes meaning
 
 ## Delivery
