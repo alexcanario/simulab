@@ -1,7 +1,7 @@
 ---
 feature: F-106
 epic: Question bank
-status: refining
+status: approved
 board: 152
 version: 1
 ---
