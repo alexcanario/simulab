@@ -88,5 +88,6 @@ public class BuildingBlockBoundaryTests
         listed.Should().Contain("src/BuildingBlocks/Simulab.Email/Simulab.Email.csproj");
         listed.Should().Contain("src/BuildingBlocks/Simulab.Jobs/Simulab.Jobs.csproj");
         listed.Should().Contain("src/BuildingBlocks/Simulab.ApiResults/Simulab.ApiResults.csproj"); // F-39
+        listed.Should().Contain("src/BuildingBlocks/Simulab.Storage/Simulab.Storage.csproj"); // F-89
     }
 }

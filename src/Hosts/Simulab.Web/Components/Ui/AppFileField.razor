@@ -1,0 +1,124 @@
+@* One file field everywhere (F-89, rule: ui): the label above, one way to choose, then the file below it with its actions.
+   Choosing is a change of the form and sends nothing; the page's Save sends it. The input is visually hidden but
+   focusable, so the keyboard reaches it and a label styled as a button opens the dialog without script. The hint or the
+   error sits below, both announced through the input's description. *@
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="app-field app-file-field @(HasError ? "app-field-error" : null)">
+    <label class="app-field-label" for="@Id">@Label</label>
+
+    <InputFile id="@Id"
+               class="app-file-input"
+               accept="@Accept"
+               OnChange="OnFileChangedAsync"
+               aria-describedby="@DescriptionId"
+               aria-invalid="@(HasError ? "true" : null)" />
+
+    <div class="app-file-row">
+        @if (ChosenText is not null)
+        {
+            <span id="@(Id)-chosen" class="app-file-name">@ChosenText</span>
+            <MudButton id="@($"{Id}-discard")" Variant="Variant.Text" OnClick="() => OnDiscard.InvokeAsync()">@DiscardText</MudButton>
+        }
+        else if (RemovePending)
+        {
+            <span id="@(Id)-removing" class="app-file-name">@RemovePendingText</span>
+            <MudButton id="@($"{Id}-keep")" Variant="Variant.Text" OnClick="() => OnKeep.InvokeAsync()">@KeepText</MudButton>
+        }
+        else if (StoredName is not null)
+        {
+            <span class="app-file-stored">
+                <MudIcon Icon="@AppIcons.Notice" aria-hidden="true" />
+                <span id="@(Id)-name" class="app-file-name">@StoredName</span>
+                @if (StoredSizeText is not null)
+                {
+                    <span id="@(Id)-size" class="app-field-hint app-file-size">@StoredSizeText</span>
+                }
+            </span>
+            @if (DownloadHref is not null)
+            {
+                <AppLink id="@($"{Id}-download")" Href="@DownloadHref" download aria-label="@DownloadLabel">@DownloadText</AppLink>
+            }
+            <MudButton id="@($"{Id}-replace")" HtmlTag="label" for="@Id" Variant="Variant.Outlined" StartIcon="@AppIcons.Upload">@ReplaceText</MudButton>
+            <MudButton id="@($"{Id}-remove")" Variant="Variant.Text" OnClick="() => OnRemove.InvokeAsync()">@RemoveText</MudButton>
+        }
+        else
+        {
+            <MudButton id="@($"{Id}-choose")" HtmlTag="label" for="@Id" Variant="Variant.Outlined" StartIcon="@AppIcons.Upload">@ChooseText</MudButton>
+        }
+    </div>
+
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span id="@(Id)-error" class="app-field-error-text">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+</div>
+
+@code {
+    /// <summary>Id of the input; the label, the description and the buttons' ids start from it.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>What the input accepts (<c>.pdf,application/pdf</c>). The Api is the authority on the content.</summary>
+    [Parameter, EditorRequired] public string Accept { get; set; } = string.Empty;
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    /// <summary>The name of the file already stored, or null when there is none.</summary>
+    [Parameter] public string? StoredName { get; set; }
+
+    /// <summary>The stored file's size, already written for the reader (<see cref="FileSizeText"/>).</summary>
+    [Parameter] public string? StoredSizeText { get; set; }
+
+    /// <summary>Where the stored file is downloaded from; null shows no link.</summary>
+    [Parameter] public string? DownloadHref { get; set; }
+
+    /// <summary>The words of the download link. Its accessible name starts with them (<see cref="DownloadLabel"/>).</summary>
+    [Parameter, EditorRequired] public string DownloadText { get; set; } = string.Empty;
+
+    /// <summary>The accessible name of the download link: it says which file and that it is a download.</summary>
+    [Parameter, EditorRequired] public string DownloadLabel { get; set; } = string.Empty;
+
+    /// <summary>The sentence that shows the file chosen and not yet saved, or null when none is.</summary>
+    [Parameter] public string? ChosenText { get; set; }
+
+    /// <summary>True after "Remove": the stored file goes when the page is saved.</summary>
+    [Parameter] public bool RemovePending { get; set; }
+
+    [Parameter, EditorRequired] public string ChooseText { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string ReplaceText { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string RemoveText { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string DiscardText { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string RemovePendingText { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string KeepText { get; set; } = string.Empty;
+
+    /// <summary>The browser's file; the page decides what to do with it (size check, reading).</summary>
+    [Parameter] public EventCallback<IBrowserFile> OnChosen { get; set; }
+
+    [Parameter] public EventCallback OnDiscard { get; set; }
+
+    [Parameter] public EventCallback OnRemove { get; set; }
+
+    [Parameter] public EventCallback OnKeep { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string DescriptionId => $"{Id}-description";
+
+    private Task OnFileChangedAsync(InputFileChangeEventArgs args) => OnChosen.InvokeAsync(args.File);
+}

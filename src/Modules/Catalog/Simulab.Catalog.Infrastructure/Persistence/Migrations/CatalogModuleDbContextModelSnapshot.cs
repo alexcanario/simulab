@@ -335,6 +335,8 @@ namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
                     b.ToTable("exam_editions", "catalog", t =>
                         {
                             t.HasComment("One paper actually applied for an exam: its notice year, the job it selects for, the board that applied it and whether students can see it.");
+
+                            t.HasCheckConstraint("ck_exam_editions_notice_document", "(notice_document_blob_name IS NULL AND notice_document_file_name IS NULL AND notice_document_size IS NULL AND notice_document_uploaded_at IS NULL) OR (notice_document_blob_name IS NOT NULL AND notice_document_file_name IS NOT NULL AND notice_document_uploaded_at IS NOT NULL AND notice_document_size IS NOT NULL AND notice_document_size BETWEEN 1 AND 20971520)");
                         });
                 });
 
@@ -1125,6 +1127,47 @@ namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_exam_editions_organizer");
+
+                    b.OwnsOne("Simulab.Catalog.Domain.Entities.NoticeDocument", "NoticeDocument", b1 =>
+                        {
+                            b1.Property<Guid>("ExamEditionId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("BlobName")
+                                .IsRequired()
+                                .HasMaxLength(98)
+                                .HasColumnType("character varying(98)")
+                                .HasColumnName("notice_document_blob_name")
+                                .HasComment("The name the notice PDF is stored under in the file storage, never the curator's file name. Empty when the edition has no PDF.");
+
+                            b1.Property<string>("FileName")
+                                .IsRequired()
+                                .HasMaxLength(255)
+                                .HasColumnType("character varying(255)")
+                                .HasColumnName("notice_document_file_name")
+                                .HasComment("The notice PDF's file name as the curator gave it, without any folder. Empty when the edition has no PDF.");
+
+                            b1.Property<long>("Size")
+                                .HasColumnType("bigint")
+                                .HasColumnName("notice_document_size")
+                                .HasComment("The notice PDF's size in bytes, from 1 to 20 MB. Empty when the edition has no PDF.");
+
+                            b1.Property<DateTimeOffset>("UploadedAt")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("notice_document_uploaded_at")
+                                .HasComment("When the notice PDF was uploaded. Empty when the edition has no PDF.");
+
+                            b1.HasKey("ExamEditionId");
+
+                            b1.ToTable("exam_editions", "catalog");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ExamEditionId")
+                                .HasConstraintName("fk_exam_editions_exam_editions_id");
+                        });
+
+                    b.Navigation("NoticeDocument");
                 });
 
             modelBuilder.Entity("Simulab.Catalog.Domain.Entities.NoticeSubject", b =>

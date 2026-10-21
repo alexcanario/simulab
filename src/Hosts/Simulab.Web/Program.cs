@@ -8,6 +8,7 @@ using Simulab.Web.Components.Ui;
 using Simulab.Web.Localization;
 using Simulab.Web.Services;
 using Simulab.Web.Services.Auth;
+using Simulab.Web.Services.Catalog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -180,6 +181,7 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapDefaultEndpoints();
 app.MapAccountEndpoints();
+app.MapNoticeDocumentEndpoints();
 if (google.Enabled)
 {
     app.MapGoogleAccountEndpoints();

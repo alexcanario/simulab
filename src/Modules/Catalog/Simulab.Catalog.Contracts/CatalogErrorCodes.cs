@@ -63,6 +63,9 @@ public static class CatalogErrorCodes
     public const string ExamEditionStatusInvalid = "exam_edition.status_invalid";
     public const string ExamEditionDuplicate = "exam_edition.duplicate";
     public const string ExamEditionPublished = "exam_edition.published";
+    public const string ExamEditionNoticeDocumentNotPdf = "exam_edition.notice_document_not_pdf";
+    public const string ExamEditionNoticeDocumentTooLarge = "exam_edition.notice_document_too_large";
+    public const string ExamEditionNoticeDocumentNotFound = "exam_edition.notice_document_not_found";
 
     public const string SubjectNotFound = "subject.not_found";
     public const string SubjectNameRequired = "subject.name_required";

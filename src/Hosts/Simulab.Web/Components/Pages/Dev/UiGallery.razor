@@ -381,6 +381,20 @@
     </MudPaper>
 </section>
 
+@* F-89: the file field. Choosing changes the form and sends nothing; Save sends it. *@
+<section id="gallery-file-field" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.FileField"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.FileField.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4 gallery-form">
+        @GalleryFileField("gallery-file-empty")
+        @GalleryFileField("gallery-file-chosen", chosen: "edital-2026.pdf")
+        @GalleryFileField("gallery-file-stored", stored: "edital-2026.pdf", size: "2.5 MB")
+        @GalleryFileField("gallery-file-removing", stored: "edital-2026.pdf", size: "2.5 MB", removing: true)
+        @GalleryFileField("gallery-file-error", error: L["exam_edition.notice_document_not_pdf"].Value)
+        @GalleryFileField("gallery-file-long", stored: LongFileName, size: "19.8 MB")
+    </MudPaper>
+</section>
+
 @* F-75: the read-only label chip. Plain, with an icon and secondary text, a topic form with a spoken text, marked, and removable. *@
 <section id="gallery-chip" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Chip"]</MudText>
@@ -1009,6 +1023,30 @@
 
     private string? _suggestValue;
     private static readonly IReadOnlyList<string> _suggestions = ["Conhecimentos Básicos", "Conhecimentos Específicos"];
+
+    private const string LongFileName =
+        "edital-de-abertura-do-concurso-publico-para-provimento-de-vagas-e-formacao-de-cadastro-de-reserva-retificado-2026-versao-final.pdf";
+
+    // One state of the file field (F-89). Nothing is sent from the gallery: the callbacks are the field's own no-ops.
+    private RenderFragment GalleryFileField(string id, string? stored = null, string? size = null, string? chosen = null, bool removing = false, string? error = null) =>
+        @<AppFileField Id="@id"
+                       Label="@L["ExamEditions.NoticeDocument.Label"]"
+                       Hint="@L["ExamEditions.NoticeDocument.Hint"]"
+                       Error="@error"
+                       Accept=".pdf,application/pdf"
+                       StoredName="@stored"
+                       StoredSizeText="@size"
+                       DownloadHref="@(stored is null ? null : "#")"
+                       DownloadText="@L["ExamEditions.NoticeDocument.Download"]"
+                       DownloadLabel="@(L["ExamEditions.NoticeDocument.Download.Name", stored ?? string.Empty].Value)"
+                       ChosenText="@(chosen is null ? null : L["ExamEditions.NoticeDocument.Chosen", chosen].Value)"
+                       RemovePending="removing"
+                       ChooseText="@L["ExamEditions.NoticeDocument.Choose"]"
+                       ReplaceText="@L["ExamEditions.NoticeDocument.Replace"]"
+                       RemoveText="@L["ExamEditions.NoticeDocument.Remove"]"
+                       DiscardText="@L["ExamEditions.NoticeDocument.Discard"]"
+                       RemovePendingText="@L["ExamEditions.NoticeDocument.RemovePending"]"
+                       KeepText="@L["ExamEditions.NoticeDocument.KeepFile"]" />;
 
     // F-75: the chip and the multi-pick field. The sample is a tiny grouped list; the keys are what the field hands back.
     private const int GalleryPickMax = 50;

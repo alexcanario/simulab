@@ -80,6 +80,17 @@ else
                                     <MudIcon Icon="@AppIcons.OpenInNew" aria-hidden="true" Style="width: 16px; height: 16px; vertical-align: text-bottom" />
                                 </AppLink>
                             }
+                            @if (edition.NoticeDocument is not null)
+                            {
+                                @* F-89 UC4: the notice kept inside Simulab. A download from the Web's own route, which asks the Api
+                                   with the student's token; the accessible name starts with the visible text and says it is a file. *@
+                                <AppLink Href="@($"/catalog/published-exams/{_exam.Id}/editions/{edition.Id}/notice-document")"
+                                         download
+                                         aria-label="@(L["Catalog.Editions.NoticePdf.Name", SpokenLabel(edition)].Value)">
+                                    @L["Catalog.Editions.NoticePdf"]
+                                    <MudIcon Icon="@AppIcons.Download" aria-hidden="true" Style="width: 16px; height: 16px; vertical-align: text-bottom" />
+                                </AppLink>
+                            }
                         </div>
                         @* F-76: the edition's syllabus, closed until the student opens it. *@
                         <EditionSyllabus EditionId="edition.Id"

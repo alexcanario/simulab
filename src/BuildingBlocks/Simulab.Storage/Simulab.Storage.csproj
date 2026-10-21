@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Azure.Storage.Blobs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+    <ProjectReference Include="..\Simulab.Storage.Contracts\Simulab.Storage.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
