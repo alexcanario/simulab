@@ -998,6 +998,30 @@
   <data name="RichText.Link.Invalid" xml:space="preserve"><value>Só endereços http e https.</value></data>
   <data name="RichText.Link.Insert" xml:space="preserve"><value>Inserir link</value></data>
   <data name="RichText.ClearFormatting" xml:space="preserve"><value>Limpar formatação</value></data>
+  <data name="RichText.Image" xml:space="preserve"><value>Inserir imagem</value></data>
+  <data name="RichText.Image.Title" xml:space="preserve"><value>Inserir imagem</value></data>
+  <data name="RichText.Image.File" xml:space="preserve"><value>Imagem</value></data>
+  <data name="RichText.Image.File.Hint" xml:space="preserve"><value>PNG, JPEG, WebP ou GIF, até 2 MB.</value></data>
+  <data name="RichText.Image.File.Required" xml:space="preserve"><value>Escolha uma imagem.</value></data>
+  <data name="RichText.Image.Choose" xml:space="preserve"><value>Escolher imagem</value></data>
+  <data name="RichText.Image.Discard" xml:space="preserve"><value>Remover</value></data>
+  <data name="RichText.Image.Chosen" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="RichText.Image.Alt" xml:space="preserve"><value>Texto alternativo</value></data>
+  <data name="RichText.Image.Alt.Hint" xml:space="preserve"><value>Descreva a imagem para quem não consegue vê-la.</value></data>
+  <data name="RichText.Image.Alt.Required" xml:space="preserve"><value>Escreva o texto alternativo ou marque a imagem como decorativa.</value></data>
+  <data name="RichText.Image.Decorative" xml:space="preserve"><value>Imagem decorativa (sem texto alternativo)</value></data>
+  <data name="RichText.Image.Insert" xml:space="preserve"><value>Inserir</value></data>
+  <data name="question_image.not_an_image" xml:space="preserve"><value>O arquivo não é uma imagem PNG, JPEG, WebP ou GIF.</value></data>
+  <data name="question_image.too_large" xml:space="preserve"><value>A imagem tem mais de 2 MB.</value></data>
+  <data name="question_image.not_found" xml:space="preserve"><value>A imagem não foi encontrada.</value></data>
+  <data name="question.image_alt_required" xml:space="preserve"><value>Toda imagem precisa de texto alternativo ou deve ser marcada como decorativa.</value></data>
+  <data name="question.image_alt_too_long" xml:space="preserve"><value>O texto alternativo de uma imagem tem no máximo 250 caracteres.</value></data>
+  <data name="question.image_not_found" xml:space="preserve"><value>Uma imagem do texto não existe mais. Insira-a de novo.</value></data>
+  <data name="question.images_too_many" xml:space="preserve"><value>Uma questão tem no máximo 10 imagens.</value></data>
+  <data name="base_text.image_alt_required" xml:space="preserve"><value>Toda imagem precisa de texto alternativo ou deve ser marcada como decorativa.</value></data>
+  <data name="base_text.image_alt_too_long" xml:space="preserve"><value>O texto alternativo de uma imagem tem no máximo 250 caracteres.</value></data>
+  <data name="base_text.image_not_found" xml:space="preserve"><value>Uma imagem do texto não existe mais. Insira-a de novo.</value></data>
+  <data name="base_text.images_too_many" xml:space="preserve"><value>Um texto-base tem no máximo 10 imagens.</value></data>
   <data name="RichText.Hint.Keyboard" xml:space="preserve"><value>Tab sai do editor.</value></data>
   <data name="Gallery.Section.RichText" xml:space="preserve"><value>Campo de texto formatado</value></data>
   <data name="Gallery.Section.Buttons" xml:space="preserve"><value>Botões</value></data>

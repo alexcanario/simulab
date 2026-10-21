@@ -4,6 +4,7 @@
 @layout MainLayout
 @using Simulab.QuestionBank.Contracts
 @using Simulab.Web.Services
+@using Simulab.Web.Services.QuestionBank
 @inject QuestionBankApiClient Api
 @inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
 @inject IStringLocalizer<SharedResources> L
@@ -90,6 +91,7 @@ else
                               Hint="@L["BaseTexts.Field.Text.Hint"]"
                               Required="true"
                               Lang="@_language"
+                              Images="ImageOptions"
                               Value="@_html"
                               ValueChanged="@((string? value) => OnTextChanged(value))"
                               Error="@_textError" />
@@ -532,4 +534,14 @@ else
         var user = AuthenticationState is null ? null : (await AuthenticationState).User;
         return user is null ? null : await Tokens.GetAccessTokenAsync(user);
     }
+
+    // F-103: the text of a base text takes pictures.
+    private RichTextImageOptions? _imageOptions;
+
+    private RichTextImageOptions ImageOptions => _imageOptions ??= QuestionImageUpload.Options(UploadImageAsync);
+
+    private async Task<RichTextImageUpload> UploadImageAsync(RichTextImageFile file) =>
+        QuestionImageUpload.Answer(
+            await TokenAsync() is { } token ? await Api.UploadImageAsync(token, file.Name, file.ContentType, file.Content) : null,
+            Errors);
 }

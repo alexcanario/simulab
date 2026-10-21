@@ -1,0 +1,146 @@
+@* The picture of a rich text field (F-103): choose a file, see it, say what it shows, then insert. The kit's own dialog, as
+   the link dialog is. The file is sent when "Insert" is pressed, by the page's upload; the Api decides what the file is.
+   The preview is a data URL built here from the chosen file and never sent anywhere. *@
+@using Microsoft.AspNetCore.Components.Forms
+@inject IStringLocalizer<SharedResources> L
+
+<MudDialog>
+    <DialogContent>
+        <AppFileField Id="richtext-image-file"
+                      Label="@L["RichText.Image.File"]"
+                      Hint="@L["RichText.Image.File.Hint"]"
+                      Error="@_fileError"
+                      Accept="image/png,image/jpeg,image/webp,image/gif"
+                      ChosenText="@(_file is null ? null : L["RichText.Image.Chosen", _file.Name, FileSizeText.Format(_file.Size)].Value)"
+                      ChooseText="@L["RichText.Image.Choose"]"
+                      ReplaceText="@L["RichText.Image.Choose"]"
+                      RemoveText="@L["RichText.Image.Discard"]"
+                      DiscardText="@L["RichText.Image.Discard"]"
+                      RemovePendingText="@L["RichText.Image.Discard"]"
+                      KeepText="@L["RichText.Image.Discard"]"
+                      DownloadText="@L["RichText.Image.Choose"]"
+                      DownloadLabel="@L["RichText.Image.Choose"]"
+                      OnChosen="OnFileChosenAsync"
+                      OnDiscard="OnFileDiscarded" />
+
+        @if (_preview is not null)
+        {
+            <div class="app-rt-image-preview">
+                <img id="richtext-image-preview" src="@_preview" alt="" />
+            </div>
+        }
+
+        <AppTextField TValue="string"
+                      Id="richtext-image-alt"
+                      Label="@L["RichText.Image.Alt"]"
+                      Hint="@L["RichText.Image.Alt.Hint"]"
+                      Value="@_alt"
+                      ValueChanged="@((string? value) => OnAltChanged(value))"
+                      MaxLength="Options.AltMaxLength"
+                      Required="true"
+                      Disabled="_decorative"
+                      Error="@_altError" />
+
+        <AppCheckbox Id="richtext-image-decorative" Value="_decorative" ValueChanged="OnDecorativeChanged">
+            @L["RichText.Image.Decorative"]
+        </AppCheckbox>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" Class="app-image-dialog-cancel">@L["Common.Cancel"]</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="InsertAsync" Disabled="_sending" Class="app-image-dialog-insert">@L["RichText.Image.Insert"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    [Parameter, EditorRequired] public RichTextImageOptions Options { get; set; } = default!;
+
+    private IBrowserFile? _file;
+    private byte[]? _content;
+    private string? _preview;
+    private string _alt = string.Empty;
+    private bool _decorative;
+    private string? _fileError;
+    private string? _altError;
+    private bool _sending;
+
+    private async Task OnFileChosenAsync(IBrowserFile file)
+    {
+        _file = null;
+        _content = null;
+        _preview = null;
+        _fileError = null;
+
+        if (file.Size > Options.MaxBytes)
+        {
+            _fileError = L["question_image.too_large"];
+            return;
+        }
+
+        try
+        {
+            // Read here, from the browser's stream: the preview needs the bytes and so does the upload that follows.
+            await using var stream = file.OpenReadStream(Options.MaxBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            _content = buffer.ToArray();
+            _file = file;
+            _preview = $"data:{file.ContentType};base64,{Convert.ToBase64String(_content)}";
+        }
+        catch (IOException)
+        {
+            _fileError = L["common.unexpected_error"];
+        }
+    }
+
+    private void OnFileDiscarded()
+    {
+        _file = null;
+        _content = null;
+        _preview = null;
+        _fileError = null;
+    }
+
+    private void OnAltChanged(string? value)
+    {
+        _alt = value ?? string.Empty;
+        _altError = null;
+    }
+
+    private void OnDecorativeChanged(bool value)
+    {
+        _decorative = value;
+        _altError = null;
+    }
+
+    private async Task InsertAsync()
+    {
+        _fileError = _file is null ? L["RichText.Image.File.Required"].Value : null;
+        var alt = _decorative ? string.Empty : _alt.Trim();
+        _altError = !_decorative && alt.Length == 0 ? L["RichText.Image.Alt.Required"].Value : null;
+        if (_fileError is not null || _altError is not null || _file is null || _content is null)
+        {
+            return;
+        }
+
+        _sending = true;
+        try
+        {
+            var upload = await Options.Upload(new RichTextImageFile(_file.Name, _file.ContentType, _content));
+            if (upload.Url is null)
+            {
+                _fileError = upload.Error ?? L["common.unexpected_error"];
+                return;
+            }
+
+            Dialog.Close(DialogResult.Ok(new RichTextImageChoice(upload.Url, alt)));
+        }
+        finally
+        {
+            _sending = false;
+        }
+    }
+
+    private void Cancel() => Dialog.Cancel();
+}

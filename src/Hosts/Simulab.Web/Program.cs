@@ -9,6 +9,7 @@ using Simulab.Web.Localization;
 using Simulab.Web.Services;
 using Simulab.Web.Services.Auth;
 using Simulab.Web.Services.Catalog;
+using Simulab.Web.Services.QuestionBank;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -182,6 +183,7 @@ app.MapStaticAssets();
 app.MapDefaultEndpoints();
 app.MapAccountEndpoints();
 app.MapNoticeDocumentEndpoints();
+app.MapQuestionImageEndpoints();
 if (google.Enabled)
 {
     app.MapGoogleAccountEndpoints();

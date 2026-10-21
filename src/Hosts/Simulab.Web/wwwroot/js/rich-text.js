@@ -8,7 +8,11 @@ window.simulabRichText = (function () {
   "use strict";
 
   // The formats the kit offers; they match the allow-list of the Api's sanitizer (F-95 BR8).
-  var allowedFormats = ["bold", "italic", "underline", "strike", "script", "list", "blockquote", "link"];
+  // "alt" travels with a picture the dialog inserted (F-103).
+  var allowedFormats = ["bold", "italic", "underline", "strike", "script", "list", "blockquote", "link", "alt"];
+  // F-103 BR5, BR14: the one address a picture may have. A picture pasted or dropped from anywhere else is dropped here;
+  // the Api removes it again on save.
+  var storedImageAddress = /^\/question-images\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   var pauseMilliseconds = 300;
   var readyAttempts = 100;
   var readyIntervalMilliseconds = 50;
@@ -67,12 +71,21 @@ window.simulabRichText = (function () {
     }
   }
 
+  // Quill drops an empty alt when it builds a picture, but an empty alt is how a decorative picture is marked (F-103 BR4).
+  // The dialog always sets an alt, so a picture of the editor with none can only have lost an empty one.
+  function keepDecorativeAlt(entry) {
+    entry.root.querySelectorAll("img:not([alt])").forEach(function (image) {
+      image.setAttribute("alt", "");
+    });
+  }
+
   function load(entry, html) {
     var quill = entry.quill;
     quill.setContents(quill.clipboard.convert({ html: html || "" }), "silent");
     if (quill.history && quill.history.clear) {
       quill.history.clear();
     }
+    keepDecorativeAlt(entry);
     entry.lastEmitted = quill.root.innerHTML;
   }
 
@@ -84,6 +97,7 @@ window.simulabRichText = (function () {
     if (entry.disposed || !entry.root) {
       return;
     }
+    keepDecorativeAlt(entry);
     var html = entry.root.innerHTML;
     if (html === entry.lastEmitted) {
       return;
@@ -117,7 +131,7 @@ window.simulabRichText = (function () {
     toolbarButtons(entry).forEach(function (button) {
       var format = button.getAttribute("data-format");
       var value = button.getAttribute("data-value");
-      if (format === "clean") {
+      if (format === "clean" || format === "image") {
         return;
       }
       var pressed = value ? formats[format] === value : !!formats[format];
@@ -153,6 +167,28 @@ window.simulabRichText = (function () {
     }).catch(function () { });
   }
 
+  // F-103: the dialog stores the file and answers with its address and alternative text; the picture goes in at the caret.
+  function requestImage(entry) {
+    var quill = entry.quill;
+    var range = quill.getSelection(true);
+    entry.reference.invokeMethodAsync("ImageRequested").then(function (choice) {
+      quill.focus();
+      if (!choice || !storedImageAddress.test(choice.url)) {
+        return;
+      }
+      var index = range ? range.index : quill.getLength();
+      quill.insertEmbed(index, "image", choice.url, "user");
+      // Set on the element itself: the editor's own format would drop an empty alt, the mark of a decorative picture.
+      var leaf = quill.getLeaf(index)[0];
+      if (leaf && leaf.domNode && leaf.domNode.setAttribute) {
+        leaf.domNode.setAttribute("alt", choice.alt || "");
+      }
+      quill.setSelection(index + 1, 0, "silent");
+      schedule(entry);
+      refreshToolbar(entry);
+    }).catch(function () { });
+  }
+
   function applyFormat(entry, button) {
     var quill = entry.quill;
     var format = button.getAttribute("data-format");
@@ -160,6 +196,11 @@ window.simulabRichText = (function () {
 
     if (format === "link") {
       requestLink(entry);
+      return;
+    }
+
+    if (format === "image") {
+      requestImage(entry);
       return;
     }
 
@@ -263,9 +304,33 @@ window.simulabRichText = (function () {
       delete quill.keyboard.bindings[9];
     }
 
-    // Only the kit's formats survive a paste; the Api sanitizes the rest again.
+    // F-103 BR14: only the dialog inserts a picture. The editor's uploader would turn a pasted or dropped file into a
+    // data: picture, so it does nothing, and a drop of files is stopped before the editor sees it.
+    var uploader = quill.getModule ? quill.getModule("uploader") : null;
+    if (uploader && uploader.options) {
+      uploader.options.handler = function () { };
+    }
+    var stopFileDrop = function (event) {
+      if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+    quill.container.addEventListener("drop", stopFileDrop, true);
+    quill.container.addEventListener("dragover", stopFileDrop, true);
+    entry.cleanups.push(function () {
+      quill.container.removeEventListener("drop", stopFileDrop, true);
+      quill.container.removeEventListener("dragover", stopFileDrop, true);
+    });
+
+    // Only the kit's formats survive a paste; the Api sanitizes the rest again. A picture survives only with the address
+    // of a stored one (a stored text is loaded through this same matcher).
     if (quill.clipboard && quill.clipboard.addMatcher) {
       quill.clipboard.addMatcher(Node.ELEMENT_NODE, function (node, delta) {
+        delta.ops = delta.ops.filter(function (operation) {
+          var image = operation.insert && typeof operation.insert === "object" ? operation.insert.image : null;
+          return !image || storedImageAddress.test(image);
+        });
         delta.ops.forEach(function (operation) {
           if (!operation.attributes) {
             return;
