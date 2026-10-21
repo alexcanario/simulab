@@ -36,6 +36,7 @@ public sealed class QuestionBankApiClient(HttpClient http)
     private const string Base = "/api/v1/question-bank/questions";
     private const string ReviewQueueBase = "/api/v1/question-bank/review-queue";
     private const string BaseTextsBase ="/api/v1/question-bank/base-texts";
+    private const string ImagesBase = "/api/v1/question-bank/images";
     private const string EditionsBase = "/api/v1/question-bank/editions";
     private const string SubjectsBase = "/api/v1/question-bank/subjects";
     private const string TaxonomyRoute = "/api/v1/question-bank/taxonomy";
@@ -302,6 +303,45 @@ public sealed class QuestionBankApiClient(HttpClient http)
         SendAsync<BaseTextResponse>(
             () => Authorized(WithJson(HttpMethod.Put, $"{BaseTextsBase}/{baseTextId}", body), accessToken),
             cancellationToken);
+
+    /// <summary>
+    /// F-103 UC1: sends a picture the curator chose in the editor. The bytes are already in memory (the dialog read the
+    /// browser's stream), so this is one short hop to the Api. The Api decides the type from the first bytes.
+    /// </summary>
+    public Task<QuestionBankResult<QuestionImageResponse>> UploadImageAsync(
+        string accessToken,
+        string fileName,
+        string contentType,
+        byte[] content,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+
+        return SendAsync<QuestionImageResponse>(
+            () =>
+            {
+                var file = new ByteArrayContent(content);
+                file.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.TryParse(contentType, out var parsed)
+                    ? parsed
+                    : new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+                var form = new MultipartFormDataContent { { file, "file", fileName } };
+
+                return Authorized(new HttpRequestMessage(HttpMethod.Post, ImagesBase) { Content = form }, accessToken);
+            },
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// F-103 UC3: asks the Api for the file of a picture and returns its answer with the headers read and the body still
+    /// unread, so the Web endpoint streams it on. The caller disposes the response.
+    /// </summary>
+    public async Task<HttpResponseMessage> OpenImageAsync(string accessToken, Guid imageId, CancellationToken cancellationToken = default)
+    {
+        using var request = Authorized(new HttpRequestMessage(HttpMethod.Get, $"{ImagesBase}/{imageId}"), accessToken);
+        request.Headers.AcceptLanguage.ParseAdd(CultureInfo.CurrentUICulture.Name);
+
+        return await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+    }
 
     /// <summary>F-102 UC5: a soft delete on the server, refused with a 409 while a question links the text.</summary>
     public Task<QuestionBankResult<bool>> DeleteBaseTextAsync(

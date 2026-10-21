@@ -55,6 +55,8 @@ public class SimulabApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Database:ApplyMigrationsOnStart", "true");
         // F-13 BR13: the hosted worker never polls here; a test drains the queue itself (AC11).
         builder.UseSetting("Jobs:WorkerEnabled", "false");
+        // F-103 BR11: nor does the question image sweep run by the clock; a test calls it itself (AC9).
+        builder.UseSetting("QuestionBank:ImageSweepEnabled", "false");
         builder.ConfigureAppConfiguration(configuration =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {

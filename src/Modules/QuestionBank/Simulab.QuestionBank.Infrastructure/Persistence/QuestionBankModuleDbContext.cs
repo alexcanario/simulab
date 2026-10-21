@@ -25,6 +25,9 @@ public sealed class QuestionBankModuleDbContext(
     /// <summary>F-95: the options of the questions, in position order.</summary>
     public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
 
+    /// <summary>F-103: the pictures of the statements, options and base texts; the files are in the storage.</summary>
+    public DbSet<QuestionImage> QuestionImages => Set<QuestionImage>();
+
     /// <summary>F-98: the immutable snapshots of the published questions, numbered per question.</summary>
     public DbSet<QuestionVersion> QuestionVersions => Set<QuestionVersion>();
 
@@ -41,6 +44,7 @@ public sealed class QuestionBankModuleDbContext(
 
         modelBuilder.ApplyConfiguration(new BaseTextConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestionImageConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionOptionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionReviewEntryConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionVersionConfiguration());

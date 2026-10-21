@@ -3208,6 +3208,43 @@
         }
       }
     },
+    "/api/v1/question-bank/images": {
+      "post": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "UploadQuestionImage",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/question-bank/images/{id}": {
+      "get": {
+        "tags": [
+          "QuestionBank"
+        ],
+        "operationId": "DownloadQuestionImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/question-bank/editions": {
       "get": {
         "tags": [

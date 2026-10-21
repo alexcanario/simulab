@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Simulab.QuestionBank.Application.Images;
 using Simulab.QuestionBank.Application.Content;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
@@ -53,7 +54,8 @@ public sealed class BaseTextRaceTests : OriginApiTests
         var handler = new SaveQuestionHandler(
             store,
             scope.ServiceProvider.GetRequiredService<IQuestionQueries>(),
-            scope.ServiceProvider.GetRequiredService<QuestionHtmlSanitizer>());
+            scope.ServiceProvider.GetRequiredService<QuestionHtmlSanitizer>(),
+            scope.ServiceProvider.GetRequiredService<QuestionImageOwnership>());
         var request = Linked(topic.Id, text.Id);
 
         var outcome = await handler.HandleAsync(null, request);

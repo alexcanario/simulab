@@ -22,13 +22,13 @@
             @* The editor puts our toolbar in its own toolbar container and creates the editable region after it. *@
             <BlazoredTextEditor Placeholder="@Placeholder" ReadOnly="Disabled">
                 <ToolbarContent>
-                    <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" />
+                    <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" ImagesEnabled="@(Images is not null)" />
                 </ToolbarContent>
             </BlazoredTextEditor>
         }
         else
         {
-            <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" />
+            <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" ImagesEnabled="@(Images is not null)" />
         }
     </div>
     <span id="@DescriptionId" class="app-field-description">
@@ -85,6 +85,12 @@
     /// <summary>Moves the focus into the editor once it is ready: a row the reader has just added.</summary>
     [Parameter] public bool AutoFocus { get; set; }
 
+    /// <summary>
+    /// What stores a picture the reader chose, and its limits (F-103). Without it the field has no image button: a field
+    /// that takes no picture, like an explanation, simply passes none.
+    /// </summary>
+    [Parameter] public RichTextImageOptions? Images { get; set; }
+
     private bool HasError => !string.IsNullOrEmpty(Error);
 
     private string LabelId => $"{Id}-label";
@@ -116,7 +122,7 @@
         {
             _editorHtml = Value ?? string.Empty;
             _applied = Options(_editorHtml);
-            var callbacks = new RichTextEditorCallbacks(OnEditorChangedAsync, RequestLinkAsync);
+            var callbacks = new RichTextEditorCallbacks(OnEditorChangedAsync, RequestLinkAsync, RequestImageAsync);
             var attachment = await Bridge.AttachAsync(_applied, callbacks);
             if (_disposed)
             {
@@ -179,6 +185,22 @@
         var result = await reference.Result;
 
         return result is { Canceled: false, Data: string url } ? url : null;
+    }
+
+    // F-103: the dialog uploads the file itself through the page's delegate and hands back the stored address.
+    private async Task<RichTextImageChoice?> RequestImageAsync()
+    {
+        if (Images is null)
+        {
+            return null;
+        }
+
+        var parameters = new DialogParameters<AppRichTextImageDialog> { { dialog => dialog.Options, Images } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+        var reference = await Dialogs.ShowAsync<AppRichTextImageDialog>(L["RichText.Image.Title"], parameters, options);
+        var result = await reference.Result;
+
+        return result is { Canceled: false, Data: RichTextImageChoice choice } ? choice : null;
     }
 
     public async ValueTask DisposeAsync()

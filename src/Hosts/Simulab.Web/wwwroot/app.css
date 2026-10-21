@@ -2393,6 +2393,21 @@ code, kbd, pre, samp {
     margin: 0;
 }
 
+/* F-103 BR15: a picture is scaled down to the width of its column, never up. */
+.app-question-content img,
+.app-rt-frame .ql-editor img,
+.app-rt-image-preview img {
+    max-width: 100%;
+    height: auto;
+}
+
+.app-rt-image-preview {
+    margin-top: var(--app-space-2);
+    max-height: 240px;
+    overflow: auto;
+    text-align: center;
+}
+
 .app-question-content p + p {
     margin-top: var(--app-space-2);
 }

@@ -44,12 +44,15 @@
     private static readonly Tool Link = new("link", null, AppIcons.Link, "RichText.Link");
     private static readonly Tool Clean = new("clean", null, AppIcons.ClearFormatting, "RichText.ClearFormatting", Toggles: false);
 
+    // F-103: opens a dialog, so it never shows as pressed.
+    private static readonly Tool Picture = new("image", null, AppIcons.Image, "RichText.Image", Toggles: false);
+
     private static readonly IReadOnlyList<IReadOnlyList<Tool>> FullGroups =
-        [[Bold, Italic, Underline, Strike], [Superscript, Subscript], [Bullets, Numbers, Quote], [Link], [Clean]];
+        [[Bold, Italic, Underline, Strike], [Superscript, Subscript], [Bullets, Numbers, Quote], [Link, Picture], [Clean]];
 
     // A compact field is an option: a phrase, so block formats (lists, quote) would break the lettered list.
     private static readonly IReadOnlyList<IReadOnlyList<Tool>> CompactGroups =
-        [[Bold, Italic, Underline, Strike], [Superscript, Subscript], [Link], [Clean]];
+        [[Bold, Italic, Underline, Strike], [Superscript, Subscript], [Link, Picture], [Clean]];
 
     /// <summary>The id of the editable region this toolbar controls (<c>aria-controls</c>).</summary>
     [Parameter, EditorRequired] public string EditorId { get; set; } = string.Empty;
@@ -58,5 +61,13 @@
 
     [Parameter] public bool Disabled { get; set; }
 
-    private IReadOnlyList<IReadOnlyList<Tool>> Groups => Compact ? CompactGroups : FullGroups;
+    /// <summary>True when the field can store a picture (F-103): the image button is drawn only then.</summary>
+    [Parameter] public bool ImagesEnabled { get; set; }
+
+    private IReadOnlyList<IReadOnlyList<Tool>> Groups { get; set; } = FullGroups;
+
+    protected override void OnParametersSet() =>
+        Groups = (Compact ? CompactGroups : FullGroups)
+            .Select(group => (IReadOnlyList<Tool>)[.. group.Where(tool => ImagesEnabled || tool != Picture)])
+            .ToList();
 }

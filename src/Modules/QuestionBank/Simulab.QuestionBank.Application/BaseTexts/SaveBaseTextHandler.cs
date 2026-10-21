@@ -1,6 +1,8 @@
 using Simulab.QuestionBank.Application.Content;
+using Simulab.QuestionBank.Application.Images;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
+using Simulab.QuestionBank.Domain;
 using Simulab.QuestionBank.Domain.Entities;
 using Simulab.SharedKernel.Results;
 
@@ -16,7 +18,8 @@ public sealed class SaveBaseTextHandler(
     IBaseTextStore baseTexts,
     IQuestionStore questions,
     IBaseTextQueries queries,
-    QuestionHtmlSanitizer sanitizer)
+    QuestionHtmlSanitizer sanitizer,
+    QuestionImageOwnership images)
 {
     public async Task<Result<BaseTextResponse>> HandleAsync(
         Guid? id,
@@ -61,6 +64,15 @@ public sealed class SaveBaseTextHandler(
             baseText = existing;
         }
 
+        // F-103 BR6, BR9, BR10: the images the text names become the base text's; the ones it held that it no longer
+        // names are released when no version keeps them. The rows commit with the content below.
+        var imageSync = await images.SyncAsync(
+            QuestionImageOwnerKind.BaseText, baseText.Id, text.ImageIds, QuestionBankErrorCodes.BaseTextImageNotFound, cancellationToken);
+        if (imageSync.Refused is { } imageRefusal)
+        {
+            return Result.Failure<BaseTextResponse>(imageRefusal);
+        }
+
         // BR4: the passage changed, so every published question that shows it gets the next version, in this save.
         if (existing is not null && baseText.TextHtml != previousHtml)
         {
@@ -75,6 +87,8 @@ public sealed class SaveBaseTextHandler(
         {
             return Result.Failure<BaseTextResponse>(refused);
         }
+
+        await images.DeleteFilesAsync(imageSync, cancellationToken);
 
         var saved = await queries.FindAsync(baseText.Id, cancellationToken);
 

@@ -1,4 +1,5 @@
 using Simulab.QuestionBank.Application.Content;
+using Simulab.QuestionBank.Application.Images;
 using Simulab.QuestionBank.Contracts;
 using Simulab.QuestionBank.Domain;
 using Simulab.QuestionBank.Domain.Entities;
@@ -14,7 +15,8 @@ namespace Simulab.QuestionBank.Application.Questions;
 public sealed class SaveQuestionHandler(
     IQuestionStore store,
     IQuestionQueries queries,
-    QuestionHtmlSanitizer sanitizer)
+    QuestionHtmlSanitizer sanitizer,
+    QuestionImageOwnership images)
 {
     private static readonly string[] OptionCodes =
     [
@@ -108,7 +110,8 @@ public sealed class SaveQuestionHandler(
             request.ContentLanguage,
             sanitizer.Sanitize(request.StatementHtml),
             request.BaseTextId,
-            sanitizer.Sanitize(request.ExplanationHtml),
+            // F-103 BR1: the explanation takes no picture, so none of its images is ever owned.
+            sanitizer.Sanitize(request.ExplanationHtml, allowImages: false),
             request.Difficulty,
             drafts,
             request.ExamEditionId,
@@ -139,6 +142,16 @@ public sealed class SaveQuestionHandler(
                 : null;
 
             return Refused(applied.Error, position);
+        }
+
+        // F-103 BR6, BR9, BR10: the images the statement and the options name become this question's; the ones it held
+        // that they no longer name are released when no version keeps them. The rows commit with the content below.
+        var imageIds = content.Statement.ImageIds.Concat(drafts.SelectMany(draft => draft.Text.ImageIds)).ToList();
+        var imageSync = await images.SyncAsync(
+            QuestionImageOwnerKind.Question, question!.Id, imageIds, QuestionBankErrorCodes.QuestionImageNotFoundOnSave, cancellationToken);
+        if (imageSync.Refused is { } imageRefusal)
+        {
+            return Refused(imageRefusal);
         }
 
         // F-98 BR3 to BR5: a saved published question records a version when its versioned content differs
@@ -182,6 +195,8 @@ public sealed class SaveQuestionHandler(
         {
             return Refused(refused);
         }
+
+        await images.DeleteFilesAsync(imageSync, cancellationToken);
 
         var saved = await queries.FindAsync(question.Id, cancellationToken);
 

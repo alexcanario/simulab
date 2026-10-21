@@ -85,6 +85,9 @@ public static class AppIcons
     /// <summary>F-35: an address the reader can follow.</summary>
     public const string Link = Icons.Material.Outlined.Link;
 
+    /// <summary>F-103: a picture in a rich text.</summary>
+    public const string Image = Icons.Material.Outlined.Image;
+
     /// <summary>F-35: the calendar button of the date field.</summary>
     public const string Calendar = Icons.Material.Outlined.CalendarToday;
 
