@@ -272,3 +272,4 @@ Não mostrado na tela, coberto por testes: as rotas de status e de aceite, as li
 ## Events
 
 - 2026-10-21 question — asked 6, from context 2
+- 2026-10-21 test-fail — tests failed (Simulab.slnx): Simulab.ArchitectureTests.FrozenManualTests.FrozenPage_CarriesTheFrozenKeyAndTheNotice(loca, 1 red
