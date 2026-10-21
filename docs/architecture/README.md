@@ -20,4 +20,3 @@ Generated from the code by `tools/Simulab.DocGen` at every ship. Do not edit by 
 - [QuestionBank/schema.dbml](QuestionBank/schema.dbml) — open it with the dbdiagram VS Code extension ("DBML: Open Preview to the Side")
 - [System/routes.md](System/routes.md)
 - [modules.md](modules.md)
-- [tools.md](tools.md)
