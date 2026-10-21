@@ -2,12 +2,15 @@
     <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
         <Found Context="routeData">
             @* BR7: a page whose permission the visitor lacks looks exactly like one that does not exist. *@
-            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
-                <NotAuthorized>
-                    <NotFoundContent />
-                </NotAuthorized>
-            </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+            @* F-85 BR6: a user who owes an acceptance of the legal documents is sent to /accept-terms before the page renders. *@
+            <LegalAcceptanceGate RouteData="routeData" Context="allowed">
+                <AuthorizeRouteView RouteData="allowed" DefaultLayout="typeof(Layout.MainLayout)">
+                    <NotAuthorized>
+                        <NotFoundContent />
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="allowed" Selector="h1" />
+            </LegalAcceptanceGate>
         </Found>
     </Router>
 </CascadingValue>

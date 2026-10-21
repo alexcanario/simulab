@@ -34,6 +34,14 @@
   <data name="SignUp.LegalUnavailable" xml:space="preserve"><value>Não foi possível carregar os textos legais, por isso o registo está indisponível neste momento.</value></data>
   <data name="Legal.DraftNotice" xml:space="preserve"><value>Texto provisório: os documentos legais estão em revisão e ainda podem mudar.</value></data>
   <data name="Legal.Version" xml:space="preserve"><value>Versão {0}, em vigor desde {1}</value></data>
+  <data name="AcceptTerms.Title" xml:space="preserve"><value>Os nossos documentos mudaram</value></data>
+  <data name="AcceptTerms.Intro" xml:space="preserve"><value>Leia o que mudou e aceite para continuar a utilizar o Simulab.</value></data>
+  <data name="AcceptTerms.Read" xml:space="preserve"><value>Ler</value></data>
+  <data name="AcceptTerms.ReadLabel" xml:space="preserve"><value>Ler {0}</value></data>
+  <data name="AcceptTerms.Accept" xml:space="preserve"><value>Aceitar e continuar</value></data>
+  <data name="AcceptTerms.Outdated" xml:space="preserve"><value>Os documentos mudaram enquanto lia. Foram carregados novamente: leia e aceite.</value></data>
+  <data name="AcceptTerms.YourData" xml:space="preserve"><value>Transferir ou eliminar os seus dados:</value></data>
+  <data name="AcceptTerms.AccountLink" xml:space="preserve"><value>Conta</value></data>
   <data name="CheckEmail.Title" xml:space="preserve"><value>Verifique o seu e-mail</value></data>
   <data name="CheckEmail.Message" xml:space="preserve"><value>Enviámos uma ligação de verificação para {0}. É válida durante 24 horas.</value></data>
   <data name="CheckEmail.NotArrived" xml:space="preserve"><value>Não chegou? Procure na pasta de spam antes de pedir uma nova ligação.</value></data>

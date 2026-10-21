@@ -323,6 +323,16 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
     private static HttpRequestMessage WithJson<T>(HttpMethod method, string route, T body) =>
         new(method, route) { Content = JsonContent.Create(body, options: AppJson.Options) };
 
+    /// <summary>F-85: what the caller still owes of the current legal documents (BR1).</summary>
+    public Task<ApiResult<LegalAcceptanceStatusResponse>> GetLegalAcceptanceAsync(string accessToken, CancellationToken cancellationToken = default) =>
+        SendAsync<LegalAcceptanceStatusResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/legal-acceptance"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-85: the caller accepts the versions the page showed (BR3, BR5).</summary>
+    public Task<ApiResult<bool>> AcceptLegalDocumentsAsync(string accessToken, AcceptLegalDocumentsRequest request, CancellationToken cancellationToken = default) =>
+        SendAsync<bool>(() => Authorized(WithJson(HttpMethod.Post, $"{Base}/legal-acceptances", request), accessToken), cancellationToken);
+
     /// <summary>F-8 UC1: the caller's own profile.</summary>
     public Task<ApiResult<ProfileResponse>> GetProfileAsync(string accessToken, CancellationToken cancellationToken = default) =>
         SendAsync<ProfileResponse>(() => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/profile"), accessToken), cancellationToken);

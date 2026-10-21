@@ -151,19 +151,19 @@ Tests locked: a6cc28a10eb476d9b2fb528fb1507e9be5a8d4b0 (2 files); unlocks: 0
 | AC11 | `LegalAcceptanceEndpointTests.Accept_BodyCarriesAnotherUsersId_TheFieldIsIgnoredAndTheRecordIsTheCallers` |
 | AC12 | `LegalAcceptanceEndpointTests.Accept_VersionsThatAreNotTheCurrentOnes_AreRefusedAndNothingIsWritten` (the two one-document cases) |
 | AC13 | `LegalAcceptanceEndpointTests.Accept_TwentyPostsAtOnce_WriteExactlyOneRow` |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | pending |
-| AC19 | pending |
-| AC20 | pending |
+| AC14 | `AcceptTermsPageTests.Accept_AReturnUrlThatIsNotALocalPath_GoesHome` (x7), `Accept_SendsTheShownVersionsAndGoesToTheLocalReturnUrl` |
+| AC15 | `LegalAcceptanceGateTests.Owing_AGatedPageIsNotRenderedAndTheUserIsSentToAcceptTerms`, `Owing_AnExemptPageIsRendered` (x3), `Owing_TheOtherAccountPagesStayBehindTheGate` (x2) |
+| AC16 | `LegalAcceptanceGateTests.ANewVersionIsPublishedWhileTheSessionIsOpen_TheNextNavigationIsSentToAcceptTerms` |
+| AC17 | `LegalAcceptanceGateTests.Owing_TheHomePage_GoesToAcceptTermsWithNoReturnUrl` (every sign-in method ends at `/`, `AccountEndpoints.CompleteSignIn`) |
+| AC18 | `AcceptTermsPageTests.Accept_SendsTheShownVersionsAndGoesToTheLocalReturnUrl`, `Accept_WithoutReturnUrl_GoesHome`, `Accept_ANewerVersionWasPublished_ReloadsTheDocumentsAndAsksAgain` |
+| AC19 | `AcceptTermsPageTests.SignOut_GoesToTheSignOutEndpoint_AndThereIsNoDeclineButton` |
+| AC20 | `LegalAcceptanceGateTests.Owing_AnExemptPageIsRendered` (`Account`), `AccountPageTests` unchanged (download and delete) |
 | AC21 | `LegalAcceptanceEndpointTests.Accept_WhenOwing_WritesANewRecordAndKeepsTheOlderOnesAndTheExportListsItLast` |
 | AC22 | `LegalAcceptanceEndpointTests.OtherAuthenticatedRoutes_AnswerAsBeforeForAUserWhoOwesAnAcceptance` (a guard: it passes before the code, by design) |
-| AC23 | pending |
-| AC24 | pending |
+| AC23 | `AcceptTermsPageTests.Page_IsTranslated` (x3), `ResourceParityTests` and `ErrorTextTests` (existing, green) |
+| AC24 | validation step 5 (keyboard only) |
 | AC25 | `LegalAcceptanceEndpointTests.Accept_ALocaleThatIsNotSupported_IsBadRequestAndNothingIsWritten` (x5), `Accept_EverySupportedLocale_IsStoredAsSent` |
-| AC26 | pending |
+| AC26 | `SignInCompleteTests` (existing, unchanged: the plain endpoints sit outside the router, so the gate never meets them), validation step 6 (language switch on the acceptance page) |
 
 ## Decisions
 - D1 (owner, 2026-10-21) Any new version of the terms or the privacy policy asks for an acceptance; no per-version "notice only" mark. Reason: same rule as sign-up, no case-by-case judgement to maintain — asked

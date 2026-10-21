@@ -1,0 +1,78 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Simulab.Web.Components.Pages.Identity
+@using Simulab.Web.Services.Auth
+@inject IdentityApiClient Api
+@inject WebSessionTokenAccessor Tokens
+@inject NavigationManager Navigation
+@inject ILogger<LegalAcceptanceGate> Logger
+
+@* F-85 BR6, BR7: a signed-in user who owes an acceptance of the current legal documents is sent to /accept-terms from
+   every route but the exempt ones. It runs on each navigation (the router hands a new RouteData each time), so a
+   session that was open before a version changed is caught too (AC16). The page asked for is shown only after the check
+   passes: its OnInitialized would otherwise call the Api before the redirect. While the next check runs, the last
+   allowed route stays on screen, so the layout is not torn down on every click. *@
+@if (_allowed is not null)
+{
+    @ChildContent(_allowed)
+}
+
+@code {
+    /// <summary>BR7: the pages a user who has not accepted can still open. Matched by page type, not by path, so /account/password and /account/security stay behind the gate.</summary>
+    private static readonly Type[] ExemptPages = [typeof(AcceptTerms), typeof(LegalDocumentPage), typeof(Account)];
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
+    [Parameter, EditorRequired] public RouteData RouteData { get; set; } = default!;
+
+    [Parameter, EditorRequired] public RenderFragment<RouteData> ChildContent { get; set; } = default!;
+
+    private RouteData? _allowed;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (await OwesAcceptanceAsync())
+        {
+            Navigation.NavigateTo(AcceptTermsPath(), replace: true);
+            return;
+        }
+
+        _allowed = RouteData;
+    }
+
+    private async Task<bool> OwesAcceptanceAsync()
+    {
+        if (Array.IndexOf(ExemptPages, RouteData.PageType) >= 0 || AuthState is null)
+        {
+            return false;
+        }
+
+        var user = (await AuthState).User;
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            return false;
+        }
+
+        var token = await Tokens.GetAccessTokenAsync(user);
+        if (token is null)
+        {
+            // The session ended: the watcher and the router's own authorization take it from here.
+            return false;
+        }
+
+        var status = await Api.GetLegalAcceptanceAsync(token);
+        if (!status.IsSuccess)
+        {
+            // B-3 BR3, F-85 BR2: an Api that does not answer never locks anyone out.
+            Logger.LogWarning("The legal acceptance status could not be read ({Code}); the page opens without the check.", status.ErrorCode);
+            return false;
+        }
+
+        return status.Value!.Owes;
+    }
+
+    private string AcceptTermsPath()
+    {
+        var asked = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+        return asked == "/" ? "/accept-terms" : $"/accept-terms?returnUrl={Uri.EscapeDataString(asked)}";
+    }
+}
