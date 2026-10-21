@@ -1,5 +1,3 @@
 {
-  "#sdk": "10.0.402",
-  "src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj|NU1902": 2,
-  "tests/Hosts/Simulab.AppHost.Tests/Simulab.AppHost.Tests.csproj|NU1902": 2
+  "#sdk": "10.0.402"
 }
