@@ -28,6 +28,6 @@ public sealed record SingleChoiceKey(
             return new OptionFault(new Error(QuestionBankErrorCodes.QuestionKeyNotAllowed, ErrorKind.Validation), null);
         }
 
-        return QuestionRules.CheckOptions(Written, published);
+        return MatchItemsRefused(MatchItemsWritten) ?? QuestionRules.CheckOptions(Written, published);
     }
 }

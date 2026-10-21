@@ -31,7 +31,8 @@ public sealed class QuestionVersion : TenantEntity
         IEnumerable<QuestionVersionOption> options,
         bool answerKeyChanged,
         string? reason,
-        bool annulled = false)
+        bool annulled = false,
+        IEnumerable<QuestionVersionMatchItem>? matchItems = null)
     {
         QuestionId = questionId;
         Number = number;
@@ -45,12 +46,13 @@ public sealed class QuestionVersion : TenantEntity
         AnswerKeyChanged = answerKeyChanged;
         Reason = reason;
         Annulled = annulled;
+        _matchItems = [.. matchItems ?? []];
     }
 
     /// <summary>
     /// The version an annulment or a reinstatement records (F-101, BR2, BR6): this one's content, numbered
-    /// <paramref name="number"/>, not a key change, with the state and the reason given. The options are new
-    /// instances, so the two versions share nothing.
+    /// <paramref name="number"/>, not a key change, with the state and the reason given. The options and the left
+    /// items (F-106) are new instances, so the two versions share nothing.
     /// </summary>
     internal QuestionVersion CopyAs(int number, bool annulled, string reason) =>
         new(
@@ -70,7 +72,13 @@ public sealed class QuestionVersion : TenantEntity
             }),
             answerKeyChanged: false,
             reason,
-            annulled);
+            annulled,
+            MatchItems.Select(item => new QuestionVersionMatchItem
+            {
+                Position = item.Position,
+                TextHtml = item.TextHtml,
+                MatchPosition = item.MatchPosition
+            }));
 
     /// <summary>The question the version belongs to, held by id with no navigation back.</summary>
     public Guid QuestionId { get; private set; }

@@ -29,6 +29,6 @@ public sealed record MultipleAnswerKey(
             return new OptionFault(new Error(QuestionBankErrorCodes.QuestionKeyNotAllowed, ErrorKind.Validation), null);
         }
 
-        return QuestionRules.CheckMultipleAnswerOptions(Written, published);
+        return MatchItemsRefused(MatchItemsWritten) ?? QuestionRules.CheckMultipleAnswerOptions(Written, published);
     }
 }

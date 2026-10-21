@@ -38,7 +38,7 @@ public sealed class QuestionOptionConfiguration : IEntityTypeConfiguration<Quest
 
         builder.Property(option => option.IsCorrect)
             .IsRequired()
-            .HasComment("True for the answer key. A published question has exactly one.");
+            .HasComment("True for the answer key: exactly one on a published single-choice question, two or more on a multiple-answer one, never on a matching one (its key is question_match_items.match_position).");
 
         builder.HasIndex(option => option.QuestionId)
             .HasDatabaseName("ix_question_options_question");

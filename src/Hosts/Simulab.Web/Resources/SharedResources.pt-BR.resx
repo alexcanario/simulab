@@ -1113,6 +1113,43 @@
   <data name="Questions.Preview.SelectCount" xml:space="preserve"><value>Marque {0} alternativas.</value></data>
   <data name="question.multiple_options_count" xml:space="preserve"><value>Uma questão de múltiplas respostas é publicada com 3 a 5 alternativas.</value></data>
   <data name="question.multiple_key_invalid" xml:space="preserve"><value>Marque ao menos duas alternativas como corretas e deixe ao menos uma errada.</value></data>
+  <data name="Questions.Type.Matching" xml:space="preserve"><value>Associação</value></data>
+  <data name="Questions.Type.Matching.Description" xml:space="preserve"><value>Duas colunas: associe cada item numerado a um item com letra.</value></data>
+  <data name="Questions.Section.Matching" xml:space="preserve"><value>Associações</value></data>
+  <data name="Questions.Section.Matching.Subtitle" xml:space="preserve"><value>De 2 a 8 itens à esquerda. A coluna da direita precisa de ao menos o mesmo número de itens; os itens extras não se associam a nenhum. Escolha a letra de cada número.</value></data>
+  <data name="Questions.Matching.Items" xml:space="preserve"><value>Itens</value></data>
+  <data name="Questions.Matching.Matches" xml:space="preserve"><value>Correspondências</value></data>
+  <data name="Questions.Matching.ItemsEmpty" xml:space="preserve"><value>Nenhum item ainda. Um rascunho pode ser salvo sem itens; publicar exige de 2 a 8.</value></data>
+  <data name="Questions.Matching.MatchesEmpty" xml:space="preserve"><value>Nenhuma correspondência ainda. Publicar exige ao menos tantas quanto os itens.</value></data>
+  <data name="Questions.Matching.Item.Field" xml:space="preserve"><value>Texto do item {0}</value></data>
+  <data name="Questions.Matching.Item.Match" xml:space="preserve"><value>Letra associada ao item {0}</value></data>
+  <data name="Questions.Matching.Item.Name" xml:space="preserve"><value>item {0}</value></data>
+  <data name="Questions.Matching.Item.MoveUp.DisabledFirst" xml:space="preserve"><value>Já é o primeiro item.</value></data>
+  <data name="Questions.Matching.Item.MoveDown.DisabledLast" xml:space="preserve"><value>Já é o último item.</value></data>
+  <data name="Questions.Matching.Item.Moved" xml:space="preserve"><value>Item movido para a posição {0} de {1}.</value></data>
+  <data name="Questions.Matching.Item.Removed" xml:space="preserve"><value>Item removido. Restam {0}.</value></data>
+  <data name="Questions.Matching.Match.Field" xml:space="preserve"><value>Texto da correspondência {0}</value></data>
+  <data name="Questions.Matching.Match.Name" xml:space="preserve"><value>correspondência {0}</value></data>
+  <data name="Questions.Matching.UsedBy" xml:space="preserve"><value>Usada pelo item {0}</value></data>
+  <data name="Questions.Matching.Extra" xml:space="preserve"><value>Extra</value></data>
+  <data name="Questions.Matching.AddItem" xml:space="preserve"><value>Adicionar item</value></data>
+  <data name="Questions.Matching.AddMatch" xml:space="preserve"><value>Adicionar correspondência</value></data>
+  <data name="Questions.Matching.ItemsCount" xml:space="preserve"><value>{0} de 8 itens</value></data>
+  <data name="Questions.Matching.MatchesCount" xml:space="preserve"><value>{0} de 8 correspondências</value></data>
+  <data name="Questions.Matching.NoMatch" xml:space="preserve"><value>Sem letra</value></data>
+  <data name="Questions.Checklist.Matching.ItemsCount" xml:space="preserve"><value>De 2 a 8 itens à esquerda</value></data>
+  <data name="Questions.Checklist.Matching.MatchesCount" xml:space="preserve"><value>Ao menos o mesmo número de correspondências à direita</value></data>
+  <data name="Questions.Checklist.Matching.Key" xml:space="preserve"><value>Todo item tem texto e uma correspondência</value></data>
+  <data name="Questions.Preview.MatchInstruction" xml:space="preserve"><value>Associe cada número a uma letra.</value></data>
+  <data name="Questions.Preview.MatchItems" xml:space="preserve"><value>Itens a associar</value></data>
+  <data name="Questions.Preview.MatchKey" xml:space="preserve"><value>{0} → {1}</value></data>
+  <data name="Questions.Preview.NoKey.Matching" xml:space="preserve"><value>Este rascunho ainda não tem correspondência definida.</value></data>
+  <data name="question.matching_items_count" xml:space="preserve"><value>Uma questão de associação tem de 2 a 8 itens à esquerda e, à direita, ao menos o mesmo número e no máximo 8.</value></data>
+  <data name="question.matching_key_invalid" xml:space="preserve"><value>Todo item precisa de uma correspondência.</value></data>
+  <data name="question.matching_key_repeated" xml:space="preserve"><value>Cada letra só pode ser associada a um item.</value></data>
+  <data name="question.match_item_text_required" xml:space="preserve"><value>Escreva o texto do item.</value></data>
+  <data name="question.match_item_too_long" xml:space="preserve"><value>Um item passa de 2.000 caracteres.</value></data>
+  <data name="question.match_items_not_allowed" xml:space="preserve"><value>Só uma questão de associação tem itens à esquerda.</value></data>
   <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>O tipo não pode ser alterado depois que a questão é criada.</value></data>
   <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Gabarito</value></data>
   <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Marque o enunciado como certo ou errado. Só é exigido para publicar.</value></data>

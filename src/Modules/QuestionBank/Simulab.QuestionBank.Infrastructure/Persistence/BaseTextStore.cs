@@ -28,6 +28,9 @@ public sealed class BaseTextStore(QuestionBankModuleDbContext context) : IBaseTe
         CancellationToken cancellationToken) =>
         await context.Questions
             .Include(question => question.Options)
+            // F-106: the version a passage edit records compares the left items too, so they are loaded with it.
+            .Include(question => question.MatchItems)
+            .AsSplitQuery()
             .Where(question => question.BaseTextId == baseTextId && question.Status == QuestionStatus.Published)
             .ToListAsync(cancellationToken);
 

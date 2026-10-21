@@ -33,7 +33,7 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             "questions",
             table =>
             {
-                table.HasComment("A question of the bank, written by a curator. Its options are in question_options.");
+                table.HasComment("A question of the bank, written by a curator. Its options are in question_options and, for a matching question, its left items in question_match_items.");
                 table.HasCheckConstraint(
                     DifficultyCheck,
                     $"difficulty IS NULL OR difficulty BETWEEN {QuestionLimits.DifficultyMin} AND {QuestionLimits.DifficultyMax}");
@@ -49,7 +49,7 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("How the question is answered: SingleChoice, TrueFalse or MultipleAnswer.");
+            .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer or Matching.");
 
         // F-101: a write that read another status than the stored one is a lost race (an annulment against an
         // unpublish, a save against an annulment) and answers 409 instead of last-writer-wins.
@@ -126,6 +126,14 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasConstraintName("fk_question_options_question")
             .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(question => question.Options).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        // F-106: the left items of a matching question, owned like the options.
+        builder.HasMany(question => question.MatchItems)
+            .WithOne()
+            .HasForeignKey(item => item.QuestionId)
+            .HasConstraintName("fk_question_match_items_question")
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.Navigation(question => question.MatchItems).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         // The topic delete guard and the topic's "in use" flag filter by the topic alone.
         builder.HasIndex(question => question.TopicId)

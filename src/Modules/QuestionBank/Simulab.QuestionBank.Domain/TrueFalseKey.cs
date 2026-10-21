@@ -28,6 +28,11 @@ public sealed record TrueFalseKey(
             return new OptionFault(new Error(QuestionBankErrorCodes.QuestionOptionsNotAllowed, ErrorKind.Validation), null);
         }
 
+        if (MatchItemsRefused(MatchItemsWritten) is { } refused)
+        {
+            return refused;
+        }
+
         return published && Value is null
             ? new OptionFault(new Error(QuestionBankErrorCodes.QuestionTrueFalseKeyRequired, ErrorKind.Validation), null)
             : null;

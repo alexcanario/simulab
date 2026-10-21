@@ -86,14 +86,76 @@ public static class QuestionRules
             : Fault(QuestionBankErrorCodes.QuestionMultipleKeyInvalid, null);
     }
 
-    // What every type with options shares (F-97 BR5): each option within its length and, to publish, with text.
-    private static OptionFault? CheckEachOption(IReadOnlyList<OptionDraft> options, bool published)
+    /// <summary>
+    /// The first thing wrong with the two columns of a matching question, or null (F-106, BR3, BR4). Any draft: at most
+    /// eight on each side, each within its length, and no match naming a missing or an already used option. To
+    /// publish: two to eight left items, at least as many options, every text written and every left item matched.
+    /// The position of a fault about one item is the item's in its own column.
+    /// </summary>
+    public static OptionFault? CheckMatching(IReadOnlyList<OptionDraft> options, IReadOnlyList<MatchItemDraft> items, bool published)
     {
-        for (var position = 0; position < options.Count; position++)
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(items);
+
+        if (items.Count > QuestionLimits.MatchingItemsMax || options.Count > QuestionLimits.MatchingItemsMax
+            || (published && (items.Count < QuestionLimits.MatchingItemsMin || options.Count < items.Count)))
         {
-            if (options[position].Text.Html.Length > QuestionLimits.OptionMaxLength)
+            return Fault(QuestionBankErrorCodes.QuestionMatchingItemsCount, null);
+        }
+
+        // BR3: a missing or a repeated letter is broken data, refused on a draft too; an unset one is unfinished work.
+        var used = new HashSet<int>();
+        for (var position = 0; position < items.Count; position++)
+        {
+            if (items[position].MatchPosition is not { } match)
             {
-                return Fault(QuestionBankErrorCodes.QuestionOptionTooLong, position);
+                continue;
+            }
+
+            if (match < 0 || match >= options.Count)
+            {
+                return Fault(QuestionBankErrorCodes.QuestionMatchingKeyInvalid, position);
+            }
+
+            if (!used.Add(match))
+            {
+                return Fault(QuestionBankErrorCodes.QuestionMatchingKeyRepeated, position);
+            }
+        }
+
+        var fault = CheckEachOption(options, published)
+            ?? CheckEach(
+                [.. items.Select(item => item.Text)],
+                published,
+                QuestionBankErrorCodes.QuestionMatchItemTooLong,
+                QuestionBankErrorCodes.QuestionMatchItemTextRequired);
+        if (fault is not null || !published)
+        {
+            return fault;
+        }
+
+        var unmatched = items.ToList().FindIndex(item => item.MatchPosition is null);
+
+        return unmatched < 0 ? null : Fault(QuestionBankErrorCodes.QuestionMatchingKeyInvalid, unmatched);
+    }
+
+    // What every type with options shares (F-97 BR5): each option within its length and, to publish, with text.
+    private static OptionFault? CheckEachOption(IReadOnlyList<OptionDraft> options, bool published) =>
+        CheckEach(
+            [.. options.Select(option => option.Text)],
+            published,
+            QuestionBankErrorCodes.QuestionOptionTooLong,
+            QuestionBankErrorCodes.QuestionOptionTextRequired);
+
+    // One rule for a list of short rich texts, options or left items (F-106 BR7): each within the option length
+    // and, to publish, with text; the codes are the list's own.
+    private static OptionFault? CheckEach(IReadOnlyList<SanitizedHtml> texts, bool published, string tooLongCode, string requiredCode)
+    {
+        for (var position = 0; position < texts.Count; position++)
+        {
+            if (texts[position].Html.Length > QuestionLimits.OptionMaxLength)
+            {
+                return Fault(tooLongCode, position);
             }
         }
 
@@ -102,11 +164,11 @@ public static class QuestionRules
             return null;
         }
 
-        for (var position = 0; position < options.Count; position++)
+        for (var position = 0; position < texts.Count; position++)
         {
-            if (options[position].Text.IsEmpty)
+            if (texts[position].IsEmpty)
             {
-                return Fault(QuestionBankErrorCodes.QuestionOptionTextRequired, position);
+                return Fault(requiredCode, position);
             }
         }
 

@@ -147,6 +147,9 @@ No mockup (owner, 2026-10-21): the form gains a fourth type card and one new sec
 - AC19 All new texts appear in pt-BR, pt-PT and en, including the error code texts.
 
 ## Criterion → test
+
+Tests locked: ec77fdd9232fac264b5d9c3239a8fcca650da096 (7 files); unlocks: 0
+
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. Test: the test name(s), `pending` (no test yet) or `validation step <n>` (only checkable on screen). -->
 | Criterion | Test |
 | --- | --- |

@@ -141,6 +141,8 @@ public sealed class QuestionQueries(
         var question = await context.Questions
             .AsNoTracking()
             .Include(row => row.Options)
+            .Include(row => row.MatchItems)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(row => row.Id == id, cancellationToken);
         if (question is null)
         {
@@ -198,7 +200,12 @@ public sealed class QuestionQueries(
             question.TrueFalseKey,
             latest?.Number,
             annulment,
-            submittedAt);
+            submittedAt,
+            [
+                .. question.MatchItems
+                    .OrderBy(item => item.Position)
+                    .Select(item => new MatchItemResponse(item.Position, item.TextHtml, item.MatchPosition))
+            ]);
     }
 
     private Task<DateTimeOffset?> LatestSubmittedAtAsync(Guid questionId, CancellationToken cancellationToken) =>
@@ -361,7 +368,12 @@ public sealed class QuestionQueries(
             version.AnswerKeyChanged,
             version.Reason,
             version.CreatedAt,
-            version.Annulled));
+            version.Annulled,
+            [
+                .. version.MatchItems
+                    .OrderBy(item => item.Position)
+                    .Select(item => new MatchItemResponse(item.Position, item.TextHtml, item.MatchPosition))
+            ]));
     }
 
     public async Task<IReadOnlyList<QuestionTaxonomySubjectResponse>> GetTaxonomyAsync(CancellationToken cancellationToken) =>

@@ -1,0 +1,348 @@
+@* F-106: the key section of a matching question. The left list is numbered, the right list (the question's options) is
+   lettered, and each left row picks the letter it matches from the letters no other row took. The section lives in its
+   own component so the form only switches to it (F-97 BR9); the form owns the lists, the errors and Save. *@
+@using Simulab.QuestionBank.Contracts
+@inject IStringLocalizer<SharedResources> L
+@inject IJSRuntime JS
+
+@* The wrapper carries the section's id: the kit card names only its title. *@
+<div id="question-section-matching">
+<AppSectionCard Id="question-section-matching"
+                Title="@L["Questions.Section.Matching"]"
+                Icon="@AppIcons.Matching"
+                Subtitle="@L["Questions.Section.Matching.Subtitle"]">
+    <div class="app-matching-columns" role="group" aria-describedby="question-matching-description">
+        <div>
+            <h3 class="app-matching-heading" id="question-matching-items-title">@L["Questions.Matching.Items"]</h3>
+            <AppItemRows TItem="MatchItemDraft"
+                         Items="Items"
+                         EmptyMessage="@L["Questions.Matching.ItemsEmpty"]"
+                         AriaLabelledBy="question-matching-items-title">
+                <RowTemplate Context="item">
+                    @{
+                        var index = Items.IndexOf(item);
+                        var number = Number(index);
+                    }
+                    <div class="app-option-row">
+                        <span class="app-option-letter">@number</span>
+                        <AppRichTextField Id="@ItemId(index)"
+                                          Label="@L["Questions.Matching.Item.Field", number]"
+                                          LabelVisuallyHidden="true"
+                                          Placeholder="@L["Questions.Options.Field.Placeholder"]"
+                                          Compact="true"
+                                          Disabled="Frozen"
+                                          AutoFocus="@item.FocusOnRender"
+                                          Lang="@ContentLanguage"
+                                          Images="Images"
+                                          Value="@item.Html"
+                                          ValueChanged="@((string? value) => OnItemChanged(item, value))"
+                                          Error="@item.Error" />
+                        <div class="app-match-select">
+                            <AppSelectField TValue="int?"
+                                            Id="@($"question-match-item-match-{index}")"
+                                            Label="@L["Questions.Matching.Item.Match", number]"
+                                            LabelVisuallyHidden="true"
+                                            Value="LetterOf(item)"
+                                            ValueChanged="@((int? value) => OnMatchChanged(item, value))"
+                                            Options="LettersFor(item)"
+                                            Disabled="Frozen" />
+                        </div>
+                    </div>
+                </RowTemplate>
+                <Actions Context="item">
+                    @{
+                        var index = Items.IndexOf(item);
+                    }
+                    @if (!Frozen)
+                    {
+                        <AppRowActions ItemName="@L["Questions.Matching.Item.Name", Number(index)]"
+                                       IdPrefix="@ItemActionsId(index)"
+                                       OnMoveUp="@(() => MoveItem(index, -1))"
+                                       MoveUpDisabledReason="@(index == 0 ? L["Questions.Matching.Item.MoveUp.DisabledFirst"].Value : null)"
+                                       OnMoveDown="@(() => MoveItem(index, 1))"
+                                       MoveDownDisabledReason="@(index == Items.Count - 1 ? L["Questions.Matching.Item.MoveDown.DisabledLast"].Value : null)"
+                                       OnDelete="@(() => RemoveItem(index))" />
+                    }
+                </Actions>
+            </AppItemRows>
+            <div class="app-options-footer">
+                @if (!Frozen)
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@AppIcons.Add"
+                               OnClick="AddItem"
+                               Disabled="@(Items.Count >= QuestionLimits.MatchingItemsMax)"
+                               id="@AddItemId">@L["Questions.Matching.AddItem"]</MudButton>
+                }
+                @* The limit is never told by a disabled button alone: the count says it. *@
+                <span class="app-options-count">@L["Questions.Matching.ItemsCount", Items.Count]</span>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="app-matching-heading" id="question-matching-matches-title">@L["Questions.Matching.Matches"]</h3>
+            <AppItemRows TItem="OptionDraft"
+                         Items="Options"
+                         EmptyMessage="@L["Questions.Matching.MatchesEmpty"]"
+                         AriaLabelledBy="question-matching-matches-title">
+                <RowTemplate Context="option">
+                    @{
+                        var position = Options.IndexOf(option);
+                        var letter = QuestionText.Letter(position);
+                    }
+                    <div class="app-option-row">
+                        <span class="app-option-letter">@letter</span>
+                        <AppRichTextField Id="@($"question-option-{position}")"
+                                          Label="@L["Questions.Matching.Match.Field", letter]"
+                                          LabelVisuallyHidden="true"
+                                          Placeholder="@L["Questions.Options.Field.Placeholder"]"
+                                          Compact="true"
+                                          Disabled="Frozen"
+                                          AutoFocus="@option.FocusOnRender"
+                                          Lang="@ContentLanguage"
+                                          Images="Images"
+                                          Value="@option.Html"
+                                          ValueChanged="@((string? value) => OnOptionChanged(option, value))"
+                                          Error="@option.Error" />
+                        @* Which number uses this letter, in words: the select is not the only way to know it (AC17). *@
+                        <span class="app-match-note">@NoteFor(option)</span>
+                    </div>
+                </RowTemplate>
+                <Actions Context="option">
+                    @{
+                        var position = Options.IndexOf(option);
+                    }
+                    @if (!Frozen)
+                    {
+                        <AppRowActions ItemName="@L["Questions.Matching.Match.Name", QuestionText.Letter(position)]"
+                                       IdPrefix="@OptionActionsId(position)"
+                                       OnMoveUp="@(() => MoveOption(position, -1))"
+                                       MoveUpDisabledReason="@(position == 0 ? L["Questions.Options.MoveUp.DisabledFirst"].Value : null)"
+                                       OnMoveDown="@(() => MoveOption(position, 1))"
+                                       MoveDownDisabledReason="@(position == Options.Count - 1 ? L["Questions.Options.MoveDown.DisabledLast"].Value : null)"
+                                       OnDelete="@(() => RemoveOption(position))" />
+                    }
+                </Actions>
+            </AppItemRows>
+            <div class="app-options-footer">
+                @if (!Frozen)
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@AppIcons.Add"
+                               OnClick="AddOption"
+                               Disabled="@(Options.Count >= QuestionLimits.MatchingItemsMax)"
+                               id="@AddOptionId">@L["Questions.Matching.AddMatch"]</MudButton>
+                }
+                <span class="app-options-count">@L["Questions.Matching.MatchesCount", Options.Count]</span>
+            </div>
+        </div>
+    </div>
+
+    @* A section-level refusal (counts or key) is under the lists and described to the group, so it is read with it. *@
+    <span id="question-matching-description" class="app-field-description">
+        @if (Error is not null)
+        {
+            <span class="app-field-error-text" aria-live="polite">@Error</span>
+        }
+    </span>
+
+    <div class="app-visually-hidden" role="status" aria-live="polite">@_announcement</div>
+
+    @ChildContent
+</AppSectionCard>
+</div>
+
+@code {
+    /// <summary>The id of the "Add item" button; the error summary points at it for a refusal about the left list.</summary>
+    public const string AddItemId = "question-match-item-add";
+
+    /// <summary>The id of the "Add match" button; the same as the options section's, so the summary works for both.</summary>
+    public const string AddOptionId = "question-option-add";
+
+    /// <summary>The right column: the question's options, owned by the form and kept across a change of type.</summary>
+    [Parameter, EditorRequired] public List<OptionDraft> Options { get; set; } = [];
+
+    /// <summary>The left column, owned by the form.</summary>
+    [Parameter, EditorRequired] public List<MatchItemDraft> Items { get; set; } = [];
+
+    /// <summary>F-101, F-105: an annulled question or one in review is read only.</summary>
+    [Parameter] public bool Frozen { get; set; }
+
+    [Parameter] public string? ContentLanguage { get; set; }
+
+    [Parameter] public RichTextImageOptions? Images { get; set; }
+
+    /// <summary>The refusal about the lists as a whole, already translated.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    /// <summary>Called after any change, so the form clears the section refusal and redraws its checklist.</summary>
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    /// <summary>What follows the lists: the reason of a key change, when the form asks for one.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string? _announcement;
+    private string? _pendingFocus;
+
+    /// <summary>The id of the editor of the left item at <paramref name="index"/>.</summary>
+    public static string ItemId(int index) => $"question-match-item-{index}";
+
+    private static string ItemActionsId(int index) => $"question-match-item-actions-{index}";
+
+    private static string OptionActionsId(int position) => $"question-option-actions-{position}";
+
+    private static string Number(int index) => (index + 1).ToString(CultureInfo.CurrentCulture);
+
+    private int? LetterOf(MatchItemDraft item) =>
+        item.Match is { } match && Options.IndexOf(match) is var position and >= 0 ? position : null;
+
+    // BR3, AC13: one to one, so a letter another row took is not offered; the row's own letter stays.
+    private IReadOnlyList<AppSelectOption<int?>> LettersFor(MatchItemDraft item) =>
+    [
+        new(null, L["Questions.Matching.NoMatch"]),
+        .. Options
+            .Select((option, position) => (option, position))
+            .Where(pair => ReferenceEquals(item.Match, pair.option) || !Items.Any(other => ReferenceEquals(other.Match, pair.option)))
+            .Select(pair => new AppSelectOption<int?>(pair.position, QuestionText.Letter(pair.position)))
+    ];
+
+    private string NoteFor(OptionDraft option)
+    {
+        var index = Items.FindIndex(item => ReferenceEquals(item.Match, option));
+
+        return index >= 0 ? L["Questions.Matching.UsedBy", Number(index)] : L["Questions.Matching.Extra"];
+    }
+
+    private Task OnItemChanged(MatchItemDraft item, string? value)
+    {
+        item.Html = value ?? string.Empty;
+        item.Error = null;
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task OnOptionChanged(OptionDraft option, string? value)
+    {
+        option.Html = value ?? string.Empty;
+        option.Error = null;
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task OnMatchChanged(MatchItemDraft item, int? position)
+    {
+        item.Match = position is { } letter && letter >= 0 && letter < Options.Count ? Options[letter] : null;
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task AddItem()
+    {
+        if (Items.Count >= QuestionLimits.MatchingItemsMax)
+        {
+            return Task.CompletedTask;
+        }
+
+        foreach (var existing in Items)
+        {
+            existing.FocusOnRender = false;
+        }
+
+        Items.Add(new MatchItemDraft { FocusOnRender = true });
+        _announcement = null;
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task AddOption()
+    {
+        if (Options.Count >= QuestionLimits.MatchingItemsMax)
+        {
+            return Task.CompletedTask;
+        }
+
+        foreach (var existing in Options)
+        {
+            existing.FocusOnRender = false;
+        }
+
+        Options.Add(new OptionDraft { FocusOnRender = true });
+        _announcement = null;
+
+        return OnChanged.InvokeAsync();
+    }
+
+    // A move keeps each match with its row: the left rows hold the right items themselves, so the letter follows.
+    private Task MoveItem(int index, int direction) =>
+        Move(Items, index, direction, ItemActionsId, L["Questions.Matching.Item.Moved", index + direction + 1, Items.Count]);
+
+    private Task MoveOption(int position, int direction) =>
+        Move(Options, position, direction, OptionActionsId, L["Questions.Options.Moved", position + direction + 1, Options.Count]);
+
+    private Task Move<T>(List<T> rows, int index, int direction, Func<int, string> actionsId, string announcement)
+    {
+        var target = index + direction;
+        if (target < 0 || target >= rows.Count)
+        {
+            return Task.CompletedTask;
+        }
+
+        (rows[index], rows[target]) = (rows[target], rows[index]);
+        _announcement = announcement;
+
+        // The focus stays on the pressed button, or on its pair when the move made it disabled.
+        var pressedStillEnabled = direction < 0 ? target > 0 : target < rows.Count - 1;
+        var key = (direction < 0) == pressedStillEnabled ? AppRowActions.MoveUpKey : AppRowActions.MoveDownKey;
+        _pendingFocus = $"{actionsId(target)}-{key}";
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task RemoveItem(int index)
+    {
+        if (index < 0 || index >= Items.Count)
+        {
+            return Task.CompletedTask;
+        }
+
+        Items.RemoveAt(index);
+        _announcement = L["Questions.Matching.Item.Removed", Items.Count];
+        _pendingFocus = index < Items.Count ? $"{ItemActionsId(index)}-{AppRowActions.DeleteKey}" : AddItemId;
+
+        return OnChanged.InvokeAsync();
+    }
+
+    // AC13: a removed right item takes its matches with it; the rows that used it have no letter again.
+    private Task RemoveOption(int position)
+    {
+        if (position < 0 || position >= Options.Count)
+        {
+            return Task.CompletedTask;
+        }
+
+        var removed = Options[position];
+        Options.RemoveAt(position);
+        foreach (var item in Items.Where(item => ReferenceEquals(item.Match, removed)))
+        {
+            item.Match = null;
+        }
+
+        _announcement = L["Questions.Options.Removed", Options.Count];
+        _pendingFocus = position < Options.Count ? $"{OptionActionsId(position)}-{AppRowActions.DeleteKey}" : AddOptionId;
+
+        return OnChanged.InvokeAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingFocus is not { } target)
+        {
+            return;
+        }
+
+        _pendingFocus = null;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+    }
+}

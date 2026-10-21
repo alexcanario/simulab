@@ -1,4 +1,5 @@
 using Simulab.QuestionBank.Contracts;
+using Simulab.SharedKernel.Results;
 
 namespace Simulab.QuestionBank.Domain;
 
@@ -28,6 +29,12 @@ public abstract record AnswerKey
     /// refused on both: nothing is ignored.
     /// </summary>
     public abstract OptionFault? Check(bool published);
+
+    /// <summary>F-106 BR6: left items written to a type that has none; null when there are none.</summary>
+    protected static OptionFault? MatchItemsRefused(IReadOnlyList<MatchItemDraft>? written) =>
+        written is { Count: > 0 }
+            ? new OptionFault(new Error(QuestionBankErrorCodes.QuestionMatchItemsNotAllowed, ErrorKind.Validation), null)
+            : null;
 
     /// <summary>
     /// The key of a question of <paramref name="type"/> from what was written: the options, the true/false key and

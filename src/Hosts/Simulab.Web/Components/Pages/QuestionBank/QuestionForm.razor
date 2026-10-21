@@ -115,7 +115,7 @@ else
                                    Value="_type"
                                    ValueChanged="@((QuestionType? value) => OnTypeChanged(value))"
                                    Options="TypeCards"
-                                   Columns="3"
+                                   Columns="2"
                                    Required="true" />
                 }
 
@@ -352,6 +352,22 @@ else
                         @ChangeReasonField
                     }
                 </AppSectionCard>
+            }
+            else if (IsMatching)
+            {
+                @* F-106: the two columns; the right one is the same options list, the left one is the form's own. *@
+                <MatchingKeySection Options="_options"
+                                    Items="_matchItems"
+                                    Frozen="IsFrozen"
+                                    ContentLanguage="@_contentLanguage"
+                                    Images="ImageOptions"
+                                    Error="@_matchingError"
+                                    OnChanged="OnMatchingChanged">
+                    @if (ShowChangeReason)
+                    {
+                        @ChangeReasonField
+                    }
+                </MatchingKeySection>
             }
             else
             {
@@ -845,6 +861,10 @@ else
     private bool? _trueFalseKey;
     private string? _trueFalseKeyError;
 
+    // F-106: the left column of a matching question; the right column is _options. Kept across a change of type.
+    private List<MatchItemDraft> _matchItems = [];
+    private string? _matchingError;
+
     // F-96: the origin. The number and the notice subject only exist with an edition (BR2).
     private AppLookupOption? _edition;
     private int? _paperNumber;
@@ -926,11 +946,14 @@ else
 
     private bool IsMultiple => _type == QuestionType.MultipleAnswer;
 
+    private bool IsMatching => _type == QuestionType.Matching;
+
     private IReadOnlyList<AppRadioCardOption<QuestionType?>> TypeCards =>
     [
         new(QuestionType.SingleChoice, L["Questions.Type.SingleChoice"], L["Questions.Type.SingleChoice.Description"], AppIcons.Options),
         new(QuestionType.TrueFalse, L["Questions.Type.TrueFalse"], L["Questions.Type.TrueFalse.Description"], AppIcons.Verified),
-        new(QuestionType.MultipleAnswer, L["Questions.Type.MultipleAnswer"], L["Questions.Type.MultipleAnswer.Description"], AppIcons.MultipleAnswer)
+        new(QuestionType.MultipleAnswer, L["Questions.Type.MultipleAnswer"], L["Questions.Type.MultipleAnswer.Description"], AppIcons.MultipleAnswer),
+        new(QuestionType.Matching, L["Questions.Type.Matching"], L["Questions.Type.Matching.Description"], AppIcons.Matching)
     ];
 
     private IReadOnlyList<AppRadioCardOption<bool?>> TrueFalseCards =>
@@ -1003,9 +1026,25 @@ else
     // F-97: a true/false question has one key and no options, so the three option items are one.
     private bool TrueFalseKeyDone => _trueFalseKey is not null;
 
+    // F-106 BR4: two to eight on the left; on the right at least as many, at most eight; every text and every match.
+    private bool MatchingItemsCountDone =>
+        _matchItems.Count >= QuestionLimits.MatchingItemsMin && _matchItems.Count <= QuestionLimits.MatchingItemsMax;
+
+    private bool MatchingMatchesCountDone =>
+        _options.Count > 0 && _options.Count >= _matchItems.Count && _options.Count <= QuestionLimits.MatchingItemsMax;
+
+    private bool MatchingKeyDone =>
+        _matchItems.Count > 0
+        && _matchItems.All(item => !QuestionHtml.IsBlank(item.Html) && item.Match is { } match && _options.Contains(match))
+        && _options.All(option => !QuestionHtml.IsBlank(option.Html));
+
     private bool ChecklistComplete =>
         TopicDone && LanguageDone && StatementDone
-        && (IsTrueFalse ? TrueFalseKeyDone : OptionsCountDone && OptionsTextDone && KeyDone);
+        && (IsTrueFalse
+            ? TrueFalseKeyDone
+            : IsMatching
+                ? MatchingItemsCountDone && MatchingMatchesCountDone && MatchingKeyDone
+                : OptionsCountDone && OptionsTextDone && KeyDone);
 
     private IReadOnlyList<AppChecklistItem> AsideChecklist =>
     [
@@ -1014,6 +1053,13 @@ else
         new(L["Questions.Checklist.Statement"], StatementDone),
         .. IsTrueFalse
             ? [new AppChecklistItem(L["Questions.Checklist.TrueFalseKey"], TrueFalseKeyDone)]
+            : IsMatching
+            ? new List<AppChecklistItem>
+            {
+                new(L["Questions.Checklist.Matching.ItemsCount"], MatchingItemsCountDone),
+                new(L["Questions.Checklist.Matching.MatchesCount"], MatchingMatchesCountDone),
+                new(L["Questions.Checklist.Matching.Key"], MatchingKeyDone)
+            }
             : new List<AppChecklistItem>
             {
                 new(IsMultiple ? L["Questions.Checklist.OptionsCount.Multiple"] : L["Questions.Checklist.OptionsCount"], OptionsCountDone),
@@ -1031,7 +1077,7 @@ else
         new(L["Questions.Field.Difficulty"], _difficulty?.ToString(CultureInfo.CurrentCulture)),
         new(L["Questions.Field.BaseText"], _baseText?.Text),
         new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
-        IsTrueFalse
+        IsTrueFalse || IsMatching
             ? new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))
             : new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value),
         .. IsMultiple ? [new AppAsideRow(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))] : Array.Empty<AppAsideRow>()
@@ -1074,6 +1120,16 @@ else
             }
 
             AddIfRefused(items, _optionsError, AddOptionId, L["Questions.Section.Options"]);
+            for (var index = 0; index < _matchItems.Count; index++)
+            {
+                AddIfRefused(
+                    items,
+                    _matchItems[index].Error,
+                    MatchingKeySection.ItemId(index),
+                    L["Questions.Matching.Item.Field", (index + 1).ToString(CultureInfo.CurrentCulture)]);
+            }
+
+            AddIfRefused(items, _matchingError, MatchingKeySection.AddItemId, L["Questions.Section.Matching"]);
             AddIfRefused(items, _trueFalseKeyError, "question-true-false-key", L["Questions.TrueFalseKey.Label"]);
             AddIfRefused(items, _changeReasonError, ChangeReasonId, L["Questions.ChangeReason.Label"]);
             AddIfRefused(items, _explanationError, "question-explanation", L["Questions.Field.Explanation"]);
@@ -1107,14 +1163,34 @@ else
     private bool AnswerChanged() =>
         IsTrueFalse
             ? _saved is null || _trueFalseKey != _saved.TrueFalseKey
-            : OptionsChanged();
+            : OptionsChanged() || (IsMatching && MatchItemsChanged());
 
     // F-98 BR4: the key of a published question differs from the stored one when the correct option moved (a
     // reorder counts) or the true/false value did. Version 1 and drafts never need a reason.
     private bool KeyChangeNeedsReason =>
         IsPublished
         && _saved is not null
-        && (IsTrueFalse ? _trueFalseKey != _saved.TrueFalseKey : !CorrectPositions.SequenceEqual(StoredCorrectPositions));
+        && (IsTrueFalse
+            ? _trueFalseKey != _saved.TrueFalseKey
+            : IsMatching
+                ? !MatchPositions.SequenceEqual(StoredMatchPositions)
+                : !CorrectPositions.SequenceEqual(StoredCorrectPositions));
+
+    // F-106 BR8: what each number matches, in item order; a new or removed item changes the sequence too.
+    private IEnumerable<int?> MatchPositions =>
+        _matchItems.Select(item => item.Match is { } match && _options.IndexOf(match) is var position and >= 0 ? position : (int?)null);
+
+    private IEnumerable<int?> StoredMatchPositions =>
+        (_saved?.MatchItems ?? []).OrderBy(item => item.Position).Select(item => item.MatchPosition);
+
+    private bool MatchItemsChanged()
+    {
+        var stored = (_saved?.MatchItems ?? []).OrderBy(item => item.Position).ToList();
+
+        return stored.Count != _matchItems.Count
+            || !MatchPositions.SequenceEqual(stored.Select(item => item.MatchPosition))
+            || stored.Where((item, index) => Normalized(item.TextHtml) != Normalized(_matchItems[index].Html)).Any();
+    }
 
     // F-104 BR7: the whole set of correct positions, so moving the second correct option counts as well.
     private IEnumerable<int> CorrectPositions =>
@@ -1267,6 +1343,7 @@ else
         _statement = string.Empty;
         _explanation = string.Empty;
         _options = [];
+        _matchItems = [];
         _type = QuestionType.SingleChoice;
         _trueFalseKey = null;
         _changeReason = string.Empty;
@@ -1330,6 +1407,16 @@ else
             .. question.Options.OrderBy(option => option.Position)
                 .Select(option => new OptionDraft { Html = option.TextHtml, IsCorrect = option.IsCorrect })
         ];
+        // F-106: each left item holds the right item it matches, so a later move or removal keeps the key right.
+        _matchItems =
+        [
+            .. (question.MatchItems ?? []).OrderBy(item => item.Position)
+                .Select(item => new MatchItemDraft
+                {
+                    Html = item.TextHtml,
+                    Match = item.MatchPosition is { } position && position >= 0 && position < _options.Count ? _options[position] : null
+                })
+        ];
         // F-98: what was typed as a reason belonged to the save that just came back.
         _changeReason = string.Empty;
         _changeReasonForced = false;
@@ -1340,7 +1427,7 @@ else
     {
         _changeReasonError = null;
         _topicError = _languageError = _difficultyError = _statementError = null;
-        _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = null;
+        _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = _matchingError = null;
         _baseTextCleared = null;
         _editionError = _paperNumberError = _noticeSubjectError = null;
         _showErrorSummary = false;
@@ -1348,7 +1435,15 @@ else
         {
             option.Error = null;
         }
+
+        foreach (var item in _matchItems)
+        {
+            item.Error = null;
+        }
     }
+
+    // F-106: any change in the two columns drops the section refusal; the redraw updates the checklist.
+    private void OnMatchingChanged() => _matchingError = null;
 
     private void BuildBreadcrumbs() =>
         _breadcrumbs =
@@ -1475,7 +1570,8 @@ else
             current.Difficulty,
             version.Options,
             TrueFalseKey: version.TrueFalseKey,
-            CurrentVersion: version.Number);
+            CurrentVersion: version.Number,
+            MatchItems: version.MatchItems);
         var parameters = new DialogParameters<QuestionPreviewDialog>
         {
             { dialog => dialog.Question, asQuestion },
@@ -1590,6 +1686,7 @@ else
         _type = type;
         _optionsError = null;
         _trueFalseKeyError = null;
+        _matchingError = null;
 
         // F-104: single choice has one correct option, so going back to it keeps the first mark only.
         if (type == QuestionType.SingleChoice && _options.Count(option => option.IsCorrect) > 1)
@@ -1908,6 +2005,22 @@ else
             : Errors.For(IsMultiple ? QuestionBankErrorCodes.QuestionMultipleKeyInvalid : QuestionBankErrorCodes.QuestionKeyInvalid);
     }
 
+    // F-106: a left item has the option's length and, to publish, text.
+    private string? MatchItemError(MatchItemDraft item, bool required) =>
+        item.Html.Length > QuestionLimits.OptionMaxLength
+            ? Errors.For(QuestionBankErrorCodes.QuestionMatchItemTooLong)
+            : required && QuestionHtml.IsBlank(item.Html)
+                ? Errors.For(QuestionBankErrorCodes.QuestionMatchItemTextRequired)
+                : null;
+
+    // F-106 BR4: the section-level rule of a published matching question: the counts, then every item matched.
+    private string? PublishedMatchingError() =>
+        !MatchingItemsCountDone || !MatchingMatchesCountDone
+            ? Errors.For(QuestionBankErrorCodes.QuestionMatchingItemsCount)
+            : MatchPositions.Any(position => position is null)
+                ? Errors.For(QuestionBankErrorCodes.QuestionMatchingKeyInvalid)
+                : null;
+
     // -- save -------------------------------------------------------------------------------------------------
 
     private async Task SaveAsync()
@@ -1929,7 +2042,13 @@ else
             option.Error = IsTrueFalse ? null : OptionError(option, required: published);
         }
 
-        _optionsError = published && !IsTrueFalse ? PublishedOptionsError() : null;
+        foreach (var item in _matchItems)
+        {
+            item.Error = IsMatching ? MatchItemError(item, required: published) : null;
+        }
+
+        _optionsError = published && !IsTrueFalse && !IsMatching ? PublishedOptionsError() : null;
+        _matchingError = published && IsMatching ? PublishedMatchingError() : null;
         _trueFalseKeyError = published && IsTrueFalse && !TrueFalseKeyDone
             ? Errors.For(QuestionBankErrorCodes.QuestionTrueFalseKeyRequired)
             : null;
@@ -1958,13 +2077,17 @@ else
             _difficulty,
             IsTrueFalse
                 ? []
-                : [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), option.IsCorrect))],
+                // F-106 BR5: a right item carries no mark, whatever single choice left on it.
+                : [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), !IsMatching && option.IsCorrect))],
             _edition?.Id,
             _edition is null ? null : _paperNumber,
             _edition is null ? null : _noticeSubjectId,
             _type,
             IsTrueFalse ? _trueFalseKey : null,
-            ShowChangeReason ? QuestionHtml.NullIfBlank(_changeReason.Trim()) : null);
+            ShowChangeReason ? QuestionHtml.NullIfBlank(_changeReason.Trim()) : null,
+            IsMatching
+                ? [.. _matchItems.Zip(MatchPositions, (item, match) => new SaveMatchItemRequest(QuestionHtml.NullIfBlank(item.Html), match))]
+                : null);
 
         var result = token is null
             ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
@@ -2009,8 +2132,9 @@ else
     private bool HasClientRefusal() =>
         _topicError is not null || _languageError is not null || _statementError is not null
         || _paperNumberError is not null || _explanationError is not null || _optionsError is not null
-        || _trueFalseKeyError is not null || _changeReasonError is not null
-        || _options.Any(option => option.Error is not null);
+        || _trueFalseKeyError is not null || _changeReasonError is not null || _matchingError is not null
+        || _options.Any(option => option.Error is not null)
+        || _matchItems.Any(item => item.Error is not null);
 
     // A refusal belongs to the field that caused it, so the reader sees where to change something (BR16).
     private async Task ShowRefusalAsync(QuestionBankResult<QuestionResponse> result)
@@ -2045,11 +2169,33 @@ else
                 {
                     _options[position].Error = text;
                 }
+                else if (IsMatching)
+                {
+                    _matchingError = text;
+                }
                 else
                 {
                     _optionsError = text;
                 }
 
+                break;
+            case QuestionBankErrorCodes.QuestionMatchItemTextRequired:
+            case QuestionBankErrorCodes.QuestionMatchItemTooLong:
+                // F-106: the position is the left item's.
+                if (result.OptionPosition is { } itemPosition && itemPosition >= 0 && itemPosition < _matchItems.Count)
+                {
+                    _matchItems[itemPosition].Error = text;
+                }
+                else
+                {
+                    _matchingError = text;
+                }
+
+                break;
+            case QuestionBankErrorCodes.QuestionMatchingItemsCount:
+            case QuestionBankErrorCodes.QuestionMatchingKeyInvalid:
+            case QuestionBankErrorCodes.QuestionMatchingKeyRepeated:
+                _matchingError = text;
                 break;
             case QuestionBankErrorCodes.QuestionOptionsCount:
             case QuestionBankErrorCodes.QuestionKeyInvalid:

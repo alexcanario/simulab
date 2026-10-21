@@ -25,7 +25,13 @@ public sealed class SaveQuestionHandler(
         QuestionBankErrorCodes.QuestionOptionTextRequired,
         QuestionBankErrorCodes.QuestionKeyInvalid,
         QuestionBankErrorCodes.QuestionMultipleOptionsCount,
-        QuestionBankErrorCodes.QuestionMultipleKeyInvalid
+        QuestionBankErrorCodes.QuestionMultipleKeyInvalid,
+        // F-106: the position of these is the item's in its own column, a left item for the match-item codes and the
+        // matching key codes, an option for the option codes above.
+        QuestionBankErrorCodes.QuestionMatchingKeyInvalid,
+        QuestionBankErrorCodes.QuestionMatchingKeyRepeated,
+        QuestionBankErrorCodes.QuestionMatchItemTextRequired,
+        QuestionBankErrorCodes.QuestionMatchItemTooLong
     ];
 
     public async Task<SaveQuestionOutcome> HandleAsync(
@@ -105,6 +111,9 @@ public sealed class SaveQuestionHandler(
         var drafts = (request.Options ?? [])
             .Select(option => new OptionDraft(sanitizer.Sanitize(option.TextHtml), option.IsCorrect))
             .ToList();
+        var matchItems = (request.MatchItems ?? [])
+            .Select(item => new MatchItemDraft(sanitizer.Sanitize(item.TextHtml), item.MatchPosition))
+            .ToList();
         var content = new QuestionContent(
             request.TopicId,
             request.ContentLanguage,
@@ -118,7 +127,8 @@ public sealed class SaveQuestionHandler(
             request.PaperNumber,
             request.NoticeSubjectId,
             existing?.Type ?? request.Type ?? QuestionType.SingleChoice,
-            request.TrueFalseKey);
+            request.TrueFalseKey,
+            matchItems);
 
         var question = existing;
         Result applied;
@@ -137,16 +147,20 @@ public sealed class SaveQuestionHandler(
         {
             // The entity answers with the code; the position of the option it is about comes from the same rule.
             var position = OptionCodes.Contains(applied.Error!.Code)
-                ? AnswerKey.From(content.Type, drafts, request.TrueFalseKey)
+                ? AnswerKey.From(content.Type, drafts, request.TrueFalseKey, matchItems)
                     .Check(existing?.Status == QuestionStatus.Published)?.Position
                 : null;
 
             return Refused(applied.Error, position);
         }
 
-        // F-103 BR6, BR9, BR10: the images the statement and the options name become this question's; the ones it held
-        // that they no longer name are released when no version keeps them. The rows commit with the content below.
-        var imageIds = content.Statement.ImageIds.Concat(drafts.SelectMany(draft => draft.Text.ImageIds)).ToList();
+        // F-103 BR6, BR9, BR10: the images the statement, the options and (F-106 BR7) the left items name become this
+        // question's; the ones it held that they no longer name are released when no version keeps them. The rows
+        // commit with the content below.
+        var imageIds = content.Statement.ImageIds
+            .Concat(drafts.SelectMany(draft => draft.Text.ImageIds))
+            .Concat(matchItems.SelectMany(item => item.Text.ImageIds))
+            .ToList();
         var imageSync = await images.SyncAsync(
             QuestionImageOwnerKind.Question, question!.Id, imageIds, QuestionBankErrorCodes.QuestionImageNotFoundOnSave, cancellationToken);
         if (imageSync.Refused is { } imageRefusal)

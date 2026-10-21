@@ -129,9 +129,18 @@ public sealed class Question : TenantEntity
                 IsCorrect = option.IsCorrect
             })
             .ToList();
+        var matchItems = _matchItems
+            .OrderBy(item => item.Position)
+            .Select(item => new QuestionVersionMatchItem
+            {
+                Position = item.Position,
+                TextHtml = item.TextHtml,
+                MatchPosition = item.MatchPosition
+            })
+            .ToList();
 
         // BR3: nothing differs from the latest version, so nothing is recorded and a reason is ignored (BR5).
-        if (latest is not null && SameVersionedContent(latest, options, baseTextHtml))
+        if (latest is not null && SameVersionedContent(latest, options, matchItems, baseTextHtml))
         {
             return Result.Success<QuestionVersion?>(null);
         }
@@ -139,11 +148,14 @@ public sealed class Question : TenantEntity
         var reason = string.IsNullOrWhiteSpace(changeReason) ? null : changeReason.Trim();
 
         // BR4: version 1 is never a key change; later ones are when the set of correct positions or the true/false
-        // value moved (F-104 BR7: a question may have several correct options, so the whole set is compared).
+        // value moved (F-104 BR7: a question may have several correct options, so the whole set is compared), or,
+        // F-106 BR8, when the number of left items or the option any of them matches moved.
         var keyChanged = latest is not null
             && (latest.TrueFalseKey != TrueFalseKey
                 || !CorrectPositions(latest.Options.Select(option => (option.Position, option.IsCorrect)))
-                    .SequenceEqual(CorrectPositions(options.Select(option => (option.Position, option.IsCorrect)))));
+                    .SequenceEqual(CorrectPositions(options.Select(option => (option.Position, option.IsCorrect))))
+                || !latest.MatchItems.OrderBy(item => item.Position).Select(item => item.MatchPosition)
+                    .SequenceEqual(matchItems.Select(item => item.MatchPosition)));
 
         if (keyChanged && reason is null)
         {
@@ -168,16 +180,29 @@ public sealed class Question : TenantEntity
             TrueFalseKey,
             options,
             keyChanged,
-            reason));
+            reason,
+            matchItems: matchItems));
     }
 
     private static List<int> CorrectPositions(IEnumerable<(int Position, bool IsCorrect)> options) =>
         [.. options.Where(option => option.IsCorrect).Select(option => option.Position).Order()];
 
     // BR1: what is versioned is exactly the language, the statement, the base text, the explanation, the options
-    // with their mark and the true/false key; topic, difficulty and origin are catalog data and never compared.
-    private bool SameVersionedContent(QuestionVersion version, List<QuestionVersionOption> options, string? baseTextHtml) =>
-        version.Type == Type
+    // with their mark, the true/false key and the left items with their match (F-106 BR8); topic, difficulty and
+    // origin are catalog data and never compared.
+    private bool SameVersionedContent(
+        QuestionVersion version,
+        List<QuestionVersionOption> options,
+        List<QuestionVersionMatchItem> matchItems,
+        string? baseTextHtml) =>
+        version.MatchItems.Count == matchItems.Count
+        && version.MatchItems
+            .OrderBy(item => item.Position)
+            .Zip(matchItems)
+            .All(pair => pair.First.Position == pair.Second.Position
+                && pair.First.TextHtml == pair.Second.TextHtml
+                && pair.First.MatchPosition == pair.Second.MatchPosition)
+        && version.Type == Type
         && version.ContentLanguage == ContentLanguage
         && version.StatementHtml == StatementHtml
         && version.BaseTextHtml == baseTextHtml
@@ -454,8 +479,15 @@ public sealed class Question : TenantEntity
             .Select(option => new OptionDraft(new SanitizedHtml(option.TextHtml, option.TextHtml), option.IsCorrect))
             .ToList();
 
+    // The stored left items as drafts, read the same way (F-106).
+    private List<MatchItemDraft> MatchItemDrafts() =>
+        _matchItems
+            .OrderBy(item => item.Position)
+            .Select(item => new MatchItemDraft(new SanitizedHtml(item.TextHtml, item.TextHtml), item.MatchPosition))
+            .ToList();
+
     // The key as stored: the type decides what it is made of (F-97, BR9).
-    private AnswerKey StoredKey() => AnswerKey.From(Type, Drafts(), TrueFalseKey);
+    private AnswerKey StoredKey() => AnswerKey.From(Type, Drafts(), TrueFalseKey, MatchItemDrafts());
 
     private Result Apply(QuestionContent content)
     {
@@ -487,9 +519,13 @@ public sealed class Question : TenantEntity
             return Result.Failure(new Error(QuestionBankErrorCodes.QuestionExplanationTooLong, ErrorKind.Validation));
         }
 
-        // F-103 BR4, BR7: the statement and the options together hold at most ten images, each with its alternative text.
+        // F-103 BR4, BR7: the statement, the options and (F-106 BR7) the left items together hold at most ten images,
+        // each with its alternative text.
+        var matchItems = content.MatchItems ?? [];
         if (QuestionImageRules.Check(
-                content.Options.Select(option => option.Text).Prepend(content.Statement),
+                content.Options.Select(option => option.Text)
+                    .Concat(matchItems.Select(item => item.Text))
+                    .Prepend(content.Statement),
                 QuestionBankErrorCodes.QuestionImageAltRequired,
                 QuestionBankErrorCodes.QuestionImageAltTooLong,
                 QuestionBankErrorCodes.QuestionImagesTooMany) is { } imageFault)
@@ -526,7 +562,7 @@ public sealed class Question : TenantEntity
         }
 
         // BR4: editing a published question runs the publish check, so it cannot be made incomplete.
-        var key = AnswerKey.From(Type, content.Options, content.TrueFalseKey);
+        var key = AnswerKey.From(Type, content.Options, content.TrueFalseKey, matchItems);
         var fault = key.Check(Status == QuestionStatus.Published);
         if (fault is not null)
         {
@@ -547,8 +583,34 @@ public sealed class Question : TenantEntity
         NoticeSubjectId = subjectId;
         TrueFalseKey = key.TrueFalseValue;
         ReplaceOptions(key.Options);
+        ReplaceMatchItems(key.MatchItems);
 
         return Result.Success();
+    }
+
+    // As the options: rows reused by position, the surplus removed as orphans (F-106).
+    private void ReplaceMatchItems(IReadOnlyList<MatchItemDraft> drafts)
+    {
+        var ordered = _matchItems.OrderBy(item => item.Position).ToList();
+
+        for (var position = 0; position < drafts.Count; position++)
+        {
+            var draft = drafts[position];
+            var html = draft.Text.IsEmpty ? string.Empty : draft.Text.Html;
+            if (position < ordered.Count)
+            {
+                ordered[position].Set(html, draft.MatchPosition);
+            }
+            else
+            {
+                _matchItems.Add(new QuestionMatchItem(position, html, draft.MatchPosition));
+            }
+        }
+
+        for (var position = ordered.Count - 1; position >= drafts.Count; position--)
+        {
+            _matchItems.Remove(ordered[position]);
+        }
     }
 
     // The rows are reused by position, so a save that keeps three options writes three updates and no row

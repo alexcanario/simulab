@@ -1,4 +1,5 @@
 using Simulab.QuestionBank.Contracts;
+using Simulab.SharedKernel.Results;
 
 namespace Simulab.QuestionBank.Domain;
 
@@ -24,5 +25,14 @@ public sealed record MatchingKey(
 
     public override bool? TrueFalseValue => null;
 
-    public override OptionFault? Check(bool published) => throw new NotImplementedException();
+    public override OptionFault? Check(bool published)
+    {
+        // BR5: the options carry no mark here, and a true/false key belongs to another type; nothing is ignored.
+        if (TrueFalseWritten is not null || Written.Any(option => option.IsCorrect))
+        {
+            return new OptionFault(new Error(QuestionBankErrorCodes.QuestionKeyNotAllowed, ErrorKind.Validation), null);
+        }
+
+        return QuestionRules.CheckMatching(Written, Items, published);
+    }
 }
