@@ -115,8 +115,7 @@ public abstract class QuestionImageApiTests : QuestionReviewApiTests
     protected async Task<ImageRow?> RowAsync(Guid id) =>
         (await QueryAsync(context => context.Database
             .SqlQuery<ImageRow>($"""
-                select id as "Id", blob_name as "BlobName", content_type as "ContentType", owner_kind as "OwnerKind",
-                       owner_id as "OwnerId", is_deleted as "IsDeleted"
+                select id, blob_name, content_type, owner_kind, owner_id, is_deleted
                 from question_bank.question_images where id = {id}
                 """)
             .ToListAsync())).SingleOrDefault();

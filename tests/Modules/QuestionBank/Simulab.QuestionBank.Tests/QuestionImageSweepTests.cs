@@ -16,6 +16,7 @@ public sealed class QuestionImageSweepTests : QuestionImageApiTests
         var owned = await UploadedAsync(curator);
         var question = await CreatedAsync(curator, WithImages(topic.Id, $"<p>S</p>{Img(owned.Id)}", "<p>A</p>", "<p>B</p>"));
         Factory.Clock.Advance(TimeSpan.FromHours(25));
+        curator = await CuratorAsync();
         var young = await UploadedAsync(curator);
         var oldBlobName = (await RowAsync(old.Id))!.BlobName;
         var sweep = Factory.Services.GetRequiredService<QuestionImageSweep>();
