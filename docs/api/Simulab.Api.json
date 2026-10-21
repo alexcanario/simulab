@@ -3751,6 +3751,7 @@
           "SingleChoice",
           "TrueFalse",
           "MultipleAnswer",
+          "Matching",
           null
         ]
       },
@@ -4074,6 +4075,29 @@
         },
         "description": "What the add and the edit dialog send (F-34 BR18, v2). The issuing authority has no kind: nothing\r\nfilters or groups by one yet, and it arrives when a screen needs it."
       },
+      "SaveMatchItemRequest": {
+        "type": "object",
+        "properties": {
+          "textHtml": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The item text as HTML written by a person; the Api sanitizes it (F-95, BR8)."
+          },
+          "matchPosition": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "The position, from 0, of the option (right item) this item matches; null while not set.",
+            "format": "int32"
+          }
+        },
+        "description": "One left item of a matching question as the form sends it (F-106, BR1). Its number is its index in the array, so\r\nthe order the curator sees is the order that is stored."
+      },
       "SaveNoticeSubjectRequest": {
         "type": "object",
         "properties": {
@@ -4288,6 +4312,16 @@
               "string"
             ],
             "description": "Why the answer key changed (F-98, BR5): plain text, 1 to 500 characters after trimming. Required when the save\r\ncreates a version whose key differs from the latest one; kept as a note on any other version the save creates\r\nand ignored when it creates none."
+          },
+          "matchItems": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SaveMatchItemRequest"
+            },
+            "description": "The left items of a matching question in order, each with the position of the option it matches (F-106, BR1);\r\nnull counts as none. Refused on any other type when not empty (BR6)."
           }
         },
         "description": "What the question form sends, for a create and for an update (F-95, UC1 and UC2). The type is implied:\r\nsingle choice is the only one (BR2). Every text is HTML written by a person; the Api sanitizes it (BR8)."
