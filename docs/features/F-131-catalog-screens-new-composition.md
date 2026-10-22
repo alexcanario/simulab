@@ -14,6 +14,7 @@ The catalog lists and details (`Catalog/Exams.razor`, `Subjects.razor`, `Subject
 
 ## Start
 - Depends on: F-125
+- Palette note (2026-10-22): the identity moved to palette v2 (design system handoff H-04); F-148 takes it to the theme. Refine this item after F-148 so mockups use the new values and the amber action.
 - Waits on (to start): nothing
 - Needed to validate: the owner, on screen
 - Model: unknown — settled at /agile:refine
