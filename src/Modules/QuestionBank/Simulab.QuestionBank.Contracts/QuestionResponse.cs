@@ -6,7 +6,9 @@ namespace Simulab.QuestionBank.Contracts;
 /// the latest version number (F-98, BR11), null while the question was never published. <c>Annulment</c> says
 /// why and when, and is null unless the status is <see cref="QuestionStatus.Annulled"/> (F-101). <c>SubmittedAt</c> is the time of the latest send for review, set only while
 /// the status is <see cref="QuestionStatus.InReview"/> (F-105). <c>MatchItems</c> are the left items of a matching
-/// question in order (F-106); the Api always sends the list, empty for the other types.
+/// question in order (F-106); the Api always sends the list, empty for the other types. <c>Blanks</c> are the blanks
+/// of a fill-in-the-blanks question in the order their markers appear in the statement (F-107); the Api always sends
+/// the list, empty for the other types.
 /// </summary>
 public sealed record QuestionResponse(
     Guid Id,
@@ -27,4 +29,5 @@ public sealed record QuestionResponse(
     int? CurrentVersion = null,
     QuestionAnnulmentResponse? Annulment = null,
     DateTimeOffset? SubmittedAt = null,
-    IReadOnlyList<MatchItemResponse>? MatchItems = null);
+    IReadOnlyList<MatchItemResponse>? MatchItems = null,
+    IReadOnlyList<BlankResponse>? Blanks = null);

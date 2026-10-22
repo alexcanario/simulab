@@ -108,6 +108,12 @@ public sealed class QuestionVersion : TenantEntity
     /// </summary>
     public IReadOnlyList<QuestionVersionMatchItem> MatchItems => _matchItems ?? [];
 
+    /// <summary>
+    /// The blanks of a fill-in-the-blanks question in statement order (F-107, BR10); empty for any other type and for a
+    /// version recorded before F-107, whose JSON column is null.
+    /// </summary>
+    public IReadOnlyList<QuestionVersionBlank> Blanks => [];
+
     /// <summary>True when the answer key differs from the previous version's (BR4); never true for version 1.</summary>
     public bool AnswerKeyChanged { get; private set; }
 

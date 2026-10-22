@@ -160,26 +160,26 @@ No mockup (owner, 2026-10-21): the form gains a fifth type card, one toolbar but
 ## Criterion → test
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | pending |
-| AC19 | pending |
-| AC20 | pending |
+| AC1 | `FillInTheBlanksQuestionTests.Create_FillInTheBlanksWithNoMarker_IsADraftOfThatType`, `FillInTheBlanksQuestionEndpointTests.Create_WithNoMarker_IsStoredAsADraftOfThatType_AndListedWithIt` |
+| AC2 | `FillInTheBlanksQuestionTests.Create_DraftWithMarkers1And3_AndAnswersForBlank3Only_KeepsBothBlanksInStatementOrder`, `.Create_WithElevenMarkers_IsRefusedWithBlanksCount`, `.Create_WithTenMarkers_IsAccepted`; `FillInTheBlanksQuestionEndpointTests.Create_DraftWithMarkers1And3_AndAnswersForBlank3Only_ReturnsBothBlanksInStatementOrder`, `.Create_WithElevenMarkers_IsRefusedWithBlanksCount` |
+| AC3 | `FillInTheBlanksQuestionTests.Create_WithTheSameMarkerTwice_IsRefusedWithBlankRepeated`, `.Create_WithABlankForANumberWithNoMarker_IsRefusedWithBlankMarkerMissing`, `.Create_WithTheSameNumberTwiceInTheBlanksSent_IsRefusedWithBlankRepeated`; `FillInTheBlanksQuestionEndpointTests.Create_WithARepeatedMarkerOrABlankWithNoMarker_IsRefused_AndNothingIsStored` |
+| AC4 | `FillInTheBlanksQuestionTests.Create_WithSixAnswersInABlank_IsRefusedWithBlankAnswersCount`, `.Create_WithAnAnswerOf101Characters_IsRefusedWithBlankAnswerTooLong_And100IsAccepted`, `.Create_WithAnEmptyAnswer_IsRefusedWithBlankAnswerRequired`, `.Create_WithTwoAnswersEqualUnderTheRule_IsRefusedWithBlankAnswerRepeated`, `.Create_WithTheSameAnswerWithAndWithoutAccent_IsAccepted_AndAnswersAreStoredTrimmed`; `FillInTheBlanksQuestionEndpointTests.Create_BreakingTheLimitsOfABlank_IsRefusedWithTheBlankNumberAsPosition`, `.Create_WithAnAnswerOf100Characters_AndTheSameAnswerWithAndWithoutAccent_IsAccepted` |
+| AC5 | `FillInTheBlanksQuestionTests.Publish_WithNoMarker_IsRefusedWithBlanksCount`, `.Publish_WithAMarkerWithNoAnswer_IsRefusedWithBlankAnswersRequired`, `.Publish_WithEveryMarkerAnswered_BecomesPublished`; `FillInTheBlanksQuestionEndpointTests.Publish_WithNoMarkerOrAnUnansweredMarker_IsRefused_AndWithEveryMarkerAnswered_IsPublished` |
+| AC6 | `FillInTheBlanksQuestionTests.Update_Published_RemovingEveryAnswerOfABlank_IsRefused_AndNothingChanges`, `.Update_Published_RemovingEveryMarker_IsRefusedWithBlanksCount`, `.Update_Published_WithAnotherValidSet_StaysPublished`; `FillInTheBlanksQuestionEndpointTests.Update_Published_RemovingTheAnswersOfABlankOrEveryMarker_IsRefused_AndTheStoredQuestionIsUnchanged`, `.Update_Published_WithAnotherValidSetAndAReason_StaysPublished` |
+| AC7 | `FillInTheBlanksQuestionTests.Create_FillInTheBlanksWithOptions_IsRefusedWithOptionsNotAllowed`, `.Create_FillInTheBlanksWithATrueFalseKey_IsRefusedWithKeyNotAllowed`, `.Create_FillInTheBlanksWithMatchItems_IsRefusedWithMatchItemsNotAllowed`, `.Create_AnotherTypeWithBlanks_IsRefusedWithBlanksNotAllowed`; `FillInTheBlanksQuestionEndpointTests.Create_WithOptionsAKeyOrMatchItems_IsRefused_AndNothingIsStored`, `.Create_AnotherTypeWithBlanks_IsRefusedWithBlanksNotAllowed` |
+| AC8 | `FillInTheBlanksQuestionTests.Update_WithContentOfAnotherType_IsAConflict`; `FillInTheBlanksQuestionEndpointTests.Update_NamingAnotherType_Is409TypeChanged_AndNamingItsOwnIsAccepted` |
+| AC9 | `AcceptedAnswerTests.Matches_IgnoringCaseAndExtraWhiteSpace_IsTrue`, `.Matches_WhenAnAccentOrAnyOtherCharacterDiffers_IsFalse`, `.Normalize_TrimsCollapsesWhiteSpaceAndUppersCase_KeepingAccents`, `.Normalize_OfNothing_IsEmpty` |
+| AC10 | `FillInTheBlanksQuestionTests.NextVersion_AddingAnAcceptedAnswer_NeedsAReason_AndThenRecordsAKeyChangeWithTheBlanks`, `.NextVersion_AddingABlank_NeedsAReason`, `.NextVersion_RemovingABlank_NeedsAReason`; `FillInTheBlanksQuestionEndpointTests.Update_Published_AddingAnAcceptedAnswer_NeedsAReason_AndThenRecordsAKeyChange`, `.Update_Published_AddingOrRemovingABlank_NeedsAReason` |
+| AC11 | `FillInTheBlanksQuestionTests.NextVersion_ChangingOnlyTheTextAroundTheMarkers_IsAVersionWithNoKeyChange`, `.NextVersion_SwappingTheMarkers_IsAVersionWithNoKeyChange_InTheNewStatementOrder`, `.NextVersion_ReorderingAnswersOrChangingOnlyTheirCase_IsAVersionWithNoKeyChange`, `.NextVersion_NothingChanged_MakesNothing`; `FillInTheBlanksQuestionEndpointTests.Update_Published_SwappingMarkersAndReorderingAnswers_RecordsAVersionWithNoKeyChange`; the F-98, F-104 and F-106 version suites unedited |
+| AC12 | `FillInTheBlanksQuestionTests.AnnulAndReinstate_CopyTheBlanksOfTheLatestVersion`; `FillInTheBlanksQuestionEndpointTests.Create_SanitizesTheStatement_AndKeepsTheMarkers`, `.Create_WithElevenImagesInTheStatement_IsRefusedWithImagesTooMany`, `.Create_WithADifficultyOutOfRange_IsRefused`, `.Create_WithAPaperNumberAlreadyTaken_IsRefusedWithPaperNumberTaken`, `.Delete_Published_IsRefused_AndADraftIsDeleted`, `.DeleteTopic_WithOnlyAFillInQuestion_IsRefusedWithTopicInUse`, `.AnnulAndReinstate_KeepTheBlanksInTheirVersions`, `.Submit_CompleteDraft_GoesToReview_AndAnIncompleteOneIsRefused`, `.UpdateBaseText_LinkedToAPublishedFillIn_RecordsAVersionThatKeepsTheBlanks` |
+| AC13 | `FillInTheBlanksQuestionEndpointTests.List_QuestionsOfTheFiveTypes_NameTheTypeOfEachRow_AndTheExcerptHidesTheMarkers`, `.List_SearchingForAMarker_FindsNothing`, `.FindVersion_OfAnotherType_HasAnEmptyBlanksList`; `BlankMarkerSanitizerTests` (4); `FillInTheBlanksQuestionPreviewAndListTests.List_NamesTheFillInTheBlanksType` |
+| AC14 | `FillInTheBlanksQuestionFormTests` (16: cards, Insert blank on this type only, rows in statement order, what is sent, removed marker, type switch, edit read-only, checklist, section and row refusals, reason, frozen); the caret insertion of the next number: validation step (to number) |
+| AC15 | `FillInTheBlanksQuestionPreviewAndListTests.Preview_FillIn_DrawsANumberedEmptyBoxForEachMarker_AndTheTaskLine`, `.Preview_FillIn_BeforeShowAnswer_HidesTheKeyAndTheExplanation`, `.Preview_FillIn_ShowAnswer_FillsTheBoxesAndListsEveryAcceptedAnswer`, `.Preview_FillInDraftWithAnUnansweredBlank_SaysItHasNoKeyYet`, `.VersionPreview_FillIn_ShowsTheBlanksOfTheVersion` |
+| AC16 | `AddFillInTheBlanksQuestionsMigrationTests.Up_AddsTheBlanksTableAndColumn_NamesTheFifthType_AndKeepsEveryRow` |
+| AC17 | `FillInTheBlanksQuestionEndpointTests.CreateAndUpdate_WithoutThePermission_AnswerForbidden` |
+| AC18 | `FillInTheBlanksQuestionFormTests.Add_FillIn_EachAnswerFieldNamesItsAnswerAndItsBlank`, `.Edit_FillIn_WhenTheApiRefusesTheBlanks_TheMessageIsUnderTheSection`, `.Add_ChoosingFillIn_ShowsInsertBlankOnTheStatementOnly_AndAnotherTypeHidesIt`; `FillInTheBlanksQuestionPreviewAndListTests.Preview_FillIn_DrawsANumberedEmptyBoxForEachMarker_AndTheTaskLine`; keyboard pass: validation step (to number) |
+| AC19 | `QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements` (now five); the button and the section there: validation step (to number) |
+| AC20 | `FillInTheBlanksQuestionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`, `ResourceParityTests` |
 
 ## Decisions
 - 2026-10-21 — F-108 (short answer, idea) also compares a typed answer with accepted answers; both items stay: the shapes differ (blanks inside the statement against one answer), this item defines the comparison rule (BR6) and F-108 reuses it — asked (recommended option, owner)

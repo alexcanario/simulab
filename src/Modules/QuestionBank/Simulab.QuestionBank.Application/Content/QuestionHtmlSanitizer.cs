@@ -63,8 +63,10 @@ public sealed partial class QuestionHtmlSanitizer
     /// <summary>
     /// The sanitized HTML, its plain text and the stored images it holds; empty when <paramref name="html"/> is null or only
     /// empty tags. <paramref name="allowImages"/> is off for a field that takes no picture (the explanation, F-103 BR1).
+    /// <paramref name="readBlankMarkers"/> is on for the statement of a fill-in-the-blanks question (F-107, BR3, BR9): the
+    /// markers are read from the text between tags only, and each reads as <c>____</c> in the plain text.
     /// </summary>
-    public SanitizedHtml Sanitize(string? html, bool allowImages = true)
+    public SanitizedHtml Sanitize(string? html, bool allowImages = true, bool readBlankMarkers = false)
     {
         if (string.IsNullOrWhiteSpace(html))
         {

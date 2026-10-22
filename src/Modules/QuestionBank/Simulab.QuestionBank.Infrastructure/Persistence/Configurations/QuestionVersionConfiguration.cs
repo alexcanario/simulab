@@ -104,6 +104,9 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
         builder.OwnsMany(version => version.MatchItems, items => items.ToJson("match_items"));
         builder.Navigation(version => version.MatchItems).UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        // F-107 test phase: not mapped yet.
+        builder.Ignore(version => version.Blanks);
+
         builder.HasOne<Question>()
             .WithMany()
             .HasForeignKey(version => version.QuestionId)

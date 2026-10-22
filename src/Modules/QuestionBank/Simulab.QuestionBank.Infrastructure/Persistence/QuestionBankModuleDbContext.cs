@@ -52,5 +52,8 @@ public sealed class QuestionBankModuleDbContext(
         modelBuilder.ApplyConfiguration(new QuestionOptionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionReviewEntryConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionVersionConfiguration());
+
+        // F-107 test phase: not mapped yet.
+        modelBuilder.Ignore<QuestionBlank>();
     }
 }

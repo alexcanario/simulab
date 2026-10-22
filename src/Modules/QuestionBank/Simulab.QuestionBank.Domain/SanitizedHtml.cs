@@ -18,6 +18,12 @@ public sealed record SanitizedHtml(string Html, string PlainText)
     /// <summary>How many images carry an <c>alt</c> longer than <c>QuestionLimits.ImageAltMaxLength</c> (F-103, BR4).</summary>
     public int AltTooLong { get; init; }
 
+    /// <summary>
+    /// The numbers of the blank markers <c>[[n]]</c> in the text, in order of appearance and with repeats (F-107, BR3);
+    /// read only when the caller asked for them (the statement of a fill-in-the-blanks question), empty otherwise.
+    /// </summary>
+    public IReadOnlyList<int> BlankMarkers { get; init; } = [];
+
     /// <summary>A field that was not sent.</summary>
     public static SanitizedHtml Empty { get; } = new(string.Empty, string.Empty);
 

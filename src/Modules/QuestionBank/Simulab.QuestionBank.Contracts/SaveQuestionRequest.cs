@@ -28,6 +28,10 @@ namespace Simulab.QuestionBank.Contracts;
 /// The left items of a matching question in order, each with the position of the option it matches (F-106, BR1);
 /// null counts as none. Refused on any other type when not empty (BR6).
 /// </param>
+/// <param name="Blanks">
+/// The blanks of a fill-in-the-blanks question, each naming a marker of the statement and its accepted answers
+/// (F-107, BR1); null counts as none. Refused on any other type when not empty (BR7).
+/// </param>
 public sealed record SaveQuestionRequest(
     Guid? TopicId = null,
     string? ContentLanguage = null,
@@ -42,4 +46,5 @@ public sealed record SaveQuestionRequest(
     QuestionType? Type = null,
     bool? TrueFalseKey = null,
     string? ChangeReason = null,
-    IReadOnlyList<SaveMatchItemRequest>? MatchItems = null);
+    IReadOnlyList<SaveMatchItemRequest>? MatchItems = null,
+    IReadOnlyList<SaveBlankRequest>? Blanks = null);

@@ -91,7 +91,7 @@ public sealed class MatchingQuestionFormTests : QuestionPageTestContext
 
     // AC13, AC18: the type field offers four cards, single choice still preselected.
     [Fact]
-    public void Add_OffersTheFourTypesWithSingleChoicePreselected()
+    public void Add_OffersTheMatchingTypeWithSingleChoicePreselected()
     {
         var page = RenderAdd();
 
@@ -99,7 +99,8 @@ public sealed class MatchingQuestionFormTests : QuestionPageTestContext
         page.Find("#question-type-Matching").GetAttribute("aria-checked").Should().Be("false");
         page.Find("#question-type-Matching").TextContent.Should().Contain("Matching")
             .And.Contain("Two columns: match each numbered item with a lettered one.");
-        page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(4);
+        // F-107 adds the fifth card; FillInTheBlanksQuestionFormTests counts them.
+        page.FindAll("#question-type-Matching").Should().ContainSingle();
     }
 
     // AC13: two lists, numbered and lettered, and a select of the free letters on each left row.

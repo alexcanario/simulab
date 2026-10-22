@@ -135,6 +135,9 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(question => question.MatchItems).UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        // F-107 test phase: not mapped yet.
+        builder.Ignore(question => question.Blanks);
+
         // The topic delete guard and the topic's "in use" flag filter by the topic alone.
         builder.HasIndex(question => question.TopicId)
             .HasDatabaseName("ix_questions_topic");

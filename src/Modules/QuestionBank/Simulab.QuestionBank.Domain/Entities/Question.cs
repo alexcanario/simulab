@@ -20,6 +20,7 @@ public sealed class Question : TenantEntity
 {
     private readonly List<QuestionOption> _options = [];
     private readonly List<QuestionMatchItem> _matchItems = [];
+    private readonly List<QuestionBlank> _blanks = [];
 
     private Question()
     {
@@ -67,6 +68,9 @@ public sealed class Question : TenantEntity
 
     /// <summary>The left items of a matching question in position order; empty for any other type (F-106, BR1).</summary>
     public IReadOnlyList<QuestionMatchItem> MatchItems => _matchItems;
+
+    /// <summary>The blanks of a fill-in-the-blanks question, one per marker, in no set order; empty for any other type (F-107, BR1).</summary>
+    public IReadOnlyList<QuestionBlank> Blanks => _blanks;
 
     public static Result<Question> Create(QuestionContent content)
     {
