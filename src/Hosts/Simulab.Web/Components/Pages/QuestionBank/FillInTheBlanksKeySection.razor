@@ -1,0 +1,177 @@
+@* F-107: the key section of a fill-in-the-blanks question. One row per marker of the statement, in statement order, read
+   live as the curator types; each row holds the answers its blank accepts, plain text. The section lives in its own
+   component so the form only switches to it (BR12); the form owns the statement, the answers, the errors and Save. *@
+@using Simulab.QuestionBank.Contracts
+@inject IStringLocalizer<SharedResources> L
+@inject IJSRuntime JS
+
+@* The wrapper carries the section's id: the kit card names only its title. *@
+<div id="question-section-blanks">
+<AppSectionCard Id="question-section-blanks"
+                Title="@L["Questions.Section.Blanks"]"
+                Icon="@AppIcons.FillInTheBlanks"
+                Subtitle="@L["Questions.Section.Blanks.Subtitle"]">
+    <div role="group" aria-describedby="question-blanks-description">
+        @if (Markers.Count == 0)
+        {
+            <p class="app-muted app-blanks-empty">@L["Questions.Blanks.Empty"]</p>
+        }
+
+        @foreach (var number in Markers)
+        {
+            var answers = AnswersOf(number);
+            var rowError = RowErrors.GetValueOrDefault(number);
+            <div class="app-blank-row" data-blank="@number" role="group" aria-labelledby="@TitleId(number)" @key="number">
+                <h3 class="app-blank-title" id="@TitleId(number)">@L["Questions.Blanks.Blank", number]</h3>
+                @for (var index = 0; index < answers.Count; index++)
+                {
+                    var position = index;
+                    <div class="app-blank-answer">
+                        <AppTextField TValue="string"
+                                      Id="@AnswerId(number, position)"
+                                      Label="@L["Questions.Blanks.Answer.Field", position + 1, number]"
+                                      Placeholder="@L["Questions.Blanks.Answer.Placeholder"]"
+                                      MaxLength="QuestionLimits.BlankAnswerMaxLength"
+                                      Disabled="Frozen"
+                                      Value="@answers[position]"
+                                      ValueChanged="@((string? value) => OnAnswerChanged(number, position, value))" />
+                        @if (!Frozen)
+                        {
+                            <AppRowActions ItemName="@L["Questions.Blanks.Answer.Name", position + 1, number]"
+                                           IdPrefix="@($"{AnswerId(number, position)}-actions")"
+                                           OnDelete="@(() => RemoveAnswer(number, position))" />
+                        }
+                    </div>
+                }
+
+                <div class="app-options-footer">
+                    @if (!Frozen)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@AppIcons.Add"
+                                   OnClick="@(() => AddAnswer(number))"
+                                   Disabled="@(answers.Count >= QuestionLimits.BlankAnswersMax)"
+                                   aria-describedby="@CountId(number)"
+                                   id="@AddId(number)">@L["Questions.Blanks.AddAnswer"]</MudButton>
+                    }
+                    @* The limit is never told by a disabled button alone: the count says it. *@
+                    <span class="app-options-count" id="@CountId(number)">@L["Questions.Blanks.AnswersCount", answers.Count]</span>
+                </div>
+
+                @if (rowError is not null)
+                {
+                    <span class="app-field-error-text app-blank-error" aria-live="polite">@rowError</span>
+                }
+            </div>
+        }
+    </div>
+
+    @* A section-level refusal (count, repeated or missing marker) is under the rows and described to the group. *@
+    <span id="question-blanks-description" class="app-field-description">
+        @if (Error is not null)
+        {
+            <span class="app-field-error-text" aria-live="polite">@Error</span>
+        }
+    </span>
+
+    <div class="app-visually-hidden" role="status" aria-live="polite">@_announcement</div>
+
+    @ChildContent
+</AppSectionCard>
+</div>
+
+@code {
+    /// <summary>The marker numbers of the statement, distinct, in statement order: one row each.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<int> Markers { get; set; } = [];
+
+    /// <summary>The answers typed per blank number, owned by the form and kept across a change of type.</summary>
+    [Parameter, EditorRequired] public Dictionary<int, List<string>> Answers { get; set; } = [];
+
+    /// <summary>F-101, F-105: an annulled question or one in review is read only.</summary>
+    [Parameter] public bool Frozen { get; set; }
+
+    /// <summary>The refusal about the blanks as a whole, already translated.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    /// <summary>The refusal about one blank, by its number, already translated.</summary>
+    [Parameter] public IReadOnlyDictionary<int, string> RowErrors { get; set; } = new Dictionary<int, string>();
+
+    /// <summary>Called after any change, so the form clears the refusals and redraws its checklist.</summary>
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    /// <summary>What follows the rows: the reason of a key change, when the form asks for one.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string? _announcement;
+    private string? _pendingFocus;
+
+    /// <summary>The id of answer <paramref name="index"/> (from 0) of blank <paramref name="number"/>.</summary>
+    public static string AnswerId(int number, int index) => $"question-blank-{number}-answer-{index}";
+
+    /// <summary>The id of the "Add answer" button of blank <paramref name="number"/>; the error summary points at it.</summary>
+    public static string AddId(int number) => $"question-blank-{number}-add";
+
+    private static string TitleId(int number) => $"question-blank-{number}-title";
+
+    private static string CountId(int number) => $"question-blank-{number}-count";
+
+    private List<string> AnswersOf(int number) => Answers.TryGetValue(number, out var answers) ? answers : [];
+
+    private Task OnAnswerChanged(int number, int index, string? value)
+    {
+        var answers = AnswersOf(number);
+        if (index < answers.Count)
+        {
+            answers[index] = value ?? string.Empty;
+        }
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task AddAnswer(int number)
+    {
+        if (!Answers.TryGetValue(number, out var answers))
+        {
+            answers = [];
+            Answers[number] = answers;
+        }
+
+        if (answers.Count >= QuestionLimits.BlankAnswersMax)
+        {
+            return Task.CompletedTask;
+        }
+
+        answers.Add(string.Empty);
+        _announcement = null;
+        _pendingFocus = AnswerId(number, answers.Count - 1);
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task RemoveAnswer(int number, int index)
+    {
+        var answers = AnswersOf(number);
+        if (index < 0 || index >= answers.Count)
+        {
+            return Task.CompletedTask;
+        }
+
+        answers.RemoveAt(index);
+        _announcement = L["Questions.Blanks.Answer.Removed", answers.Count, number];
+        _pendingFocus = index < answers.Count ? $"{AnswerId(number, index)}-actions-{AppRowActions.DeleteKey}" : AddId(number);
+
+        return OnChanged.InvokeAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingFocus is not { } target)
+        {
+            return;
+        }
+
+        _pendingFocus = null;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+    }
+}

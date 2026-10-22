@@ -131,7 +131,7 @@ window.simulabRichText = (function () {
     toolbarButtons(entry).forEach(function (button) {
       var format = button.getAttribute("data-format");
       var value = button.getAttribute("data-value");
-      if (format === "clean" || format === "image") {
+      if (format === "clean" || format === "image" || format === "blank") {
         return;
       }
       var pressed = value ? formats[format] === value : !!formats[format];
@@ -189,6 +189,29 @@ window.simulabRichText = (function () {
     }).catch(function () { });
   }
 
+  // F-107 BR3: the next blank marker is one more than the highest number the editor holds now (1 when none), read
+  // from the editor's own text so a marker typed a moment ago counts. The pattern is BlankMarker.Pattern of the Api.
+  function insertBlank(entry) {
+    var quill = entry.quill;
+    var range = quill.getSelection(true);
+    var markers = /\[\[([1-9][0-9]?)\]\]/g;
+    var highest = 0;
+    var text = quill.getText();
+    var match;
+    while ((match = markers.exec(text)) !== null) {
+      highest = Math.max(highest, parseInt(match[1], 10));
+    }
+    var marker = "[[" + (highest + 1) + "]]";
+    var index = range ? range.index : Math.max(quill.getLength() - 1, 0);
+    if (range && range.length > 0) {
+      quill.deleteText(range.index, range.length, "user");
+    }
+    quill.insertText(index, marker, "user");
+    quill.setSelection(index + marker.length, 0, "silent");
+    schedule(entry);
+    refreshToolbar(entry);
+  }
+
   function applyFormat(entry, button) {
     var quill = entry.quill;
     var format = button.getAttribute("data-format");
@@ -201,6 +224,11 @@ window.simulabRichText = (function () {
 
     if (format === "image") {
       requestImage(entry);
+      return;
+    }
+
+    if (format === "blank") {
+      insertBlank(entry);
       return;
     }
 
