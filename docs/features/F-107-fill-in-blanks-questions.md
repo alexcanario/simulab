@@ -1,7 +1,7 @@
 ---
 feature: F-107
 epic: Question bank
-status: approved
+status: building
 board: 153
 version: 1
 ---
@@ -158,7 +158,28 @@ No mockup (owner, 2026-10-21): the form gains a fifth type card, one toolbar but
 - AC20 All new texts appear in pt-BR, pt-PT and en, including the error code texts.
 
 ## Criterion → test
-<!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
+| Criterion | Test |
+|---|---|
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
+| AC15 | pending |
+| AC16 | pending |
+| AC17 | pending |
+| AC18 | pending |
+| AC19 | pending |
+| AC20 | pending |
 
 ## Decisions
 - 2026-10-21 — F-108 (short answer, idea) also compares a typed answer with accepted answers; both items stay: the shapes differ (blanks inside the statement against one answer), this item defines the comparison rule (BR6) and F-108 reuses it — asked (recommended option, owner)
