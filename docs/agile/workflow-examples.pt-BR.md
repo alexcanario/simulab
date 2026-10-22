@@ -5547,7 +5547,7 @@ Isso cria `docs/design/themes/` com `index.json`, um arquivo por tema e modo e o
 
 Se o dono responde não, o ADR-0001 só ganha `Customizable themes | no | one identity`: nenhuma pasta, nenhuma ideia. Se o script recusasse por um par de cores sem contraste, o bootstrap mostraria a recusa, manteria o sim e capturaria antes a ideia "Built-in themes from the identity".
 
-Um app `desktop` com cabeça WinUI 3 não recebe a pergunta: o kit dele ainda não tem módulo (#251). O ADR-0001 ganha `Customizable themes | not offered | no run-time theme module for WinUI 3 yet`, e a mensagem do bootstrap lista isso em "Já claro". O mesmo vale para `web-api` e `plugin`, que não têm telas.
+Um app `desktop` recebe a pergunta com qualquer das três cabeças, Avalonia, WinUI 3 ou MAUI (o exemplo 14.176 mostra a do WinUI 3). Quem não recebe é `web-api` e `plugin`, que não têm telas: o ADR-0001 ganha `Customizable themes | not offered`, e a mensagem do bootstrap lista isso em "Já claro".
 
 ### 14.154 O head Velopack sem assinatura é lançado no GitHub Actions: o runner é Windows e o feed https vira artefato
 
@@ -6322,10 +6322,10 @@ Round 5 — Experience.
 - Question 23: AdminLTE 4 is offered, because this is a `web-app` on Blazor Server.
 - Question 23b: Outlined, which is Bootstrap Icons' base name.
 - Question 23c: row action (pencil).
-- Question 23f isn't asked, because AdminLTE has no run-time theme module.
+- Question 23f: no (when this example ran, AdminLTE had no run-time theme module and the question was not asked; since #248 it is, see example 14.174).
 ```
 
-No `CLAUDE.md` entra a linha `- UI library: adminlte` embaixo de `Profile:`, e o ADR-0001 ganha a linha da biblioteca (`AdminLTE 4 (package ColorlibHQ.AdminLTE.AspNetCore 0.3.1; sidebar stays the package's dark #343A40 in both themes)`) e `Customizable themes | not offered (AdminLTE, #248)`. A ideia do kit de UI passa a seguir a seção `## AdminLTE kit` do perfil.
+No `CLAUDE.md` entra a linha `- UI library: adminlte` embaixo de `Profile:`, e o ADR-0001 ganha a linha da biblioteca (`AdminLTE 4 (package ColorlibHQ.AdminLTE.AspNetCore 0.3.1; sidebar stays the package's dark #343A40 in both themes)`); a linha de temas vem da 23f (hoje também feita para o AdminLTE, exemplo 14.174). A ideia do kit de UI passa a seguir a seção `## AdminLTE kit` do perfil.
 
 Outro app, mesmo brief, mas você responde Blazor WebAssembly na pergunta 4. A 23 não oferece o AdminLTE e a mensagem diz o porquê (texto da execução):
 
@@ -6431,3 +6431,99 @@ Process board — F-12   elapsed 1h 12m   76k in / 5.6k out   1.5M read / 109k w
 ```
 
 O topo soma os tokens das execuções terminadas (o cache à parte); o `security` ainda não tem modelo nem tokens, porque eles chegam na linha de fim. Os horários são os do seu computador. Neste repositório do plugin, onde o item é um issue e não há arquivo com `status:`, o rodapé mostra só o id e o que roda (`F-240 · security running`), sem trilha. Num cliente sem módulos de plugin nada aparece, e com `AGILE_HOOKS=off` o rodapé some e o comando responde que o módulo está desligado.
+
+### 14.174 Temas personalizáveis no kit AdminLTE: a pergunta 23f deixa de ser pulada
+
+O brief é o mesmo do exemplo 14.170 (um app web só para a equipe, tabelas e formulários) e você escolhe o AdminLTE 4 na 23. Até o #248 a 23f não era feita para esse kit; agora ela aparece na rodada 5, com sim como recomendação. A mensagem da rodada, tirada de uma execução de verdade do bootstrap num app de teste:
+
+```
+## Rodada 5 — Experiência
+Já claro: AdminLTE 4 é oferecido porque o perfil é `web-app` e a pergunta 4 será Blazor Server.
+
+| # | Pergunta | Recomendação | Motivo |
+|---|---|---|---|
+| 23 | Biblioteca | MudBlazor (padrão) ou AdminLTE 4 | AdminLTE se o brief quiser painel nesse visual |
+| 23b | Família de ícones | Outlined | Telas densas |
+| 23c | Edição de item | Ação na linha (lápis) | Um jeito só |
+| 23f | Temas personalizados (padrão VS Code) | Sim | O kit AdminLTE tem módulo de temas em tempo de execução |
+
+**Resposta do dono:**
+- 23: AdminLTE 4, que foi oferecido.
+- 23f: sim.
+```
+
+Um **sim** grava no ADR-0001 a linha da execução:
+
+```
+| 23f | Customizable themes | yes | VS Code pattern (references/theme-format.md) |
+```
+
+Nesse teste a identidade (23a) foi pulada, então o `themes.js write --init` não rodou; num app com identidade ele roda logo depois dela e cria `docs/design/themes/`. No passo 13 o bootstrap captura a ideia "Run-time themes in the AdminLTE kit", que segue a seção `## AdminLTE run-time themes` do perfil: a página `/appearance`, o `appearance.js` no `head` e o botão claro/escuro do pacote desligado.
+
+### 14.175 Todos os MVPs numa olhada: `/agile:mvp --list`
+
+No acme-shop há três epics. O `catalog` tem dois marcos: `loja-1-vitrine` (posição 1, F-1 e F-2, os dois entregues) e `loja-2-carrinho` (posição 2: o F-3 entregue, o F-4 em aberto e o F-5 cancelado). O `checkout` tem um corte sem rótulo e sem posição com o F-6 entregue, o F-7 e o F-8 em aberto (o F-8 depende do F-9, do `admin`). O `admin` tem a seção do corte, mas vazia. Você quer saber onde cada MVP está, sem mudar nada, e digita `/agile:mvp --list`. O Claude roda a lista na branch principal; a saída real, sobre esse cenário:
+
+```text
+- loja-1-vitrine · rank 1 · catalog · open 0 · delivered 2 · delivered
+- loja-2-carrinho · rank 2 · catalog · open 1: F-4 · delivered 1
+- checkout · rank none · checkout · open 2: F-7, F-8 · delivered 1
+empty cuts not listed: admin
+agile mvp LIST: 3 MVPs, 1 delivered
+```
+
+E diz em pt-BR: três MVPs, um já entregue (`loja-1-vitrine`); o `loja-2-carrinho` espera só o F-4 (o F-5 cancelado não conta); o `checkout`, sem posição, vem depois dos que têm e espera o F-7 e o F-8; o corte do `admin` está vazio e por isso não é MVP. O F-9 não aparece na linha do `checkout`, embora o F-8 dependa dele: ele não está no corte, e o grupo inteiro, com as dependências, é o `/agile:order checkout`. Nada foi gravado, nenhum card, nenhum commit. Se você digitar `/agile:mvp --list loja`, o Claude responde que o `--list` não aceita outro argumento e que um MVP sozinho é o `/agile:order <rótulo>`.
+
+### 14.176 A pergunta 23f num app desktop com cabeça WinUI 3: o kit dele tem módulo de temas, e o dono vira o modo do Windows uma vez
+
+A acme-ponto é um app `desktop` com cabeça WinUI 3, só para Windows, com o visual nativo. Na rodada 5, depois de a 23a gravar a identidade, o bootstrap pergunta, com sim como recomendação (antes do #251 o kit do WinUI 3 não tinha módulo e a pergunta nem era feita):
+
+```
+Pergunta 23f — Temas personalizáveis, no padrão do VS Code?
+a) sim   b) não
+Recomendação: sim. Motivo: quem usa o app escolhe o tema do modo claro e do escuro do Windows e a fonte, e o kit aplica isso em tempo de execução.
+```
+
+O dono responde sim. O ADR-0001 ganha a linha `Customizable themes | yes | VS Code pattern (references/theme-format.md)`, e o bootstrap roda o script de temas logo depois da identidade (a saída é a do script no projeto de teste desta seção):
+
+```
+high contrast: 1 colors adjusted, 0 of them backgrounds
+WROTE 7 files
+```
+
+A pasta `docs/design/themes/` é o que liga o módulo. No passo 13 entra no quadro a ideia "Run-time themes in the WinUI 3 kit", com prioridade Must e tamanho M, logo depois da ideia do kit de UI e dependendo dela; o resumo aponta para o bloco `### WinUI 3` do `## Desktop run-time themes` do perfil.
+
+Quando o item do kit chega ao `validating`, o roteiro de validação tem um passo que só o dono faz: abrir a janela de configurações do app (a que traz a `AppearanceView`), pôr o modo em Sistema, escolher um tema para o claro e outro para o escuro, e então virar a configuração claro e escuro do próprio Windows uma vez. O app troca para o tema preferido da nova variante sem reiniciar, porque a cabeça WinUI 3 acompanha o Windows pelo evento de mudança de cores do sistema. Tudo o mais (o modo escolhido à mão, a troca de tema na mesma variante, a fonte e o tamanho, o aviso de contraste por par) o Claude já leu na janela em execução, pela árvore de automação do Windows e por uma captura da própria janela.
+
+### 14.177 O quadro do GitHub atrás dos cortes: `/agile:mvp --list` e `/agile:mvp --mirror`
+
+A acme-shop usa GitHub (`Board: GitHub Issues + Projects (acme/acme-shop) via gh`). Os cortes do exemplo 14.175 já estavam escritos antes de o plugin espelhar os MVPs, e no repositório só existe um marco posto à mão, `v1`, na issue do F-7. Você roda `/agile:mvp --list` e, ao final de cada linha, vê o estado do marco (a saída é a do script na acme-shop deste exemplo):
+
+```text
+- loja-1-vitrine · rank 1 · catalog · open 0 · delivered 2 · delivered · milestone missing
+- loja-2-carrinho · rank 2 · catalog · open 1: F-4 · delivered 1 · milestone missing
+- checkout · rank none · checkout · open 2: F-7, F-8 · delivered 1 · milestone missing
+item F-7 has milestone v1, the cut asks checkout
+empty cuts not listed: admin
+agile mvp LIST: 3 MVPs, 1 delivered
+```
+
+O Claude diz em pt-BR que os três MVPs ainda não têm marco no GitHub e que `/agile:mvp --mirror` resolve; o F-7 tem o `v1` posto à mão e o espelho não vai mexer nele. Você roda `/agile:mvp --mirror`: o Claude não lê o brief nem grava corte, só mostra o plano em um bloco:
+
+```text
+milestone loja-1-vitrine: create
+milestone loja-2-carrinho: create
+milestone checkout: create
+item F-7 has milestone v1, the cut asks checkout
+item F-1: none → loja-1-vitrine
+item F-2: none → loja-1-vitrine
+item F-3: none → loja-2-carrinho
+item F-4: none → loja-2-carrinho
+item F-6: none → checkout
+item F-8: none → checkout
+agile mvp MIRROR PLAN: 3 MVPs, 9 changes
+```
+
+Ele explica: três marcos serão criados, seis issues levam o marco do MVP (nove mudanças ao todo) (as entregues F-1, F-2, F-3 e F-6 também, para o progresso de cada marco bater), e a issue do F-7 fica com o `v1`. O card pergunta: **escrever (recomendado)** ou pular. Você escolhe escrever, o Claude roda `mirror --write` e a última linha é `agile mvp MIRRORED: 3 MVPs, 9 changes`. Um `/agile:mvp --list` agora termina cada linha com `milestone ok`, e um segundo `/agile:mvp --mirror` diz `agile mvp MIRROR PLAN: 3 MVPs, 0 changes` (o aviso do F-7 continua, porque o marco dele é seu). Os marcos têm no GitHub a descrição de duas linhas, `Objetivo: vender pelo site` (o objetivo gravado do rótulo `loja`) e `Espelho de /agile:mvp; o corte no arquivo do épico é a fonte.`; o `checkout`, sem objetivo gravado, leva `Primeira entrega do épico checkout: brief e prioridade Must`.
+
+Se o `gh` tivesse falhado na hora de um `/agile:mvp` com escrita, o corte estaria no arquivo e o script diria `milestone pending: <a primeira linha do erro>`; o Claude avisa que o quadro ficou atrás e que `--mirror` o acerta, sem refazer a análise.
