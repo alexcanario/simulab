@@ -99,22 +99,37 @@ else
     web.WithExternalHttpEndpoints();
 }
 
+// Local network access: Lan:PublicBaseUrl (user secrets or Lan__PublicBaseUrl, e.g. https://192.168.1.68:7125) makes
+// the Web listen on every interface and puts that address in the email links. Local runs only; unset, nothing changes.
+// It is the https address: the Web sets Secure cookies and redirects http to https, so plain http cannot sign in.
+// Lan:Enabled=true (the "https-lan" launch profile) uses this machine's name when no address is given.
+var lanBaseUrl = publishing
+    ? null
+    : (builder.Configuration["Lan:PublicBaseUrl"]
+        ?? (string.Equals(builder.Configuration["Lan:Enabled"], "true", StringComparison.OrdinalIgnoreCase) ? $"https://{Environment.MachineName.ToLowerInvariant()}:7125" : null))
+        ?.TrimEnd('/');
+if (!string.IsNullOrWhiteSpace(lanBaseUrl))
+{
+    web.WithEndpoint("http", endpoint => endpoint.TargetHost = "0.0.0.0")
+        .WithEndpoint("https", endpoint => endpoint.TargetHost = "0.0.0.0");
+}
+
 // The verification link in the email points at the Web page that consumes the token (F-4). The Api
 // cannot know that address on its own, and the ports change on every run.
+ReferenceExpression WebLink(string path) => string.IsNullOrWhiteSpace(lanBaseUrl)
+    ? ReferenceExpression.Create($"{web.GetEndpoint("https")}{path}")
+    : ReferenceExpression.Create($"{lanBaseUrl}{path}");
+
 api.WithEnvironment(context =>
 {
-    context.EnvironmentVariables["Identity__VerificationUrl"] =
-        ReferenceExpression.Create($"{web.GetEndpoint("https")}/verify-email");
+    context.EnvironmentVariables["Identity__VerificationUrl"] = WebLink("/verify-email");
 
     // F-7: the reset link, and the "was it not you?" link in the password-changed email.
-    context.EnvironmentVariables["Identity__PasswordResetUrl"] =
-        ReferenceExpression.Create($"{web.GetEndpoint("https")}/reset-password");
-    context.EnvironmentVariables["Identity__ForgotPasswordUrl"] =
-        ReferenceExpression.Create($"{web.GetEndpoint("https")}/forgot-password");
+    context.EnvironmentVariables["Identity__PasswordResetUrl"] = WebLink("/reset-password");
+    context.EnvironmentVariables["Identity__ForgotPasswordUrl"] = WebLink("/forgot-password");
 
     // F-10: the farewell email says the address is free again and points back at sign-up.
-    context.EnvironmentVariables["Identity__SignUpUrl"] =
-        ReferenceExpression.Create($"{web.GetEndpoint("https")}/sign-up");
+    context.EnvironmentVariables["Identity__SignUpUrl"] = WebLink("/sign-up");
 });
 
 // F-20: Google sign-in is on locally only when the OAuth client is in this host's user secrets (Google:ClientId,

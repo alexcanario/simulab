@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cadastrar no Simulab a prova da Guarda Municipal de Manaus (IBFC, edital 01/2023): banca, órgão, questões e gabarito</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --fg: #182029;
+  --fg2: #39434f;
+  --muted: #5b6573;
+  --line: #d7dce2;
+  --edge: #56606d;
+  --accent: #1c5bb8;
+  --api-fill: #e1eaf9; --api-stroke: #2a5cae;
+  --ext-fill: #eceef1; --ext-stroke: #5b6573;
+  --atr-fg: #6a3fb0; --atr-bg: #efe7fb;
+  --lg-fg: #a8231a; --lg-bg: #fbe5e2;
+  --md-fg: #8a5300; --md-bg: #fbeed6;
+  --sm-fg: #39434f; --sm-bg: #e8ebef;
+  --ok-fg: #17703f; --ok-bg: #dff2e6;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101317; --surface: #171b20; --fg: #e6e9ed; --fg2: #c2c8d0; --muted: #9ba5b1;
+    --line: #2a3038; --edge: #9ba5b1; --accent: #8ab6ff;
+    --api-fill: #142440; --api-stroke: #7fa8ef;
+    --ext-fill: #22272e; --ext-stroke: #9ba5b1;
+    --atr-fg: #cdb2ff; --atr-bg: #2a1d40;
+    --lg-fg: #ff9e93; --lg-bg: #3a1714;
+    --md-fg: #f1c06a; --md-bg: #382a0c;
+    --sm-fg: #c2c8d0; --sm-bg: #252a31;
+    --ok-fg: #7bd8a1; --ok-bg: #12301f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101317; --surface: #171b20; --fg: #e6e9ed; --fg2: #c2c8d0; --muted: #9ba5b1;
+  --line: #2a3038; --edge: #9ba5b1; --accent: #8ab6ff;
+  --api-fill: #142440; --api-stroke: #7fa8ef;
+  --ext-fill: #22272e; --ext-stroke: #9ba5b1;
+  --atr-fg: #cdb2ff; --atr-bg: #2a1d40;
+  --lg-fg: #ff9e93; --lg-bg: #3a1714;
+  --md-fg: #f1c06a; --md-bg: #382a0c;
+  --sm-fg: #c2c8d0; --sm-bg: #252a31;
+  --ok-fg: #7bd8a1; --ok-bg: #12301f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--sans); padding-inline: 16px; padding-block: 0 64px; }
+.frame { max-width: 1180px; margin: 0 auto; }
+.col { max-width: 72ch; }
+a { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+h2 { font-size: 26px; font-weight: 700; margin: 0 0 12px; }
+h3 { font-size: 18px; font-weight: 600; margin: 28px 0 8px; }
+p { margin: 0 0 12px; }
+
+header.top { padding-block: 40px 20px; border-bottom: 1px solid var(--line); display: grid; gap: 12px; }
+.lede { font-size: 19px; color: var(--fg2); margin: 0; max-width: 72ch; }
+.meta { font-size: 13px; color: var(--muted); margin: 0; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 8px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+nav.toc a { font-size: 14px; text-decoration: none; color: var(--fg2); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; }
+nav.toc a:hover { color: var(--accent); border-color: var(--accent); }
+
+section { padding-block: 40px 8px; border-bottom: 1px solid var(--line); scroll-margin-top: 12px; }
+section:last-of-type { border-bottom: 0; }
+.kicker { font: 500 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+
+.ev { font: 400 12px/1.5 var(--mono); color: var(--muted); margin: -6px 0 14px; overflow-wrap: anywhere; }
+ul.facts, ol.facts { margin: 0 0 16px; padding-left: 22px; max-width: 84ch; }
+ul.facts li, ol.facts li { margin-bottom: 8px; }
+ul.facts li .ev, ol.facts li .ev { margin: 2px 0 0; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--fg2); margin: 8px 0 16px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; width: fit-content; max-width: 100%; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 18px; height: 12px; border-radius: 3px; border: 1.5px solid; display: inline-block; }
+.sw.api { background: var(--api-fill); border-color: var(--api-stroke); }
+.sw.ext { background: var(--ext-fill); border-color: var(--ext-stroke); }
+
+figure { margin: 12px 0 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+figcaption { font-size: 14px; color: var(--fg2); margin-top: 10px; max-width: 84ch; }
+figcaption b { color: var(--fg); }
+.dg { overflow-x: auto; }
+.dg svg { display: block; width: 100%; height: auto; min-width: 760px; }
+
+svg .n rect { stroke-width: 1.5; }
+svg .api rect { fill: var(--api-fill); stroke: var(--api-stroke); }
+svg .ext rect { fill: var(--ext-fill); stroke: var(--ext-stroke); }
+svg .nm { font: 600 14px var(--sans); fill: var(--fg); text-anchor: middle; }
+svg .cd { font: 400 10.5px var(--mono); fill: var(--fg2); text-anchor: middle; }
+svg .e { fill: none; stroke: var(--edge); stroke-width: 1.5; }
+svg .mk { fill: var(--edge); }
+svg .life { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+svg .lbl { font: 500 11px var(--sans); fill: var(--fg2); text-anchor: middle; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+svg .lbl.st { text-anchor: start; }
+svg .lbl.it { font-style: italic; fill: var(--muted); }
+svg .gut { font: 500 11px var(--mono); fill: var(--fg); text-anchor: start; }
+svg .term { font: 500 11.5px var(--sans); fill: var(--fg); text-anchor: middle; }
+svg .note { font: 400 12px var(--sans); fill: var(--fg2); text-anchor: middle; }
+
+.tw { overflow-x: auto; margin: 8px 0 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td .ev { margin: 4px 0 0; }
+td.k { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+tr.grp td { background: var(--bg); font-weight: 600; color: var(--fg); }
+.t-wide { min-width: 760px; }
+td.num { font-variant-numeric: tabular-nums; }
+
+.src, .chip { display: inline-block; font: 600 11px var(--sans); letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.src.atr { color: var(--atr-fg); background: var(--atr-bg); }
+.src.bd { color: var(--ok-fg); background: var(--ok-bg); }
+.src.cfg { color: var(--accent); background: var(--api-fill); }
+.src.fix { color: var(--md-fg); background: var(--md-bg); }
+.src.calc { color: var(--sm-fg); background: var(--sm-bg); }
+.chip.large { color: var(--lg-fg); background: var(--lg-bg); }
+.chip.medium { color: var(--md-fg); background: var(--md-bg); }
+.chip.small { color: var(--sm-fg); background: var(--sm-bg); }
+.chip.ill { color: var(--atr-fg); background: var(--atr-bg); }
+
+.srclist { display: grid; grid-template-columns: max-content 1fr; gap: 8px 14px; align-items: baseline; max-width: 84ch; margin: 8px 0 18px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; font-size: 15px; }
+.srclist .src { justify-self: start; }
+
+.side { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; max-width: 900px; margin: 8px 0 18px; font-size: 15px; }
+.side p:last-child { margin-bottom: 0; }
+
+.io { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 8px 0 20px; }
+.io > div { min-width: 0; }
+.io h4 { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--fg2); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+@media (max-width: 860px) { .io { grid-template-columns: 1fr; } }
+pre.code { margin: 0; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; font: 400 12.5px/1.55 var(--mono); color: var(--fg); }
+pre.code .c { color: var(--muted); }
+pre.code.solo { margin: 8px 0 20px; }
+
+ol.strip { list-style: none; margin: 12px 0 20px; padding: 0; display: grid; gap: 0; max-width: 960px; }
+ol.strip li { display: grid; grid-template-columns: 44px 1fr; gap: 0 14px; position: relative; padding-bottom: 16px; }
+ol.strip li::before { content: ""; position: absolute; left: 21px; top: 30px; bottom: 0; width: 2px; background: var(--line); }
+ol.strip li:last-child::before { display: none; }
+ol.strip .no { width: 44px; height: 30px; border-radius: 6px; background: var(--api-fill); border: 1.5px solid var(--api-stroke); font: 600 14px var(--mono); display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+ol.strip .body { min-width: 0; padding-top: 3px; }
+ol.strip .what { margin: 0; }
+ol.strip .val { font: 400 12.5px/1.55 var(--mono); color: var(--fg2); margin: 4px 0 0; overflow-wrap: anywhere; }
+ol.strip .meta2 { font: 400 12px/1.5 var(--mono); color: var(--muted); margin: 2px 0 0; overflow-wrap: anywhere; }
+
+.gaps { display: grid; gap: 0; max-width: 940px; margin-bottom: 8px; }
+.gap { padding: 12px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 76px 1fr; gap: 2px 14px; }
+.gap:last-child { border-bottom: 0; }
+.gap .chip { justify-self: start; margin-top: 3px; }
+.gap h4 { margin: 0; font-size: 15.5px; font-weight: 600; }
+.gap .why { margin: 2px 0 0; color: var(--fg2); font-size: 15px; }
+.gap .ev { margin: 4px 0 0; }
+.gap > div { min-width: 0; }
+@media (max-width: 560px) {
+  .gap { grid-template-columns: 1fr; }
+  .srclist { grid-template-columns: 1fr; gap: 2px; }
+  .srclist .src { margin-top: 8px; }
+}
+ol.qs { padding-left: 22px; max-width: 900px; }
+ol.qs li { margin-bottom: 8px; }
+footer { padding-block: 24px; font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* ---- Extensoes do tutorial-make (sobre o leiaute base) ---- */
+/* Faixa de inicio/fim de secao: mesmo tamanho nas duas, mesma cor (regra do skill). */
+.band { font: 600 14px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+.band.end { margin: 24px 0 8px; padding-top: 12px; border-top: 1px dashed var(--line); }
+/* Destaque por cor da fonte, sem caixas. Azul = dica/resultado; vermelho = atencao/armadilha. Uma frase vermelha por vez. */
+.warn { color: var(--lg-fg); }
+.tip, .result { color: var(--accent); }
+.warn b, .tip b, .result b { letter-spacing: 0.02em; }
+/* Bloco continuo: rode tudo de uma vez, sem parar. */
+.cont { border-left: 4px solid var(--lg-fg); padding-left: 12px; margin: 12px 0 20px; }
+.cont > .warn { margin: 0 0 8px; }
+.cont pre.code { margin: 0 0 8px; }
+.lvl { margin-left: 8px; vertical-align: middle; }
+.chip.ini { color: var(--ok-fg); background: var(--ok-bg); }
+.chip.int { color: var(--md-fg); background: var(--md-bg); }
+.chip.adv { color: var(--lg-fg); background: var(--lg-bg); }
+.mermaid { text-align: center; overflow-x: auto; }
+.ficha { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; max-width: 900px; margin: 8px 0 18px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; font-size: 15px; }
+.ficha dt { font-weight: 600; color: var(--fg2); } .ficha dd { margin: 0; }
+@media (max-width: 560px) { .ficha { grid-template-columns: 1fr; gap: 2px; } .ficha dd { margin-bottom: 8px; } }
+a.ref { white-space: nowrap; }
+h4 { font-size: 16px; font-weight: 600; margin: 22px 0 6px; line-height: 1.3; }
+section > p, section > .col { max-width: 72ch; }
+p.cap { font-size: 14px; color: var(--fg2); margin: 18px 0 6px; }
+p.cap b { color: var(--fg); }
+pre.code { position: relative; }
+pre.code[data-lang]::before { content: attr(data-lang); position: absolute; top: 4px; right: 10px; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+pre.code.solo { margin: 4px 0 16px; }
+.warn code, .tip code, .result code { color: inherit; }
+h2 .chip.lvl { font-size: 11px; }
+:target { scroll-margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="frame">
+<header class="top">
+  <div class="kicker">Tutorial</div>
+  <h1>Cadastrar no Simulab a prova da Guarda Municipal de Manaus (IBFC, edital 01/2023): banca, órgão, questões e gabarito</h1>
+  <p class="lede">Premissas adotadas (conforme as suas respostas): <code>--md --html</code>; "órgão" é o órgão contratante (Prefeitura de Manaus) e a banca (IBFC) entra junto; gabarito oficial é o <b>pós-recurso</b>, e o preliminar serve de apoio; cadastro pela <b>tela do back-office</b>, sem tocar em código. Conferido contra o manual <code>docs/manual/pt-BR/</code> e contra as migrações de carga do módulo Catalog. <b>Não rodei o app</b>: os passos seguem o manual e precisam ser validados na tela (Seção <a class="ref" href="#s8">8</a>).</p>
+  <p class="meta">Convertido de <code>tutorial-cadastrar-prova-guarda-manaus-ibfc.md</code> com tutorial-make · 21/10/2026</p>
+</header>
+<nav class="toc" aria-label="Seções">
+  <a href="#s0">0 Ficha do tutorial</a>
+  <a href="#s1">1 Pre-requisitos</a>
+  <a href="#s2">2 Glossario e siglas</a>
+  <a href="#s3">3 Indice remissivo</a>
+  <a href="#s4">4 Introducao e conceitos fundamentais</a>
+  <a href="#s5">5 Projeto pratico — iniciante</a>
+  <a href="#s6">6 Projeto pratico — intermediario</a>
+  <a href="#s7">7 Projeto pratico — avancado</a>
+  <a href="#s8">8 Resumo</a>
+</nav>
+<div class="legend" aria-label="Legenda de cores"><span><b class="tip">Azul</b> título, dica, resultado testável</span><span><b class="warn">Vermelho</b> atenção, armadilha, bloco contínuo</span></div>
+<section id="s0">
+  <p class="band">&#9654; Início · 0. Ficha do tutorial</p>
+  <h2>0. Ficha do tutorial</h2>
+<p><b>Título:</b> Cadastrar no Simulab a prova do concurso de Técnico Municipal I – Guarda Municipal da Prefeitura de Manaus (IBFC, Edital nº 01/2023): banca, órgão contratante, exame, edição, disciplinas do edital, 60 questões e gabarito pós-recurso.</p>
+<p><b>Objetivo:</b> ao final, você será capaz de deixar no Simulab uma edição completa dessa prova: a banca IBFC cadastrada, a edição ligada ao exame "Guarda Municipal – Manaus", as 60 questões transcritas com o gabarito oficial, as 3 questões anuladas registradas como anuladas e a edição publicada para os alunos.</p>
+<p><b>Motivação e aplicabilidade</b></p>
+<ul class="facts">
+<li>Problema real: o Simulab só treina o aluno com prova de verdade se a prova estiver no banco, com a fonte certa (banca, exame, ano, número) e o gabarito que a banca realmente adotou depois dos recursos.</li>
+<li>Cenário 1: um concurso novo sai e você precisa colocar a prova anterior da mesma banca no ar antes de os alunos começarem a estudar.</li>
+<li>Cenário 2: a banca divulga o gabarito definitivo e ele difere do preliminar; você precisa registrar a anulação sem apagar o histórico.</li>
+<li>Cenário 3: você quer alimentar o banco com uma prova inteira sem reabrir o formulário 60 vezes.</li>
+<li>Quando NÃO usar este caminho: para dezenas de provas de uma vez. A tela serve para uma prova; em lote, o caminho previsto é a importação por IA do épico E-9 (confira se já foi entregue; ver Seção <a class="ref" href="#s8">8</a>).</li>
+<li>No dia a dia: é o trabalho típico do Curador e do Administrador do catálogo.</li>
+</ul>
+<p><b>Público-alvo:</b> quem tem uma conta de Administrador do Simulab (permissão "Gerenciar o catálogo" e "Gerenciar o banco de questões"), sabe abrir um PDF e digitar texto, e nunca cadastrou uma prova do zero.</p>
+<p><b>Tempo estimado (leitura + prática)</b></p>
+<div class="tw"><table>
+<thead><tr>
+<th>Nível</th>
+<th>Seção</th>
+<th>Tempo</th>
+</tr></thead><tbody>
+<tr><td>Inicial</td><td>4 e 5</td><td>cerca de 40 min</td></tr>
+<tr><td>Intermediário</td><td>6</td><td>cerca de 1h30</td></tr>
+<tr><td>Avançado</td><td>7</td><td>cerca de 3h (60 questões)</td></tr>
+</tbody></table></div>
+<p><b>Stack e ferramentas:</b> Simulab rodando local pelo app host (<code>dotnet run --project src/Hosts/Simulab.AppHost</code>) ou em outro ambiente; navegador; conta Administrador; os 4 PDFs da pasta <code>simulae/docs/provas/guarda municipal/manaus/2024, ibfc/</code> (a prova, os dois gabaritos e o edital).</p>
+  <p class="band end">&#9632; Fim DA SECAO 0 — proxima: Secao 1, Pre-requisitos</p>
+</section>
+<section id="s1">
+  <p class="band">&#9654; Início · 1. Pre-requisitos</p>
+  <h2>1. Pre-requisitos</h2>
+<ol class="facts">
+<li><b>Conta com papel Administrador.</b> As telas de Bancas, Exames e Edições exigem "Gerenciar o catálogo"; as de Questões e Textos-base exigem "Gerenciar o banco de questões". O Administrador tem as duas; o Curador só a segunda. Como adquirir: peça a um administrador ou veja a página <code>roles.md</code> do manual. Tutorial próprio: não.</li>
+<li><b>Simulab no ar e você logado.</b> Todo o roteiro é feito na interface. Como adquirir: <code>docs/manual/pt-BR/sign-in-and-sign-out.md</code>. Tutorial próprio: não.</li>
+<li><b>Ler um caderno de prova e um gabarito.</b> Você vai cruzar o número da questão com a letra do gabarito. Como adquirir: os PDFs desta pasta bastam. Tutorial próprio: não.</li>
+<li><b>Noção de concurso público (edital, banca, cargo, recurso, anulação).</b> O vocabulário do Simulab segue o mundo real; a Seção <a class="ref" href="#s2">2</a> explica cada termo. Tutorial próprio: sim, se você nunca viu um edital (Seção <a class="ref" href="#s8">8</a>).</li>
+<li><b>Digitar com cuidado em português.</b> Cada questão é copiada à mão: erro de digitação vira erro para o aluno. Tutorial próprio: não.</li>
+</ol>
+<p class="tip"><b>DICA:</b> abra o PDF da prova e o app lado a lado (duas janelas). Você vai alternar entre eles centenas de vezes.</p>
+  <p class="band end">&#9632; Fim DA SECAO 1 — proxima: Secao 2, Glossario</p>
+</section>
+<section id="s2">
+  <p class="band">&#9654; Início · 2. Glossario e siglas</p>
+  <h2>2. Glossario e siglas</h2>
+<div class="tw"><table>
+<thead><tr>
+<th>Termo/Sigla</th>
+<th>Significado por extenso</th>
+<th>Definição em linguagem simples</th>
+</tr></thead><tbody>
+<tr><td>Abrange</td><td>Disciplinas e tópicos que o título do edital cobre</td><td>Liga uma disciplina do edital à lista comum do Simulab (opcional).</td></tr>
+<tr><td>Anular questão</td><td>Registrar anulação</td><td>Marcar uma questão publicada como anulada pela banca, com motivo; ela sai da prática e o histórico fica.</td></tr>
+<tr><td>Banca</td><td>Organizadora (<code>Organizer</code>)</td><td>Quem elabora, aplica e corrige a prova. Aqui: IBFC.</td></tr>
+<tr><td>Cargo</td><td>Posto de trabalho</td><td>O emprego para o qual a prova seleciona; texto livre na edição.</td></tr>
+<tr><td>Disciplina do edital</td><td><code>NoticeSubject</code></td><td>A matéria como o edital a nomeia, com o grupo e o número de questões.</td></tr>
+<tr><td>Edição</td><td><code>ExamEdition</code></td><td>Uma prova realmente aplicada: ano do edital, cargo, banca e situação.</td></tr>
+<tr><td>Edital</td><td>Aviso (<code>Notice</code>)</td><td>O documento oficial que abre o concurso.</td></tr>
+<tr><td>Enunciado</td><td><code>Statement</code></td><td>O texto da questão que diz o que o aluno deve responder.</td></tr>
+<tr><td>Exame</td><td><code>Exam</code></td><td>O concurso que se repete ao longo dos anos; pertence a um órgão contratante.</td></tr>
+<tr><td>Gabarito</td><td>Chave de respostas (<code>AnswerKey</code>)</td><td>As respostas corretas oficiais; podem mudar depois dos recursos.</td></tr>
+<tr><td>Gabarito pós-recurso</td><td>Gabarito definitivo</td><td>O gabarito depois que a banca julgou os recursos; vale como oficial.</td></tr>
+<tr><td>Gabarito preliminar</td><td>Gabarito provisório</td><td>O primeiro gabarito, antes dos recursos.</td></tr>
+<tr><td>IBFC</td><td>Instituto Brasileiro de Formação e Capacitação</td><td>A banca desta prova.</td></tr>
+<tr><td>Órgão contratante</td><td><code>IssuingAuthority</code></td><td>Quem publica o edital e define as regras: aqui, a Prefeitura de Manaus.</td></tr>
+<tr><td>Questão anulada</td><td><code>AnnulledQuestion</code></td><td>Questão cancelada pela banca; no gabarito vem como <code>*</code>.</td></tr>
+<tr><td>Rascunho / Publicada</td><td><code>Draft</code> / <code>Published</code></td><td>Se alunos veem ou não a edição ou a questão.</td></tr>
+<tr><td>SEMAD</td><td>Secretaria Municipal de Administração, Planejamento e Gestão</td><td>Quem assina o edital pela Prefeitura de Manaus.</td></tr>
+<tr><td>Texto-base</td><td><code>BaseText</code></td><td>Trecho compartilhado por várias questões (a Língua Portuguesa tem dois).</td></tr>
+<tr><td>Tópico</td><td><code>Topic</code></td><td>Segundo nível da lista comum de assuntos, dentro de uma disciplina.</td></tr>
+<tr><td>Transcrever</td><td>Modo de digitação em série</td><td>Tela que salva uma questão e já abre a próxima com a edição fixa e o número seguinte.</td></tr>
+</tbody></table></div>
+  <p class="band end">&#9632; Fim DA SECAO 2 — proxima: Secao 3, Indice remissivo</p>
+</section>
+<section id="s3">
+  <p class="band">&#9654; Início · 3. Indice remissivo</p>
+  <h2>3. Indice remissivo</h2>
+<ul class="facts">
+<li>Abrange — Secao 6.1</li>
+<li>Anular questão — Secao 7.4</li>
+<li>Banca (IBFC) — Secao 4.1, 5.1</li>
+<li>Cargo — Secao 5.4</li>
+<li>Disciplina do edital — Secao 6.1</li>
+<li>Edição — Secao 4.1, 5.4</li>
+<li>Enunciado — Secao 6.3</li>
+<li>Exame — Secao 4.2, 5.3</li>
+<li>Gabarito pós-recurso — Secao 4.3, 7.2</li>
+<li>Gabarito preliminar — Secao 4.3, 7.4</li>
+<li>Órgão contratante — Secao 4.1, 4.2, 5.2</li>
+<li>PDF do edital — Secao 5.5</li>
+<li>Publicar a edição — Secao 7.6</li>
+<li>Questão anulada — Secao 4.3, 7.4</li>
+<li>Texto-base — Secao 6.2</li>
+<li>Tópico — Secao 7.1</li>
+<li>Transcrever — Secao 6.3, 7.1</li>
+<li>Troca de gabarito — Secao 7.5</li>
+</ul>
+  <p class="band end">&#9632; Fim DA SECAO 3 — proxima: Secao 4, Introducao</p>
+</section>
+<section id="s4">
+  <p class="band">&#9654; Início · 4. Introducao e conceitos fundamentais</p>
+  <h2>4. Introducao e conceitos fundamentais</h2>
+<h3 id="s4-1">4.1 O mapa das peças</h3>
+<p>Pense numa obra. O <b>órgão contratante</b> é o dono do terreno que decide o que construir (a Prefeitura de Manaus abre o concurso). A <b>banca</b> é a empreiteira que executa e confere o trabalho (o IBFC elabora, aplica e corrige a prova). O <b>exame</b> é o projeto que se repete (a Guarda Municipal de Manaus). A <b>edição</b> é uma obra entregue num ano (o Edital nº 01/2023, cargo Técnico Municipal I – Guarda Municipal). As <b>questões</b> são os cômodos dessa obra. <i>Onde a analogia falha:</i> a empreiteira pode mudar de uma obra para a outra; por isso a banca fica na edição, nunca no exame.</p>
+<figure id="fig-4-1"><div class="dg mermaid">
+flowchart TD
+    A[Órgão contratante&lt;br/&gt;Prefeitura de Manaus] --&gt; B[Exame&lt;br/&gt;Guarda Municipal - Manaus]
+    B --&gt; C[Edição&lt;br/&gt;2023, Técnico Municipal I]
+    D[Banca&lt;br/&gt;IBFC] --&gt; C
+    C --&gt; E[Disciplinas do edital&lt;br/&gt;5 linhas]
+    C --&gt; F[Questões&lt;br/&gt;60, números 1 a 60]
+    G[Textos-base&lt;br/&gt;2 de Português] --&gt; F
+</div><figcaption><b>Figura 4.1</b> — A hierarquia que você vai preencher, de cima para baixo</figcaption></figure>
+<p>Regra que decide a ordem do trabalho: cada peça precisa existir antes de quem aponta para ela. Banca e exame antes da edição; edição antes das disciplinas do edital e das questões; textos-base antes das questões que os usam.</p>
+<h3 id="s4-2">4.2 O que o Simulab já tem (conferido nas migrações)</h3>
+<p>A carga inicial do módulo Catalog (<code>20260929142114_SeedMunicipalGuardCatalog</code>) já cadastra o órgão <b>Prefeitura de Manaus</b> e o exame <b>Guarda Municipal</b> (município Manaus, Concurso público, pt-BR). Já existe também uma edição <b>2026</b>, de outro edital (Edital nº 01 de 23 de março de 2026), com outra banca. Ela não conflita com a sua: o Simulab proíbe duas edições com o mesmo ano, cargo e banca no mesmo exame, e a sua é de 2023.</p>
+<p>Conclusão prática: <b>o órgão e o exame você só confere</b>; a <b>banca IBFC não existe</b> na carga (as sete bancas são AOCP, Consulplan, FGV, Copeve/Ufal, Vunesp, FCC e Cebraspe) e precisa ser cadastrada; a edição 2023, as disciplinas, os textos-base e as 60 questões são novos.</p>
+<p class="warn"><b>ATENCAO:</b> isso vale para o código atual desta branch. Se o seu ambiente é antigo ou foi limpo à mão, confira na tela (Seção <a class="ref" href="#s5-2">5.2</a>) antes de supor que o órgão existe.</p>
+<h3 id="s4-3">4.3 O que os PDFs dizem (e o que importa deles)</h3>
+<ul class="facts">
+<li><b>Prova (<code>guarda_municipal.pdf</code>)</b>: caderno IBFC_01, 60 questões objetivas de 5 alternativas, mais uma redação. Língua Portuguesa 10, Noções de Informática 5, Geografia e História de Manaus 5, Noções de Direito 25, Legislação 15. A redação não é questão objetiva e <b>fica fora</b> do cadastro.</li>
+<li><b>Edital (<code>Edital de abertura 01-2023.pdf</code>)</b>: "Edital nº 01, de 27 de novembro de 2023", Prefeitura de Manaus / SEMAD, execução do IBFC, cargo Técnico Municipal I – Guarda Municipal (SEMSEG). A tabela 9.1.1 do edital confirma os grupos: Conhecimentos Gerais (Português, Informática, Geografia e História de Manaus) e Conhecimentos Específicos (Noções de Direito, Legislação).</li>
+<li><b>Gabaritos</b>: o preliminar e o pós-recurso são iguais em 57 das 60 questões. Diferem nas <b>três anuladas</b> (marcadas <code>*</code> no pós-recurso): questão 32 (preliminar A), 43 (preliminar D) e 54 (preliminar E).</li>
+</ul>
+<p>Por que isso importa: o Simulab só deixa <b>anular uma questão publicada</b>, e uma questão só é publicada se tiver <b>exatamente uma alternativa correta</b>. Então as três anuladas entram com a letra do gabarito preliminar, são publicadas e depois anuladas (Seção <a class="ref" href="#s7-4">7.4</a>). É para isso que o preliminar serve.</p>
+<p class="tip"><b>DICA:</b> a data de aplicação da prova não aparece com clareza no texto extraído do edital (o cronograma é uma tabela quebrada). O campo é opcional; deixe vazio em vez de chutar. A carga do próprio Simulab faz o mesmo para as outras edições.</p>
+<h3 id="s4-4">4.4 Decisões deste tutorial</h3>
+<div class="tw"><table>
+<thead><tr>
+<th>Decisão</th>
+<th>Escolha</th>
+<th>Motivo</th>
+</tr></thead><tbody>
+<tr><td>Ano do edital</td><td>2023</td><td>O edital é de 27/11/2023; a pasta diz 2024 porque a prova foi aplicada em 2024. O campo do Simulab é o ano <b>do edital</b>.</td></tr>
+<tr><td>Gabarito oficial</td><td>Pós-recurso</td><td>É o definitivo.</td></tr>
+<tr><td>Redação</td><td>Fora</td><td>Não é questão objetiva; o Simulab corrige questões de escolha.</td></tr>
+<tr><td>Tópicos</td><td>A lista da Tabela 7.1</td><td>Sugestão minha, a partir dos 71 tópicos da carga; você pode trocar um a um.</td></tr>
+<tr><td>Edição</td><td>Rascunho até o fim</td><td>Só publique quando as 60 estiverem conferidas (Seção <a class="ref" href="#s7-6">7.6</a>).</td></tr>
+</tbody></table></div>
+  <p class="band end">&#9632; Fim DA SECAO 4 — proxima: Secao 5, Iniciante</p>
+</section>
+<section id="s5">
+  <p class="band">&#9654; Início · 5. Projeto pratico — iniciante</p>
+  <h2>5. Projeto pratico — iniciante <span class="chip ini lvl">Iniciante</span></h2>
+<p><b>Resultado desta seção:</b> a banca IBFC existe, o órgão e o exame foram conferidos e a edição 2023 existe em <b>Rascunho</b>, com o PDF do edital guardado.</p>
+<h3 id="s5-1">5.1 Cadastrar a banca IBFC</h3>
+<ol class="facts">
+<li>No menu lateral, seção <b>Conteúdo</b>, escolha <b>Bancas</b>. Digite <code>IBFC</code> na busca: deve vir vazio. Se vier, <b>não cadastre outra</b> (o nome e a sigla são únicos, mesmo entre excluídas); use a que existe.</li>
+<li>Escolha <b>Adicionar</b>.</li>
+<li><b>Nome:</b> <code>Instituto Brasileiro de Formação e Capacitação</code>.</li>
+<li><b>Sigla:</b> <code>IBFC</code> (é salva em maiúsculas).</li>
+<li><b>Tipo:</b> banca examinadora.</li>
+<li><b>Site oficial:</b> <code>https://www.ibfc.org.br</code> (o endereço consta do edital) e <b>Descrição:</b> opcional; deixe vazia.</li>
+<li>Escolha <b>Salvar</b>.</li>
+</ol>
+<p class="cap" id="cod-5-1"><b>Código 5.1</b> — Os dados da banca, prontos para copiar</p>
+<pre class="code solo" data-lang="text">Nome:  Instituto Brasileiro de Formação e Capacitação
+Sigla: IBFC
+Tipo:  Banca examinadora
+Site:  https://www.ibfc.org.br</pre>
+<p>Por que esses valores: o nome é "como a banca assina seus editais" (o edital diz exatamente isso) e a sigla é o nome curto que aparece na <b>linha de fonte</b> das questões: <code>IBFC · Guarda Municipal · 2023</code>.</p>
+<p class="warn"><b>ARMADILHA:</b> "Outra banca já tem esse nome" ou "essa sigla" significa que existe uma, talvez excluída. Excluída ainda ocupa o nome. Não invente <code>IBFC2</code>: peça para um administrador restaurá-la ou use outro nome oficial.</p>
+<p class="result"><b>RESULTADO TESTAVEL:</b> a lista de Bancas mostra "Instituto Brasileiro de Formação e Capacitação · IBFC · Banca examinadora".</p>
+<h3 id="s5-2">5.2 Conferir o órgão contratante</h3>
+<ol class="facts">
+<li>Em <b>Conteúdo</b>, escolha <b>Órgãos contratantes</b> e digite <code>manaus</code> na busca.</li>
+<li>Deve aparecer <b>Prefeitura de Manaus</b>. Está pronto: não cadastre outro (a carga garante um por cidade).</li>
+<li>Se <b>não</b> aparecer, cadastre: <b>Adicionar</b>, nome <code>Prefeitura de Manaus</code> (o nome com que ela assina o edital), site e descrição opcionais, <b>Salvar</b>.</li>
+</ol>
+<p class="tip"><b>DICA:</b> o órgão contratante <b>não</b> é a banca. O edital é da Prefeitura/SEMAD; o IBFC só executa. Cadastrar "IBFC" como órgão é o erro mais comum de quem começa.</p>
+<h3 id="s5-3">5.3 Conferir o exame</h3>
+<ol class="facts">
+<li>Em <b>Exames</b>, busque <code>guarda manaus</code> (palavras em qualquer ordem).</li>
+<li>Deve aparecer <b>Guarda Municipal</b>, órgão Prefeitura de Manaus, Concurso público, Municipal. Escolha <b>Editar</b>: você vai estar na página do exame, com o cartão <b>Edições</b> embaixo.</li>
+<li>Se não existir: <b>Adicionar</b>, órgão Prefeitura de Manaus, nome <code>Guarda Municipal</code>, tipo Concurso público, abrangência Municipal, município <code>Manaus</code>, idioma Português (Brasil), <b>Salvar</b>.</li>
+</ol>
+<h3 id="s5-4">5.4 Criar a edição 2023</h3>
+<ol class="facts">
+<li>Na página do exame, no cartão <b>Edições</b>, escolha <b>Adicionar edição</b>.</li>
+<li>Preencha como na Tabela 5.1 e escolha <b>Salvar</b>. A edição nasce <b>Rascunho</b>; deixe assim.</li>
+</ol>
+<p><b>Tabela 5.1 — Campos da edição</b></p>
+<div class="tw"><table>
+<thead><tr>
+<th>Campo</th>
+<th>Valor</th>
+<th>De onde vem</th>
+</tr></thead><tbody>
+<tr><td>Banca</td><td>IBFC</td><td>digite duas letras e escolha na lista</td></tr>
+<tr><td>Ano do edital</td><td>2023</td><td>"Edital nº 01, de 27 de novembro de 2023"</td></tr>
+<tr><td>Cargo</td><td><code>Técnico Municipal I - Guarda Municipal</code></td><td>capa da prova e item 1.2 do edital</td></tr>
+<tr><td>Identificação do edital</td><td><code>Edital nº 01, de 27 de novembro de 2023</code></td><td>cabeçalho do edital</td></tr>
+<tr><td>Link do edital</td><td>vazio</td><td>não há link oficial estável no PDF; use o PDF (Seção <a class="ref" href="#s5-5">5.5</a>)</td></tr>
+<tr><td>Data de aplicação</td><td>vazia</td><td>não confirmada (Seção <a class="ref" href="#s4-3">4.3</a>)</td></tr>
+<tr><td>Situação</td><td>Rascunho</td><td>só publica no fim</td></tr>
+</tbody></table></div>
+<p class="warn"><b>ARMADILHA:</b> o cargo da edição 2026 tem o <b>mesmo texto</b>. Não há conflito porque o <b>ano</b> muda (2023 × 2026). Mas "ano, cargo e banca" juntos são únicos: se errar o ano e salvar 2026 com a banca certa, a mensagem "Este exame já tem uma edição com este ano, cargo e banca" aparece.</p>
+<h3 id="s5-5">5.5 Guardar o PDF do edital</h3>
+<ol class="facts">
+<li>Ainda na edição, no cartão <b>Edital e aplicação</b>, escolha <b>Escolher PDF</b> e selecione <code>Edital de abertura 01-2023.pdf</code> (0,66 MB, abaixo do limite de 20 MB).</li>
+<li>Escolha <b>Salvar</b>: o arquivo vai junto. A edição passa a mostrar nome e tamanho, e <b>Baixar</b> funciona.</li>
+</ol>
+<p>Por que guardar: o site do IBFC pode mudar ou sair do ar; a cópia fica com o Simulab. Os alunos só baixam o PDF de edições publicadas.</p>
+<p class="warn"><b>ATENCAO:</b> o PDF só é enviado quando você aperta <b>Salvar</b>. Se escolher o arquivo e apertar <b>Cancelar</b>, nada é enviado.</p>
+<h3 id="s5-6">5.6 Exercícios e resultado testável</h3>
+<p class="result"><b>RESULTADO TESTAVEL:</b> no cartão <b>Edições</b> do exame "Guarda Municipal – Manaus" aparecem duas linhas: 2026 (Publicada, outra banca) e <b>2023 · Técnico Municipal I - Guarda Municipal · IBFC · Rascunho</b>.</p>
+<p><b>Exercício 5.1.</b> Tente salvar outra edição com os mesmos dados. <i>Esperado:</i> a mensagem de duplicidade; nada é criado.</p>
+<p><b>Exercício 5.2.</b> Tente cadastrar uma banca "ibfc" (minúsculas). <i>Esperado:</i> "Outra banca já tem essa sigla".</p>
+<p><b>O que ficou:</b> a regra "peça que aponta precisa existir antes" e o fato de que o órgão e o exame são reaproveitados. A Seção <a class="ref" href="#s6">6</a> parte da edição que você acabou de criar.</p>
+  <p class="band end">&#9632; Fim DA SECAO 5 — proxima: Secao 6, Intermediario</p>
+</section>
+<section id="s6">
+  <p class="band">&#9654; Início · 6. Projeto pratico — intermediario</p>
+  <h2>6. Projeto pratico — intermediario <span class="chip int lvl">Intermediário</span></h2>
+<p>Partindo da edição criada na Seção <a class="ref" href="#s5">5</a> (Tabela 5.1), vamos agora preencher o que o edital descreve (disciplinas), preparar o material compartilhado (textos-base) e transcrever o primeiro bloco da prova.</p>
+<p><b>Resultado desta seção:</b> a edição tem 5 disciplinas do edital, 2 textos-base e as questões 1 a 10 (Língua Portuguesa) salvas como rascunho.</p>
+<h3 id="s6-1">6.1 Disciplinas do edital</h3>
+<p>Abra a edição 2023 e role até o cartão <b>Disciplinas do edital</b>. Para cada linha da Tabela 6.1, escolha <b>Adicionar disciplina do edital</b>, preencha e <b>Salvar</b>. O botão Salvar da edição nunca salva estas linhas: cada uma tem o seu diálogo.</p>
+<p><b>Tabela 6.1 — Disciplinas do edital (item 9.1.1 do edital)</b></p>
+<div class="tw"><table class="t-wide">
+<thead><tr>
+<th>Grupo</th>
+<th>Disciplina</th>
+<th>Nº de questões</th>
+<th>Abrange (opcional)</th>
+</tr></thead><tbody>
+<tr><td>Conhecimentos Gerais</td><td>Língua Portuguesa</td><td>10</td><td>Leitura e Interpretação, Produção Textual, Morfologia, Sintaxe, Ortografia e Pontuação (disciplinas inteiras)</td></tr>
+<tr><td>Conhecimentos Gerais</td><td>Noções de Informática</td><td>5</td><td>Informática (inteira)</td></tr>
+<tr><td>Conhecimentos Gerais</td><td>Geografia e História de Manaus</td><td>5</td><td>Conhecimentos locais › Manaus (AM)</td></tr>
+<tr><td>Conhecimentos Específicos</td><td>Noções de Direito</td><td>25</td><td>Direito Administrativo, Direito Constitucional, Direito Penal, Direitos Humanos (inteiras)</td></tr>
+<tr><td>Conhecimentos Específicos</td><td>Legislação</td><td>15</td><td>Legislação Municipal, Legislação Federal, Estatuto das Guardas Municipais, Estatuto do Desarmamento (inteiras)</td></tr>
+</tbody></table></div>
+<p>Soma: 10 + 5 + 5 + 25 + 15 = <b>60</b>, e o rodapé do cartão deve mostrar 60.</p>
+<p class="tip"><b>DICA:</b> o grupo sugere o que você já usou ao digitar (sem diferenciar acento e maiúscula); ao adicionar várias seguidas, o grupo da última já vem preenchido. O <b>Abrange</b> é opcional: se tiver dúvida, deixe em branco ("Não mapeada" não impede salvar nem publicar).</p>
+<p class="warn"><b>ARMADILHA:</b> o grupo é texto livre. "Conhecimentos Gerais" e "Conhecimentos gerais" viram o mesmo grupo (maiúscula e acento não contam), mas "Conhec. Gerais" cria um terceiro. Copie exatamente o do edital.</p>
+<h3 id="s6-2">6.2 Textos-base da Língua Portuguesa</h3>
+<p>Conferindo o que cada enunciado cita: as questões 1, 2, 3, 5 e 6 se apoiam no <b>Texto 1</b>; as questões 4, 8 e 9 se apoiam no <b>Texto 2</b> (a 4 aparece antes dele no caderno, mas a frase que ela cita é do Texto 2); as questões 7 e 10 são autossuficientes e <b>não levam texto-base</b>. Para cada texto: <b>Textos-base › Adicionar</b>.</p>
+<div class="tw"><table>
+<thead><tr>
+<th>Título (só você vê)</th>
+<th>Idioma</th>
+<th>Texto</th>
+</tr></thead><tbody>
+<tr><td>IBFC 2023 Manaus – Texto 1: O que nos mantém vivos?</td><td>Português (Brasil)</td><td>o trecho de Ricardo Viveiros, copiado do caderno, com a nota "Texto modificado especificamente para este concurso"</td></tr>
+<tr><td>IBFC 2023 Manaus – Texto 2: O progresso é o que nos mantém vivos</td><td>Português (Brasil)</td><td>o trecho de Matheus de Souza, com a nota de modificação</td></tr>
+</tbody></table></div>
+<p class="warn"><b>ATENCAO:</b> o idioma do texto-base tem de ser igual ao da questão (os dois pt-BR). Só textos do mesmo idioma aparecem na escolha da questão.</p>
+<h3 id="s6-3">6.3 Transcrever as questões 1 a 10</h3>
+<ol class="facts">
+<li>Abra a edição e, no cartão <b>Questões</b>, escolha <b>Transcrever</b>. O formulário abre com a edição fixa e o <b>número 1</b> sugerido.</li>
+<li>Preencha a questão conforme o <b>Código <a class="ref" href="#cod-6-1">6.1</a></b> (a questão 1 completa, como modelo).</li>
+<li>Escolha <b>Salvar e continuar</b>. A questão vira rascunho, o contador "Questão 2 desta sessão" sobe e o formulário limpa, mantendo edição, disciplina do edital, idioma e texto-base.</li>
+<li>Repita seguindo a ordem do texto-base: 1, 2 e 3 com o Texto 1; <b>troque</b> para o Texto 2 na 4; volte ao Texto 1 na 5 e na 6; <b>retire</b> o texto-base na 7; Texto 2 na 8 e na 9; retire de novo na 10 (Redação Oficial). O texto-base escolhido continua entre uma questão e a seguinte, então toda troca é por sua conta.</li>
+</ol>
+<p class="cap" id="cod-6-1"><b>Código 6.1</b> — Questão 1, campos do formulário</p>
+<pre class="code solo" data-lang="text">Tipo de questão:        Múltipla escolha
+Disciplina / Tópico:    Leitura e Interpretação / Interpretação de textos
+Idioma do conteúdo:     Português (Brasil)
+Dificuldade:            (vazia)
+Texto-base:             IBFC 2023 Manaus – Texto 1
+Enunciado:              Analise as afirmativas abaixo e dê valores Verdadeiro (V) ou Falso (F).
+                        ( ) O texto 1 tem como único enfoque o nosso comportamento na época do Natal.
+                        ( ) Sobre o Brasil, o texto afirma que nosso país está evoluindo com a finalidade de se recuperar de danos já transcorridos.
+                        ( ) Paz, meio ambiente, segurança alimentar, cultura, educação e equilíbrio econômico com crescimento sustentável são algumas necessidades para a manutenção de nossa existência.
+                        ( ) Há um consenso sobre o que nos mantém vivos: apenas a fé.
+                        ( ) Ao escrever 'Política' com letra inicial maiúscula, o autor expõe soberania, independência, liberdade, democracia e direitos humanos como elementos execráveis ao nosso país.
+                        Assinale a alternativa que apresenta a sequência correta de cima para baixo.
+Alternativas:           A  V - F - F - F - F
+                        B  F - V - V - F - F      &lt;- correta (gabarito: B)
+                        C  V - V - V - V - F
+                        D  V - F - V - F - V
+                        E  F - F - V - V - F
+Origem:                 Edição IBFC · Guarda Municipal · 2023 (já fixa) · Número 1 · Disciplina do edital: Língua Portuguesa</pre>
+<p>Use listas do editor para as afirmativas, se quiser; só a formatação simples é mantida. O gabarito entra marcando a alternativa correta (Seção <a class="ref" href="#s7-2">7.2</a> traz a tabela completa).</p>
+<p class="warn"><b>ARMADILHA:</b> a questão 3 pede a alternativa <b>incorreta</b> (resposta E, "Nariz - Narisinho"); as 11, 21, 29, 32, 34, 37, 43, 51, 57 e 59 também, e a 19 pede o "exceto". Confira o verbo do enunciado ("incorreta", "exceto") antes de marcar. Erro de leitura aqui vira gabarito invertido no banco.</p>
+<p class="result"><b>RESULTADO TESTAVEL:</b> o cartão <b>Questões</b> da edição lista 10 linhas, números 1 a 10, todas Rascunho, disciplina do edital Língua Portuguesa; e a lista de <b>Questões</b> (menu) mostra a fonte <code>IBFC · Guarda Municipal · 2023 · nº N</code>.</p>
+<h3 id="s6-4">6.4 Exercícios</h3>
+<p><b>Exercício 6.1.</b> Em uma das questões já salvas, troque a alternativa correta e salve. <i>Esperado:</i> como é rascunho, salva sem pedir motivo (só questão publicada exige "Motivo da troca de gabarito").</p>
+<p><b>Exercício 6.2.</b> Em <b>Textos-base</b>, abra o Texto 1: o cartão "Questões que usam este texto" deve listar 5 questões (1, 2, 3, 5 e 6); o Texto 2 lista 3 (4, 8 e 9).</p>
+  <p class="band end">&#9632; Fim DA SECAO 6 — proxima: Secao 7, Avancado</p>
+</section>
+<section id="s7">
+  <p class="band">&#9654; Início · 7. Projeto pratico — avancado</p>
+  <h2>7. Projeto pratico — avancado <span class="chip adv lvl">Avançado</span></h2>
+<p>Partindo do fluxo de transcrição da Seção <a class="ref" href="#s6">6</a> (Código <a class="ref" href="#cod-6-1">6.1</a>), vamos agora terminar a prova, aplicar o gabarito oficial, anular as três questões e publicar.</p>
+<p><b>Resultado desta seção:</b> 60 questões publicadas, 57 com a letra do gabarito pós-recurso e 3 anuladas, com a edição publicada.</p>
+<h3 id="s7-1">7.1 Transcrever as questões 11 a 60</h3>
+<p>Continue em <b>Transcrever</b> (o número sugerido segue o que já está salvo; o contador "desta sessão" recomeça em 1 se você sair, mas o número não). Troque a <b>disciplina do edital</b> sempre que a prova mudar de matéria: Informática 11–15, Geografia e História de Manaus 16–20, Noções de Direito 21–45, Legislação 46–60. Escolha o <b>tópico</b> de cada questão pela Tabela 7.1.</p>
+<p><b>Tabela 7.1 — Gabarito pós-recurso, disciplina e tópico sugerido, por questão</b></p>
+<div class="tw"><table class="t-wide">
+<thead><tr>
+<th>Nº</th>
+<th>Gab.</th>
+<th>Disciplina › Tópico sugerido</th>
+<th>Nº</th>
+<th>Gab.</th>
+<th>Disciplina › Tópico sugerido</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>B</td><td>Leitura e Interpretação › Interpretação de textos</td><td>31</td><td>D</td><td>Direito Administrativo › Princípios da administração pública</td></tr>
+<tr><td>2</td><td>A</td><td>Ortografia e Pontuação › Pontuação</td><td>32</td><td>* (prelim. A)</td><td>Direito Constitucional › Princípios constitucionais</td></tr>
+<tr><td>3</td><td>E</td><td>Ortografia e Pontuação › Ortografia</td><td>33</td><td>D</td><td>Direito Constitucional › Direitos fundamentais</td></tr>
+<tr><td>4</td><td>D</td><td>Sintaxe › Sintaxe, Concordância e Regência</td><td>34</td><td>C</td><td>Direito Constitucional › Direitos fundamentais</td></tr>
+<tr><td>5</td><td>C</td><td>Ortografia e Pontuação › Ortografia</td><td>35</td><td>D</td><td>Direito Constitucional › Princípios constitucionais</td></tr>
+<tr><td>6</td><td>B</td><td>Sintaxe › Sintaxe, Concordância e Regência</td><td>36</td><td>C</td><td>Direito Constitucional › Princípios constitucionais</td></tr>
+<tr><td>7</td><td>A</td><td>Ortografia e Pontuação › Ortografia</td><td>37</td><td>E</td><td>Direito Constitucional › Direitos fundamentais</td></tr>
+<tr><td>8</td><td>B</td><td>Sintaxe › Sintaxe, Concordância e Regência</td><td>38</td><td>B</td><td>Direito Constitucional › Direitos fundamentais</td></tr>
+<tr><td>9</td><td>C</td><td>Morfologia › Morfologia</td><td>39</td><td>B</td><td>Direito Penal › Crimes específicos</td></tr>
+<tr><td>10</td><td>C</td><td>Produção Textual › Comunicação escrita</td><td>40</td><td>A</td><td>Estatuto do Desarmamento › Lei 10.826/2003</td></tr>
+<tr><td>11</td><td>C</td><td>Informática › Sistemas operacionais Windows</td><td>41</td><td>D</td><td>Direito Penal › Tipos penais</td></tr>
+<tr><td>12</td><td>A</td><td>Informática › Conceitos de hardware (rede)</td><td>42</td><td>E</td><td>Direito Penal › Crimes específicos</td></tr>
+<tr><td>13</td><td>E</td><td>Informática › Conceitos de hardware (nuvem)</td><td>43</td><td>* (prelim. D)</td><td>Direito Penal › Códigos penais</td></tr>
+<tr><td>14</td><td>B</td><td>Informática › Segurança na internet</td><td>44</td><td>B</td><td>Direito Penal › Tipos penais</td></tr>
+<tr><td>15</td><td>B</td><td>Informática › Pacotes Microsoft Office</td><td>45</td><td>A</td><td>Direito Penal › Processo penal</td></tr>
+<tr><td>16</td><td>A</td><td>Conhecimentos locais › Manaus (AM)</td><td>46</td><td>D</td><td>Legislação Municipal › Estatuto dos Funcionários Públicos Municipais</td></tr>
+<tr><td>17</td><td>B</td><td>Conhecimentos locais › Manaus (AM)</td><td>47</td><td>B</td><td>Legislação Municipal › Estatuto dos Funcionários Públicos Municipais</td></tr>
+<tr><td>18</td><td>C</td><td>Conhecimentos locais › Manaus (AM)</td><td>48</td><td>C</td><td>Legislação Federal › Lei Maria da Penha</td></tr>
+<tr><td>19</td><td>D</td><td>Conhecimentos locais › Manaus (AM)</td><td>49</td><td>D</td><td>Legislação Federal › Lei Maria da Penha</td></tr>
+<tr><td>20</td><td>B</td><td>Conhecimentos locais › Manaus (AM)</td><td>50</td><td>E</td><td>Estatuto das Guardas Municipais › Lei 13.022/2014</td></tr>
+<tr><td>21</td><td>C</td><td>Direitos Humanos › Proteção de direitos fundamentais</td><td>51</td><td>A</td><td>Estatuto das Guardas Municipais › Lei 13.022/2014</td></tr>
+<tr><td>22</td><td>D</td><td>Direitos Humanos › Legislação de direitos humanos</td><td>52</td><td>D</td><td>Legislação Municipal › Lei complementar municipal</td></tr>
+<tr><td>23</td><td>E</td><td>Direitos Humanos › Direitos humanos e cidadania</td><td>53</td><td>A</td><td>Legislação Municipal › Lei complementar municipal</td></tr>
+<tr><td>24</td><td>A</td><td>Direitos Humanos › Legislação de direitos humanos</td><td>54</td><td>* (prelim. E)</td><td>Estatuto do Desarmamento › Lei 10.826/2003</td></tr>
+<tr><td>25</td><td>D</td><td>Direito Constitucional › Legislação de proteção</td><td>55</td><td>A</td><td>Direitos Humanos › Legislação de direitos humanos</td></tr>
+<tr><td>26</td><td>B</td><td>Direito Administrativo › Legislação administrativa</td><td>56</td><td>A</td><td>Legislação Federal › ECA (Lei 8.069/1990)</td></tr>
+<tr><td>27</td><td>D</td><td>Direito Administrativo › Legislação administrativa</td><td>57</td><td>B</td><td>Direito Penal › Crimes específicos</td></tr>
+<tr><td>28</td><td>C</td><td>Direito Administrativo › Legislação administrativa</td><td>58</td><td>D</td><td>Direito Penal › Crimes específicos</td></tr>
+<tr><td>29</td><td>D</td><td>Direito Administrativo › Conceitos fundamentais</td><td>59</td><td>A</td><td>Direito Penal › Crimes específicos</td></tr>
+<tr><td>30</td><td>B</td><td>Direito Administrativo › Conceitos fundamentais</td><td>60</td><td>E</td><td>Direito Administrativo › Legislação administrativa</td></tr>
+</tbody></table></div>
+<p>Notas de leitura da tabela:</p>
+<ul class="facts">
+<li>Os tópicos são <b>sugestões</b>: a lista comum não tem "redes", "nuvem" nem "Estatuto da Igualdade Racial"; usei o mais próximo. Se quiser fidelidade, registre esses tópicos em <b>Disciplinas e tópicos</b> antes de transcrever (é trabalho de Administrador) e depois escolha-os; isso é uma melhoria de taxonomia, não do cadastro da prova.</li>
+<li>A questão 15 traz uma <b>planilha</b> como imagem (A1=12, B1=13, A2=10, B2=11). O editor insere imagem (PNG, JPEG, WebP ou GIF, até 2 MB, com texto alternativo). Duas formas válidas: recortar a tabela do PDF e inserir com texto alternativo "Planilha: A1 12, B1 13, A2 10, B2 11", ou escrever essa descrição no enunciado. Responde-se B: A1 + B2 = 12 + 11 = 23.</li>
+<li>A questão 39 traz, no original, "Lei nº 23.869/2019" (o certo é 13.869/2019). <b>Transcreva como está impresso</b>; o aluno vê a prova como foi aplicada. Se quiser registrar, use a explicação.</li>
+<li>A questão 60 e as de V/F com cinco linhas (1, 22, 33, 40, 45, 50, 56) têm enunciado longo: use listas do editor.</li>
+</ul>
+<p class="warn"><b>ARMADILHA:</b> as colunas do PDF da prova saem embaralhadas ao copiar e colar (a prova é diagramada em duas colunas, com alternativas fora de ordem). Digite ou cole bloco a bloco e releia contra o PDF. O número da questão é único por edição; se errar, a mensagem "Número já usado nesta edição" avisa.</p>
+<h3 id="s7-2">7.2 Aplicar o gabarito</h3>
+<p>Para cada questão, marque como <b>correta</b> a letra da coluna <b>Gab.</b> da Tabela 7.1. Para as três anuladas (32, 43, 54), marque a letra do <b>preliminar</b> indicada entre parênteses (Seção <a class="ref" href="#s7-4">7.4</a> explica por quê).</p>
+<p class="cap" id="cod-7-1"><b>Código 7.1</b> — O gabarito pós-recurso em uma linha por bloco (confira com o PDF "GABARITO PÓS RECURSO")</p>
+<pre class="code solo" data-lang="text"> 1- 5:  B A E D C       6-10:  B A B C C
+11-15:  C A E B B      16-20:  A B C D B
+21-25:  C D E A D      26-30:  B D C D B
+31-35:  D * D C D      36-40:  C E B B A
+41-45:  D E * B A      46-50:  D B C D E
+51-55:  A D A * A      56-60:  A B D A E</pre>
+<p class="tip"><b>DICA:</b> depois de salvar 10 questões, abra a lista de Questões, filtre pela edição e compare as letras com este bloco. Corrigir cedo é barato; depois de publicada, trocar o gabarito exige motivo e gera versão nova (Seção <a class="ref" href="#s7-5">7.5</a>).</p>
+<h3 id="s7-3">7.3 Publicar as questões</h3>
+<ol class="facts">
+<li>Abra cada rascunho e, no cartão <b>Publicação</b>, escolha <b>Publicar</b>. Ele só fica disponível se a questão estiver salva e completa: tópico, idioma, enunciado, de 2 a 5 alternativas com texto e <b>exatamente uma correta</b>.</li>
+<li>A questão publicada vira <b>versão 1</b>, "Primeira publicação".</li>
+</ol>
+<p>Há um caminho com revisão (<b>Enviar para revisão</b>, e outra pessoa aprova na <a href="../manual/pt-BR/review-queue.md">Fila de revisão</a>). Sendo você o Administrador e a prova um material público conferido contra o PDF, a publicação direta é o atalho. Se a política da sua equipe exige dupla conferência, use a revisão.</p>
+<p class="warn"><b>ATENCAO:</b> "Publicar" <b>não</b> publica a edição. São dois botões diferentes. Questão publicada numa edição ainda em rascunho continua invisível ao aluno.</p>
+<h3 id="s7-4">7.4 Anular as questões 32, 43 e 54</h3>
+<p>Para cada uma das três, depois de publicada:</p>
+<ol class="facts">
+<li>Abra a questão e olhe o cartão <b>Publicação</b>. Se o formulário tiver alterações não salvas, salve antes ("Salve suas alterações primeiro").</li>
+<li>Escolha <b>Anular questão</b>.</li>
+<li>No <b>motivo</b> (até 500 caracteres, obrigatório), cite o ato oficial. Modelo:</li>
+</ol>
+<p class="cap" id="cod-7-2"><b>Código 7.2</b> — Motivo da anulação</p>
+<pre class="code solo" data-lang="text">Anulada pela banca IBFC no Gabarito Pós Recurso do Edital nº 01/2023 (Prefeitura de Manaus/SEMAD), cargo Técnico Municipal I - Guarda Municipal. Gabarito preliminar: &lt;A | D | E&gt;.</pre>
+<ol class="facts">
+<li>Confirme com <b>Anular</b>. A questão passa a <b>Anulada</b>: aviso amarelo, campos só leitura, linha "Anulada" no Histórico.</li>
+</ol>
+<p>Por que isso e não apagar ou deixar sem resposta: a regra do projeto é que uma anulação <b>nunca reescreve o histórico</b>; ela cria uma versão. E como o Simulab só aceita publicar com uma correta, a letra preliminar é o jeito honesto de chegar lá. A <b>data</b> exibida é a do seu registro, não a oficial: o lugar do ato oficial é o motivo.</p>
+<p class="warn"><b>ARMADILHA:</b> uma questão anulada não pode ser salva, publicada, despublicada nem excluída. Se errou a anulação, use <b>Reintegrar questão</b> (com motivo); ela volta a Publicada e vira nova versão. Como uma anulada conta num simulado completo é regra de pontuação da edição, que não é definida aqui.</p>
+<h3 id="s7-5">7.5 Se o gabarito mudar depois (troca de gabarito)</h3>
+<p>Cenário hipotético: o IBFC corrige a questão 17 depois. Em uma questão <b>publicada</b>, marque outra alternativa como correta: aparece <b>Motivo da troca de gabarito</b> (obrigatório, até 500 caracteres). <b>Salvar</b> registra a versão como "Gabarito alterado", com motivo e data. Quem fez a prova com a versão anterior continua corrigido por ela.</p>
+<h3 id="s7-6">7.6 Conferir e publicar a edição</h3>
+<p>Antes de apertar <b>Publicada</b>:</p>
+<ol class="facts">
+<li>Em <b>Questões</b>, filtre <b>Edição</b> = esta e <b>Situação</b> = Publicada ou Anulada: devem ser 60 no total, 57 publicadas e 3 anuladas.</li>
+<li>Confira que os números 1 a 60 existem uma vez cada e que cada disciplina do edital tem o número de questões da Tabela 6.1 (use o cartão <b>Questões</b> da edição).</li>
+<li>Abra três questões ao acaso e use <b>Visualizar como aluno</b> + <b>Mostrar resposta</b> para comparar com o PDF.</li>
+<li>Na edição, em <b>Publicação</b>, escolha <b>Publicada</b> e <b>Salvar</b>.</li>
+</ol>
+<p class="result"><b>RESULTADO TESTAVEL:</b> em <b>Catálogo</b> (visão do aluno), o exame "Guarda Municipal – Manaus" mostra a edição 2023 do IBFC com o botão de baixar o edital, e a prática enxerga as 57 questões não anuladas.</p>
+<h3 id="s7-7">7.7 Erros, segurança e observabilidade</h3>
+<ul class="facts">
+<li><b>Erros:</b> o app usa mensagens por campo e um aviso no topo com os campos que faltam (clicar leva ao campo). A tabela de mensagens de cada página está no manual (<code>questions.md</code>, <code>exam-editions.md</code>, <code>organizers.md</code>).</li>
+<li><b>Concorrência:</b> se outra pessoa mexer na mesma questão, o app pede para recarregar ("Esta questão já está publicada", "Outra gravação alterou o histórico...").</li>
+<li><b>Permissões:</b> o Curador transcreve e publica questões, mas <b>não</b> cadastra banca nem edição (isso é "Gerenciar o catálogo"). Teste o fluxo com o menor papel que o usa, não só com o Administrador.</li>
+<li><b>Conteúdo:</b> só formatação simples é mantida; scripts e links que não são <code>http</code>/<code>https</code> são removidos ao salvar. Prova pública, sem dado pessoal.</li>
+<li><b>Direito autoral:</b> a prova e o texto-base vêm de fontes públicas (concurso, Folha de S.Paulo, blog). Mantenha as notas "Texto modificado especificamente para este concurso" e a fonte no texto-base.</li>
+<li><b>Rastreabilidade:</b> cada questão carrega a linha de fonte <code>IBFC · Guarda Municipal · 2023</code>, o número na prova, as versões e o motivo de cada anulação ou troca de gabarito.</li>
+</ul>
+<h3 id="s7-8">7.8 Desafio final</h3>
+<p>Faça uma <b>conferência cruzada</b> do que você cadastrou: exporte (ou copie) da lista de Questões filtrada pela edição a letra correta de cada uma e compare, linha a linha, com o Código <a class="ref" href="#cod-7-1">7.1</a>. <i>Esperado:</i> 57 letras iguais e 3 anuladas (32, 43, 54), com os motivos do Código <a class="ref" href="#cod-7-2">7.2</a>. Qualquer divergência: abra a questão, confira o PDF e, se publicada, corrija com motivo (Seção <a class="ref" href="#s7-5">7.5</a>).</p>
+  <p class="band end">&#9632; Fim DA SECAO 7 — proxima: Secao 8, Resumo</p>
+</section>
+<section id="s8">
+  <p class="band">&#9654; Início · 8. Resumo, pre-requisitos pendentes e proximos passos</p>
+  <h2>8. Resumo, pre-requisitos pendentes e proximos passos</h2>
+<p><b>Resumo.</b> Nível inicial: banca IBFC criada, órgão e exame conferidos, edição 2023 em rascunho com o PDF do edital. Nível intermediário: 5 disciplinas do edital (60 questões no total), 2 textos-base e as questões 1 a 10. Nível avançado: questões 11 a 60, gabarito pós-recurso aplicado, 57 publicadas e 3 anuladas (32, 43, 54), edição publicada.</p>
+<p><b>O que não verifiquei:</b> não rodei o app; os passos vêm do manual e do código de carga, e a ordem dos botões pode ter pequenas diferenças na tela. Os tópicos da Tabela 7.1 são minha sugestão. A data de aplicação não foi confirmada. A leitura dos PDFs foi conferida contra a imagem do gabarito; o texto da prova foi extraído por ferramenta e precisa ser relido ao digitar.</p>
+<p><b>Pré-requisitos ainda não cobertos por tutorial:</b></p>
+<ol class="facts">
+<li>Noção de concurso público (edital, banca, recurso, anulação) — Seção <a class="ref" href="#s1">1</a>, item 4.</li>
+<li>Papéis e permissões do Simulab (por que o Curador não vê Bancas) — Seção <a class="ref" href="#s1">1</a>, item 1.</li>
+</ol>
+<p><b>Para onde evoluir:</b> (a) cadastrar a mesma banca em outro concurso e copiar disciplinas de outra edição ("Copiar de outra edição"); (b) quando a importação por IA do épico E-9 estiver disponível, trocar a transcrição manual por rascunhos revisados; (c) registrar na taxonomia os tópicos que faltaram (redes, nuvem, Estatuto da Igualdade Racial).</p>
+<div class="side"><p><b>Deseja que eu crie um tutorial dedicado para algum destes pré-requisitos antes de prosseguir para outro assunto?</b> As opções encontradas: (1) "Como ler um edital de concurso"; (2) "Papéis e permissões do Simulab".</p></div>
+  <p class="band end">&#9632; Fim DA SECAO 8 — fim do tutorial</p>
+</section>
+<footer>Cadastrar no Simulab a prova da Guarda Municipal de Manaus (IBFC, edital 01/2023): banca, órgão, questões e gabarito · convertido com tutorial-make</footer>
+</div>
+
+<!-- Mermaid: versao fixa. Se offline, o diagrama aparece como texto (continua legivel). -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  try {
+    var dark = document.documentElement.dataset.theme === 'dark' ||
+      (document.documentElement.dataset.theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+    mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+  } catch (e) {}
+</script>
+</body>
+</html>
