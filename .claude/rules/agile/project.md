@@ -153,3 +153,4 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 
 ## Dependency bumps
 - A bump of a package or tool version that clears a security advisory (B-34) takes the short path: the item file holds a paragraph of cause, the fix and the one regression test seen failing; no guard test beyond it, no `## Validation script` when no behavior is visible (the owner's typed `/agile:ship` is the validation, asked once), no plan line and a one-paragraph board body. The gate, the scan and the locked regression test still run.
+- A module DbContext registers every TenantEntity subclass of its assembly, so a test-phase skeleton entity becomes a table and a pending model change before its mapping exists: add modelBuilder.Ignore<T>() in the context until the real configuration lands (F-107: 33 HTTP tests failed on PendingModelChangesWarning instead of the behavior). (F-107, 2026-10-22)
