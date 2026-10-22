@@ -5,4 +5,4 @@ namespace Simulab.Web.Theme;
 /// so <see cref="SimulabThemeProvider"/> writes these as <c>--app-keycap-*-edge</c> next to the palette's own variables.
 /// The edge is decorative (change note v2): the fill is what identifies the button.
 /// </summary>
-public sealed record KeycapEdges(string Primary, string Secondary, string Tertiary, string Error);
+public sealed record KeycapEdges(string Primary, string Secondary, string Tertiary, string Info, string Error);

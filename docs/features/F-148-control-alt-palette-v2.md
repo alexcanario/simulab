@@ -1,7 +1,7 @@
 ---
 feature: F-148
 epic: Foundation and identity
-status: approved
+status: building
 board: 206
 version: 1
 ---
@@ -108,19 +108,19 @@ Give every screen the new Control Alt Systems colours in the one place that alre
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
+| AC1 | `ApprovedPaletteTests` (`Role_HoldsTheApprovedValue`, `KeycapEdges_HoldTheApprovedValues`, `LinkAndBrandName_HoldTheApprovedValues`); `IdentityTokensTests` (`Colours_EqualTheThemeInBothModes`, `DesignMd_FrontMatterGivesTheValueOfEveryToken`) |
+| AC2 | `ThemePaletteTests.Pair_ReadsAtTheMinimumOfItsRole`; `KeycapContrastTests` (`FilledButton_TextReadsAtAaAtRestAndOnHover`, `FilledButton_FillReadsAtTheNonTextMinimumOnThePageAndTheSurface`, `TealAndAmber_CarryInkNeverWhite`, `LinkRole_ReadsAtAaOnItsSurfaces`) |
+| AC3 | `KeycapButtonTests` (`MudButton_RendersTheClassesTheKitStyles`, `FilledVariant_IsAKeycapWithItsEdge`, `Buttons_HaveTheMinimumHeights`); `KeycapContrastTests.FilledButton_TextReadsAtAaAtRestAndOnHover` |
+| AC4 | `KeycapButtonTests` (`TextVariant_IsAnUnderlinedLink`, `Links_TakeTheLinkRole`, `ThemeProvider_WritesTheLinkAndTheBrandNameOfTheThemeInUse`); `StylesheetLiteralColourTests` |
+| AC5 | `ActionColourScopeTests.RoutedPages_PutNoTertiaryColourOnAButtonAndNoActionShortcut` |
+| AC6 | `AppActionButtonTests` (`Shortcut_ShowsCtrlAltTwoPlusSignsAndTheAmberKey`, `Compact_ShowsTheAmberKeyAlone`, `TheClickableElementIsOneButtonNamedByTheLabel`, `CtrlAltAndPlusSigns_AreDecorative`, `Click_RaisesOnClick`) |
+| AC7 | `AppActionButtonTests` (`Disabled_IsARealDisabledAndMarksTheWholeShortcut`, `Disabled_IsSunkenWithNoEdge`, `Pressed_MovesTheKeyDownShrinksTheEdgeAndTurnsTheIcon`, `ReducedMotion_StopsTheTurnAndTheTransitions`) |
+| AC8 | `KeycapContrastTests.BrandName_ReadsAtAaOnTheBar`; `ApprovedPaletteTests.Role_HoldsTheApprovedValue` (app bar, sidebar); `AppBarBrandTests.Bar_IsTheThemesAppBarColourWithItsLineBelow` |
+| AC9 | `BrandFilesTests` (`Symbol_HasTheTealBlueAndAmberKeys`, `DarkSymbol_TakesTheDarkThemesBlueAndKeepsTealAndAmber`, `AppIcon_IsTheNavyTileWithTheAmberKey`, `BrandFile_HoldsNoColourOfTheOldPalette`) |
+| AC10 | `EmailIdentityTests` (`Email_ButtonIsTheNavyPrimaryWithWhiteText`, `Email_OpensWithTheBrandAsTextInInkAndTheBrandFont`) |
+| AC11 | `UiGalleryIdentityTests` (`Buttons_ShowTheFourVariantsTheSmallSizeAndTheStates`, `Palette_ShowsEveryRoleOfTheThemeInUseWithItsValue`); `ActionColourScopeTests.Gallery_ShowsTheActionShortcutAndItsCompactVariant` |
+| AC12 | `PaletteV2DecisionTests` (`Adr0007_RecordsThePaletteV2Decisions`, `Adr0006_PointsToAdr0007`) |
+| AC13 | `ResourceParityTests` (existing missing-key test, green with the new gallery keys) |
 
 ## Approved list
 
@@ -168,6 +168,7 @@ Light / dark. Hover tones (the `*Darken` slots) and the keycap edges not listed 
 - 2026-10-22 — The dark brand symbol is derived by hand from the v2 tokens, as in F-125, because the design system ships one `simbolo-teclas.svg` only — Claude
 - 2026-10-22 — No new package; the old item mockups under `docs/features/mockups/` keep their colours (historical records) — Claude
 - 2026-10-22 — Manual: `docs/manual/pt-BR/getting-around.md` (lines 13, 14 and 16) names the primary button and the email button "azul-escuro" and the app bar white; navy `#0F3266` is still a dark blue, so those lines stay true and the manual is unchanged. The build re-reads them against the screen; if one is false, it is fixed in pt-BR only (pt-PT and en are frozen, F-124) — Claude
+- 2026-10-22: plan — 1 tests first: bring the F-125 palette, contrast, tokens, brand, email and gallery tests to v2 values and add the action shortcut, link, amber edge, SVG, ADR tests → red, `test(F-148)` commit and lock; 2 `SimulabTheme` palettes and `SimulabThemeProvider` (`link`, edges incl. primary) → AC1, AC2; 3 `app.css` buttons, links, brand name via variables → AC3, AC4, AC8; 4 brand SVGs, `MainLayout`, `EmailHtml` → AC8, AC9, AC10; 5 `AppActionButton` + `AppIcons.RestartAlt` + css + gallery + resources in three locales → AC5, AC6, AC7, AC11, AC13; 6 `identity.tokens.json`, `DESIGN.md`, ADR-0007, ADR-0006 line, glossary, flow page `brand-identity-theme.md` → AC1, AC12; 7 gate, coverage table, review/scan, validation script.
 
 ## Out of scope
 - Composition of each screen and which screen gets the amber action: F-126 to F-134.

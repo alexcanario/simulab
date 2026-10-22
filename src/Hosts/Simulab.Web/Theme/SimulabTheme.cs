@@ -10,10 +10,18 @@ namespace Simulab.Web.Theme;
 public static class SimulabTheme
 {
     /// <summary>The edge under each filled keycap, light theme. Error is derived (error x0.72): the list gives none.</summary>
-    public static KeycapEdges LightKeycapEdges { get; } = new(Primary: "#043A5E", Secondary: "#00574A", Tertiary: "#A84606", Error: "#892828");
+    public static KeycapEdges LightKeycapEdges { get; } = new(Primary: "#043A5E", Secondary: "#00574A", Tertiary: "#A84606", Info: "#043A5E", Error: "#892828");
 
     /// <summary>The same in the dark theme, error x0.65. The edges are decorative (change note v2).</summary>
-    public static KeycapEdges DarkKeycapEdges { get; } = new(Primary: "#0F6BA8", Secondary: "#006B5B", Tertiary: "#B24A0C", Error: "#924646");
+    public static KeycapEdges DarkKeycapEdges { get; } = new(Primary: "#0F6BA8", Secondary: "#006B5B", Tertiary: "#B24A0C", Info: "#0F6BA8", Error: "#924646");
+
+    public static string LightLink => string.Empty;
+
+    public static string DarkLink => string.Empty;
+
+    public static string LightBrandName => string.Empty;
+
+    public static string DarkBrandName => string.Empty;
 
     private const string Ink = "#0B1B2E";
 

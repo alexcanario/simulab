@@ -3,29 +3,57 @@ using System.Text.RegularExpressions;
 namespace Simulab.Web.Tests.Ui;
 
 /// <summary>
-/// F-125 AC5 (BR5): one orange action at most per screen, and F-125 delivers it only in the kit and the gallery. No routed
-/// page outside the dev gallery puts <c>Color.Tertiary</c> on a button until its screen item picks its action.
+/// F-148 AC5 (BR7, F-125 AC5): one amber action at most per screen, and F-148 delivers it only in the kit and the gallery.
+/// No routed page outside the dev gallery puts <c>Color.Tertiary</c> on a button or uses the action shortcut component
+/// until its screen item picks its action.
 /// </summary>
 public sealed partial class ActionColourScopeTests
 {
     [Fact]
-    public void RoutedPages_PutNoTertiaryColourOnAButton()
+    public void RoutedPages_PutNoTertiaryColourOnAButtonAndNoActionShortcut()
     {
         var offenders = RazorFiles()
-            .Where(file => !file.Replace('\\', '/').Contains("/Components/Pages/Dev/", StringComparison.Ordinal))
-            .SelectMany(file => TertiaryButtons(File.ReadAllText(file)).Select(tag => $"{Path.GetFileName(file)}: {tag}"))
+            .Where(file => !IsKitOrGallery(file))
+            .SelectMany(file => TertiaryButtons(File.ReadAllText(file)).Select(tag => $"{Path.GetFileName(file)}: {tag}")
+                .Concat(ActionShortcuts(File.ReadAllText(file)).Select(tag => $"{Path.GetFileName(file)}: {tag}")))
             .ToList();
 
-        offenders.Should().BeEmpty("the orange action waits for each screen item (F-126 to F-134)");
+        offenders.Should().BeEmpty("the amber action waits for each screen item (F-126 to F-134)");
     }
 
     [Fact]
-    public void Gallery_ShowsTheActionVariant()
+    public void Gallery_ShowsTheActionShortcutAndItsCompactVariant()
     {
         var gallery = File.ReadAllText(Path.Combine(WebRoot(), "Components", "Pages", "Dev", "UiGallery.razor"));
 
-        TertiaryButtons(gallery).Should().NotBeEmpty("the gallery shows the action variant (BR5)");
+        ActionShortcuts(gallery).Should().HaveCountGreaterThanOrEqualTo(2, "the gallery shows the shortcut and the compact variant (BR7, BR8)");
+        ActionShortcuts(gallery).Should().Contain(tag => tag.Contains("Compact", StringComparison.Ordinal));
     }
+
+    /// <summary>The scan finds the component however it is written: self-closing, with children, over several lines.</summary>
+    [Fact]
+    public void ActionShortcuts_FindsEveryWayToWriteIt()
+    {
+        const string razor = """
+            <AppActionButton Label="@L["Start"]" />
+            <AppActionButton
+                Label="Go" Compact="true"></AppActionButton>
+            <AppLink Href="/x">Not an action</AppLink>
+            """;
+
+        ActionShortcuts(razor).Should().HaveCount(2);
+    }
+
+    private static bool IsKitOrGallery(string file)
+    {
+        var path = file.Replace('\\', '/');
+        return path.Contains("/Components/Pages/Dev/", StringComparison.Ordinal) || path.Contains("/Components/Ui/", StringComparison.Ordinal);
+    }
+
+    internal static IReadOnlyList<string> ActionShortcuts(string razor) =>
+        ActionTagPattern().Matches(razor)
+            .Select(match => string.Join(' ', match.Value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)))
+            .ToList();
 
     /// <summary>Each offending way: a filled tertiary button, an icon button, and the colour set on a separate line.</summary>
     [Fact]
@@ -70,4 +98,7 @@ public sealed partial class ActionColourScopeTests
     // A quoted attribute may hold '>' (OnClick="@(() => Go())"), so quotes are read whole.
     [GeneratedRegex(@"<Mud(Icon)?Button\b(?:[^>""]|""[^""]*"")*>", RegexOptions.Singleline)]
     private static partial Regex ButtonTagPattern();
+
+    [GeneratedRegex(@"<AppActionButton\b(?:[^>""]|""[^""]*"")*>", RegexOptions.Singleline)]
+    private static partial Regex ActionTagPattern();
 }

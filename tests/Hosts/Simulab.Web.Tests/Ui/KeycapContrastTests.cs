@@ -58,9 +58,57 @@ public sealed class KeycapContrastTests
     {
         var palette = PaletteOf(theme);
         var fill = Paint(Filled.Single(entry => entry.Variant == variant).Selector, "background-color", palette);
+        // F-148 BR3: the amber action in the light theme reads 1.94:1 on the page, so its edge identifies it.
+        var identifier = variant == "action" && theme == "light" ? AppCssColours.AppToken("keycap-tertiary-edge", dark: false) : fill;
 
-        Ratio(fill, palette.Background.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForNonText, $"{variant} fill on the page ({theme})");
-        Ratio(fill, palette.Surface.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForNonText, $"{variant} fill on the surface ({theme})");
+        Ratio(identifier, palette.Background.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForNonText, $"{variant} on the page ({theme})");
+        Ratio(identifier, palette.Surface.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForNonText, $"{variant} on the surface ({theme})");
+    }
+
+    /// <summary>F-148 BR3: the amber edge is always drawn, at rest and pressed, and the other keycaps' edges stay decorative.</summary>
+    [Fact]
+    public void ActionButton_CarriesItsEdgeAlways()
+    {
+        AppCssColours.Declaration(".mud-button-filled.mud-button-filled-tertiary", "box-shadow").Should().Contain("var(--app-keycap-tertiary-edge)");
+        AppCssColours.Declaration(".mud-button-filled.mud-button-filled-tertiary:active:not(:disabled)", "box-shadow").Should().Contain("var(--app-keycap-tertiary-edge)");
+    }
+
+    /// <summary>F-148 AC2/BR4: text and icons on teal and on amber are the navy ink, never white.</summary>
+    [Theory]
+    [MemberData(nameof(BothThemes))]
+    public void TealAndAmber_CarryInkNeverWhite(string theme)
+    {
+        var palette = PaletteOf(theme);
+
+        foreach (var (fill, text) in new[] { (palette.Secondary, palette.SecondaryContrastText), (palette.Tertiary, palette.TertiaryContrastText), (palette.Success, palette.SuccessContrastText) })
+        {
+            text.ToString().Should().Be("#0B1B2E");
+            Ratio(text.ToString(), fill.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForText);
+        }
+    }
+
+    /// <summary>F-148 BR6: the link role reads at AA on the page, the surface and the tint blue, in both themes.</summary>
+    [Theory]
+    [MemberData(nameof(BothThemes))]
+    public void LinkRole_ReadsAtAaOnItsSurfaces(string theme)
+    {
+        var palette = PaletteOf(theme);
+        var link = AppCssColours.AppToken("link", dark: theme == "dark");
+
+        Ratio(link, palette.Background.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForText);
+        Ratio(link, palette.Surface.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForText);
+        Ratio(link, palette.PrimaryLighten.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForText);
+    }
+
+    /// <summary>F-148 BR9: the brand name reads on the bar, and it is the theme's variable on both lines of the brand.</summary>
+    [Theory]
+    [MemberData(nameof(BothThemes))]
+    public void BrandName_ReadsAtAaOnTheBar(string theme)
+    {
+        var palette = PaletteOf(theme);
+
+        AppCssColours.Declaration(".app-brand-name", "color").Should().Be("var(--app-brand-name)");
+        Ratio(Paint(".app-brand-name", "color", palette), palette.AppbarBackground.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForText);
     }
 
     /// <summary>The secondary button: ink on the surface fill, inside a 2px line-strong border.</summary>

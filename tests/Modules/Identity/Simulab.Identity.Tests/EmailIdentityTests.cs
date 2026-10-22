@@ -35,18 +35,18 @@ public sealed class EmailIdentityTests
         company.Should().BeGreaterThan(brand, "the company sits under the app name");
         heading.Should().BeGreaterThan(company, "the brand opens the email, before its heading");
         html.Should().NotContain("<img", "the brand is text, never an image");
-        html.Should().NotContainAny("#19243E", "#4A5A7A", "#216DB5");
+        html.Should().NotContainAny("#19243E", "#4A5A7A", "#216DB5", "#064F80");
     }
 
     [Theory]
     [InlineData("verification")]
     [InlineData("password-reset")]
-    public async Task Email_ButtonIsThePrimaryDarkBlueWithWhiteText(string email)
+    public async Task Email_ButtonIsTheNavyPrimaryWithWhiteText(string email)
     {
         var html = (await SendAsync(email)).HtmlBody;
 
-        html.Should().Contain("background: #064F80; color: #FFFFFF;");
-        EmailHtml.ButtonColour.Should().Be("#064F80");
+        html.Should().Contain("background: #0F3266; color: #FFFFFF;");
+        EmailHtml.ButtonColour.Should().Be("#0F3266");
     }
 
     private static async Task<EmailMessage> SendAsync(string email)
