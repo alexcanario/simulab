@@ -1046,6 +1046,7 @@
   <data name="Gallery.RichText.Hint" xml:space="preserve"><value>A visual editor for formatted text, with the label, hint and error of every kit field. Tab into a field to see its focus ring.</value></data>
   <data name="Gallery.RichText.Empty" xml:space="preserve"><value>Empty</value></data>
   <data name="Gallery.RichText.Filled" xml:space="preserve"><value>Filled</value></data>
+  <data name="Gallery.RichText.Blanks" xml:space="preserve"><value>With Insert blank (fill-in-the-blanks statement)</value></data>
   <data name="Gallery.RichText.Error" xml:space="preserve"><value>Error</value></data>
   <data name="Gallery.RichText.Disabled" xml:space="preserve"><value>Disabled</value></data>
   <data name="Gallery.RichText.Compact" xml:space="preserve"><value>Compact (option row)</value></data>

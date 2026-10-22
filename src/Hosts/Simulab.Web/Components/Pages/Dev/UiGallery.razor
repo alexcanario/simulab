@@ -718,6 +718,16 @@
                           Value="@_richEmpty"
                           ValueChanged="@((string? value) => _richEmpty = value)" />
 
+        @* F-107: the statement of a fill-in-the-blanks question; Insert blank writes the next marker at the caret. *@
+        <MudText Typo="Typo.subtitle2">@L["Gallery.RichText.Blanks"]</MudText>
+        <AppRichTextField Id="gallery-rt-blanks"
+                          Label="@L["Questions.Field.Statement"]"
+                          Placeholder="@L["Questions.Field.Statement.Placeholder"]"
+                          BlankMarkers="true"
+                          Lang="@CultureInfo.CurrentUICulture.Name"
+                          Value="@_richBlanks"
+                          ValueChanged="@((string? value) => _richBlanks = value)" />
+
         <MudText Typo="Typo.subtitle2">@L["Gallery.RichText.Filled"]</MudText>
         <AppRichTextField Id="gallery-rt-filled"
                           Label="@L["Questions.Field.Explanation"]"
@@ -982,6 +992,7 @@
 
     // F-95: the rich text field. Each sample holds the HTML its editor last reported.
     private string? _richEmpty;
+    private string? _richBlanks = "<p>A capital do Brasil é [[1]].</p>";
     private string? _richFilled;
     private string? _richCompact;
     private int? _richKey = 1;

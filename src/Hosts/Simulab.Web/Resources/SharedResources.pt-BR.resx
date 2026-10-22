@@ -1046,6 +1046,7 @@
   <data name="Gallery.RichText.Hint" xml:space="preserve"><value>Um editor visual para texto formatado, com o rótulo, a dica e o erro de todo campo do kit. Use Tab para entrar em um campo e ver o anel de foco.</value></data>
   <data name="Gallery.RichText.Empty" xml:space="preserve"><value>Vazio</value></data>
   <data name="Gallery.RichText.Filled" xml:space="preserve"><value>Preenchido</value></data>
+  <data name="Gallery.RichText.Blanks" xml:space="preserve"><value>Com Inserir lacuna (enunciado de lacunas)</value></data>
   <data name="Gallery.RichText.Error" xml:space="preserve"><value>Erro</value></data>
   <data name="Gallery.RichText.Disabled" xml:space="preserve"><value>Desabilitado</value></data>
   <data name="Gallery.RichText.Compact" xml:space="preserve"><value>Compacto (linha de alternativa)</value></data>
