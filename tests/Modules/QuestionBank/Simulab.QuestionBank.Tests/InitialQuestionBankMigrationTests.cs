@@ -35,7 +35,7 @@ public sealed class InitialQuestionBankMigrationTests
         await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync();
         (await ValuesAsync(connection, $"SELECT table_name FROM information_schema.tables WHERE table_schema = '{Schema}' AND table_name <> '__ef_migrations_history'"))
-            .Should().BeEquivalentTo("questions", "question_options", "question_versions", "base_texts", "question_review_entries", "question_images", "question_match_items");
+            .Should().BeEquivalentTo("questions", "question_options", "question_versions", "base_texts", "question_review_entries", "question_images", "question_match_items", "question_blanks");
         (await ValuesAsync(connection, $"SELECT indexname FROM pg_indexes WHERE schemaname = '{Schema}' AND tablename = 'questions'"))
             .Should().Contain(["pk_questions", "ix_questions_topic", "ix_questions_status_created_at"]);
         (await ValuesAsync(connection, $"SELECT indexname FROM pg_indexes WHERE schemaname = '{Schema}' AND tablename = 'question_options'"))

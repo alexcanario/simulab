@@ -47,8 +47,11 @@
     // F-103: opens a dialog, so it never shows as pressed.
     private static readonly Tool Picture = new("image", null, AppIcons.Image, "RichText.Image", Toggles: false);
 
+    // F-107: writes the next blank marker at the caret, so it never shows as pressed.
+    private static readonly Tool Blank = new("blank", null, AppIcons.Blank, "RichText.Blank", Toggles: false);
+
     private static readonly IReadOnlyList<IReadOnlyList<Tool>> FullGroups =
-        [[Bold, Italic, Underline, Strike], [Superscript, Subscript], [Bullets, Numbers, Quote], [Link, Picture], [Clean]];
+        [[Bold, Italic, Underline, Strike], [Superscript, Subscript], [Bullets, Numbers, Quote], [Link, Picture, Blank], [Clean]];
 
     // A compact field is an option: a phrase, so block formats (lists, quote) would break the lettered list.
     private static readonly IReadOnlyList<IReadOnlyList<Tool>> CompactGroups =
@@ -64,10 +67,14 @@
     /// <summary>True when the field can store a picture (F-103): the image button is drawn only then.</summary>
     [Parameter] public bool ImagesEnabled { get; set; }
 
+    /// <summary>True when the field takes blank markers (F-107, the statement of a fill-in-the-blanks question).</summary>
+    [Parameter] public bool BlanksEnabled { get; set; }
+
     private IReadOnlyList<IReadOnlyList<Tool>> Groups { get; set; } = FullGroups;
 
     protected override void OnParametersSet() =>
         Groups = (Compact ? CompactGroups : FullGroups)
-            .Select(group => (IReadOnlyList<Tool>)[.. group.Where(tool => ImagesEnabled || tool != Picture)])
+            .Select(group => (IReadOnlyList<Tool>)
+                [.. group.Where(tool => (ImagesEnabled || tool != Picture) && (BlanksEnabled || tool != Blank))])
             .ToList();
 }

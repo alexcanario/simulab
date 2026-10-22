@@ -3800,6 +3800,7 @@
           "TrueFalse",
           "MultipleAnswer",
           "Matching",
+          "FillInTheBlanks",
           null
         ]
       },
@@ -3977,6 +3978,34 @@
           }
         },
         "description": "What the base text form sends, for a create and for an update (F-102, UC1 and UC2). The text is HTML written\r\nby a person; the Api sanitizes it (BR8)."
+      },
+      "SaveBlankRequest": {
+        "required": [
+          "number"
+        ],
+        "type": "object",
+        "properties": {
+          "number": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The marker's number, 1 to 99; the statement must hold `[[Number]]`.",
+            "format": "int32"
+          },
+          "acceptedAnswers": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The accepted answers as typed; null counts as none. Each is trimmed and must not be empty."
+          }
+        },
+        "description": "One blank of a fill-in-the-blanks question as the form sends it (F-107, BR1): the number of its marker\r\n`[[n]]` in the statement and the answers it accepts, plain text."
       },
       "SaveExamEditionRequest": {
         "type": "object",
@@ -4370,6 +4399,16 @@
               "$ref": "#/components/schemas/SaveMatchItemRequest"
             },
             "description": "The left items of a matching question in order, each with the position of the option it matches (F-106, BR1);\r\nnull counts as none. Refused on any other type when not empty (BR6)."
+          },
+          "blanks": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SaveBlankRequest"
+            },
+            "description": "The blanks of a fill-in-the-blanks question, each naming a marker of the statement and its accepted answers\r\n(F-107, BR1); null counts as none. Refused on any other type when not empty (BR7)."
           }
         },
         "description": "What the question form sends, for a create and for an update (F-95, UC1 and UC2). The type is implied:\r\nsingle choice is the only one (BR2). Every text is HTML written by a person; the Api sanitizes it (BR8)."

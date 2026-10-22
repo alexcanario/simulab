@@ -94,6 +94,33 @@ public static class QuestionBankErrorCodes
     /// <summary>F-106 BR6: a question of another type was sent left items (a non-empty list); nothing is ignored.</summary>
     public const string QuestionMatchItemsNotAllowed = "question.match_items_not_allowed";
 
+    /// <summary>F-107 BR4, BR5: a fill-in-the-blanks statement has more than 10 markers, or is published with none.</summary>
+    public const string QuestionBlanksCount = "question.blanks_count";
+
+    /// <summary>F-107 BR4: the same blank number appears twice, in the statement or in the blanks sent.</summary>
+    public const string QuestionBlankRepeated = "question.blank_repeated";
+
+    /// <summary>F-107 BR4: a blank was sent for a number with no marker in the statement.</summary>
+    public const string QuestionBlankMarkerMissing = "question.blank_marker_missing";
+
+    /// <summary>F-107 BR5: a published fill-in-the-blanks question has a blank with no accepted answer. The problem's <c>position</c> is the blank number.</summary>
+    public const string QuestionBlankAnswersRequired = "question.blank_answers_required";
+
+    /// <summary>F-107 BR4: a blank has more than 5 accepted answers. The problem's <c>position</c> is the blank number.</summary>
+    public const string QuestionBlankAnswersCount = "question.blank_answers_count";
+
+    /// <summary>F-107 BR4: an accepted answer is empty once trimmed. The problem's <c>position</c> is the blank number.</summary>
+    public const string QuestionBlankAnswerRequired = "question.blank_answer_required";
+
+    /// <summary>F-107 BR4: an accepted answer has more than 100 characters once trimmed. The problem's <c>position</c> is the blank number.</summary>
+    public const string QuestionBlankAnswerTooLong = "question.blank_answer_too_long";
+
+    /// <summary>F-107 BR4, BR6: two accepted answers of one blank are equal under the comparison rule. The problem's <c>position</c> is the blank number.</summary>
+    public const string QuestionBlankAnswerRepeated = "question.blank_answer_repeated";
+
+    /// <summary>F-107 BR7: a question of another type was sent blanks (a non-empty list); nothing is ignored.</summary>
+    public const string QuestionBlanksNotAllowed = "question.blanks_not_allowed";
+
     /// <summary>F-98 BR5: a save or a publish would create a version whose answer key changed and gave no reason.</summary>
     public const string QuestionKeyChangeReasonRequired = "question.key_change_reason_required";
 

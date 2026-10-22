@@ -33,6 +33,18 @@ public static class QuestionLimits
     /// <summary>The most items a matching question has on each side, draft or published (F-106, BR3).</summary>
     public const int MatchingItemsMax = 8;
 
+    /// <summary>The most blanks (markers in the statement) a fill-in-the-blanks question has, draft or published (F-107, BR4).</summary>
+    public const int BlanksMax = 10;
+
+    /// <summary>The highest number a blank marker <c>[[n]]</c> may carry; the lowest is 1 (F-107, BR3).</summary>
+    public const int BlankNumberMax = 99;
+
+    /// <summary>The most accepted answers a blank has (F-107, BR4).</summary>
+    public const int BlankAnswersMax = 5;
+
+    /// <summary>The most characters an accepted answer has, after trimming (F-107, BR4).</summary>
+    public const int BlankAnswerMaxLength = 100;
+
     public const int DifficultyMin = 1;
     public const int DifficultyMax = 5;
 

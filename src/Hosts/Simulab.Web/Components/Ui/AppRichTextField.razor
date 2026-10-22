@@ -22,13 +22,13 @@
             @* The editor puts our toolbar in its own toolbar container and creates the editable region after it. *@
             <BlazoredTextEditor Placeholder="@Placeholder" ReadOnly="Disabled">
                 <ToolbarContent>
-                    <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" ImagesEnabled="@(Images is not null)" />
+                    <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" ImagesEnabled="@(Images is not null)" BlanksEnabled="BlankMarkers" />
                 </ToolbarContent>
             </BlazoredTextEditor>
         }
         else
         {
-            <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" ImagesEnabled="@(Images is not null)" />
+            <AppRichTextToolbar EditorId="@Id" Compact="Compact" Disabled="Disabled" ImagesEnabled="@(Images is not null)" BlanksEnabled="BlankMarkers" />
         }
     </div>
     <span id="@DescriptionId" class="app-field-description">
@@ -90,6 +90,12 @@
     /// that takes no picture, like an explanation, simply passes none.
     /// </summary>
     [Parameter] public RichTextImageOptions? Images { get; set; }
+
+    /// <summary>
+    /// F-107: the toolbar has "Insert blank", which writes the next marker <c>[[n]]</c> at the caret (the statement of a
+    /// fill-in-the-blanks question). The browser side picks the number from the text the editor holds now.
+    /// </summary>
+    [Parameter] public bool BlankMarkers { get; set; }
 
     private bool HasError => !string.IsNullOrEmpty(Error);
 

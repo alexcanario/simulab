@@ -13,6 +13,7 @@ public sealed class QuestionVersion : TenantEntity
 {
     private readonly List<QuestionVersionOption> _options = [];
     private readonly List<QuestionVersionMatchItem>? _matchItems = [];
+    private readonly List<QuestionVersionBlank>? _blanks = [];
 
     // For EF.
     private QuestionVersion()
@@ -32,7 +33,8 @@ public sealed class QuestionVersion : TenantEntity
         bool answerKeyChanged,
         string? reason,
         bool annulled = false,
-        IEnumerable<QuestionVersionMatchItem>? matchItems = null)
+        IEnumerable<QuestionVersionMatchItem>? matchItems = null,
+        IEnumerable<QuestionVersionBlank>? blanks = null)
     {
         QuestionId = questionId;
         Number = number;
@@ -47,12 +49,13 @@ public sealed class QuestionVersion : TenantEntity
         Reason = reason;
         Annulled = annulled;
         _matchItems = [.. matchItems ?? []];
+        _blanks = [.. blanks ?? []];
     }
 
     /// <summary>
     /// The version an annulment or a reinstatement records (F-101, BR2, BR6): this one's content, numbered
-    /// <paramref name="number"/>, not a key change, with the state and the reason given. The options and the left
-    /// items (F-106) are new instances, so the two versions share nothing.
+    /// <paramref name="number"/>, not a key change, with the state and the reason given. The options, the left
+    /// items (F-106) and the blanks (F-107) are new instances, so the two versions share nothing.
     /// </summary>
     internal QuestionVersion CopyAs(int number, bool annulled, string reason) =>
         new(
@@ -78,7 +81,8 @@ public sealed class QuestionVersion : TenantEntity
                 Position = item.Position,
                 TextHtml = item.TextHtml,
                 MatchPosition = item.MatchPosition
-            }));
+            }),
+            Blanks.Select(blank => new QuestionVersionBlank { Number = blank.Number, AcceptedAnswers = [.. blank.AcceptedAnswers] }));
 
     /// <summary>The question the version belongs to, held by id with no navigation back.</summary>
     public Guid QuestionId { get; private set; }
@@ -107,6 +111,12 @@ public sealed class QuestionVersion : TenantEntity
     /// version recorded before F-106, whose JSON column is null.
     /// </summary>
     public IReadOnlyList<QuestionVersionMatchItem> MatchItems => _matchItems ?? [];
+
+    /// <summary>
+    /// The blanks of a fill-in-the-blanks question in statement order (F-107, BR10); empty for any other type and for a
+    /// version recorded before F-107, whose JSON column is null.
+    /// </summary>
+    public IReadOnlyList<QuestionVersionBlank> Blanks => _blanks ?? [];
 
     /// <summary>True when the answer key differs from the previous version's (BR4); never true for version 1.</summary>
     public bool AnswerKeyChanged { get; private set; }

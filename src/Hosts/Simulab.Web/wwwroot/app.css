@@ -2303,6 +2303,51 @@ code, kbd, pre, samp {
     font-weight: 700;
 }
 
+/* F-107: a blank of the statement in the preview, an underlined box with its number (or, revealed, its first answer).
+   A fixed minimum width, so the box gives no hint of the answer's length (BR15); the text pair is the body's. */
+.app-blank {
+    display: inline-block;
+    min-width: 4.5em;
+    padding: 0 var(--app-space-2);
+    border-bottom: 2px solid var(--mud-palette-text-primary);
+    border-radius: var(--app-radius-sm) var(--app-radius-sm) 0 0;
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-text-primary);
+    font-weight: 700;
+    text-align: center;
+}
+
+/* F-107: one blank of the key section: its title, then its answers, each a field with its remove action. */
+.app-blank-row {
+    padding: var(--app-space-3) 0;
+    border-top: 1px solid var(--mud-palette-lines-default);
+}
+
+.app-blank-row:first-child {
+    border-top: none;
+}
+
+.app-blank-title {
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-sm);
+    font-weight: 700;
+}
+
+.app-blank-answer {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-2);
+}
+
+.app-blank-answer > :first-child {
+    flex: 1;
+}
+
+.app-preview-blanks {
+    margin: var(--app-space-2) 0 var(--app-space-3);
+    padding-left: var(--app-space-4);
+}
+
 .app-option-radio {
     flex: none;
     display: inline-flex;

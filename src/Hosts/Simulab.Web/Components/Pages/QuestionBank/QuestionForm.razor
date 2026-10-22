@@ -228,6 +228,7 @@ else
                                   Disabled="IsFrozen"
                                   Lang="@_contentLanguage"
                                   Images="ImageOptions"
+                                  BlankMarkers="IsFillIn"
                                   Value="@_statement"
                                   ValueChanged="@((string? value) => OnStatementChanged(value))"
                                   Error="@_statementError" />
@@ -368,6 +369,21 @@ else
                         @ChangeReasonField
                     }
                 </MatchingKeySection>
+            }
+            else if (IsFillIn)
+            {
+                @* F-107: one row per marker of the statement; the answers are the form's own. *@
+                <FillInTheBlanksKeySection Markers="BlankNumbers"
+                                           Answers="_blankAnswers"
+                                           Frozen="IsFrozen"
+                                           Error="@_blanksError"
+                                           RowErrors="_blankRowErrors"
+                                           OnChanged="OnBlanksChanged">
+                    @if (ShowChangeReason)
+                    {
+                        @ChangeReasonField
+                    }
+                </FillInTheBlanksKeySection>
             }
             else
             {
@@ -865,6 +881,11 @@ else
     private List<MatchItemDraft> _matchItems = [];
     private string? _matchingError;
 
+    // F-107: the answers typed per blank number, kept across a change of type; the rows are the statement's markers.
+    private Dictionary<int, List<string>> _blankAnswers = [];
+    private string? _blanksError;
+    private readonly Dictionary<int, string> _blankRowErrors = [];
+
     // F-96: the origin. The number and the notice subject only exist with an edition (BR2).
     private AppLookupOption? _edition;
     private int? _paperNumber;
@@ -948,12 +969,23 @@ else
 
     private bool IsMatching => _type == QuestionType.Matching;
 
+    private bool IsFillIn => _type == QuestionType.FillInTheBlanks;
+
+    // F-107 BR3: the markers of the statement, read as the Api reads them; the rows follow them in statement order.
+    private IReadOnlyList<int> StatementMarkers => StatementBlanks.Markers(_statement);
+
+    private List<int> BlankNumbers => [.. StatementMarkers.Distinct()];
+
+    // The answers of one blank as they are sent: the typed ones, an empty list when none was typed.
+    private List<string> BlankAnswersOf(int number) => _blankAnswers.TryGetValue(number, out var answers) ? answers : [];
+
     private IReadOnlyList<AppRadioCardOption<QuestionType?>> TypeCards =>
     [
         new(QuestionType.SingleChoice, L["Questions.Type.SingleChoice"], L["Questions.Type.SingleChoice.Description"], AppIcons.Options),
         new(QuestionType.TrueFalse, L["Questions.Type.TrueFalse"], L["Questions.Type.TrueFalse.Description"], AppIcons.Verified),
         new(QuestionType.MultipleAnswer, L["Questions.Type.MultipleAnswer"], L["Questions.Type.MultipleAnswer.Description"], AppIcons.MultipleAnswer),
-        new(QuestionType.Matching, L["Questions.Type.Matching"], L["Questions.Type.Matching.Description"], AppIcons.Matching)
+        new(QuestionType.Matching, L["Questions.Type.Matching"], L["Questions.Type.Matching.Description"], AppIcons.Matching),
+        new(QuestionType.FillInTheBlanks, L["Questions.Type.FillInTheBlanks"], L["Questions.Type.FillInTheBlanks.Description"], AppIcons.FillInTheBlanks)
     ];
 
     private IReadOnlyList<AppRadioCardOption<bool?>> TrueFalseCards =>
@@ -1038,13 +1070,21 @@ else
         && _matchItems.All(item => !QuestionHtml.IsBlank(item.Html) && item.Match is { } match && _options.Contains(match))
         && _options.All(option => !QuestionHtml.IsBlank(option.Html));
 
+    // F-107 BR5: 1 to 10 markers, each with an accepted answer.
+    private bool BlanksCountDone => StatementMarkers.Count is >= 1 and <= QuestionLimits.BlanksMax;
+
+    private bool BlanksAnswersDone =>
+        BlankNumbers.Count > 0 && BlankNumbers.All(number => BlankAnswersOf(number).Any(answer => !string.IsNullOrWhiteSpace(answer)));
+
     private bool ChecklistComplete =>
         TopicDone && LanguageDone && StatementDone
         && (IsTrueFalse
             ? TrueFalseKeyDone
             : IsMatching
                 ? MatchingItemsCountDone && MatchingMatchesCountDone && MatchingKeyDone
-                : OptionsCountDone && OptionsTextDone && KeyDone);
+                : IsFillIn
+                    ? BlanksCountDone && BlanksAnswersDone
+                    : OptionsCountDone && OptionsTextDone && KeyDone);
 
     private IReadOnlyList<AppChecklistItem> AsideChecklist =>
     [
@@ -1059,6 +1099,12 @@ else
                 new(L["Questions.Checklist.Matching.ItemsCount"], MatchingItemsCountDone),
                 new(L["Questions.Checklist.Matching.MatchesCount"], MatchingMatchesCountDone),
                 new(L["Questions.Checklist.Matching.Key"], MatchingKeyDone)
+            }
+            : IsFillIn
+            ? new List<AppChecklistItem>
+            {
+                new(L["Questions.Checklist.Blanks.Count"], BlanksCountDone),
+                new(L["Questions.Checklist.Blanks.Answers"], BlanksAnswersDone)
             }
             : new List<AppChecklistItem>
             {
@@ -1077,7 +1123,7 @@ else
         new(L["Questions.Field.Difficulty"], _difficulty?.ToString(CultureInfo.CurrentCulture)),
         new(L["Questions.Field.BaseText"], _baseText?.Text),
         new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
-        IsTrueFalse || IsMatching
+        IsTrueFalse || IsMatching || IsFillIn
             ? new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))
             : new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value),
         .. IsMultiple ? [new AppAsideRow(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))] : Array.Empty<AppAsideRow>()
@@ -1130,6 +1176,13 @@ else
             }
 
             AddIfRefused(items, _matchingError, MatchingKeySection.AddItemId, L["Questions.Section.Matching"]);
+            // F-107: a section refusal is about the markers, so it points at the statement; a row one at its blank.
+            AddIfRefused(items, _blanksError, "question-statement", L["Questions.Section.Blanks"]);
+            foreach (var (number, rowError) in _blankRowErrors.OrderBy(pair => pair.Key))
+            {
+                AddIfRefused(items, rowError, FillInTheBlanksKeySection.AddId(number), L["Questions.Blanks.Blank", number]);
+            }
+
             AddIfRefused(items, _trueFalseKeyError, "question-true-false-key", L["Questions.TrueFalseKey.Label"]);
             AddIfRefused(items, _changeReasonError, ChangeReasonId, L["Questions.ChangeReason.Label"]);
             AddIfRefused(items, _explanationError, "question-explanation", L["Questions.Field.Explanation"]);
@@ -1163,7 +1216,9 @@ else
     private bool AnswerChanged() =>
         IsTrueFalse
             ? _saved is null || _trueFalseKey != _saved.TrueFalseKey
-            : OptionsChanged() || (IsMatching && MatchItemsChanged());
+            : IsFillIn
+                ? BlanksChanged()
+                : OptionsChanged() || (IsMatching && MatchItemsChanged());
 
     // F-98 BR4: the key of a published question differs from the stored one when the correct option moved (a
     // reorder counts) or the true/false value did. Version 1 and drafts never need a reason.
@@ -1174,7 +1229,42 @@ else
             ? _trueFalseKey != _saved.TrueFalseKey
             : IsMatching
                 ? !MatchPositions.SequenceEqual(StoredMatchPositions)
-                : !CorrectPositions.SequenceEqual(StoredCorrectPositions));
+                : IsFillIn
+                    ? BlanksKeyChanged()
+                    : !CorrectPositions.SequenceEqual(StoredCorrectPositions));
+
+    // F-107: the blanks as they would be sent, one per marker in statement order, answers trimmed and non-empty.
+    private List<(int Number, List<string> Answers)> BlanksAsSent =>
+    [
+        .. BlankNumbers.Select(number => (number, BlankAnswersOf(number).Select(answer => answer.Trim()).Where(answer => answer.Length > 0).ToList()))
+    ];
+
+    private bool BlanksChanged()
+    {
+        var stored = _saved?.Blanks ?? [];
+        var current = BlanksAsSent;
+
+        return stored.Count != current.Count
+            || stored.Zip(current).Any(pair => pair.First.Number != pair.Second.Number
+                || !pair.First.AcceptedAnswers.SequenceEqual(pair.Second.Answers, StringComparer.Ordinal));
+    }
+
+    // F-107 BR10 (comfort; the Api decides): the set of numbers and, per blank, the set of answers compared as the domain
+    // compares them (trimmed, white space collapsed, case ignored, accents kept).
+    private bool BlanksKeyChanged()
+    {
+        static Dictionary<int, HashSet<string>> KeyOf(IEnumerable<(int Number, IEnumerable<string> Answers)> blanks) =>
+            blanks.ToDictionary(
+                blank => blank.Number,
+                blank => blank.Answers.Select(answer => string.Join(' ', answer.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).ToUpperInvariant())
+                    .ToHashSet(StringComparer.Ordinal));
+
+        var stored = KeyOf((_saved?.Blanks ?? []).Select(blank => (blank.Number, (IEnumerable<string>)blank.AcceptedAnswers)));
+        var current = KeyOf(BlanksAsSent.Select(blank => (blank.Number, (IEnumerable<string>)blank.Answers)));
+
+        return stored.Count != current.Count
+            || stored.Any(pair => !current.TryGetValue(pair.Key, out var answers) || !answers.SetEquals(pair.Value));
+    }
 
     // F-106 BR8: what each number matches, in item order; a new or removed item changes the sequence too.
     private IEnumerable<int?> MatchPositions =>
@@ -1417,6 +1507,8 @@ else
                     Match = item.MatchPosition is { } position && position >= 0 && position < _options.Count ? _options[position] : null
                 })
         ];
+        // F-107: the stored answers by blank number.
+        _blankAnswers = (question.Blanks ?? []).ToDictionary(blank => blank.Number, blank => blank.AcceptedAnswers.ToList());
         // F-98: what was typed as a reason belonged to the save that just came back.
         _changeReason = string.Empty;
         _changeReasonForced = false;
@@ -1427,7 +1519,8 @@ else
     {
         _changeReasonError = null;
         _topicError = _languageError = _difficultyError = _statementError = null;
-        _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = _matchingError = null;
+        _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = _matchingError = _blanksError = null;
+        _blankRowErrors.Clear();
         _baseTextCleared = null;
         _editionError = _paperNumberError = _noticeSubjectError = null;
         _showErrorSummary = false;
@@ -1444,6 +1537,13 @@ else
 
     // F-106: any change in the two columns drops the section refusal; the redraw updates the checklist.
     private void OnMatchingChanged() => _matchingError = null;
+
+    // F-107: any change of an answer drops the refusals of the section; the redraw updates the checklist.
+    private void OnBlanksChanged()
+    {
+        _blanksError = null;
+        _blankRowErrors.Clear();
+    }
 
     private void BuildBreadcrumbs() =>
         _breadcrumbs =
@@ -1571,7 +1671,8 @@ else
             version.Options,
             TrueFalseKey: version.TrueFalseKey,
             CurrentVersion: version.Number,
-            MatchItems: version.MatchItems);
+            MatchItems: version.MatchItems,
+            Blanks: version.Blanks);
         var parameters = new DialogParameters<QuestionPreviewDialog>
         {
             { dialog => dialog.Question, asQuestion },
@@ -1687,6 +1788,8 @@ else
         _optionsError = null;
         _trueFalseKeyError = null;
         _matchingError = null;
+        _blanksError = null;
+        _blankRowErrors.Clear();
 
         // F-104: single choice has one correct option, so going back to it keeps the first mark only.
         if (type == QuestionType.SingleChoice && _options.Count(option => option.IsCorrect) > 1)
@@ -1784,6 +1887,18 @@ else
     {
         _statement = value ?? string.Empty;
         _statementError = StatementError();
+
+        // F-107: a marker removed from the statement takes its row and its answers with it; typed back, it starts empty.
+        if (IsFillIn)
+        {
+            var numbers = BlankNumbers;
+            foreach (var gone in _blankAnswers.Keys.Where(number => !numbers.Contains(number)).ToList())
+            {
+                _blankAnswers.Remove(gone);
+            }
+
+            _blanksError = null;
+        }
     }
 
     // -- the base text (F-102) --------------------------------------------------------------------------------
@@ -2047,8 +2162,9 @@ else
             item.Error = IsMatching ? MatchItemError(item, required: published) : null;
         }
 
-        _optionsError = published && !IsTrueFalse && !IsMatching ? PublishedOptionsError() : null;
+        _optionsError = published && !IsTrueFalse && !IsMatching && !IsFillIn ? PublishedOptionsError() : null;
         _matchingError = published && IsMatching ? PublishedMatchingError() : null;
+        CheckBlanks(published);
         _trueFalseKeyError = published && IsTrueFalse && !TrueFalseKeyDone
             ? Errors.For(QuestionBankErrorCodes.QuestionTrueFalseKeyRequired)
             : null;
@@ -2075,7 +2191,7 @@ else
             _baseText?.Id,
             QuestionHtml.NullIfBlank(_explanation),
             _difficulty,
-            IsTrueFalse
+            IsTrueFalse || IsFillIn
                 ? []
                 // F-106 BR5: a right item carries no mark, whatever single choice left on it.
                 : [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), !IsMatching && option.IsCorrect))],
@@ -2087,6 +2203,10 @@ else
             ShowChangeReason ? QuestionHtml.NullIfBlank(_changeReason.Trim()) : null,
             IsMatching
                 ? [.. _matchItems.Zip(MatchPositions, (item, match) => new SaveMatchItemRequest(QuestionHtml.NullIfBlank(item.Html), match))]
+                : null,
+            // F-107: one blank per marker the statement holds now; the answers of a removed marker are not sent.
+            IsFillIn
+                ? [.. BlankNumbers.Select(number => new SaveBlankRequest(number, [.. BlankAnswersOf(number)]))]
                 : null);
 
         var result = token is null
@@ -2129,10 +2249,47 @@ else
         await ShowRefusalAsync(result);
     }
 
+    // F-107 BR4, BR5 (comfort; the Api decides): the section rules, then each blank's answers; a published question also
+    // needs 1 to 10 markers, each answered.
+    private void CheckBlanks(bool published)
+    {
+        _blanksError = null;
+        _blankRowErrors.Clear();
+        if (!IsFillIn)
+        {
+            return;
+        }
+
+        var markers = StatementMarkers;
+        if (markers.Count > QuestionLimits.BlanksMax || (published && markers.Count == 0))
+        {
+            _blanksError = Errors.For(QuestionBankErrorCodes.QuestionBlanksCount);
+        }
+        else if (markers.Distinct().Count() != markers.Count)
+        {
+            _blanksError = Errors.For(QuestionBankErrorCodes.QuestionBlankRepeated);
+        }
+
+        foreach (var number in BlankNumbers)
+        {
+            var answers = BlankAnswersOf(number);
+            var code = answers.Any(string.IsNullOrWhiteSpace)
+                ? QuestionBankErrorCodes.QuestionBlankAnswerRequired
+                : published && answers.Count == 0
+                    ? QuestionBankErrorCodes.QuestionBlankAnswersRequired
+                    : null;
+            if (code is not null)
+            {
+                _blankRowErrors[number] = Errors.For(code);
+            }
+        }
+    }
+
     private bool HasClientRefusal() =>
         _topicError is not null || _languageError is not null || _statementError is not null
         || _paperNumberError is not null || _explanationError is not null || _optionsError is not null
         || _trueFalseKeyError is not null || _changeReasonError is not null || _matchingError is not null
+        || _blanksError is not null || _blankRowErrors.Count > 0
         || _options.Any(option => option.Error is not null)
         || _matchItems.Any(item => item.Error is not null);
 
@@ -2196,6 +2353,27 @@ else
             case QuestionBankErrorCodes.QuestionMatchingKeyInvalid:
             case QuestionBankErrorCodes.QuestionMatchingKeyRepeated:
                 _matchingError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionBlanksCount:
+            case QuestionBankErrorCodes.QuestionBlankRepeated:
+            case QuestionBankErrorCodes.QuestionBlankMarkerMissing:
+                _blanksError = text;
+                break;
+            case QuestionBankErrorCodes.QuestionBlankAnswersRequired:
+            case QuestionBankErrorCodes.QuestionBlankAnswersCount:
+            case QuestionBankErrorCodes.QuestionBlankAnswerRequired:
+            case QuestionBankErrorCodes.QuestionBlankAnswerTooLong:
+            case QuestionBankErrorCodes.QuestionBlankAnswerRepeated:
+                // F-107: the position of these is the blank number; the row of that blank is marked.
+                if (result.OptionPosition is { } blankNumber && BlankNumbers.Contains(blankNumber))
+                {
+                    _blankRowErrors[blankNumber] = text;
+                }
+                else
+                {
+                    _blanksError = text;
+                }
+
                 break;
             case QuestionBankErrorCodes.QuestionOptionsCount:
             case QuestionBankErrorCodes.QuestionKeyInvalid:

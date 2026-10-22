@@ -16,5 +16,11 @@ public enum QuestionType
     /// Two columns: numbered left items, each matching one lettered right item (the options); the right column may
     /// have extra items. One to one (F-106).
     /// </summary>
-    Matching
+    Matching,
+
+    /// <summary>
+    /// Numbered markers <c>[[n]]</c> in the statement, each a blank with the answers it accepts, typed by the
+    /// student. No options (F-107).
+    /// </summary>
+    FillInTheBlanks
 }

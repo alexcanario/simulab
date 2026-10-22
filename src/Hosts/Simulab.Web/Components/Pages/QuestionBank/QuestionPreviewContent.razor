@@ -2,6 +2,7 @@
    explanation) below it. Shared by the preview dialog (F-95 UC6, which hides the answer until "show answer") and by
    the review screen (F-105 BR9, which always shows it). The Web never renders HTML the Api has not sanitized: the
    question comes from a read, never from the editors. *@
+@using System.Net
 @using Simulab.QuestionBank.Contracts
 @inject IStringLocalizer<SharedResources> L
 
@@ -21,9 +22,14 @@
         <div class="app-question-base app-question-content" id="question-preview-base-text">@((MarkupString)BaseTextHtml!)</div>
     }
 
-    <div class="app-question-content" id="question-preview-statement">@((MarkupString)Question.StatementHtml)</div>
+    <div class="app-question-content" id="question-preview-statement">@((MarkupString)StatementHtml)</div>
 
-    @if (IsTrueFalse)
+    @if (IsFillIn)
+    {
+        @* F-107 BR15: the task, not the answer; the boxes give no hint of the answer's length. *@
+        <p class="app-question-select-count" id="question-preview-blanks-instruction">@L["Questions.Preview.BlanksInstruction"]</p>
+    }
+    else if (IsTrueFalse)
     {
         @* F-97 BR7: the two answers a student judges between, as inert labelled text. *@
         <ul class="app-question-options" id="question-preview-true-false" aria-label="@L["Questions.Preview.Answers"]">
@@ -108,7 +114,23 @@
     {
         <section class="app-preview-answer" role="region" aria-labelledby="question-preview-answer-heading">
             <h3 class="app-preview-heading" id="question-preview-answer-heading">@L["Questions.Preview.Answer"]</h3>
-            @if (IsTrueFalse ? Question.TrueFalseKey is null : !_options.Any(IsKey))
+            @if (IsFillIn)
+            {
+                @* F-107: every accepted answer of each blank, in statement order; icon and text, never colour alone. *@
+                <span class="app-correct-label">
+                    <MudIcon Icon="@AppIcons.Verified" Size="Size.Small" Color="Color.Success" aria-hidden="true" />
+                    @L["Questions.Preview.CorrectAnswer"]
+                </span>
+                <ul class="app-preview-blanks" id="question-preview-blanks-key">
+                    @foreach (var blank in _blanks)
+                    {
+                        <li>@(blank.AcceptedAnswers.Count == 0
+                                ? L["Questions.Preview.BlankNoKey", blank.Number]
+                                : L["Questions.Preview.BlankKey", blank.Number, string.Join(", ", blank.AcceptedAnswers)])</li>
+                    }
+                </ul>
+            }
+            else if (IsTrueFalse ? Question.TrueFalseKey is null : !_options.Any(IsKey))
             {
                 <p class="app-preview-no-key">@NoKeyText</p>
             }
@@ -149,8 +171,27 @@
 
     private IReadOnlyList<QuestionOptionResponse> _options = [];
     private IReadOnlyList<MatchItemResponse> _matchItems = [];
+    private IReadOnlyList<BlankResponse> _blanks = [];
 
     private bool Shown => AlwaysRevealed || Revealed;
+
+    private bool IsFillIn => Question.Type == QuestionType.FillInTheBlanks;
+
+    // F-107 BR15: each marker of the stored statement is drawn as a numbered empty box named "Blank n"; after "show
+    // answer" the box holds the blank's first accepted answer. Only the number and encoded texts go into the markup.
+    private string StatementHtml =>
+        IsFillIn ? StatementBlanks.Replace(Question.StatementHtml, BlankBox) : Question.StatementHtml;
+
+    private string BlankBox(int number)
+    {
+        var first = Shown ? _blanks.FirstOrDefault(blank => blank.Number == number)?.AcceptedAnswers.FirstOrDefault() : null;
+        var text = first ?? number.ToString(CultureInfo.CurrentCulture);
+        var label = first is null
+            ? L["Questions.Blanks.Blank", number].Value
+            : L["Questions.Preview.BlankKey", number, first].Value;
+
+        return $"<span class=\"app-blank\" role=\"img\" aria-label=\"{WebUtility.HtmlEncode(label)}\">{WebUtility.HtmlEncode(text)}</span>";
+    }
 
     private bool IsTrueFalse => Question.Type == QuestionType.TrueFalse;
 
@@ -183,5 +224,6 @@
     {
         _options = [.. Question.Options.OrderBy(option => option.Position)];
         _matchItems = [.. (Question.MatchItems ?? []).OrderBy(item => item.Position)];
+        _blanks = Question.Blanks ?? [];
     }
 }

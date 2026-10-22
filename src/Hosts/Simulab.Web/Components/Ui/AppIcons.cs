@@ -133,6 +133,12 @@ public static class AppIcons
     /// <summary>F-106: a question of two columns whose items are matched.</summary>
     public const string Matching = Icons.Material.Outlined.CompareArrows;
 
+    /// <summary>F-107: a question whose statement has blanks the student types in; its type card and key section.</summary>
+    public const string FillInTheBlanks = Icons.Material.Outlined.ShortText;
+
+    /// <summary>F-107: the toolbar button that inserts a blank marker at the caret.</summary>
+    public const string Blank = Icons.Material.Outlined.SpaceBar;
+
     /// <summary>F-95: why the key is right.</summary>
     public const string Explanation = Icons.Material.Outlined.Info;
 

@@ -19,6 +19,7 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="Type">How the question is answered; fixed when the question is created (F-97, BR2).</param>
 /// <param name="TrueFalseKey">The key of a true/false question; null when not set. Refused on any other type (F-97, BR3).</param>
 /// <param name="MatchItems">The left items of a matching question; null counts as none. Refused on any other type (F-106, BR6).</param>
+/// <param name="Blanks">The blanks of a fill-in-the-blanks question; null counts as none. Refused on any other type (F-107, BR7).</param>
 public sealed record QuestionContent(
     Guid? TopicId,
     string? ContentLanguage,
@@ -32,4 +33,5 @@ public sealed record QuestionContent(
     Guid? NoticeSubjectId = null,
     QuestionType Type = QuestionType.SingleChoice,
     bool? TrueFalseKey = null,
-    IReadOnlyList<MatchItemDraft>? MatchItems = null);
+    IReadOnlyList<MatchItemDraft>? MatchItems = null,
+    IReadOnlyList<BlankDraft>? Blanks = null);

@@ -62,6 +62,7 @@ public static class QuestionText
             QuestionType.TrueFalse => l["Questions.Type.TrueFalse"],
             QuestionType.MultipleAnswer => l["Questions.Type.MultipleAnswer"],
             QuestionType.Matching => l["Questions.Type.Matching"],
+            QuestionType.FillInTheBlanks => l["Questions.Type.FillInTheBlanks"],
             _ => l["Questions.Type.SingleChoice"]
         };
     }

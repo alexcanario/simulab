@@ -63,8 +63,10 @@ public sealed partial class QuestionHtmlSanitizer
     /// <summary>
     /// The sanitized HTML, its plain text and the stored images it holds; empty when <paramref name="html"/> is null or only
     /// empty tags. <paramref name="allowImages"/> is off for a field that takes no picture (the explanation, F-103 BR1).
+    /// <paramref name="readBlankMarkers"/> is on for the statement of a fill-in-the-blanks question (F-107, BR3, BR9): the
+    /// markers are read from the text between tags only, and each reads as <c>____</c> in the plain text.
     /// </summary>
-    public SanitizedHtml Sanitize(string? html, bool allowImages = true)
+    public SanitizedHtml Sanitize(string? html, bool allowImages = true, bool readBlankMarkers = false)
     {
         if (string.IsNullOrWhiteSpace(html))
         {
@@ -72,7 +74,7 @@ public sealed partial class QuestionHtmlSanitizer
         }
 
         var safe = SanitizeAllowList(Prepare(html, allowImages)).Trim();
-        var (plain, images) = ReadBack(safe);
+        var (plain, images, markers) = ReadBack(safe, readBlankMarkers);
 
         // Only empty tags is empty: nothing to store, so the field is the same as one that was not sent.
         return plain.Length == 0 && images.Ids.Count == 0
@@ -81,7 +83,8 @@ public sealed partial class QuestionHtmlSanitizer
             {
                 ImageIds = images.Ids,
                 ImagesWithoutAlt = images.WithoutAlt,
-                AltTooLong = images.AltTooLong
+                AltTooLong = images.AltTooLong,
+                BlankMarkers = markers
             };
     }
 
@@ -216,15 +219,30 @@ public sealed partial class QuestionHtmlSanitizer
 
     // The plain text and the images of the HTML that is going to be stored, from one parse. The alt of a picture is part of
     // the plain text (BR8): a decorative one (an empty alt) adds nothing. A picture counts with no alt attribute at all (BR4).
-    private static (string PlainText, ImagesFound Images) ReadBack(string safeHtml)
+    // F-107 BR3, BR9: with readBlankMarkers, the markers are read from the text nodes as parsed, before any alt is added,
+    // so a marker inside an attribute or split by a tag is never one; each reads as four underscores in the plain text.
+    private static (string PlainText, ImagesFound Images, List<int> Markers) ReadBack(string safeHtml, bool readBlankMarkers)
     {
         var ids = new List<Guid>();
+        var markers = new List<int>();
         if (safeHtml.Length == 0)
         {
-            return (string.Empty, new ImagesFound(ids, 0, 0));
+            return (string.Empty, new ImagesFound(ids, 0, 0), markers);
         }
 
         var document = new HtmlParser().ParseDocument(safeHtml);
+        if (readBlankMarkers && document.Body is { } body)
+        {
+            foreach (var text in body.GetDescendants().OfType<IText>().ToList())
+            {
+                text.Data = Marker().Replace(text.Data, match =>
+                {
+                    markers.Add(int.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture));
+                    return BlankMarker.PlainText;
+                });
+            }
+        }
+
         var withoutAlt = 0;
         var altTooLong = 0;
         foreach (var image in document.QuerySelectorAll("img").ToList())
@@ -259,9 +277,12 @@ public sealed partial class QuestionHtmlSanitizer
 
         var plain = WhiteSpace().Replace(document.Body?.TextContent ?? string.Empty, " ").Trim();
 
-        return (plain, new ImagesFound(ids, withoutAlt, altTooLong));
+        return (plain, new ImagesFound(ids, withoutAlt, altTooLong), markers);
     }
 
     [GeneratedRegex(@"\s+")]
     private static partial Regex WhiteSpace();
+
+    [GeneratedRegex(BlankMarker.Pattern)]
+    private static partial Regex Marker();
 }

@@ -1053,6 +1053,7 @@
   <data name="Gallery.RichText.Hint" xml:space="preserve"><value>Um editor visual para texto formatado, com o rótulo, a dica e o erro de todo campo do kit. Use Tab para entrar em um campo e ver o anel de foco.</value></data>
   <data name="Gallery.RichText.Empty" xml:space="preserve"><value>Vazio</value></data>
   <data name="Gallery.RichText.Filled" xml:space="preserve"><value>Preenchido</value></data>
+  <data name="Gallery.RichText.Blanks" xml:space="preserve"><value>Com Inserir lacuna (enunciado de lacunas)</value></data>
   <data name="Gallery.RichText.Error" xml:space="preserve"><value>Erro</value></data>
   <data name="Gallery.RichText.Disabled" xml:space="preserve"><value>Desabilitado</value></data>
   <data name="Gallery.RichText.Compact" xml:space="preserve"><value>Compacto (linha de alternativa)</value></data>
@@ -1157,6 +1158,33 @@
   <data name="question.match_item_text_required" xml:space="preserve"><value>Escreva o texto do item.</value></data>
   <data name="question.match_item_too_long" xml:space="preserve"><value>Um item passa de 2.000 caracteres.</value></data>
   <data name="question.match_items_not_allowed" xml:space="preserve"><value>Só uma questão de associação tem itens à esquerda.</value></data>
+  <data name="Questions.Type.FillInTheBlanks" xml:space="preserve"><value>Lacunas</value></data>
+  <data name="Questions.Type.FillInTheBlanks.Description" xml:space="preserve"><value>Lacunas no enunciado; o aluno digita cada resposta.</value></data>
+  <data name="RichText.Blank" xml:space="preserve"><value>Inserir lacuna</value></data>
+  <data name="Questions.Section.Blanks" xml:space="preserve"><value>Lacunas</value></data>
+  <data name="Questions.Section.Blanks.Subtitle" xml:space="preserve"><value>Insira uma lacuna no enunciado e escreva as respostas que ela aceita. Maiúsculas e espaços extras são ignorados; acentos contam.</value></data>
+  <data name="Questions.Blanks.Empty" xml:space="preserve"><value>Nenhuma lacuna ainda. Use Inserir lacuna no enunciado.</value></data>
+  <data name="Questions.Blanks.Blank" xml:space="preserve"><value>Lacuna {0}</value></data>
+  <data name="Questions.Blanks.Answer.Field" xml:space="preserve"><value>Resposta aceita {0} da lacuna {1}</value></data>
+  <data name="Questions.Blanks.Answer.Name" xml:space="preserve"><value>resposta {0} da lacuna {1}</value></data>
+  <data name="Questions.Blanks.Answer.Placeholder" xml:space="preserve"><value>Uma resposta que a lacuna aceita</value></data>
+  <data name="Questions.Blanks.Answer.Removed" xml:space="preserve"><value>Resposta removida. Restam {0} na lacuna {1}.</value></data>
+  <data name="Questions.Blanks.AddAnswer" xml:space="preserve"><value>Adicionar resposta</value></data>
+  <data name="Questions.Blanks.AnswersCount" xml:space="preserve"><value>{0} de 5 respostas</value></data>
+  <data name="Questions.Checklist.Blanks.Count" xml:space="preserve"><value>De 1 a 10 lacunas no enunciado</value></data>
+  <data name="Questions.Checklist.Blanks.Answers" xml:space="preserve"><value>Toda lacuna tem uma resposta aceita</value></data>
+  <data name="Questions.Preview.BlanksInstruction" xml:space="preserve"><value>Preencha cada lacuna.</value></data>
+  <data name="Questions.Preview.BlankKey" xml:space="preserve"><value>Lacuna {0}: {1}</value></data>
+  <data name="Questions.Preview.BlankNoKey" xml:space="preserve"><value>Lacuna {0}: ainda sem gabarito</value></data>
+  <data name="question.blanks_count" xml:space="preserve"><value>Uma questão de lacunas tem de 1 a 10 lacunas no enunciado.</value></data>
+  <data name="question.blank_repeated" xml:space="preserve"><value>Cada número de lacuna aparece uma só vez no enunciado.</value></data>
+  <data name="question.blank_marker_missing" xml:space="preserve"><value>Uma lacuna não tem marcador no enunciado.</value></data>
+  <data name="question.blank_answers_required" xml:space="preserve"><value>Toda lacuna precisa de uma resposta aceita.</value></data>
+  <data name="question.blank_answers_count" xml:space="preserve"><value>Uma lacuna aceita no máximo 5 respostas.</value></data>
+  <data name="question.blank_answer_required" xml:space="preserve"><value>Escreva a resposta ou remova-a.</value></data>
+  <data name="question.blank_answer_too_long" xml:space="preserve"><value>Uma resposta passa de 100 caracteres.</value></data>
+  <data name="question.blank_answer_repeated" xml:space="preserve"><value>Duas respostas desta lacuna são iguais quando se ignoram maiúsculas e espaços extras.</value></data>
+  <data name="question.blanks_not_allowed" xml:space="preserve"><value>Só uma questão de lacunas tem lacunas.</value></data>
   <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>O tipo não pode ser alterado depois que a questão é criada.</value></data>
   <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Gabarito</value></data>
   <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Marque o enunciado como certo ou errado. Só é exigido para publicar.</value></data>

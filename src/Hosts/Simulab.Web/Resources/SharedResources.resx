@@ -1053,6 +1053,7 @@
   <data name="Gallery.RichText.Hint" xml:space="preserve"><value>A visual editor for formatted text, with the label, hint and error of every kit field. Tab into a field to see its focus ring.</value></data>
   <data name="Gallery.RichText.Empty" xml:space="preserve"><value>Empty</value></data>
   <data name="Gallery.RichText.Filled" xml:space="preserve"><value>Filled</value></data>
+  <data name="Gallery.RichText.Blanks" xml:space="preserve"><value>With Insert blank (fill-in-the-blanks statement)</value></data>
   <data name="Gallery.RichText.Error" xml:space="preserve"><value>Error</value></data>
   <data name="Gallery.RichText.Disabled" xml:space="preserve"><value>Disabled</value></data>
   <data name="Gallery.RichText.Compact" xml:space="preserve"><value>Compact (option row)</value></data>
@@ -1157,6 +1158,33 @@
   <data name="question.match_item_text_required" xml:space="preserve"><value>Write the text of the item.</value></data>
   <data name="question.match_item_too_long" xml:space="preserve"><value>An item has more than 2,000 characters.</value></data>
   <data name="question.match_items_not_allowed" xml:space="preserve"><value>Only a matching question has items on the left.</value></data>
+  <data name="Questions.Type.FillInTheBlanks" xml:space="preserve"><value>Fill in the blanks</value></data>
+  <data name="Questions.Type.FillInTheBlanks.Description" xml:space="preserve"><value>Blanks in the statement; the student types each answer.</value></data>
+  <data name="RichText.Blank" xml:space="preserve"><value>Insert blank</value></data>
+  <data name="Questions.Section.Blanks" xml:space="preserve"><value>Blanks</value></data>
+  <data name="Questions.Section.Blanks.Subtitle" xml:space="preserve"><value>Insert a blank in the statement, then write the answers it accepts. Case and extra spaces are ignored; accents count.</value></data>
+  <data name="Questions.Blanks.Empty" xml:space="preserve"><value>No blank yet. Use Insert blank in the statement.</value></data>
+  <data name="Questions.Blanks.Blank" xml:space="preserve"><value>Blank {0}</value></data>
+  <data name="Questions.Blanks.Answer.Field" xml:space="preserve"><value>Accepted answer {0} of blank {1}</value></data>
+  <data name="Questions.Blanks.Answer.Name" xml:space="preserve"><value>answer {0} of blank {1}</value></data>
+  <data name="Questions.Blanks.Answer.Placeholder" xml:space="preserve"><value>An answer the blank accepts</value></data>
+  <data name="Questions.Blanks.Answer.Removed" xml:space="preserve"><value>Answer removed. {0} left in blank {1}.</value></data>
+  <data name="Questions.Blanks.AddAnswer" xml:space="preserve"><value>Add answer</value></data>
+  <data name="Questions.Blanks.AnswersCount" xml:space="preserve"><value>{0} of 5 answers</value></data>
+  <data name="Questions.Checklist.Blanks.Count" xml:space="preserve"><value>1 to 10 blanks in the statement</value></data>
+  <data name="Questions.Checklist.Blanks.Answers" xml:space="preserve"><value>Every blank has an accepted answer</value></data>
+  <data name="Questions.Preview.BlanksInstruction" xml:space="preserve"><value>Fill in each blank.</value></data>
+  <data name="Questions.Preview.BlankKey" xml:space="preserve"><value>Blank {0}: {1}</value></data>
+  <data name="Questions.Preview.BlankNoKey" xml:space="preserve"><value>Blank {0}: no key yet</value></data>
+  <data name="question.blanks_count" xml:space="preserve"><value>A fill-in-the-blanks question has 1 to 10 blanks in the statement.</value></data>
+  <data name="question.blank_repeated" xml:space="preserve"><value>Each blank number appears only once in the statement.</value></data>
+  <data name="question.blank_marker_missing" xml:space="preserve"><value>A blank has no marker in the statement.</value></data>
+  <data name="question.blank_answers_required" xml:space="preserve"><value>Every blank needs an accepted answer.</value></data>
+  <data name="question.blank_answers_count" xml:space="preserve"><value>A blank accepts at most 5 answers.</value></data>
+  <data name="question.blank_answer_required" xml:space="preserve"><value>Write the answer or remove it.</value></data>
+  <data name="question.blank_answer_too_long" xml:space="preserve"><value>An answer has more than 100 characters.</value></data>
+  <data name="question.blank_answer_repeated" xml:space="preserve"><value>Two answers of this blank are the same once case and extra spaces are ignored.</value></data>
+  <data name="question.blanks_not_allowed" xml:space="preserve"><value>Only a fill-in-the-blanks question has blanks.</value></data>
   <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>The type cannot be changed after the question is created.</value></data>
   <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Answer key</value></data>
   <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Mark the statement as true or false. Needed only to publish.</value></data>

@@ -28,6 +28,9 @@ public sealed class QuestionBankModuleDbContext(
     /// <summary>F-106: the left items of the matching questions, in position order.</summary>
     public DbSet<QuestionMatchItem> QuestionMatchItems => Set<QuestionMatchItem>();
 
+    /// <summary>F-107: the blanks of the fill-in-the-blanks questions, one per marker.</summary>
+    public DbSet<QuestionBlank> QuestionBlanks => Set<QuestionBlank>();
+
     /// <summary>F-103: the pictures of the statements, options and base texts; the files are in the storage.</summary>
     public DbSet<QuestionImage> QuestionImages => Set<QuestionImage>();
 
@@ -46,6 +49,7 @@ public sealed class QuestionBankModuleDbContext(
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new BaseTextConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestionBlankConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionImageConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionMatchItemConfiguration());

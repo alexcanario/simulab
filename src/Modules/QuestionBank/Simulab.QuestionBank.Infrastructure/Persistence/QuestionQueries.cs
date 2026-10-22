@@ -142,6 +142,7 @@ public sealed class QuestionQueries(
             .AsNoTracking()
             .Include(row => row.Options)
             .Include(row => row.MatchItems)
+            .Include(row => row.Blanks)
             .AsSplitQuery()
             .FirstOrDefaultAsync(row => row.Id == id, cancellationToken);
         if (question is null)
@@ -205,6 +206,12 @@ public sealed class QuestionQueries(
                 .. question.MatchItems
                     .OrderBy(item => item.Position)
                     .Select(item => new MatchItemResponse(item.Position, item.TextHtml, item.MatchPosition))
+            ],
+            // F-107: in statement order.
+            [
+                .. question.Blanks
+                    .OrderBy(blank => blank.Position)
+                    .Select(blank => new BlankResponse(blank.Number, [.. blank.AcceptedAnswers]))
             ]);
     }
 
@@ -373,7 +380,9 @@ public sealed class QuestionQueries(
                 .. version.MatchItems
                     .OrderBy(item => item.Position)
                     .Select(item => new MatchItemResponse(item.Position, item.TextHtml, item.MatchPosition))
-            ]));
+            ],
+            // F-107: the JSON array keeps the statement order.
+            [.. version.Blanks.Select(blank => new BlankResponse(blank.Number, [.. blank.AcceptedAnswers]))]));
     }
 
     public async Task<IReadOnlyList<QuestionTaxonomySubjectResponse>> GetTaxonomyAsync(CancellationToken cancellationToken) =>

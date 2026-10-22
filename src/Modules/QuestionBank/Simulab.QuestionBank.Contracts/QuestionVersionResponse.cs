@@ -23,6 +23,10 @@ namespace Simulab.QuestionBank.Contracts;
 /// The left items of a matching question with their matches (F-106, BR8); the Api always sends the list, empty for
 /// the other types and for versions recorded before F-106.
 /// </param>
+/// <param name="Blanks">
+/// The blanks of a fill-in-the-blanks question in statement order (F-107, BR10); the Api always sends the list, empty
+/// for the other types and for versions recorded before F-107.
+/// </param>
 public sealed record QuestionVersionResponse(
     Guid Id,
     Guid QuestionId,
@@ -38,4 +42,5 @@ public sealed record QuestionVersionResponse(
     string? Reason,
     DateTimeOffset CreatedAt,
     bool Annulled,
-    IReadOnlyList<MatchItemResponse>? MatchItems = null);
+    IReadOnlyList<MatchItemResponse>? MatchItems = null,
+    IReadOnlyList<BlankResponse>? Blanks = null);

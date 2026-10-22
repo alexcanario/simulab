@@ -10,10 +10,12 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="Written">The options as written; any of them is a refusal.</param>
 /// <param name="Value">The key; null when it is not set.</param>
 /// <param name="MatchItemsWritten">Left items that came with them; any of them is a refusal (F-106, BR6).</param>
+/// <param name="BlanksWritten">Blanks that came with them; any of them is a refusal (F-107, BR7).</param>
 public sealed record TrueFalseKey(
     IReadOnlyList<OptionDraft> Written,
     bool? Value,
-    IReadOnlyList<MatchItemDraft>? MatchItemsWritten = null) : AnswerKey
+    IReadOnlyList<MatchItemDraft>? MatchItemsWritten = null,
+    IReadOnlyList<BlankDraft>? BlanksWritten = null) : AnswerKey
 {
     public override QuestionType Type => QuestionType.TrueFalse;
 
@@ -28,7 +30,7 @@ public sealed record TrueFalseKey(
             return new OptionFault(new Error(QuestionBankErrorCodes.QuestionOptionsNotAllowed, ErrorKind.Validation), null);
         }
 
-        if (MatchItemsRefused(MatchItemsWritten) is { } refused)
+        if ((MatchItemsRefused(MatchItemsWritten) ?? BlanksRefused(BlanksWritten)) is { } refused)
         {
             return refused;
         }
