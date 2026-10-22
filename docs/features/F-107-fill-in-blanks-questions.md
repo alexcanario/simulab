@@ -1,7 +1,7 @@
 ---
 feature: F-107
 epic: Question bank
-status: refining
+status: approved
 board: 153
 version: 1
 ---
@@ -186,6 +186,7 @@ No mockup (owner, 2026-10-21): the form gains a fifth type card, one toolbar but
 - 2026-10-21 — No security section: no door (no upload, permission change, personal data or authentication); the routes and the permission are unchanged — Claude
 - 2026-10-21 — Reuse: the `AnswerKey` seam (F-97, F-106), the F-98 reason field and `NextVersion`, the F-103 toolbar button pattern in `rich-text.js`, kit `AppItemRows`, `AppRowActions`, `AppTextField`, `AppRadioCards`, the migration test pattern of F-104 and F-106, the base-text fan-out and `CopyAs` lists of F-106 (its trap T3) — Claude
 - 2026-10-21 — Size M, fits one session: one domain unit, one table, a migration, a fifth card, one toolbar button, one key section, one preview change and the key-change fix — the same shape as F-106 — Claude, from the code read
+- 2026-10-22 — Approved by the owner ("aprovo F-107"); every dependency delivered (`deps.js block`: FREE).
 
 ## Out of scope
 - Scoring: all or nothing, credit per blank, weight per blank — epic E-6 (owner, 2026-10-09).
