@@ -1,0 +1,5 @@
+name: staging-power
+
+# F-81 skeleton: the test phase of the build needs the file to exist; the real workflow replaces this text.
+on:
+  workflow_dispatch:

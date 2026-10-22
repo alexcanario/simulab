@@ -1,7 +1,7 @@
 ---
 feature: F-81
 epic: Cloud hosting and operations
-status: approved
+status: building
 board: 124
 version: 1
 ---
@@ -62,6 +62,22 @@ No screen and no API route. The GitHub Actions page and `gh workflow run` are th
 - AC11 Given the real staging running, when the owner runs `park`, then the run is green, `api`, `web` and `redis` have zero minimum replicas and the PostgreSQL server is `Stopped`; and given it parked, when the owner runs `start`, then the run is green and the Check URL answers 200. Running either one again is green and changes nothing. (UC1, UC2, UC3, BR6, BR7; validation script)
 - AC12 No UI text is added and no resource file is touched.
 
+## Criterion → test
+| Criterion | Test |
+|---|---|
+| AC1 | `StagingPowerWorkflowTests.Trigger_IsOnlyWorkflowDispatchWithARequiredActionChoice_AndNoEnvironmentInput`, `StagingPowerWorkflowTests.Job_RunsInTheLiteralEnvironmentStaging` |
+| AC2 | `StagingPowerWorkflowTests.Permissions_AreExactlyIdTokenWriteAndContentsRead`, `StagingPowerWorkflowTests.AzureLogin_UsesOidcWithIdsFromVariables`, `StagingPowerWorkflowTests.Workflow_ReadsNoSecretAtAll` |
+| AC3 | `StagingPowerWorkflowTests.Concurrency_IsTheGroupOfTheStagingDeploy_AndNeverCancelsARunningRun` |
+| AC4 | `StagingPowerWorkflowTests.RefCheck_IsTheFirstStep_BeforeTheAzureSignIn`, `StagingPowerWorkflowTests.RefCheck_AcceptsOnlyMainOrATagV` |
+| AC5 | `StagingPowerWorkflowTests.ParkStep_RunsTheLinesOfInfraCharacterForCharacter_OnlyOnPark_AppsBeforeTheServer`, `StagingPowerWorkflowTests.StartStep_RunsTheLinesOfInfraCharacterForCharacter_OnlyOnStart_ServerBeforeTheApps` |
+| AC6 | `StagingPowerWorkflowTests.Workflow_HardCodesNoResourceName_AndTakesTheGroupFromTheEnvironmentVariable`, `StagingPowerWorkflowTests.FindServerStep_FailsUnlessTheGroupHoldsExactlyOneServer` |
+| AC7 | `StagingPowerWorkflowTests.FindServerStep_AcceptsOnlyReadyOrStopped_AndNamesTheOtherState`, `StagingPowerWorkflowTests.ParkStep_StopsTheServerOnlyWhenItIsNotStopped_AndAlwaysUpdatesTheApps`, `StagingPowerWorkflowTests.StartStep_StartsTheServerOnlyWhenItIsNotReady_AndAlwaysUpdatesTheApps` |
+| AC8 | `StagingPowerWorkflowTests.ParkCheck_FailsUnlessTheServerIsStoppedAndTheThreeAppsHaveZeroMinimumReplicas`, `StagingPowerWorkflowTests.WaitStep_WaitsOnTheCheckUrlForAtMostTenMinutes_AfterAStart_AndFailsOtherwise`, `StagingPowerWorkflowTests.WaitStep_PassesWhenTheCheckUrlAnswers200` |
+| AC9 | `StagingPowerWorkflowTests.Summary_NamesTheActionTheRefTheCommitTheState_AndTheSevenDayRestartAfterAPark` |
+| AC10 | `StagingPowerWorkflowTests.Infra_StartAndStopSection_HoldsTheBlocksAndNamesTheWorkflow`, `StagingPowerWorkflowTests.Infra_CodeHostingTable_HasTheWorkflowRow` |
+| AC11 | validation step 2 to 5 |
+| AC12 | validation step 1 (no resource file in the diff) |
+
 ## Decisions
 - 2026-10-22 — Only started by hand; no schedule in this item — F-65 D1 (manual trigger only, nothing runs without being asked) still holds — confirmed: F-65
 - 2026-10-22 — The workflow runs the commands of `docs/infra.md` unchanged and a test compares both — one source of truth — confirmed: F-65
@@ -76,6 +92,7 @@ No screen and no API route. The GitHub Actions page and `gh workflow run` are th
 - 2026-10-22 — Tests live in `tests/Hosts/Simulab.AppHost.Tests` as `StagingPowerWorkflowTests`, reading the YAML as F-65's `DeployWorkflowTests` does; no new package (`YamlDotNet` is already referenced by that project) (Claude, technical)
 - 2026-10-22 — No security section: no route, screen, upload or inbound call is opened, and the sign-in and its permissions are F-65's (no door by `model-choice.md` signal 1) (Claude, technical)
 - 2026-10-22 — A sign-in session lives in Redis, so a park signs every tester out; that is the documented behavior of F-64 (BR4) and is not new here (Claude, technical)
+- 2026-10-22: plan — 1 tests of AC1-AC10 (workflow read as YAML, steps run in bash with a fake `az`) plus a stub workflow and a shared test helper, locked → red for missing behavior; 2 `staging-power.yml` (ref check, sign-in, server and state, park, start, checks, summary) → AC1-AC9 green; 3 `docs/infra.md` command blocks, workflow row and how-to → AC5 and AC10 green; 4 gate, scan, validation script → `agile gate GREEN`. No design passes (no project, contract, message or schema). Reuse: `DeployWorkflowTests` pattern; its private bash runner is copied into a new helper (debt, the old file stays untouched).
 
 ## Out of scope
 - A scheduled park, resume or re-park (a new idea, depends on F-117).
