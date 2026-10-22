@@ -493,6 +493,24 @@ public sealed class CatalogApiClient(HttpClient http)
             () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/subjects/{subjectId}"), accessToken),
             cancellationToken);
 
+    /// <summary>F-90 UC1: the live notice subjects that map the subject whole.</summary>
+    public Task<ApiResult<WhereUsedResponse>> GetSubjectWhereUsedAsync(
+        string accessToken,
+        Guid subjectId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<WhereUsedResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/subjects/{subjectId}/where-used"), accessToken),
+            cancellationToken);
+
+    /// <summary>F-90 UC2: the live notice subjects that map the topic and how many questions point at it.</summary>
+    public Task<ApiResult<WhereUsedResponse>> GetTopicWhereUsedAsync(
+        string accessToken,
+        Guid topicId,
+        CancellationToken cancellationToken = default) =>
+        SendAsync<WhereUsedResponse>(
+            () => Authorized(new HttpRequestMessage(HttpMethod.Get, $"{Base}/topics/{topicId}/where-used"), accessToken),
+            cancellationToken);
+
     /// <summary>F-79 UC2.</summary>
     public Task<ApiResult<SubjectResponse>> CreateSubjectAsync(
         string accessToken,

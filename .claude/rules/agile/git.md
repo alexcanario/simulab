@@ -1,20 +1,19 @@
 # Git
 
-- The main branch is the one named in `CLAUDE.md` (default `main`). Never edit it directly: every item has its branch, `feature/F-<n>` or `bug/B-<n>` (`feature/<id>` / `bug/<id>` when the item took a ticket id).
-- Never push, merge or rebase onto the main branch without the owner's authorization in the current conversation; typing `/agile:ship <id>` is that authorization for that item. With `- Merge: pr` in `CLAUDE.md` it authorizes only the push of the item branch and the pull request; the owner merges on the PR.
+- The main branch is the one named in `CLAUDE.md` (default `main`). Never edit it directly: every item has its branch, `feature/<id>` or `bug/<id>` (`F-<n>`, `B-<n>` or a ticket id).
+- Never push, merge or rebase onto the main branch without the owner's authorization in the current conversation; typing `/agile:ship <id>` is that authorization for that item, and with `- Merge: pr` in `CLAUDE.md` only for the push and the pull request.
 - Never force-push, reset a shared branch, delete a branch or skip hooks (`--no-verify`) without asking.
 - Commits are Conventional Commits in English with the item id: `feat(F-3): add exam board list`.
 - Commit in small steps on the item branch. Nothing stays only on disk: before a pause, commit with `wip(F-<n>): ...`.
-- An item file that is not `done` (refining, approved, building, validating, blocked) is committed on the item branch, never on the main branch; the guard hook refuses it. Docs-only commits on the main branch (ideas, epics, retro, sync) carry no code or tests.
-- A commit message says what the diff really does. Check `git diff --staged` and `git branch --show-current` right before every commit: an IDE can switch the branch behind the session. A guard hook refuses a commit on the main branch while an item branch is open.
-- Start of session: `git status` and `git log` on the main checkout and on **every** worktree (`git worktree list`). Report uncommitted work before anything else.
+- An item file that is not `done` is committed on the item branch, never on the main branch; the guard hook refuses it. Docs-only commits on the main branch (ideas, epics, retro, sync) carry no code or tests.
+- A commit message says what the diff really does. Check `git diff --staged` and `git branch --show-current` before every commit: an IDE can switch the branch. A guard hook refuses a commit on the main branch while an item branch is open.
+- Start of session: `git status` and `git log` on the main checkout and on **every** worktree (`git worktree list`). Report uncommitted work first.
 - If git and the board or the files disagree, stop and ask.
-- Every item has its own worktree, created by `/agile:refine` before it writes anything and reused by the build. No checkout is ever switched; one writer per worktree, and two writers never share one (the index races).
-- Worktrees live in a short folder named `f-<n>-<desc>` / `b-<n>-<desc>` (`<desc>`: the slug, ≤ 20 characters, cut at a hyphen) under the `Worktrees:` root of `CLAUDE.md` (default `<repository parent>/wt/<repository>/`). Never inside the repository. The item status lives in the worktree until the merge.
+- Every item has its own worktree, created by `/agile:refine` and reused by the build. No checkout is ever switched; one writer per worktree (the index races).
+- Worktrees live in a short folder named `f-<n>-<desc>` / `b-<n>-<desc>` (`<desc>`: the slug, ≤ 20 characters, cut at a hyphen; Windows paths break at 260) under the `Worktrees:` root of `CLAUDE.md`, never inside the repository.
 - Remove a worktree only with `scripts/worktree.js remove <path>` (worktrees.md "Ship from a worktree"), never by composing git commands; ask only when the folder is held or is an orphan.
 - Bring the item branch up to date with the main branch before the full suite, not after.
 - Merge with `--no-ff` and a message that references the item and the board id.
-- After a merge verify: `git rev-list --left-right --count main...origin/main` shows `0 0`, the branch is gone locally and absent from `git ls-remote --heads origin <branch>` (delete it on the remote only when that lists it: an item branch is usually never pushed), that item's worktree folder is gone.
 - A merge commit with an empty diff is a defect. Check `git show --stat` after merging.
 - Stage files by name in the main checkout (never `git add -A` or `git add .`): another session may have uncommitted work sitting there, and a broad stage silently sweeps it into your commit.
 - Never commit secrets, connection strings with passwords, or local settings. Use user secrets or environment variables. A hook refuses a commit, a push or a `gh`/`az` body that carries one; fake test data takes `agile:allow-secret` on its line.

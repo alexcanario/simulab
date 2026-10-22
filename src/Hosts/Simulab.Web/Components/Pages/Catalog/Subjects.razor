@@ -73,7 +73,8 @@
         <AppRowActions ItemName="@context.Name"
                        OnEdit="@(() => EditAsync(context))"
                        OnDelete="@(() => DeleteAsync(context))"
-                       DeleteDisabledReason="@DeleteDisabledReason(context)" />
+                       DeleteDisabledReason="@DeleteDisabledReason(context)"
+                       MoreActions="@WhereUsedActions(context)" />
     </RowActions>
 </AppDataTable>
 
@@ -101,6 +102,29 @@
         subject.TopicCount > 0
             ? L["Subjects.Delete.DisabledHasTopics"].Value
             : subject.InUse ? L["Subjects.Delete.DisabledInUse"].Value : null;
+
+    // F-90, BR7: only a subject in use has the action, next to its disabled delete.
+    private IReadOnlyList<AppRowAction>? WhereUsedActions(SubjectResponse subject) =>
+        subject.InUse ? [new AppRowAction(L["WhereUsed.Action"], AppIcons.WhereUsed, () => WhereUsedAsync(subject))] : null;
+
+    private async Task WhereUsedAsync(SubjectResponse subject)
+    {
+        var parameters = new DialogParameters<WhereUsedDialog>
+        {
+            {
+                dialog => dialog.Load,
+                async () => await TokenAsync() is not { } token
+                    ? ApiResult.Failed<WhereUsedResponse>(ErrorText.UnexpectedCode)
+                    : await Api.GetSubjectWhereUsedAsync(token, subject.Id)
+            }
+        };
+
+        var dialog = await Dialogs.ShowAsync<WhereUsedDialog>(L["WhereUsed.Title", subject.Name], parameters, DialogOptions);
+        await dialog.Result;
+
+        // BR8: what the dialog showed may differ from the row (released or deleted since the list loaded).
+        await _table.ReloadAsync();
+    }
 
     protected override async Task OnInitializedAsync()
     {

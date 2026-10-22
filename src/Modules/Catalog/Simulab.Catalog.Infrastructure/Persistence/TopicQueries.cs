@@ -48,4 +48,20 @@ public sealed class TopicQueries(CatalogModuleDbContext context, IEnumerable<ITo
             ? topics
             : [.. topics.Select(topic => used.Contains(topic.Id) ? topic with { InUse = true } : topic)];
     }
+
+    // F-90, BR3, BR9: the topic's live mappings and the sum of what every module counts for it.
+    public async Task<WhereUsedResponse?> WhereUsedAsync(Guid id, CancellationToken cancellationToken)
+    {
+        if (!await context.Topics.AnyAsync(topic => topic.Id == id, cancellationToken))
+        {
+            return null;
+        }
+
+        var mappings = await WhereUsedMappings.ListAsync(
+            context,
+            context.LiveNoticeSubjectMappings.Where(mapping => mapping.TopicId == id),
+            cancellationToken);
+
+        return new WhereUsedResponse(mappings, await TopicUsageChecks.CountAsync(usageChecks, id, cancellationToken));
+    }
 }

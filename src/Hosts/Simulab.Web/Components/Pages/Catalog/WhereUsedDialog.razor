@@ -1,0 +1,110 @@
+@* F-90: what makes a subject or a topic "in use", read when the dialog opens. Read-only (BR1): each notice subject
+   links to its edition page, where the mapping is released (F-75); for a topic, the question count links to the
+   question list filtered by it for who holds questions.manage (BR6). The caller reloads its list on close (BR8). *@
+@using Simulab.Catalog.Contracts
+@using Simulab.Identity.Contracts
+@using Simulab.QuestionBank.Contracts
+@using Simulab.Web.Components.Pages.QuestionBank
+@using Simulab.Web.Services
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+
+<MudDialog Class="app-where-used-dialog">
+    <DialogContent>
+        @if (_loading)
+        {
+            <AppLoadingState />
+        }
+        else if (_error is not null)
+        {
+            <AppAlert Severity="Severity.Error" Text="@_error" />
+        }
+        else if (_whereUsed is { } whereUsed)
+        {
+            @if (whereUsed.Mappings.Count == 0 && whereUsed.QuestionCount == 0)
+            {
+                <MudText Typo="Typo.body2" Class="app-muted">@L["WhereUsed.Empty"]</MudText>
+            }
+
+            @if (whereUsed.Mappings.Count > 0)
+            {
+                <MudText Typo="Typo.subtitle2" id="@MappingsHeadingId" Class="mb-1">@L["WhereUsed.NoticeSubjects"]</MudText>
+                <AppItemRows TItem="WhereUsedMappingResponse"
+                             Items="whereUsed.Mappings"
+                             EmptyMessage="@L["WhereUsed.Empty"]"
+                             AriaLabelledBy="@MappingsHeadingId"
+                             Class="mb-4">
+                    <RowTemplate Context="mapping">
+                        <div class="app-where-used-mapping">
+                            <AppLink Href="@($"/admin/exams/{mapping.ExamId}/editions/{mapping.EditionId}")">
+                                @EditionLabel(mapping)
+                            </AppLink>
+                            <div class="app-muted">@mapping.NoticeSubjectName</div>
+                        </div>
+                    </RowTemplate>
+                </AppItemRows>
+            }
+
+            @if (whereUsed.QuestionCount > 0)
+            {
+                <MudText Typo="Typo.subtitle2" Class="mb-1">@L["WhereUsed.Questions"]</MudText>
+                <AuthorizeView Policy="@(PermissionPolicy.Prefix + QuestionBankPermissions.Manage)">
+                    <Authorized>
+                        <AppLink Href="@QuestionListHref">@CountText(whereUsed.QuestionCount)</AppLink>
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudText Typo="Typo.body2">@CountText(whereUsed.QuestionCount)</MudText>
+                    </NotAuthorized>
+                </AuthorizeView>
+            }
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" Color="Color.Primary" id="where-used-close" OnClick="Close">@L["Common.Close"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private const string MappingsHeadingId = "where-used-mappings";
+
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>Reads what uses the item, when the dialog opens (BR8: it may be released since the list loaded).</summary>
+    [Parameter, EditorRequired] public Func<Task<ApiResult<WhereUsedResponse>>> Load { get; set; } = default!;
+
+    /// <summary>The topic whose questions the count links to; null for a subject, which has no count.</summary>
+    [Parameter] public Guid? TopicId { get; set; }
+
+    private WhereUsedResponse? _whereUsed;
+    private string? _error;
+    private bool _loading = true;
+
+    private string QuestionListHref =>
+        "/admin/questions" + QuestionListQueryString.Build(new QuestionListState(TopicIds: TopicId is { } id ? [id] : null));
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Load();
+        _loading = false;
+        if (result is { IsSuccess: true, Value: { } whereUsed })
+        {
+            _whereUsed = whereUsed;
+        }
+        else
+        {
+            // 404: the item was deleted since the list loaded; the existing text says so, and the list reloads on close.
+            _error = Errors.For(result.ErrorCode);
+        }
+    }
+
+    private static string EditionLabel(WhereUsedMappingResponse mapping) =>
+        string.Join(
+            ExamEditionText.VisibleSeparator,
+            new[] { mapping.ExamName, mapping.NoticeYear.ToString(CultureInfo.InvariantCulture), mapping.Position }
+                .Where(part => !string.IsNullOrWhiteSpace(part)));
+
+    private string CountText(int count) =>
+        count == 1 ? L["WhereUsed.QuestionCount.One", count] : L["WhereUsed.QuestionCount", count];
+
+    private void Close() => Dialog.Close();
+}

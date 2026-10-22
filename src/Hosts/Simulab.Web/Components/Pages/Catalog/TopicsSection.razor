@@ -40,7 +40,8 @@
                     <AppRowActions ItemName="@topic.Name"
                                    OnEdit="@(() => OpenAsync(topic))"
                                    OnDelete="@(() => DeleteAsync(topic))"
-                                   DeleteDisabledReason="@(topic.InUse ? L["Topics.Delete.DisabledInUse"].Value : null)" />
+                                   DeleteDisabledReason="@(topic.InUse ? L["Topics.Delete.DisabledInUse"].Value : null)"
+                                   MoreActions="@WhereUsedActions(topic)" />
                 </div>
             </Actions>
         </AppItemRows>
@@ -113,6 +114,32 @@
             _topics = [];
             _loadFailed = true;
         }
+    }
+
+    // F-90, BR7: only a topic in use has the action, next to its disabled delete.
+    private IReadOnlyList<AppRowAction>? WhereUsedActions(TopicResponse topic) =>
+        topic.InUse ? [new AppRowAction(L["WhereUsed.Action"], AppIcons.WhereUsed, () => WhereUsedAsync(topic))] : null;
+
+    private async Task WhereUsedAsync(TopicResponse topic)
+    {
+        var parameters = new DialogParameters<WhereUsedDialog>
+        {
+            {
+                dialog => dialog.Load,
+                async () => await TokenAsync() is not { } token
+                    ? ApiResult.Failed<WhereUsedResponse>(ErrorText.UnexpectedCode)
+                    : await Api.GetTopicWhereUsedAsync(token, topic.Id)
+            },
+            { dialog => dialog.TopicId, topic.Id }
+        };
+
+        var dialog = await Dialogs.ShowAsync<WhereUsedDialog>(L["WhereUsed.Title", topic.Name], parameters, DialogOptions);
+        await dialog.Result;
+
+        // BR8: the topic may be released or deleted since the section loaded. The action is a plain delegate of
+        // AppRowActions, not an EventCallback of this section, so the reload is followed by a render (F-95, F-86).
+        await LoadAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task OpenAsync(TopicResponse? topic)

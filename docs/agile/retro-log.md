@@ -1465,3 +1465,16 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Lesson 3 (score 2/7), not applied (owner): the full suite took about 12 min (Catalog 11 m 27 s, Identity 11 m 25 s, QuestionBank 10 m 49 s), over the 5 min budget; no idea captured.
 - Seen again: the widget ticks did not reach `validation-ticks.js` (`0 of 16 tested`, fifth time); the open note stays.
 - Process slip: the app version bump ran on main after the merge instead of on the item branch before it (`AppVersionTests` 4/4 green on main).
+
+## 2026-10-22 - Sync with agile@canary 0.150.0
+- From 0.146.0 to 0.150.0. Copied (owner's OK): `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md`.
+- Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (edited, upstream unchanged); manual build files (no upstream change). Merged: none. Declined: none.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present; technical-term rows not swept.
+- Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
+## 2026-10-22 - Sync with agile@canary 0.156.0
+- From 0.150.0 to 0.156.0. Copied (owner's OK): `build-config.md`, `definition-of-done.md`, `output-style.md`, `workflow.md`, new `naming-dotnet.md`, `docs/agile/templates/project-claude.md`, `workflow.pt-BR.md`, `workflow-examples.pt-BR.md`, four `docs/agile/profile-sections/*.md`.
+- Merged: `git.md` and `naming.md` (one conflict each, project lines kept), `profile.md` (the compose recipe became a pointer to `profile-sections/deploy-aspire.md`; the Simulab ACA line kept).
+- Left alone: `i18n.md` (upstream unchanged); manual build files (no upstream change). Declined: glossary link lines (15 docs), capture of the two missing capabilities.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Build and tests not run (no build file changed).
+- Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).

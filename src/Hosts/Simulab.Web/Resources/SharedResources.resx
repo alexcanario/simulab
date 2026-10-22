@@ -747,6 +747,13 @@
   <data name="NoticeSubjects.Total.Unmapped.Many" xml:space="preserve"><value>{0} subjects are not mapped yet.</value></data>
   <data name="Subjects.Delete.DisabledInUse" xml:space="preserve"><value>Notice subjects map this whole subject. Remove it from their mappings before deleting it.</value></data>
   <data name="Topics.Delete.DisabledInUse" xml:space="preserve"><value>Notice subjects map this topic or questions use it. Remove those links before deleting it.</value></data>
+  <data name="WhereUsed.Action" xml:space="preserve"><value>Where used</value></data>
+  <data name="WhereUsed.Title" xml:space="preserve"><value>Where "{0}" is used</value></data>
+  <data name="WhereUsed.NoticeSubjects" xml:space="preserve"><value>Notice subjects</value></data>
+  <data name="WhereUsed.Questions" xml:space="preserve"><value>Questions</value></data>
+  <data name="WhereUsed.QuestionCount" xml:space="preserve"><value>Used by {0} questions</value></data>
+  <data name="WhereUsed.QuestionCount.One" xml:space="preserve"><value>Used by {0} question</value></data>
+  <data name="WhereUsed.Empty" xml:space="preserve"><value>Nothing uses this item any more.</value></data>
   <data name="notice_subject.mapping_invalid" xml:space="preserve"><value>One of the picked items is not valid. Remove it and pick it again.</value></data>
   <data name="notice_subject.mapping_too_many" xml:space="preserve"><value>At most 50 items per notice subject.</value></data>
   <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>One of the picked items is no longer in the taxonomy; it is marked below. Remove it and save again.</value></data>

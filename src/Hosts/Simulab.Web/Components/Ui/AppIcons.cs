@@ -58,6 +58,9 @@ public static class AppIcons
 
     /// <summary>F-79: the topics under a subject.</summary>
     public const string Topics = Icons.Material.Outlined.Bookmarks;
+
+    /// <summary>F-90: what uses a subject or a topic (the row action that explains a disabled delete).</summary>
+    public const string WhereUsed = Icons.Material.Outlined.AccountTree;
     public const string Security = Icons.Material.Outlined.Security;
 
     /// <summary>F-41: the AI gateway, and sending one prompt to it.</summary>
