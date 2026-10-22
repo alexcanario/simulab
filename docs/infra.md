@@ -81,7 +81,7 @@ The Api refuses to start until its certificates exist (F-64 BR4), so the first d
    ```powershell
    aspire deploy --apphost src/Hosts/Simulab.AppHost/Simulab.AppHost.csproj -e Staging -o artifacts/deploy/staging --clear-cache --non-interactive --nologo
    ```
-4. Learn the names: the Key Vault (`keyvault...`) is `VAULT_NAME` below, the PostgreSQL server (`postgres-...`) is the `<server>` of "Staging start and stop", and there are two storage accounts (`storageapi...`, `storageweb...`, one per host).
+4. Learn the names: the Key Vault (`keyvault...`) is `VAULT_NAME` below, the PostgreSQL server (`postgres-...`) is the `SERVER` of "Staging start and stop", and there are two storage accounts (`storageapi...`, `storageweb...`, one per host).
    ```powershell
    az resource list -g rg-simulab-staging -o table
    ```
@@ -146,9 +146,25 @@ The Api migrates the module schemas, roles and permissions and the OpenIddict cl
 - The measured cost (BR8) is read after one full test window followed by 7 parked days, in two periods: the days it ran and the parked days. Save as `cost.json` (dates are the period): `{ "type": "ActualCost", "timeframe": "Custom", "timePeriod": { "from": "2026-10-10T00:00:00Z", "to": "2026-10-16T23:59:59Z" }, "dataset": { "granularity": "None", "aggregation": { "totalCost": { "name": "Cost", "function": "Sum" } } } }`, then `az rest --method post --url "/subscriptions/<subscription id>/resourceGroups/rg-simulab-staging/providers/Microsoft.CostManagement/query?api-version=2023-11-01" --body @cost.json`. The figures lag 8 to 24 hours behind the spend; the service answers 429 after a handful of queries in a minute. The monthly figure is running days × running cost per day + parked days × parked cost per day, with the number of test days a month the owner expects; plan B of ADR-0002 applies when it, plus the ADR's production estimate, is above US$ 80.
 
 ### Staging start and stop (ADR-0002, BR3)
-Staging runs during test windows and is parked outside them. These commands are **declared, not yet run**: step 4 above gives the resource names (`<rg>` is the resource group of the environment, `<server>` its PostgreSQL server). A parked staging keeps its data: the key ring is a blob and the Redis container holds only sessions (they are lost on a park and testers sign in again).
-- Park: `az containerapp update -n api -g <rg> --min-replicas 0`, the same for `web` and `redis`, then `az postgres flexible-server stop -g <rg> -n <server>`. A parked staging keeps the PostgreSQL storage and the registry (about US$ 12/month, estimate); the PostgreSQL server restarts by itself after 7 days, so a long park needs the stop repeated.
-- Start: `az postgres flexible-server start -g <rg> -n <server>`, then `az containerapp update -n redis -g <rg> --min-replicas 1`, `-n api --min-replicas 1`, `-n web --min-replicas 0 --max-replicas 1` (the `web` wakes on the first request).
+Staging runs during test windows and is parked outside them, from GitHub (F-81). A parked staging keeps its data: the key ring is a blob and the Redis container holds only sessions (they are lost on a park and testers sign in again).
+
+**Run it**: GitHub → Actions → `staging-power` → Run workflow, choosing the ref `main` (or a tag `v*`) and the `action`; or `gh workflow run staging-power.yml --ref main -f action=park` / `gh workflow run staging-power.yml --ref main -f action=start`.
+
+The workflow signs in with the OIDC identity of "Deploy workflow" below, runs in the GitHub environment `staging` and nothing else (production is never parked), takes `RG` from the variable `AZURE_RESOURCE_GROUP` and finds `SERVER` as the one PostgreSQL server of that group (it stops without changing anything when there is none or more than one, or when the server is neither `Ready` nor `Stopped`). A `park` on a stopped server, or a `start` on a running one, skips the server command and still makes the apps match, so running either twice is safe. After the run it checks the result (park: server `Stopped` and the three apps at zero minimum replicas; start: the Check URL answers 200 within 10 minutes) and writes the state to the run summary. It shares the concurrency group `deploy-staging` with the staging deploy: one runs at a time and a running one is never cancelled, but GitHub keeps one pending run per group, so a newer pending run replaces an older pending one (a deploy included). Start staging before a deploy, as advice: what `aspire deploy` does to a parked staging is not verified.
+
+The commands the workflow runs, character for character (a test compares both). Park: the apps first, then the server. A parked staging keeps the PostgreSQL storage and the registry (about US$ 12/month, estimate). Azure starts a stopped PostgreSQL server by itself after 7 days, so a longer park needs the `park` run again (the workflow prints the date in its summary).
+```bash
+for APP in api web redis; do az containerapp update -n "$APP" -g "$RG" --min-replicas 0 -o none; done
+az postgres flexible-server stop -g "$RG" -n "$SERVER"
+```
+Start: the server first, then the apps (the `web` wakes on the first request).
+```bash
+az postgres flexible-server start -g "$RG" -n "$SERVER"
+az containerapp update -n redis -g "$RG" --min-replicas 1 -o none
+az containerapp update -n api -g "$RG" --min-replicas 1 -o none
+az containerapp update -n web -g "$RG" --min-replicas 0 --max-replicas 1 -o none
+```
+By hand (no workflow), set `RG` to the resource group and `SERVER` to the server of step 4 above in the shell, then run the same lines.
 - Production is not created until the first release and is never parked.
 
 ### Deploy workflow (F-65)
@@ -229,6 +245,7 @@ Data region: every user's data is hosted in Azure Central US (`centralus`), stag
 | Git remote | provisioned | GitHub, repository `alexcanario/simulab` |
 | CI (build + tests on pull requests and `main`, no deploy stages; F-62) | provisioned | GitHub Actions, `.github/workflows/ci.yml` |
 | Deploy workflow (OIDC sign-in, GitHub environments, approval for production) | provisioned | GitHub Actions, `.github/workflows/deploy.yml` (F-65); the one-time setup is "Deploy workflow" above |
+| Staging power workflow (park and start staging by hand) | provisioned | GitHub Actions, `.github/workflows/staging-power.yml` (F-81); how to run it: "Staging start and stop" above |
 | Board | provisioned | GitHub Issues + Projects, repository `alexcanario/simulab` |
 
 ## Access

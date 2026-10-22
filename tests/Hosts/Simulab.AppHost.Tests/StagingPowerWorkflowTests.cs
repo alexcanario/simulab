@@ -353,7 +353,7 @@ public class StagingPowerWorkflowTests
 
         script.Should().Contain("$GITHUB_STEP_SUMMARY").And.Contain("$ACTION").And.Contain("$GITHUB_REF").And.Contain("$GITHUB_SHA").And.Contain("flexible-server show");
         script.Should().Contain("+7 days").And.Contain("park");
-        Steps().Last().Should().BeSameAs(step, "the summary is the last step");
+        Scalar(Steps().Last(), "name").Should().Be(SummaryStep, "the summary is the last step");
     }
 
     // AC10

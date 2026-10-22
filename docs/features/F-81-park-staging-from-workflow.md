@@ -63,6 +63,9 @@ No screen and no API route. The GitHub Actions page and `gh workflow run` are th
 - AC12 No UI text is added and no resource file is touched.
 
 ## Criterion → test
+
+Tests locked: 619efc8936c6bce9e4676f325386df0ee69fd2cd (2 files); unlocks: 0
+
 | Criterion | Test |
 |---|---|
 | AC1 | `StagingPowerWorkflowTests.Trigger_IsOnlyWorkflowDispatchWithARequiredActionChoice_AndNoEnvironmentInput`, `StagingPowerWorkflowTests.Job_RunsInTheLiteralEnvironmentStaging` |
@@ -93,6 +96,8 @@ No screen and no API route. The GitHub Actions page and `gh workflow run` are th
 - 2026-10-22 — No security section: no route, screen, upload or inbound call is opened, and the sign-in and its permissions are F-65's (no door by `model-choice.md` signal 1) (Claude, technical)
 - 2026-10-22 — A sign-in session lives in Redis, so a park signs every tester out; that is the documented behavior of F-64 (BR4) and is not new here (Claude, technical)
 - 2026-10-22: plan — 1 tests of AC1-AC10 (workflow read as YAML, steps run in bash with a fake `az`) plus a stub workflow and a shared test helper, locked → red for missing behavior; 2 `staging-power.yml` (ref check, sign-in, server and state, park, start, checks, summary) → AC1-AC9 green; 3 `docs/infra.md` command blocks, workflow row and how-to → AC5 and AC10 green; 4 gate, scan, validation script → `agile gate GREEN`. No design passes (no project, contract, message or schema). Reuse: `DeployWorkflowTests` pattern; its private bash runner is copied into a new helper (debt, the old file stays untouched).
+- 2026-10-22: tests unlocked (the Summary test compared YAML nodes by reference across two parses and could never pass; it now compares the last step by name) - owner chose "Destravar e corrigir" as recommended
+- 2026-10-22: the `gh workflow run` forms are inline code in the section, not a fenced block, because the locked tests read the fenced `bash` blocks as the park and start commands (Claude, technical)
 
 ## Out of scope
 - A scheduled park, resume or re-park (a new idea, depends on F-117).
@@ -112,3 +117,4 @@ Written by `/agile:build` at its end (at most 8 steps; the real staging is neede
 ## Events
 
 - 2026-10-22 question — asked 2, from context 4
+- 2026-10-22 blocked — test wrong: Summary test compared YAML nodes by reference across separate parses; compare the last step by name
