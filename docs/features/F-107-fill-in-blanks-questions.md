@@ -176,12 +176,12 @@ Tests locked: 5ad60ba0209774fb91aac0c29fa7fb70593524af (8 files); unlocks: 0
 | AC11 | `FillInTheBlanksQuestionTests.NextVersion_ChangingOnlyTheTextAroundTheMarkers_IsAVersionWithNoKeyChange`, `.NextVersion_SwappingTheMarkers_IsAVersionWithNoKeyChange_InTheNewStatementOrder`, `.NextVersion_ReorderingAnswersOrChangingOnlyTheirCase_IsAVersionWithNoKeyChange`, `.NextVersion_NothingChanged_MakesNothing`; `FillInTheBlanksQuestionEndpointTests.Update_Published_SwappingMarkersAndReorderingAnswers_RecordsAVersionWithNoKeyChange`; the F-98, F-104 and F-106 version suites unedited |
 | AC12 | `FillInTheBlanksQuestionTests.AnnulAndReinstate_CopyTheBlanksOfTheLatestVersion`; `FillInTheBlanksQuestionEndpointTests.Create_SanitizesTheStatement_AndKeepsTheMarkers`, `.Create_WithElevenImagesInTheStatement_IsRefusedWithImagesTooMany`, `.Create_WithADifficultyOutOfRange_IsRefused`, `.Create_WithAPaperNumberAlreadyTaken_IsRefusedWithPaperNumberTaken`, `.Delete_Published_IsRefused_AndADraftIsDeleted`, `.DeleteTopic_WithOnlyAFillInQuestion_IsRefusedWithTopicInUse`, `.AnnulAndReinstate_KeepTheBlanksInTheirVersions`, `.Submit_CompleteDraft_GoesToReview_AndAnIncompleteOneIsRefused`, `.UpdateBaseText_LinkedToAPublishedFillIn_RecordsAVersionThatKeepsTheBlanks` |
 | AC13 | `FillInTheBlanksQuestionEndpointTests.List_QuestionsOfTheFiveTypes_NameTheTypeOfEachRow_AndTheExcerptHidesTheMarkers`, `.List_SearchingForAMarker_FindsNothing`, `.FindVersion_OfAnotherType_HasAnEmptyBlanksList`; `BlankMarkerSanitizerTests` (4); `FillInTheBlanksQuestionPreviewAndListTests.List_NamesTheFillInTheBlanksType` |
-| AC14 | `FillInTheBlanksQuestionFormTests` (16: cards, Insert blank on this type only, rows in statement order, what is sent, removed marker, type switch, edit read-only, checklist, section and row refusals, reason, frozen); the caret insertion of the next number: validation step (to number) |
+| AC14 | `FillInTheBlanksQuestionFormTests` (16: cards, Insert blank on this type only, rows in statement order, what is sent, removed marker, type switch, edit read-only, checklist, section and row refusals, reason, frozen); the caret insertion of the next number: validation step 3 (3.2; also checked by Claude through the app host on 2026-10-22) |
 | AC15 | `FillInTheBlanksQuestionPreviewAndListTests.Preview_FillIn_DrawsANumberedEmptyBoxForEachMarker_AndTheTaskLine`, `.Preview_FillIn_BeforeShowAnswer_HidesTheKeyAndTheExplanation`, `.Preview_FillIn_ShowAnswer_FillsTheBoxesAndListsEveryAcceptedAnswer`, `.Preview_FillInDraftWithAnUnansweredBlank_SaysItHasNoKeyYet`, `.VersionPreview_FillIn_ShowsTheBlanksOfTheVersion` |
 | AC16 | `AddFillInTheBlanksQuestionsMigrationTests.Up_AddsTheBlanksTableAndColumn_NamesTheFifthType_AndKeepsEveryRow` |
 | AC17 | `FillInTheBlanksQuestionEndpointTests.CreateAndUpdate_WithoutThePermission_AnswerForbidden` |
-| AC18 | `FillInTheBlanksQuestionFormTests.Add_FillIn_EachAnswerFieldNamesItsAnswerAndItsBlank`, `.Edit_FillIn_WhenTheApiRefusesTheBlanks_TheMessageIsUnderTheSection`, `.Add_ChoosingFillIn_ShowsInsertBlankOnTheStatementOnly_AndAnotherTypeHidesIt`; `FillInTheBlanksQuestionPreviewAndListTests.Preview_FillIn_DrawsANumberedEmptyBoxForEachMarker_AndTheTaskLine`; keyboard pass: validation step (to number) |
-| AC19 | `QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements` (now five); the button and the section there: validation step (to number) |
+| AC18 | `FillInTheBlanksQuestionFormTests.Add_FillIn_EachAnswerFieldNamesItsAnswerAndItsBlank`, `.Edit_FillIn_WhenTheApiRefusesTheBlanks_TheMessageIsUnderTheSection`, `.Add_ChoosingFillIn_ShowsInsertBlankOnTheStatementOnly_AndAnotherTypeHidesIt`; `FillInTheBlanksQuestionPreviewAndListTests.Preview_FillIn_DrawsANumberedEmptyBoxForEachMarker_AndTheTaskLine`; keyboard pass: validation step 8 (8.1) |
+| AC19 | `QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements` (now five); the button and the section there: validation step 8 (8.2) |
 | AC20 | `FillInTheBlanksQuestionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`, `ResourceParityTests` |
 
 ## Decisions
@@ -234,7 +234,72 @@ Tests locked: 5ad60ba0209774fb91aac0c29fa7fb70593524af (8 files); unlocks: 0
 ## Change notes
 
 ## Validation script
-<!-- Written by /agile:build. -->
+
+### English
+Needed to validate: the local app host — the owner; in place (Claude started it from this worktree on 2026-10-22, on its own database).
+
+1. Stop any app host you have open (the F-90 worktree's included: they share ports), then start this worktree's app host on its own database `simulab_f107` (the item's migration lands only there), from the worktree folder `D:\wt\simulab\f-107-fill-in-blanks`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f107 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f107"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Expected: the line `Dashboard:` with a link; the site answers at https://localhost:7125. To repeat, press Ctrl+C and run the same command.
+2. [ ] Open https://localhost:7125 and sign in as `admin@simulab.local` (the development password of `appsettings.Development.json`); if the page "Our documents changed" appears, click "Accept and continue". The database `simulab_f107` is new: if the subject field of step 3.2 finds nothing, first add a subject with one topic in the sidebar (menu lateral esquerdo) at Content > Subjects.
+3. Create a fill-in-the-blanks draft:
+   - [ ] 3.1 In the sidebar click Content > Questions, then Add. In "Question type" click the type card (cartão de tipo: each card of the "Question type" field) "Fill in the blanks": the Statement editor's toolbar gains Insert blank (Inserir lacuna: the button after the image button that writes the next marker [[n]] at the caret) and the blanks section (seção de lacunas: the "Blanks" card with one "Blank n" row per marker) replaces the Options card, saying "No blank yet. Use Insert blank in the statement.". The Explanation editor has no Insert blank.
+   - [ ] 3.2 Pick a subject and a topic. In Statement type "The capital of Brazil is ", click Insert blank, type " and it was founded in ", click Insert blank again: the text reads "... is [[1]] and it was founded in [[2]]" and the blanks section shows "Blank 1" and "Blank 2".
+   - [ ] 3.3 Under Blank 1 click "Add answer" twice and type Brasília and Brasilia ("2 of 5 answers"). Leave Blank 2 empty. Click Save: the page becomes the edit page, the type reads "Fill in the blanks", not editable; the checklist "Before publishing" shows "Every blank has an accepted answer" pending and Publish is disabled.
+4. Rules of the blanks:
+   - [ ] 4.1 Under Blank 1 add a third answer " brasília " (spaces around, lower case) and click Save: under Blank 1 the message "Two answers of this blank are the same once case and extra spaces are ignored." appears. Remove that answer.
+   - [ ] 4.2 In Statement delete "[[2]]": the Blank 2 row disappears. Type "[[2]]" back at the end: an empty Blank 2 row returns.
+   - [ ] 4.3 Under Blank 2 add the answer 1960, Save, then Publish: the status becomes Published.
+5. Preview:
+   - [ ] 5.1 In the Publication card click "Preview as a student": the statement shows an underlined box "1" and a box "2" in place of the markers (no answer, no hint of its length), then the line "Fill in each blank.".
+   - [ ] 5.2 Click "Show answer": the boxes read Brasília and 1960; below, the check icon with "Correct answer", "Blank 1: Brasília, Brasilia" and "Blank 2: 1960", and the explanation. Close the dialog.
+6. Answer key change:
+   - [ ] 6.1 Under Blank 1 change "Brasilia" to "BRASILIA" (case only): no reason field appears.
+   - [ ] 6.2 Under Blank 2 add the answer "MCMLX": the field "Reason for the answer key change" appears. Write a reason and Save: the History card lists the new version with "Answer key changed" and your reason; View on version 1 shows Blank 2 with 1960 only.
+7. [ ] Language: in the app bar (barra superior) click the globe and pick Português (Brasil): the type card reads "Lacunas", the toolbar button's tooltip "Inserir lacuna", the section "Lacunas" with "Lacuna 1", and the preview line "Preencha cada lacuna.". Switch back to English.
+8. Keyboard and transcription:
+   - [ ] 8.1 Without the mouse, on Questions > Add pick the Fill in the blanks card with the arrows; Tab into the Statement toolbar and reach Insert blank with the right arrow; Space writes the marker. Then Tab through each answer field, its remove action and "Add answer": each takes one Tab stop and the screen reader names "Accepted answer 1 of blank 1".
+   - [ ] 8.2 In the sidebar click Content > Exams, open the exam and then an edition, and on its Questions card click Transcribe: the "Question type" field offers five cards; pick Fill in the blanks and Insert blank and the blanks section appear (AC19).
+
+### pt-BR
+Necessário para validar: o app host local — o dono; disponível (o Claude subiu a partir deste worktree em 2026-10-22, no banco próprio).
+
+1. Pare qualquer app host aberto (inclusive o do worktree da F-90: as portas são as mesmas) e suba o app host deste worktree no banco próprio `simulab_f107` (a migração do item cai só nele), a partir da pasta do worktree `D:\wt\simulab\f-107-fill-in-blanks`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f107 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f107"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Esperado: a linha `Dashboard:` com um link; o site responde em https://localhost:7125. Para repetir, Ctrl+C e o mesmo comando.
+2. [ ] Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento de `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue". O banco `simulab_f107` é novo: se o campo de disciplina do passo 3.2 não achar nada, antes cadastre uma disciplina com um tópico no menu lateral (sidebar, menu lateral esquerdo) em Content > Subjects.
+3. Crie um rascunho de lacunas:
+   - [ ] 3.1 No menu lateral clique em Content > Questions e depois em Add. Em "Question type" clique no cartão de tipo (cada cartão do campo "Question type") "Fill in the blanks": a barra do editor de Statement ganha o Inserir lacuna (Insert blank: o botão depois do de imagem que escreve o próximo marcador [[n]] onde está o cursor) e a seção de lacunas (o cartão "Blanks" com uma linha "Blank n" por marcador) substitui o cartão Options, dizendo "No blank yet. Use Insert blank in the statement.". O editor de Explanation não tem Insert blank.
+   - [ ] 3.2 Escolha disciplina e tópico. Em Statement digite "The capital of Brazil is ", clique em Insert blank, digite " and it was founded in ", clique em Insert blank de novo: o texto fica "... is [[1]] and it was founded in [[2]]" e a seção de lacunas mostra "Blank 1" e "Blank 2".
+   - [ ] 3.3 Em Blank 1 clique duas vezes em "Add answer" e digite Brasília e Brasilia ("2 of 5 answers"). Deixe a Blank 2 vazia. Clique em Save: a página vira a de edição, o tipo aparece como "Fill in the blanks", sem edição; a lista "Before publishing" mostra "Every blank has an accepted answer" pendente e Publish fica desabilitado.
+4. Regras das lacunas:
+   - [ ] 4.1 Em Blank 1 acrescente uma terceira resposta " brasília " (com espaços, minúscula) e clique em Save: sob a Blank 1 aparece "Two answers of this blank are the same once case and extra spaces are ignored.". Remova essa resposta.
+   - [ ] 4.2 Em Statement apague "[[2]]": a linha Blank 2 some. Digite "[[2]]" de novo no fim: volta uma linha Blank 2 vazia.
+   - [ ] 4.3 Em Blank 2 acrescente a resposta 1960, Save e depois Publish: o status vira Published.
+5. Pré-visualização:
+   - [ ] 5.1 No cartão Publication clique em "Preview as a student": o enunciado mostra uma caixa sublinhada "1" e uma "2" no lugar dos marcadores (sem resposta e sem pista do tamanho), depois a linha "Fill in each blank.".
+   - [ ] 5.2 Clique em "Show answer": as caixas mostram Brasília e 1960; abaixo, o ícone com "Correct answer", "Blank 1: Brasília, Brasilia" e "Blank 2: 1960", e a explicação. Feche o diálogo.
+6. Troca de gabarito:
+   - [ ] 6.1 Em Blank 1 troque "Brasilia" por "BRASILIA" (só maiúsculas): não aparece campo de motivo.
+   - [ ] 6.2 Em Blank 2 acrescente a resposta "MCMLX": aparece o campo "Reason for the answer key change". Escreva um motivo e clique em Save: o cartão History lista a nova versão com "Answer key changed" e o seu motivo; View na versão 1 mostra a Blank 2 só com 1960.
+7. [ ] Idioma: na barra superior (app bar, a faixa no alto das páginas) clique no globo e escolha Português (Brasil): o cartão de tipo mostra "Lacunas", a dica do botão "Inserir lacuna", a seção "Lacunas" com "Lacuna 1", e a pré-visualização "Preencha cada lacuna.". Volte para English.
+8. Teclado e transcrição:
+   - [ ] 8.1 Sem o mouse, em Questions > Add escolha o cartão Fill in the blanks com as setas; com Tab entre na barra do Statement e chegue ao Insert blank com a seta para a direita; Espaço escreve o marcador. Depois percorra com Tab cada campo de resposta, sua ação de remover e "Add answer": cada um é uma parada de Tab e o leitor de tela diz "Accepted answer 1 of blank 1".
+   - [ ] 8.2 No menu lateral clique em Content > Exams, abra o concurso e depois uma edição e, no cartão Questions dela, clique em Transcribe: o campo "Question type" oferece cinco cartões; escolha Fill in the blanks e aparecem o Insert blank e a seção de lacunas (AC19).
 
 ## Events
 
