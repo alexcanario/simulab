@@ -1,7 +1,7 @@
 ---
 feature: F-90
 epic: Subject taxonomy
-status: approved
+status: building
 board: 133
 version: 1
 ---
@@ -110,18 +110,18 @@ Empty: "Nothing uses this item any more."
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
+| AC1 | `WhereUsedEndpointTests.Subject_MappedWholeByNoticeSubjectsOfSeveralEditions_ListsThemInTheBr5Order`; `SubjectsWhereUsedPageTests.WhereUsed_SubjectMappedByTwoEditions_ListsBothInOrderWithLinksToTheEditionPages` |
+| AC2 | `WhereUsedEndpointTests.Subject_WhoseOnlyMappingIsDeleted_IsNotInUseAndListsNoMapping` (both cases); `SubjectsWhereUsedPageTests.Load_OnlyTheRowInUse_HasTheWhereUsedAction` |
+| AC3 | `WhereUsedEndpointTests.Subject_WhoseTopicsAreMappedButNotItself_ListsNoMapping` |
+| AC4 | `TopicWhereUsedEndpointTests.Topic_MappedAndUsedByQuestionsOfEveryStatus_ShowsTheMappingAndCountsTheLiveQuestions`; `WhereUsedEndpointTests.Topic_MappedByLiveAndDeletedNoticeSubjects_ListsOnlyTheLiveOnes` |
+| AC5 | `TopicsWhereUsedSectionTests.WhereUsed_WithQuestionsManage_TheCountLinksToTheFilteredQuestionList`; `TopicsWhereUsedSectionTests.WhereUsed_WithCatalogManageOnly_TheCountIsPlainText` |
+| AC6 | `TopicWhereUsedEndpointTests.Topic_UsedOnlyByQuestions_HasNoMappingAndTheCount`; `TopicsWhereUsedSectionTests.WhereUsed_TopicUsedOnlyByQuestions_ShowsNoMappingAndTheCount` |
+| AC7 | `SubjectsWhereUsedPageTests.Load_OnlyTheRowInUse_HasTheWhereUsedAction`; `TopicsWhereUsedSectionTests.Load_OnlyTheTopicInUse_HasTheWhereUsedAction` |
+| AC8 | `SubjectsWhereUsedPageTests.WhereUsed_SubjectReleasedSinceTheListLoaded_ShowsTheEmptyStateAndReloadsTheListOnClose`; `TopicsWhereUsedSectionTests.WhereUsed_TopicReleasedSinceTheSectionLoaded_ShowsTheEmptyStateAndReloadsTheSectionOnClose`; `TopicWhereUsedEndpointTests.Count_IsAboveZeroExactlyWhileTheListSaysTheTopicIsInUse` |
+| AC9 | `TopicUsageCountTests.CountAsync_TwoChecks_AddsBothCounts`; `TopicWhereUsedSecondModuleTests.TopicCount_AddsTheSecondModulesAnswerToTheQuestions` |
+| AC10 | `WhereUsedEndpointTests.BothEndpoints_ForAStudent_Answer403Forbidden` |
+| AC11 | `WhereUsedEndpointTests.Subject_UnknownOrDeleted_Answers404SubjectNotFound`; `WhereUsedEndpointTests.Topic_UnknownOrDeleted_Answers404TopicNotFound` |
+| AC12 | `WhereUsedResourcesTests.EveryNewText_ExistsInTheThreeLanguages`; `ResourceParityTests` (existing) |
 
 ## Decisions
 - 2026-10-21 — Only live mappings count (deleted notice subjects and editions excluded) — it shows exactly what blocks the delete — confirmed: F-75 BR9
@@ -136,6 +136,11 @@ Empty: "Nothing uses this item any more."
 - 2026-10-21 — The question count comes through a catalog contract that each referencing module implements (the F-95 `ITopicUsageCheck` pattern); its exact shape (a count method on the existing check or a sibling interface) is settled by the design pass at build — the catalog must not read the question bank's tables — Claude, technical
 - 2026-10-21 — No paging in the dialog: mappings per subject or topic are bounded by the editions of the catalog (tens) — Claude, technical
 - 2026-10-21 — No new package — the item uses MudBlazor, EF Core and the test stack already referenced — Claude, verified in `Directory.Packages.props`
+- 2026-10-22: design passes (system-design, architect; opus) — accepted: contracts `WhereUsedResponse` and `WhereUsedMappingResponse` in `Catalog.Contracts`; `ISubjectQueries` / `ITopicQueries.WhereUsedAsync` returning null for the 404; one shared `WhereUsedMappings` projection over `LiveNoticeSubjectMappings` (BR4 stays in one place), ordered by exam normalized name, notice year descending, normalized position, display order, id; the action through `AppRowActions.MoreActions`, after Delete (no kit change; three actions fit `MaxVisible`); the list reloads on every close; a 404 in the dialog shows the existing `ErrorText` message; the count stays labelled "questions" in v1; architect finding 1 (`TopicsSection` ends the action handler with `InvokeAsync(StateHasChanged)`, project rule F-95/F-86, with a bUnit test); finding 2 (no mockup, so no `frontend` agent: each use case is one vertical step, API and screen together); finding 3 (the manual change is `docs/manual/pt-BR/subjects.md`, no new page). Dropped: nothing.
+- 2026-10-22: design coverage — scope (item file in full), contracts (routes, callers and implementers of `ITopicUsageCheck`, F-107 worktree), data (indexes, `LiveNoticeSubjectMappings`, `DeleteExamHandler` guard for the inner join), simplicity (reuse of `TopicUsageChecks`, `QuestionListQueryString.Build`, `ErrorText`, `MoreActions`, `ConfigureHost`); not checked: none.
+- 2026-10-22: design trade-off 4 Where the question count lives — owner chose as proposed (`CountAsync` on `ITopicUsageCheck`)
+- 2026-10-22: plan — 1 tests first for every criterion a test reaches, with skeletons → red, then locked; 2 subject where-used end to end (contracts, `WhereUsedMappings`, query, endpoint, `CatalogApiClient`, `WhereUsedDialog`, `Subjects.razor` action) → AC1, AC2, AC3, AC7, AC8, AC10, AC11 (subject); 3 topic where-used end to end (`ITopicUsageCheck.CountAsync`, `TopicUsageChecks.CountAsync`, query, endpoint, `TopicsSection.razor` action, count line gated by `questions.manage`) → AC4, AC5, AC6, AC9, AC10, AC11 (topic); 4 texts in three locales → AC12; 5 OpenAPI document, flow page, pt-BR manual → OpenAPI 200, `techdocs.js check`; 6 gate, app host screen check, scan → `agile gate GREEN`, `agile scan GREEN`
+- 2026-10-22: traps — T1 sibling `ITopicUsageCount`: an in-use row could open on the empty state (avoided); T2 every module's count added into `questionCount`: a non-question module would be labelled "questions" (taken, BR9 requires it; an idea when the first such module appears); T3 a second copy of the live rule or reuse of `ListByEditionsAsync`: drift from `InUse` or in-memory sort (avoided).
 
 ## Out of scope
 - Unmapping or editing from the dialog (BR1).

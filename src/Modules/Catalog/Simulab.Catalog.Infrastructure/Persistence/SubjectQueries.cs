@@ -86,6 +86,9 @@ public sealed class SubjectQueries(CatalogModuleDbContext context) : ISubjectQue
         Project(context.Subjects.AsNoTracking().Where(subject => subject.Id == id))
             .FirstOrDefaultAsync(cancellationToken);
 
+    public Task<WhereUsedResponse?> WhereUsedAsync(Guid id, CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     private IQueryable<SubjectResponse> Project(IQueryable<Subject> subjects) =>
         subjects.Select(subject => new SubjectResponse(
             subject.Id,

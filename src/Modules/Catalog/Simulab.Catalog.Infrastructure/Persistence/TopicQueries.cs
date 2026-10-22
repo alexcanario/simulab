@@ -48,4 +48,7 @@ public sealed class TopicQueries(CatalogModuleDbContext context, IEnumerable<ITo
             ? topics
             : [.. topics.Select(topic => used.Contains(topic.Id) ? topic with { InUse = true } : topic)];
     }
+
+    public Task<WhereUsedResponse?> WhereUsedAsync(Guid id, CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
 }

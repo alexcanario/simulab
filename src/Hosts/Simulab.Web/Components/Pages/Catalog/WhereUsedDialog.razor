@@ -1,0 +1,17 @@
+@using Simulab.Catalog.Contracts
+@using Simulab.Web.Services
+
+<MudDialog Class="app-where-used-dialog">
+    <DialogContent>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+
+    /// <summary>Reads what uses the item, when the dialog opens (BR8: it may be released since the list loaded).</summary>
+    [Parameter, EditorRequired] public Func<Task<ApiResult<WhereUsedResponse>>> Load { get; set; } = default!;
+
+    /// <summary>The topic whose questions the count links to; null for a subject, which has no count.</summary>
+    [Parameter] public Guid? TopicId { get; set; }
+}

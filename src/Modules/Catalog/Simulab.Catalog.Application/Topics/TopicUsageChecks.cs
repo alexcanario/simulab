@@ -26,4 +26,11 @@ public static class TopicUsageChecks
 
         return false;
     }
+
+    /// <summary>The sum of what every check counts for <paramref name="topicId"/> (F-90, BR9).</summary>
+    public static Task<int> CountAsync(
+        IEnumerable<ITopicUsageCheck> checks,
+        Guid topicId,
+        CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
 }

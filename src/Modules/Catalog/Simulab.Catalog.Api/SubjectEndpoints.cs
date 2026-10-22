@@ -39,14 +39,12 @@ public static class SubjectEndpoints
         subjects.MapGet("/{id:guid}", FindSubjectAsync).WithName("FindSubject");
         subjects.MapPost(string.Empty, CreateSubjectAsync).WithName("CreateSubject");
         subjects.MapPut("/{id:guid}", UpdateSubjectAsync).WithName("UpdateSubject");
-        subjects.MapDelete("/{id:guid}", DeleteSubjectAsync).WithName("DeleteSubject");
-        subjects.MapGet("/{subjectId:guid}/topics", ListTopicsAsync).WithName("ListTopics");
+        subjects.MapDelete("/{id:guid}", DeleteSubjectAsync).WithName("DeleteSubject");        subjects.MapGet("/{subjectId:guid}/topics", ListTopicsAsync).WithName("ListTopics");
         subjects.MapPost("/{subjectId:guid}/topics", CreateTopicAsync).WithName("CreateTopic");
 
         var topics = group.MapGroup("/topics").RequireAuthorization(policy);
         topics.MapPut("/{id:guid}", UpdateTopicAsync).WithName("UpdateTopic");
         topics.MapDelete("/{id:guid}", DeleteTopicAsync).WithName("DeleteTopic");
-
         return group;
     }
 

@@ -30,4 +30,7 @@ public sealed class QuestionTopicUsageCheck(QuestionBankModuleDbContext context)
 
         return used.ToHashSet();
     }
+
+    public Task<int> CountAsync(Guid topicId, CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
 }
