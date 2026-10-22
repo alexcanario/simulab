@@ -1,7 +1,7 @@
 ---
 feature: F-81
 epic: Cloud hosting and operations
-status: building
+status: validating
 board: 124
 version: 1
 ---
@@ -44,9 +44,7 @@ Open and close a staging test window from GitHub with one command, so a forgotte
 No screen and no API route. The GitHub Actions page and `gh workflow run` are the entry points (UC1 and UC2). No Wireframe: the item adds no page, dialog or window of the app.
 
 ## Docs
-- reference: update docs/infra.md#staging-start-and-stop — the commands as fenced blocks with `RG` and `SERVER`, the workflow that runs them, the `gh workflow run` form, the 7-day limit, the concurrency note (BR8, BR10)
-- reference: update docs/infra.md#code-hosting-ci-and-board — a row for `staging-power.yml`
-- how-to: none — the owner's how-to is the same infra.md section (the repository's how-to folder does not exist and a second page would repeat it)
+- none — the commands and the how-to live in docs/infra.md (a project document, outside the technical-page folders), updated by AC10
 
 ## Acceptance criteria
 - AC1 Given `staging-power.yml`, when it is parsed, then its only trigger is `workflow_dispatch` with a required choice input `action` of exactly `park` and `start`, it has no input named `environment`, and the job's `environment` is the literal `staging`. (BR1)
@@ -64,7 +62,7 @@ No screen and no API route. The GitHub Actions page and `gh workflow run` are th
 
 ## Criterion → test
 
-Tests locked: 619efc8936c6bce9e4676f325386df0ee69fd2cd (2 files); unlocks: 0
+Tests locked: 36a9338604136a522310fa38778c6990504f650c (2 files); unlocks: 1
 
 | Criterion | Test |
 |---|---|
@@ -98,6 +96,9 @@ Tests locked: 619efc8936c6bce9e4676f325386df0ee69fd2cd (2 files); unlocks: 0
 - 2026-10-22: plan — 1 tests of AC1-AC10 (workflow read as YAML, steps run in bash with a fake `az`) plus a stub workflow and a shared test helper, locked → red for missing behavior; 2 `staging-power.yml` (ref check, sign-in, server and state, park, start, checks, summary) → AC1-AC9 green; 3 `docs/infra.md` command blocks, workflow row and how-to → AC5 and AC10 green; 4 gate, scan, validation script → `agile gate GREEN`. No design passes (no project, contract, message or schema). Reuse: `DeployWorkflowTests` pattern; its private bash runner is copied into a new helper (debt, the old file stays untouched).
 - 2026-10-22: tests unlocked (the Summary test compared YAML nodes by reference across two parses and could never pass; it now compares the last step by name) - owner chose "Destravar e corrigir" as recommended
 - 2026-10-22: the `gh workflow run` forms are inline code in the section, not a fenced block, because the locked tests read the fenced `bash` blocks as the park and start commands (Claude, technical)
+- 2026-10-22: `## Docs` set to none: techdocs.js check refuses docs/infra.md as a reference page (not under docs/reference/) and the "none" how-to line; the infra.md edit stays and is proven by AC10 (Claude, technical)
+- 2026-10-22: Reuse: `DeployWorkflowTests` pattern (YAML read, bash run of a step), the sign-in and ref-check shape of `deploy.yml`; nothing else found to reuse.
+- 2026-10-22: Shortcuts: none
 
 ## Out of scope
 - A scheduled park, resume or re-park (a new idea, depends on F-117).
@@ -112,7 +113,39 @@ Tests locked: 619efc8936c6bce9e4676f325386df0ee69fd2cd (2 files); unlocks: 0
 ## Change notes
 
 ## Validation script
-Written by `/agile:build` at its end (at most 8 steps; the real staging is needed).
+### English
+Needed to validate: the provisioned staging environment (F-64, in place now: `rg-simulab-staging`, Central US, with the F-65 sign-in and the variables `AZURE_RESOURCE_GROUP` and `CHECK_URL` in the GitHub environment `staging`) and `staging-power.yml` on `main`, because GitHub lists a manual workflow only from the default branch. The owner provides both. The workflow is on `main` only after the merge, so steps 2 to 6 run after it; step 1 needs nothing but the worktree. No app host is started and no local data is touched. There is no screen, so no language switch and no keyboard pass.
+
+1. Before the merge, in the worktree, run the tests of the workflow and look for resource files in the diff.
+   - [ ] 1.1 Stop the app host if it runs (a running host locks `bin/`), then run `dotnet test tests/Hosts/Simulab.AppHost.Tests --filter "FullyQualifiedName~StagingPowerWorkflowTests"` (the same line in Git Bash and in PowerShell 7) → `Passed!  - Failed: 0, Passed: 36`.
+   - [ ] 1.2 Run `git diff --name-only main...HEAD -- "*.resx"` (the same line in both shells) → no output: no UI text was added (AC12).
+2. [ ] After the merge, park a running staging: `gh workflow run staging-power.yml --ref main -f action=park` (the same line in both shells), then `gh run watch` and pick the run → the run is green; the run summary lists action, ref, commit, the server `Stopped` and the date Azure restarts it (AC9, AC11).
+3. Confirm the park in Azure (the same lines in both shells).
+   - [ ] 3.1 `az postgres flexible-server list -g rg-simulab-staging --query "[].state" -o tsv` → `Stopped`.
+   - [ ] 3.2 `az containerapp show -n api -g rg-simulab-staging --query properties.template.scale.minReplicas -o tsv`, then the same for `web` and `redis` → `0` each (an empty answer also means zero).
+4. [ ] Park again: `gh workflow run staging-power.yml --ref main -f action=park`, then `gh run watch` → the run is green and the log of "Park staging" says `The server is already stopped` (UC3, BR6).
+5. [ ] Start: `gh workflow run staging-power.yml --ref main -f action=start`, then `gh run watch` → the run is green; "Wait for the check URL" is green and says it answered 200; the summary shows the server `Ready`. Open the address `gh variable get CHECK_URL --env staging --repo alexcanario/simulab` prints in a browser → the site answers (AC8, AC11).
+6. [ ] Start again: `gh workflow run staging-power.yml --ref main -f action=start`, then `gh run watch` → green, and the log of "Start staging" says `The server is already running`. Park staging again if the test window is over (UC2).
+7. Optional, a ref that is not allowed (AC4 is already proven by tests): GitHub refuses any run that is not on the default branch or a tag unless the branch exists on the remote.
+   - [ ] 7.1 `git push origin main:refs/heads/scratch-f81` (the same line in both shells), then `gh workflow run staging-power.yml --ref scratch-f81 -f action=park` → GitHub refuses the run (the environment policy allows `main` and `v*` tags) or the first step "Check the ref" fails with `cannot park or start staging`; the log has no "Sign in to Azure" step.
+   - [ ] 7.2 `git push origin --delete scratch-f81` → the scratch branch is gone.
+
+### pt-BR
+Necessário para validar: o ambiente de staging provisionado (F-64, já no lugar: `rg-simulab-staging`, Central US, com o login da F-65 e as variáveis `AZURE_RESOURCE_GROUP` e `CHECK_URL` no ambiente `staging` do GitHub) e o `staging-power.yml` na `main`, porque o GitHub só lista um workflow manual a partir do branch padrão. Você fornece os dois. O workflow só está na `main` depois do merge, então os passos 2 a 6 rodam depois dele; o passo 1 só precisa do worktree. Nenhum app host é iniciado e nenhum dado local é tocado. Não há tela, então não há troca de idioma nem passada só por teclado.
+
+1. Antes do merge, no worktree, rode os testes do workflow e procure arquivos de recursos no diff.
+   - [ ] 1.1 Pare o app host se ele estiver rodando (um host rodando trava o `bin/`), depois rode `dotnet test tests/Hosts/Simulab.AppHost.Tests --filter "FullyQualifiedName~StagingPowerWorkflowTests"` (a mesma linha no Git Bash e no PowerShell 7) → `Passed!  - Failed: 0, Passed: 36`.
+   - [ ] 1.2 Rode `git diff --name-only main...HEAD -- "*.resx"` (a mesma linha nos dois shells) → nenhuma saída: nenhum texto de UI foi adicionado (AC12).
+2. [ ] Depois do merge, estacione um staging que está rodando: `gh workflow run staging-power.yml --ref main -f action=park` (a mesma linha nos dois shells), depois `gh run watch` e escolha a execução → a execução fica verde; o resumo lista ação, ref, commit, o servidor `Stopped` e a data em que o Azure o reinicia (AC9, AC11).
+3. Confirme o estacionamento no Azure (as mesmas linhas nos dois shells).
+   - [ ] 3.1 `az postgres flexible-server list -g rg-simulab-staging --query "[].state" -o tsv` → `Stopped`.
+   - [ ] 3.2 `az containerapp show -n api -g rg-simulab-staging --query properties.template.scale.minReplicas -o tsv`, depois o mesmo para `web` e `redis` → `0` em cada (resposta vazia também significa zero).
+4. [ ] Estacione de novo: `gh workflow run staging-power.yml --ref main -f action=park`, depois `gh run watch` → a execução fica verde e o log de "Park staging" diz `The server is already stopped` (UC3, BR6).
+5. [ ] Inicie: `gh workflow run staging-power.yml --ref main -f action=start`, depois `gh run watch` → a execução fica verde; "Wait for the check URL" fica verde e diz que respondeu 200; o resumo mostra o servidor `Ready`. Abra no navegador o endereço que `gh variable get CHECK_URL --env staging --repo alexcanario/simulab` imprime → o site responde (AC8, AC11).
+6. [ ] Inicie de novo: `gh workflow run staging-power.yml --ref main -f action=start`, depois `gh run watch` → verde, e o log de "Start staging" diz `The server is already running`. Estacione o staging de novo se a janela de testes acabou (UC2).
+7. Opcional, um ref não permitido (o AC4 já está provado por testes): o GitHub só roda um workflow em um branch que existe no remoto.
+   - [ ] 7.1 `git push origin main:refs/heads/scratch-f81` (a mesma linha nos dois shells), depois `gh workflow run staging-power.yml --ref scratch-f81 -f action=park` → o GitHub recusa a execução (a política do ambiente permite `main` e tags `v*`) ou o primeiro passo "Check the ref" falha com `cannot park or start staging`; o log não tem o passo "Sign in to Azure".
+   - [ ] 7.2 `git push origin --delete scratch-f81` → o branch temporário some.
 
 ## Events
 
