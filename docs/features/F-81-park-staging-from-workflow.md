@@ -1,7 +1,7 @@
 ---
 feature: F-81
 epic: Cloud hosting and operations
-status: validating
+status: done
 board: 124
 version: 1
 ---
@@ -151,3 +151,13 @@ Necessário para validar: o ambiente de staging provisionado (F-64, já no lugar
 
 - 2026-10-22 question — asked 2, from context 4
 - 2026-10-22 blocked — test wrong: Summary test compared YAML nodes by reference across separate parses; compare the last step by name
+
+## Delivery
+
+Gate time: 5 passes, 16 min 32 s — turn 2 (56 s), ship 1 (11 min 3 s), scan 2 (4 min 33 s); 0 red
+Usage: 1009.9k weighted (estimate) — build 73% · ship 26% · other 1% — context per turn 191k → 235k — 1 session, 57 turns
+Built 2026-10-22 on `feature/F-81`, validated by the owner (step 1 run by the owner; steps 2 to 7 need the workflow on `main`) and shipped 2026-10-22 as merge `7e56cfd` (app version 1.15.0, board #124).
+- Full suite at the ship: 4924 tests, 0 failures; build 44 s, tests 619 s (over the 5 min budget of the profile: the QuestionBank, Identity and Catalog test projects take about 10 min each in parallel, a finding for the retro); 0 new warnings; `docs` gate green; security scan green (16 false positives and 13 fixed triaged earlier, 2 medium in `tools/Simulab.DocGen` left open). New tests: 36 (`StagingPowerWorkflowTests`). No new package.
+- No manual page: the item changes no screen or text (AC12). Glossary: nothing missing.
+- Validation evidence: step 1 (1.1 and 1.2) passed, confirmed by the owner in chat; the widget ticks were not used, so the evidence tool records 0 of 10. Steps 2 to 7 (AC11 and the real runs of AC8) are not proven before the merge: they run on `main` against the real staging. The first real run is the proof of the Contributor role on the PostgreSQL stop and start actions.
+- Follow-up: F-147 (scheduled staging re-park, depends on F-117).
