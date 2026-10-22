@@ -1,7 +1,7 @@
 ---
 feature: F-148
 epic: Foundation and identity
-status: idea
+status: refining
 board: 206
 version: 1
 ---
