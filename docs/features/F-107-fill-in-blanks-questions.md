@@ -1,7 +1,7 @@
 ---
 feature: F-107
 epic: Question bank
-status: validating
+status: done
 board: 153
 version: 1
 ---
@@ -316,3 +316,39 @@ Necessário para validar: o app host local — o dono; disponível (o Claude sub
 - 2026-10-22 rework — review #1: form marker reader skips quoted attribute values
 - 2026-10-22 rework — review #2: Insert blank never writes a number over 99
 - 2026-10-22 question — asked 1, from context 0
+
+## Delivery
+
+Gate time: 8 passes, 35 min 29 s — turn 2 (2 min 24 s), ship 4 (27 min 51 s), scan 2 (5 min 14 s); 0 red
+Usage: 21026.5k weighted (estimate) — build 65% · review 21% · ship 13% · other 1% — agents 8% — context per turn 417k → 715k — 1 session, 308 turns
+
+- Branch: `feature/F-107` (never pushed; removed with its worktree `D:\wt\simulab\f-107-fill-in-blanks`).
+- Merge: `de09afc` on `main` (`--no-ff`, board #153), pushed; app version 1.14.0.
+- Tests: `gate.js ship` GREEN on the merged tree — 4885 tests in 14 projects, 0 failures, 0 warnings (baseline 0 entries); 31 s build, 512 s test run (over the 5 min budget, machine shared; reported to the retro). Scan GREEN; test lock `5ad60ba` unchanged, 0 unlocks.
+- Validated by the owner in the conversation on 2026-10-22 ("validado"); no box was ticked in the widget, so the evidence below reads "not tested" for every path.
+- App manual: `docs/manual/pt-BR/questions.md` (the only manual locale). Technical page: `docs/flows/fill-in-the-blanks-questions.md`. Generated docs: `docs/architecture/QuestionBank/` and `docs/api/Simulab.Api.json`.
+- Glossary: 2 technical rows added (regular expression, array column `text[]`); business rows `Blank`, `BlankMarker`, `AcceptedAnswer` added at the build.
+- Validation evidence:
+```text
+1. Pare qualquer app host aberto (inclusive o do worktree da F-90: as portas são as mesmas) e suba o app host deste worktree no banco próprio `simulab_f107` (a migração do item cai só nele), a partir da pasta do worktree `D:\wt\simulab\f-107-fill-in-blanks`:
+2. [ ] not tested Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento de `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue". O banco `simulab_f107` é novo: se o campo de disciplina do passo 3.2 não achar nada, antes cadastre uma disciplina com um tópico no menu lateral (sidebar, menu lateral esquerdo) em Content > Subjects.
+3. Crie um rascunho de lacunas:
+   [ ] 3.1 not tested No menu lateral clique em Content > Questions e depois em Add. Em "Question type" clique no cartão de tipo (cada cartão do campo "Question type") "Fill in the blanks": a barra do editor de Statement ganha o Inserir lacuna (Insert blank: o botão depois do de imagem que escreve o próximo marcador [[n]] onde está o cursor) e a seção de lacunas (o cartão "Blanks" com uma linha "Blank n" por marcador) substitui o cartão Options, dizendo "No blank yet. Use Insert blank in the statement.". O editor de Explanation não tem Insert blank.
+   [ ] 3.2 not tested Escolha disciplina e tópico. Em Statement digite "The capital of Brazil is ", clique em Insert blank, digite " and it was founded in ", clique em Insert blank de novo: o texto fica "... is [[1]] and it was founded in [[2]]" e a seção de lacunas mostra "Blank 1" e "Blank 2".
+   [ ] 3.3 not tested Em Blank 1 clique duas vezes em "Add answer" e digite Brasília e Brasilia ("2 of 5 answers"). Deixe a Blank 2 vazia. Clique em Save: a página vira a de edição, o tipo aparece como "Fill in the blanks", sem edição; a lista "Before publishing" mostra "Every blank has an accepted answer" pendente e Publish fica desabilitado.
+4. Regras das lacunas:
+   [ ] 4.1 not tested Em Blank 1 acrescente uma terceira resposta " brasília " (com espaços, minúscula) e clique em Save: sob a Blank 1 aparece "Two answers of this blank are the same once case and extra spaces are ignored.". Remova essa resposta.
+   [ ] 4.2 not tested Em Statement apague "[[2]]": a linha Blank 2 some. Digite "[[2]]" de novo no fim: volta uma linha Blank 2 vazia.
+   [ ] 4.3 not tested Em Blank 2 acrescente a resposta 1960, Save e depois Publish: o status vira Published.
+5. Pré-visualização:
+   [ ] 5.1 not tested No cartão Publication clique em "Preview as a student": o enunciado mostra uma caixa sublinhada "1" e uma "2" no lugar dos marcadores (sem resposta e sem pista do tamanho), depois a linha "Fill in each blank.".
+   [ ] 5.2 not tested Clique em "Show answer": as caixas mostram Brasília e 1960; abaixo, o ícone com "Correct answer", "Blank 1: Brasília, Brasilia" e "Blank 2: 1960", e a explicação. Feche o diálogo.
+6. Troca de gabarito:
+   [ ] 6.1 not tested Em Blank 1 troque "Brasilia" por "BRASILIA" (só maiúsculas): não aparece campo de motivo.
+   [ ] 6.2 not tested Em Blank 2 acrescente a resposta "MCMLX": aparece o campo "Reason for the answer key change". Escreva um motivo e clique em Save: o cartão History lista a nova versão com "Answer key changed" e o seu motivo; View na versão 1 mostra a Blank 2 só com 1960.
+7. [ ] not tested Idioma: na barra superior (app bar, a faixa no alto das páginas) clique no globo e escolha Português (Brasil): o cartão de tipo mostra "Lacunas", a dica do botão "Inserir lacuna", a seção "Lacunas" com "Lacuna 1", e a pré-visualização "Preencha cada lacuna.". Volte para English.
+8. Teclado e transcrição:
+   [ ] 8.1 not tested Sem o mouse, em Questions > Add escolha o cartão Fill in the blanks com as setas; com Tab entre na barra do Statement e chegue ao Insert blank com a seta para a direita; Espaço escreve o marcador. Depois percorra com Tab cada campo de resposta, sua ação de remover e "Add answer": cada um é uma parada de Tab e o leitor de tela diz "Accepted answer 1 of blank 1".
+   [ ] 8.2 not tested No menu lateral clique em Content > Exams, abra o concurso e depois uma edição e, no cartão Questions dela, clique em Transcribe: o campo "Question type" oferece cinco cartões; escolha Fill in the blanks e aparecem o Insert blank e a seção de lacunas (AC19).
+Evidence: 0 of 14 tested
+```
