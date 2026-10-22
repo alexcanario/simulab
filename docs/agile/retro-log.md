@@ -1471,3 +1471,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (edited, upstream unchanged); manual build files (no upstream change). Merged: none. Declined: none.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: column present; technical-term rows not swept.
 - Missing capabilities, not captured (owner did not ask): release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
+## 2026-10-22 - Sync with agile@canary 0.156.0
+- From 0.150.0 to 0.156.0. Copied (owner's OK): `build-config.md`, `definition-of-done.md`, `output-style.md`, `workflow.md`, new `naming-dotnet.md`, `docs/agile/templates/project-claude.md`, `workflow.pt-BR.md`, `workflow-examples.pt-BR.md`, four `docs/agile/profile-sections/*.md`.
+- Merged: `git.md` and `naming.md` (one conflict each, project lines kept), `profile.md` (the compose recipe became a pointer to `profile-sections/deploy-aspire.md`; the Simulab ACA line kept).
+- Left alone: `i18n.md` (upstream unchanged); manual build files (no upstream change). Declined: glossary link lines (15 docs), capture of the two missing capabilities.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Build and tests not run (no build file changed).
+- Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).

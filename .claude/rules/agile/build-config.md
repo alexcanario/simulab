@@ -20,4 +20,6 @@ paths:
 - A justified suppression is local (one `#pragma` around one line, with a comment saying why), never project-wide. `AppJson` is the one place allowed to construct `JsonSerializerOptions`.
 - `TreatWarningsAsErrors` stays off. The gate, not the compiler, decides what fails, so inherited code still builds.
 - When a retro lesson can be checked mechanically, add it to `.editorconfig` or `BannedSymbols.txt` before adding a written rule.
+- `.claude/agile/warnings-baseline.json` is committed; build output, `bin/` and `obj/`, and IDE folders are not.
+- Generated files (migrations, snapshots, OpenAPI documents) are committed with the change that produced them. A schema change has a migration.
 - A change to a `.props`, `.targets` or solution file rebuilds the whole solution at the end of the turn; say so before making it.
