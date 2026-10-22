@@ -747,6 +747,13 @@
   <data name="NoticeSubjects.Total.Unmapped.Many" xml:space="preserve"><value>{0} disciplinas ainda não estão mapeadas.</value></data>
   <data name="Subjects.Delete.DisabledInUse" xml:space="preserve"><value>Disciplinas do edital estão mapeadas para esta disciplina inteira. Retire-a desses mapeamentos antes de excluir.</value></data>
   <data name="Topics.Delete.DisabledInUse" xml:space="preserve"><value>Disciplinas do edital estão mapeadas para este tópico ou há questões que o usam. Desfaça esses vínculos antes de excluir.</value></data>
+  <data name="WhereUsed.Action" xml:space="preserve"><value>Onde é usado</value></data>
+  <data name="WhereUsed.Title" xml:space="preserve"><value>Onde "{0}" é usado</value></data>
+  <data name="WhereUsed.NoticeSubjects" xml:space="preserve"><value>Disciplinas do edital</value></data>
+  <data name="WhereUsed.Questions" xml:space="preserve"><value>Questões</value></data>
+  <data name="WhereUsed.QuestionCount" xml:space="preserve"><value>Usado por {0} questões</value></data>
+  <data name="WhereUsed.QuestionCount.One" xml:space="preserve"><value>Usado por {0} questão</value></data>
+  <data name="WhereUsed.Empty" xml:space="preserve"><value>Nada usa mais este item.</value></data>
   <data name="notice_subject.mapping_invalid" xml:space="preserve"><value>Um dos itens escolhidos não é válido. Remova-o e escolha de novo.</value></data>
   <data name="notice_subject.mapping_too_many" xml:space="preserve"><value>No máximo 50 itens por disciplina do edital.</value></data>
   <data name="notice_subject.mapping_target_not_found" xml:space="preserve"><value>Um dos itens escolhidos não existe mais na taxonomia; ele está marcado abaixo. Remova-o e salve de novo.</value></data>

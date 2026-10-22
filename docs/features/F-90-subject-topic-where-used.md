@@ -108,6 +108,9 @@ Empty: "Nothing uses this item any more."
 - AC12 All new texts appear in pt-BR, pt-PT and en, and the missing-key test is green. (BR12)
 
 ## Criterion → test
+
+Tests locked: 274bc91bade297100717f3e5aaee3e145798be56 (7 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `WhereUsedEndpointTests.Subject_MappedWholeByNoticeSubjectsOfSeveralEditions_ListsThemInTheBr5Order`; `SubjectsWhereUsedPageTests.WhereUsed_SubjectMappedByTwoEditions_ListsBothInOrderWithLinksToTheEditionPages` |

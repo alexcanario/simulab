@@ -28,9 +28,19 @@ public static class TopicUsageChecks
     }
 
     /// <summary>The sum of what every check counts for <paramref name="topicId"/> (F-90, BR9).</summary>
-    public static Task<int> CountAsync(
+    public static async Task<int> CountAsync(
         IEnumerable<ITopicUsageCheck> checks,
         Guid topicId,
-        CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(checks);
+
+        var total = 0;
+        foreach (var check in checks)
+        {
+            total += await check.CountAsync(topicId, cancellationToken);
+        }
+
+        return total;
+    }
 }

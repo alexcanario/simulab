@@ -31,6 +31,10 @@ public sealed class QuestionTopicUsageCheck(QuestionBankModuleDbContext context)
         return used.ToHashSet();
     }
 
+    // F-90, BR3: the same rows InUseAsync looks at - live questions of any status - so the count is above 0
+    // exactly when the topic is in use for this module.
     public Task<int> CountAsync(Guid topicId, CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+        context.Questions
+            .AsNoTracking()
+            .CountAsync(question => question.TopicId == topicId, cancellationToken);
 }

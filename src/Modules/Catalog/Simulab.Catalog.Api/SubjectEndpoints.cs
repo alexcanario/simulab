@@ -39,12 +39,14 @@ public static class SubjectEndpoints
         subjects.MapGet("/{id:guid}", FindSubjectAsync).WithName("FindSubject");
         subjects.MapPost(string.Empty, CreateSubjectAsync).WithName("CreateSubject");
         subjects.MapPut("/{id:guid}", UpdateSubjectAsync).WithName("UpdateSubject");
-        subjects.MapDelete("/{id:guid}", DeleteSubjectAsync).WithName("DeleteSubject");        subjects.MapGet("/{subjectId:guid}/topics", ListTopicsAsync).WithName("ListTopics");
+        subjects.MapDelete("/{id:guid}", DeleteSubjectAsync).WithName("DeleteSubject");
+        subjects.MapGet("/{id:guid}/where-used", FindSubjectWhereUsedAsync).WithName("FindSubjectWhereUsed");        subjects.MapGet("/{subjectId:guid}/topics", ListTopicsAsync).WithName("ListTopics");
         subjects.MapPost("/{subjectId:guid}/topics", CreateTopicAsync).WithName("CreateTopic");
 
         var topics = group.MapGroup("/topics").RequireAuthorization(policy);
         topics.MapPut("/{id:guid}", UpdateTopicAsync).WithName("UpdateTopic");
         topics.MapDelete("/{id:guid}", DeleteTopicAsync).WithName("DeleteTopic");
+        topics.MapGet("/{id:guid}/where-used", FindTopicWhereUsedAsync).WithName("FindTopicWhereUsed");
         return group;
     }
 
@@ -76,6 +78,32 @@ public static class SubjectEndpoints
         return subject is null
             ? Problem(new Error(CatalogErrorCodes.SubjectNotFound, ErrorKind.NotFound))
             : Results.Ok(subject);
+    }
+
+    // F-90, BR2: what maps the subject whole; read-only (BR1).
+    private static async Task<IResult> FindSubjectWhereUsedAsync(
+        Guid id,
+        ISubjectQueries queries,
+        CancellationToken cancellationToken)
+    {
+        var whereUsed = await queries.WhereUsedAsync(id, cancellationToken);
+
+        return whereUsed is null
+            ? Problem(new Error(CatalogErrorCodes.SubjectNotFound, ErrorKind.NotFound))
+            : Results.Ok(whereUsed);
+    }
+
+    // F-90, BR3: the mappings of the topic and what the other modules count for it; read-only (BR1).
+    private static async Task<IResult> FindTopicWhereUsedAsync(
+        Guid id,
+        ITopicQueries queries,
+        CancellationToken cancellationToken)
+    {
+        var whereUsed = await queries.WhereUsedAsync(id, cancellationToken);
+
+        return whereUsed is null
+            ? Problem(new Error(CatalogErrorCodes.TopicNotFound, ErrorKind.NotFound))
+            : Results.Ok(whereUsed);
     }
 
     private static async Task<IResult> CreateSubjectAsync(
