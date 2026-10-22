@@ -1,7 +1,7 @@
 ---
 feature: F-90
 epic: Subject taxonomy
-status: building
+status: validating
 board: 133
 version: 1
 ---
@@ -143,6 +143,10 @@ Tests locked: 274bc91bade297100717f3e5aaee3e145798be56 (7 files); unlocks: 0
 - 2026-10-22: design coverage — scope (item file in full), contracts (routes, callers and implementers of `ITopicUsageCheck`, F-107 worktree), data (indexes, `LiveNoticeSubjectMappings`, `DeleteExamHandler` guard for the inner join), simplicity (reuse of `TopicUsageChecks`, `QuestionListQueryString.Build`, `ErrorText`, `MoreActions`, `ConfigureHost`); not checked: none.
 - 2026-10-22: design trade-off 4 Where the question count lives — owner chose as proposed (`CountAsync` on `ITopicUsageCheck`)
 - 2026-10-22: plan — 1 tests first for every criterion a test reaches, with skeletons → red, then locked; 2 subject where-used end to end (contracts, `WhereUsedMappings`, query, endpoint, `CatalogApiClient`, `WhereUsedDialog`, `Subjects.razor` action) → AC1, AC2, AC3, AC7, AC8, AC10, AC11 (subject); 3 topic where-used end to end (`ITopicUsageCheck.CountAsync`, `TopicUsageChecks.CountAsync`, query, endpoint, `TopicsSection.razor` action, count line gated by `questions.manage`) → AC4, AC5, AC6, AC9, AC10, AC11 (topic); 4 texts in three locales → AC12; 5 OpenAPI document, flow page, pt-BR manual → OpenAPI 200, `techdocs.js check`; 6 gate, app host screen check, scan → `agile gate GREEN`, `agile scan GREEN`
+- 2026-10-22: Reuse: `LiveNoticeSubjectMappings` (the live rule), `ITopicUsageCheck` and `TopicUsageChecks` (the F-95 contract, one member added), `AppRowActions.MoreActions`, `AppItemRows`, `AppLink`, `ErrorText`, `QuestionListQueryString.Build`, `ExamEditionText.VisibleSeparator`, `ApiHostTests.ConfigureHost`; `Common.Close` text.
+- 2026-10-22: Shortcuts: none
+- 2026-10-22: screen check through the app host on `simulab_f90` (an unnamed database of this item, no migration): `/admin/subjects` shows "Where used" on the 20 seeded subjects mapped whole; the dialog of "Direito Constitucional" lists 4 rows in BR5 order, each linking to its edition page; Close reloads the list. No topic is in use in the seed, so the topic dialog is covered by bUnit and step 4 of the script. Observed: two seeded exams share the name "Guarda Civil Municipal", so two rows read the same label (BR5 shows the exam name only) — reported to the owner, not built.
+- 2026-10-22: test budget: `Simulab.Catalog.Tests` 2 m 33 s and `Simulab.QuestionBank.Tests` 2 m 23 s on this branch, over the 2 min integration budget; not measured on `main` — a retro finding.
 - 2026-10-22: traps — T1 sibling `ITopicUsageCount`: an in-use row could open on the empty state (avoided); T2 every module's count added into `questionCount`: a non-question module would be labelled "questions" (taken, BR9 requires it; an idea when the first such module appears); T3 a second copy of the live rule or reuse of `ListByEditionsAsync`: drift from `InUse` or in-memory sort (avoided).
 
 ## Out of scope
@@ -158,8 +162,67 @@ Tests locked: 274bc91bade297100717f3e5aaee3e145798be56 (7 files); unlocks: 0
 
 ## Validation script
 
+### English
+Needed to validate: the local app host with the seeded taxonomy and catalog (in place: the seed maps subjects whole on the Guarda Municipal editions) and one question on a topic (you create it in step 4). Claude opened `/admin/subjects` and the Where used dialog through the app host; the topic dialog was checked by the bUnit tests only.
+
+1. Stop any app host that is running, then start this item's app host on its own database `simulab_f90` (the item adds no migration; nothing touches the shared `simulab` database). The dashboard address appears after "Dashboard:"; stop it at the end with Ctrl+C.
+
+```powershell
+$env:Database__Name = "simulab_f90"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+```bash
+Database__Name=simulab_f90 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+2. Sign in to `https://localhost:7125` as `admin@simulab.local` with the development password of `appsettings.Development.json` (accept the documents if they are asked).
+   - [ ] 2.1 In the sidebar (menu lateral esquerdo) click Content > Subjects: the list of subjects appears.
+   - [ ] 2.2 Check that "Direito Constitucional" has three row actions (ações da linha: os botões de ícone no fim de cada linha de uma lista (Editar, Excluir e, quando há, outros)): Edit, a disabled Delete, and "Where used" (hover shows the name).
+   - [ ] 2.3 Check that "Conhecimentos locais" (it has topics and no whole mapping) has only Edit and Delete.
+3. Open the Where used dialog (diálogo "Onde é usado": a janelinha que lista as disciplinas do edital que usam uma disciplina ou um tópico e, para um tópico, quantas questões o usam).
+   - [ ] 3.1 Click "Where used" on "Direito Constitucional": the title reads `Where "Direito Constitucional" is used`, with four rows under "Notice subjects", 2026 editions before the 2025 one.
+   - [ ] 3.2 Click the first row: the edition page opens, and its "Notice subjects" section shows the notice subject named in the row.
+   - [ ] 3.3 Go back, open the dialog again and click Close: the dialog closes and the list is still there.
+4. Give a topic a question, then look at the topic.
+   - [ ] 4.1 In the sidebar click Content > Questions > Add; pick the subject "Ortografia e Pontuação" and its first topic, write any statement and two options, mark one correct and click Save.
+   - [ ] 4.2 In the sidebar click Content > Subjects, then the name "Ortografia e Pontuação": the subject page opens with its "Topics" section.
+   - [ ] 4.3 On the topic you used, click "Where used": the dialog shows no "Notice subjects" part and, under "Questions", the link "Used by 1 question".
+   - [ ] 4.4 Click the link: the question list opens filtered by that topic and shows your question.
+5. [ ] Keyboard only: on the Subject list press Tab until "Where used" of "Direito Constitucional" has the focus, press Space to open the dialog, Tab to Close and press Space; the focus returns to the page.
+6. [ ] Language switch: in the app bar (barra superior: a faixa no alto de todas as páginas, com o menu, a marca e os botões de tema, idioma e usuário) click the globe and choose Português (Brasil); open the dialog of step 3 again: the action reads "Onde é usado", the title `Onde "Direito Constitucional" é usado` and the part "Disciplinas do edital".
+7. [ ] Permission: sign out and open `https://localhost:7125/admin/subjects` without signing in: the sign-in page appears and nothing of the list is shown. (A reader with `catalog.manage` but not `questions.manage` sees the count without a link: `TopicsWhereUsedSectionTests.WhereUsed_WithCatalogManageOnly_TheCountIsPlainText`.)
+
+### pt-BR
+Necessário para validar: o app host local com a taxonomia e o catálogo semeados (já existe: o seed mapeia disciplinas inteiras nas edições da Guarda Municipal) e uma questão num tópico (você cria no passo 4). O Claude abriu `/admin/subjects` e o diálogo "Where used" pelo app host; o diálogo do tópico foi conferido só pelos testes bUnit.
+
+1. Pare qualquer app host aberto e inicie o app host deste item no banco próprio `simulab_f90` (o item não tem migration; nada toca o banco compartilhado `simulab`). O endereço do painel aparece depois de "Dashboard:"; pare no fim com Ctrl+C.
+
+```powershell
+$env:Database__Name = "simulab_f90"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+```bash
+Database__Name=simulab_f90 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+2. Entre em `https://localhost:7125` como `admin@simulab.local` com a senha de desenvolvimento do `appsettings.Development.json` (aceite os documentos se forem pedidos).
+   - [ ] 2.1 No sidebar (menu lateral esquerdo) clique em Content > Subjects: a lista de disciplinas aparece.
+   - [ ] 2.2 Confira que "Direito Constitucional" tem três row actions (ações da linha: os botões de ícone no fim de cada linha de uma lista (Editar, Excluir e, quando há, outros)): Edit, Delete desabilitado e "Where used" (o nome aparece ao passar o mouse).
+   - [ ] 2.3 Confira que "Conhecimentos locais" (tem tópicos e nenhum mapeamento inteiro) tem só Edit e Delete.
+3. Abra o Where used dialog (diálogo "Onde é usado": a janelinha que lista as disciplinas do edital que usam uma disciplina ou um tópico e, para um tópico, quantas questões o usam).
+   - [ ] 3.1 Clique em "Where used" de "Direito Constitucional": o título é `Where "Direito Constitucional" is used`, com quatro linhas em "Notice subjects", as edições de 2026 antes da de 2025.
+   - [ ] 3.2 Clique na primeira linha: a página da edição abre, e a seção "Notice subjects" mostra a disciplina do edital nomeada na linha.
+   - [ ] 3.3 Volte, abra o diálogo de novo e clique em Close: o diálogo fecha e a lista continua lá.
+4. Dê uma questão a um tópico e olhe o tópico.
+   - [ ] 4.1 No sidebar clique em Content > Questions > Add; escolha a disciplina "Ortografia e Pontuação" e o primeiro tópico dela, escreva qualquer enunciado e duas alternativas, marque uma como correta e clique em Save.
+   - [ ] 4.2 No sidebar clique em Content > Subjects e no nome "Ortografia e Pontuação": a página da disciplina abre com a seção "Topics".
+   - [ ] 4.3 No tópico que você usou, clique em "Where used": o diálogo não mostra a parte "Notice subjects" e, em "Questions", mostra o link "Used by 1 question".
+   - [ ] 4.4 Clique no link: a lista de questões abre filtrada por esse tópico e mostra a sua questão.
+5. [ ] Só teclado: na lista de disciplinas tecle Tab até o foco chegar em "Where used" de "Direito Constitucional", tecle Espaço para abrir o diálogo, Tab até Close e Espaço; o foco volta para a página.
+6. [ ] Troca de idioma: na app bar (barra superior: a faixa no alto de todas as páginas, com o menu, a marca e os botões de tema, idioma e usuário) clique no globo e escolha Português (Brasil); abra de novo o diálogo do passo 3: a ação diz "Onde é usado", o título `Onde "Direito Constitucional" é usado` e a parte "Disciplinas do edital".
+7. [ ] Permissão: saia da conta e abra `https://localhost:7125/admin/subjects` sem entrar: a página de entrada aparece e nada da lista é mostrado. (Quem tem `catalog.manage` sem `questions.manage` vê a contagem sem link: `TopicsWhereUsedSectionTests.WhereUsed_WithCatalogManageOnly_TheCountIsPlainText`.)
+
 ## Events
 
 - 2026-10-21 question — asked 6, from context 2
+- 2026-10-22 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 1 red
 
 ## Delivery

@@ -24,10 +24,15 @@
 | file field | campo de arquivo: o campo "Notice PDF" do formulário da edição, com Choose PDF, Replace e Remove |
 | alternative text | texto alternativo: o texto de uma imagem lido em voz alta para quem não a vê; "Imagem decorativa" dispensa o texto |
 | image dialog | diálogo de imagem: a janelinha "Insert image" aberta pelo botão de imagem da barra do editor, com arquivo, prévia e texto alternativo |
+| row actions | ações da linha: os botões de ícone no fim de cada linha de uma lista (Editar, Excluir e, quando há, outros) |
+| Where used dialog | diálogo "Onde é usado": a janelinha que lista as disciplinas do edital que usam uma disciplina ou um tópico e, para um tópico, quantas questões o usam |
 
 ## Screens
 | Screen | Path | Control | Source | Verified |
 |---|---|---|---|---|
+| Subject list | sidebar > Content > Subjects (/admin/subjects) | the table of subjects; row actions at the end of each row: Edit, Delete and, on a subject in use, "Where used" (the third icon) | src/Hosts/Simulab.Web/Components/Pages/Catalog/Subjects.razor | be2e866 |
+| Subject page, topics | Subject list > the subject's name (/admin/subjects/{id}) > the "Topics" section | one row per topic with Edit, Delete and, on a topic in use, "Where used"; "Add topic" below the rows | src/Hosts/Simulab.Web/Components/Pages/Catalog/TopicsSection.razor | be2e866 |
+| Where used dialog | the "Where used" row action on the Subject list or the Subject page, topics | title `Where "<name>" is used`; "Notice subjects" with one link per edition (exam · year · position, the notice subject's name under it); for a topic "Questions" with "Used by n questions"; Close at the bottom right | src/Hosts/Simulab.Web/Components/Pages/Catalog/WhereUsedDialog.razor | be2e866 |
 | App bar | every page with the main layout, at the top | from the left: menu button, brand symbol, "Simulab" over "Control Alt Systems" (the home link), theme switch, language switch (globe), user menu or Sign in | src/Hosts/Simulab.Web/Components/Layout/MainLayout.razor | 5078271 |
 | UI gallery, identity sections | sidebar > Development > UI kit (/dev/ui, Development only) | the sections Buttons, Type and Palette at the end of the page | src/Hosts/Simulab.Web/Components/Pages/Dev/UiGallery.razor | 5078271 |
 | Base texts list | sidebar > Content > Base texts | the table; Add at the top right; Edit and Delete in each row | src/Hosts/Simulab.Web/Components/Pages/QuestionBank/BaseTexts.razor | 31cb0606 |
