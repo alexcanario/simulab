@@ -1,7 +1,7 @@
 ---
 feature: F-81
 epic: Cloud hosting and operations
-status: idea
+status: refining
 board: 124
 version: 1
 ---
