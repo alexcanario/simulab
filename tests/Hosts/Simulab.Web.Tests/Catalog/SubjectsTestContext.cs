@@ -51,6 +51,9 @@ public abstract class SubjectsTestContext : CatalogPageTestContext
     /// <summary>When set, a write to a subject or a topic answers this problem.</summary>
     protected (HttpStatusCode Status, string Code)? TaxonomyWriteFailure { get; set; }
 
+    /// <summary>F-90: what the "where used" of a subject or topic answers, by id; an id not here answers 404.</summary>
+    protected Dictionary<Guid, WhereUsedResponse> WhereUsed { get; } = [];
+
     protected SubjectsTestContext() => Api.Custom = Answer;
 
     private HttpResponseMessage? Answer(HttpMethod method, string path, string? query, string? body)
@@ -69,6 +72,13 @@ public abstract class SubjectsTestContext : CatalogPageTestContext
         }
 
         var segments = path[Base.Length..].Split('/');
+        if (segments is [var kind, var id, "where-used"] && method == HttpMethod.Get)
+        {
+            return WhereUsed.TryGetValue(Guid.Parse(id), out var whereUsed)
+                ? FakeCatalogApi.Json(whereUsed)
+                : FakeCatalogApi.Problem((HttpStatusCode.NotFound, kind == "subjects" ? CatalogErrorCodes.SubjectNotFound : CatalogErrorCodes.TopicNotFound));
+        }
+
         return (segments[0], segments.Length, method.Method) switch
         {
             ("areas", 1, "GET") => FakeCatalogApi.Json(AllAreas),

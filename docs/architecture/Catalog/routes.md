@@ -26,10 +26,12 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `GET` | `/api/v1/catalog/published-exams/{examId}/editions/{id}/notice-document` | DownloadPublishedExamEditionNoticeDocument | 200 |
 | `GET` | `/api/v1/catalog/published-exams/{id}` | FindPublishedExam | 200 |
 | `GET` | `/api/v1/catalog/published-exams` | ListPublishedExams | 200 |
+| `GET` | `/api/v1/catalog/subjects/{id}/where-used` | FindSubjectWhereUsed | 200 |
 | `GET` | `/api/v1/catalog/subjects/{id}` | FindSubject | 200 |
 | `GET` | `/api/v1/catalog/subjects/{subjectId}/topics` | ListTopics | 200 |
 | `GET` | `/api/v1/catalog/subjects` | ListSubjects | 200 |
 | `GET` | `/api/v1/catalog/taxonomy` | GetTaxonomy | 200 |
+| `GET` | `/api/v1/catalog/topics/{id}/where-used` | FindTopicWhereUsed | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/copy` | CopyNoticeSubjects | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects/{id}/move` | MoveNoticeSubject | 200 |
 | `POST` | `/api/v1/catalog/exams/{examId}/editions/{editionId}/notice-subjects` | CreateNoticeSubject | 200 |

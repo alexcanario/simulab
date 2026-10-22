@@ -86,6 +86,22 @@ public sealed class SubjectQueries(CatalogModuleDbContext context) : ISubjectQue
         Project(context.Subjects.AsNoTracking().Where(subject => subject.Id == id))
             .FirstOrDefaultAsync(cancellationToken);
 
+    // F-90, BR2: only the whole-subject mappings, the rule of subject.in_use; a subject has no question count.
+    public async Task<WhereUsedResponse?> WhereUsedAsync(Guid id, CancellationToken cancellationToken)
+    {
+        if (!await context.Subjects.AnyAsync(subject => subject.Id == id, cancellationToken))
+        {
+            return null;
+        }
+
+        var mappings = await WhereUsedMappings.ListAsync(
+            context,
+            context.LiveNoticeSubjectMappings.Where(mapping => mapping.SubjectId == id),
+            cancellationToken);
+
+        return new WhereUsedResponse(mappings, 0);
+    }
+
     private IQueryable<SubjectResponse> Project(IQueryable<Subject> subjects) =>
         subjects.Select(subject => new SubjectResponse(
             subject.Id,

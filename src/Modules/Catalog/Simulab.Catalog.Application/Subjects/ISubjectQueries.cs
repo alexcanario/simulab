@@ -16,4 +16,10 @@ public interface ISubjectQueries
 
     /// <summary>The subject with this id, or null when it does not exist or was deleted.</summary>
     Task<SubjectResponse?> FindAsync(Guid id, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// The live notice subjects that map the subject whole (F-90, BR2, BR4, BR5), or null when it does not exist or
+    /// was deleted. Mappings of its topics are not listed: they are shown on each topic.
+    /// </summary>
+    Task<WhereUsedResponse?> WhereUsedAsync(Guid id, CancellationToken cancellationToken);
 }

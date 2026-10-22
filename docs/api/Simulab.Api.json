@@ -2295,6 +2295,30 @@
         }
       }
     },
+    "/api/v1/catalog/subjects/{id}/where-used": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "FindSubjectWhereUsed",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/catalog/subjects/{subjectId}/topics": {
       "get": {
         "tags": [
@@ -2389,6 +2413,30 @@
           "Catalog"
         ],
         "operationId": "DeleteTopic",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/topics/{id}/where-used": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "operationId": "FindTopicWhereUsed",
         "parameters": [
           {
             "name": "id",
