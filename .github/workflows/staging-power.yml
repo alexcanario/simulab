@@ -1,0 +1,158 @@
+name: staging-power
+
+# F-81: parks or starts the staging environment. Manual only (BR1); nothing else runs it, and the job is the GitHub
+# environment staging and nothing else, so production can never be parked or started from here (ADR-0002).
+# The Azure sign-in is OIDC federation, as in deploy.yml: no Azure credential is stored in GitHub (BR3).
+# The commands are the ones docs/infra.md declares in "Staging start and stop", character for character (BR4);
+# a test compares both. How to run it: docs/infra.md, same section.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Park staging (apps to zero, PostgreSQL stopped) or start it again (the version is the ref this run was started on)
+        type: choice
+        required: true
+        options:
+          - park
+          - start
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  power:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: staging
+    # BR8: the group of the staging deploy, so a park never overlaps a deploy; a running run is never cancelled.
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    env:
+      RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+      ACTION: ${{ inputs.action }}
+    steps:
+      # BR2: first step, before any Azure sign-in. Staging takes main or a tag v*, as the staging deploy does.
+      - name: Check the ref
+        run: |
+          case "$GITHUB_REF" in
+            refs/heads/main | refs/tags/v*)
+              echo "Running $ACTION on $GITHUB_REF"
+              ;;
+            *)
+              echo "::error::Ref $GITHUB_REF cannot park or start staging. Use main or a tag v*."
+              exit 1
+              ;;
+          esac
+
+      - name: Sign in to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install the containerapp extension
+        run: az extension add --name containerapp --only-show-errors
+
+      # BR5 and BR6: no name is typed here. The server is the only one of the resource group, and only Ready and Stopped are states to act on.
+      - name: Find the server and read its state
+        run: |
+          SERVERS=$(az postgres flexible-server list -g "$RG" --query "[].name" -o tsv | tr -d '\r')
+          COUNT=$(printf '%s\n' "$SERVERS" | grep -c . || true)
+          if [ "$COUNT" != "1" ]; then
+            echo "::error::The resource group $RG holds $COUNT PostgreSQL servers; exactly one is expected. Nothing was changed."
+            exit 1
+          fi
+          SERVER="$SERVERS"
+          STATE=$(az postgres flexible-server show -g "$RG" -n "$SERVER" --query state -o tsv | tr -d '\r')
+          case "$STATE" in
+            Ready | Stopped)
+              echo "Server $SERVER is $STATE"
+              ;;
+            *)
+              echo "::error::Server $SERVER is $STATE; only Ready and Stopped can be parked or started. Nothing was changed. Try again when it settles."
+              exit 1
+              ;;
+          esac
+          echo "SERVER=$SERVER" >> "$GITHUB_ENV"
+          echo "STATE=$STATE" >> "$GITHUB_ENV"
+
+      # BR4: the lines of docs/infra.md, "Staging start and stop", Park block. The apps go first, then the server; a Stopped server is left alone (BR6).
+      - name: Park staging
+        if: ${{ inputs.action == 'park' }}
+        run: |
+          for APP in api web redis; do az containerapp update -n "$APP" -g "$RG" --min-replicas 0 -o none; done
+          if [ "$STATE" = "Stopped" ]; then
+            echo "The server is already stopped"
+          else
+            az postgres flexible-server stop -g "$RG" -n "$SERVER"
+          fi
+
+      # BR4: the lines of docs/infra.md, "Staging start and stop", Start block. The server goes first, then the apps; a Ready server is left alone (BR6).
+      - name: Start staging
+        if: ${{ inputs.action == 'start' }}
+        run: |
+          if [ "$STATE" = "Ready" ]; then
+            echo "The server is already running"
+          else
+            az postgres flexible-server start -g "$RG" -n "$SERVER"
+          fi
+          az containerapp update -n redis -g "$RG" --min-replicas 1 -o none
+          az containerapp update -n api -g "$RG" --min-replicas 1 -o none
+          az containerapp update -n web -g "$RG" --min-replicas 0 --max-replicas 1 -o none
+
+      # BR7: after a park the server is Stopped and the three apps have no minimum replica (a null minimum counts as zero).
+      - name: Check the park result
+        if: ${{ inputs.action == 'park' }}
+        run: |
+          STATE_NOW=$(az postgres flexible-server show -g "$RG" -n "$SERVER" --query state -o tsv | tr -d '\r')
+          if [ "$STATE_NOW" != "Stopped" ]; then
+            echo "::error::Server $SERVER is $STATE_NOW after the park; expected Stopped."
+            exit 1
+          fi
+          for APP in api web redis; do
+            MIN=$(az containerapp show -n "$APP" -g "$RG" --query properties.template.scale.minReplicas -o tsv | tr -d '\r')
+            case "${MIN:-0}" in
+              0 | None)
+                echo "$APP has no minimum replica"
+                ;;
+              *)
+                echo "::error::$APP has a minimum of $MIN replicas after the park; expected 0."
+                exit 1
+                ;;
+            esac
+          done
+
+      # BR7: after a start, wait for HTTP 200 for at most 10 minutes (a cold web wakes on the first request). Like the deploy, skipped when the environment has no check URL.
+      - name: Wait for the check URL
+        if: ${{ inputs.action == 'start' && vars.CHECK_URL != '' }}
+        env:
+          CHECK_URL: ${{ vars.CHECK_URL }}
+        timeout-minutes: 11
+        run: |
+          deadline=$((SECONDS + 600))
+          until [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$CHECK_URL")" = "200" ]; do
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error::$CHECK_URL did not answer 200 within 10 minutes"
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "$CHECK_URL answered 200"
+
+      # BR9
+      - name: Summarize the run
+        run: |
+          STATE_NOW=$(az postgres flexible-server show -g "$RG" -n "$SERVER" --query state -o tsv | tr -d '\r')
+          {
+            echo "### Staging: $ACTION"
+            echo "- Action: $ACTION"
+            echo "- Ref: $GITHUB_REF"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Server $SERVER: $STATE_NOW"
+            if [ "$ACTION" = "park" ]; then
+              echo "- Azure starts the server again by itself on $(date -u -d '+7 days' +%F). Run park again before then to keep it parked."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
