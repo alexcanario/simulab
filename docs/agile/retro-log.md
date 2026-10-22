@@ -1513,3 +1513,8 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - From 0.158.0 to 0.159.0. Copied (owner's OK): `docs/agile/workflow.pt-BR.md`.
 - Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (upstream unchanged); manual build files (no upstream change). Declined: capture of the two missing capabilities (release pipeline 0.64.0, Azure login check 0.2.0).
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: `Meaning (pt-BR)` column already present on both tables; per-document term scan not run. Build and tests not run (no build file changed).
+
+## 2026-10-22 - Sync with agile@canary 0.161.0
+- From 0.159.0 to 0.161.0. Copied (owner's OK): `docs/agile/workflow.pt-BR.md` (version line and the #281 note on `--file` in the plugin repository).
+- Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (upstream unchanged); manual build files (no upstream change). Not captured: the two missing capabilities (release pipeline 0.64.0, Azure login check 0.2.0).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Build and tests not run (no build file changed).
