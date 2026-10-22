@@ -1,7 +1,7 @@
 ---
 feature: F-90
 epic: Subject taxonomy
-status: validating
+status: done
 board: 133
 version: 1
 ---
@@ -226,3 +226,11 @@ Database__Name=simulab_f90 dotnet run --project src/Hosts/Simulab.AppHost
 - 2026-10-22 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 1 red
 
 ## Delivery
+Gate time: 7 passes, 21 min 23 s — turn 4 (7 min 51 s), ship 1 (8 min 52 s), scan 2 (4 min 40 s); 1 red
+Usage: 265.2k weighted (estimate) — ship 96% · other 4% — context per turn 143k — 1 session, 19 turns
+- Branch: `feature/F-90` (never pushed; deleted after the merge). Merge commit: `90a44f9` on `main`. App version 1.13.0.
+- Tests: full suite 4748 passed, 0 failed, 0 skipped (build 33 s, tests 499 s: over the 5 min budget, a retro finding). Architecture tests 301 passed. `agile gate GREEN`, `agile scan GREEN` (no open critical or high; 2 medium `unsafe-path-combine` in `tools/Simulab.DocGen/GeneratedDocs.cs`, tool code outside the item).
+- Test lock: `274bc91` unchanged, 7 files, 0 unlocks.
+- Manual: `docs/manual/pt-BR/subjects.md` (new section "Ver onde uma disciplina ou um tópico é usado" and one message row). `pt-PT` and `en` are frozen (F-124).
+- Technical pages: 1 (`docs/flows/subject-topic-where-used.md`). Glossary: nothing missing (the row "Onde é usado" came with the build). Generated docs: `docs/architecture/` refreshed (3 files).
+- Validation evidence: the owner said in chat that the validation script passed; the script's ticks were not marked in the widget (0 of 13 ticked), so every path reads `not tested` by tick.
