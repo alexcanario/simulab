@@ -142,9 +142,13 @@ public sealed class Question : TenantEntity
                 MatchPosition = item.MatchPosition
             })
             .ToList();
+        var blanks = _blanks
+            .OrderBy(blank => blank.Position)
+            .Select(blank => new QuestionVersionBlank { Number = blank.Number, AcceptedAnswers = [.. blank.AcceptedAnswers] })
+            .ToList();
 
         // BR3: nothing differs from the latest version, so nothing is recorded and a reason is ignored (BR5).
-        if (latest is not null && SameVersionedContent(latest, options, matchItems, baseTextHtml))
+        if (latest is not null && SameVersionedContent(latest, options, matchItems, blanks, baseTextHtml))
         {
             return Result.Success<QuestionVersion?>(null);
         }
@@ -159,7 +163,8 @@ public sealed class Question : TenantEntity
                 || !CorrectPositions(latest.Options.Select(option => (option.Position, option.IsCorrect)))
                     .SequenceEqual(CorrectPositions(options.Select(option => (option.Position, option.IsCorrect))))
                 || !latest.MatchItems.OrderBy(item => item.Position).Select(item => item.MatchPosition)
-                    .SequenceEqual(matchItems.Select(item => item.MatchPosition)));
+                    .SequenceEqual(matchItems.Select(item => item.MatchPosition))
+                || BlanksKeyChanged(latest.Blanks, blanks));
 
         if (keyChanged && reason is null)
         {
@@ -185,11 +190,28 @@ public sealed class Question : TenantEntity
             options,
             keyChanged,
             reason,
-            matchItems: matchItems));
+            matchItems: matchItems,
+            blanks: blanks));
     }
 
     private static List<int> CorrectPositions(IEnumerable<(int Position, bool IsCorrect)> options) =>
         [.. options.Where(option => option.IsCorrect).Select(option => option.Position).Order()];
+
+    // F-107 BR10: the key of the blanks is the set of numbers and, for each, the set of its answers under the comparison
+    // rule; the order of the markers or of the answers, and the case or spacing of an answer, are not part of it.
+    private static bool BlanksKeyChanged(IReadOnlyList<QuestionVersionBlank> before, IReadOnlyList<QuestionVersionBlank> after)
+    {
+        static Dictionary<int, HashSet<string>> KeyOf(IEnumerable<QuestionVersionBlank> blanks) =>
+            blanks.ToDictionary(
+                blank => blank.Number,
+                blank => blank.AcceptedAnswers.Select(AcceptedAnswer.Normalize).ToHashSet(StringComparer.Ordinal));
+
+        var old = KeyOf(before);
+        var now = KeyOf(after);
+
+        return old.Count != now.Count
+            || old.Any(pair => !now.TryGetValue(pair.Key, out var answers) || !answers.SetEquals(pair.Value));
+    }
 
     // BR1: what is versioned is exactly the language, the statement, the base text, the explanation, the options
     // with their mark, the true/false key and the left items with their match (F-106 BR8); topic, difficulty and
@@ -198,8 +220,15 @@ public sealed class Question : TenantEntity
         QuestionVersion version,
         List<QuestionVersionOption> options,
         List<QuestionVersionMatchItem> matchItems,
+        List<QuestionVersionBlank> blanks,
         string? baseTextHtml) =>
-        version.MatchItems.Count == matchItems.Count
+        // F-107 BR10: the blanks, exactly as stored, in statement order.
+        version.Blanks.Count == blanks.Count
+        && version.Blanks
+            .Zip(blanks)
+            .All(pair => pair.First.Number == pair.Second.Number
+                && pair.First.AcceptedAnswers.SequenceEqual(pair.Second.AcceptedAnswers, StringComparer.Ordinal))
+        && version.MatchItems.Count == matchItems.Count
         && version.MatchItems
             .OrderBy(item => item.Position)
             .Zip(matchItems)
@@ -490,8 +519,22 @@ public sealed class Question : TenantEntity
             .Select(item => new MatchItemDraft(new SanitizedHtml(item.TextHtml, item.TextHtml), item.MatchPosition))
             .ToList();
 
+    // The stored blanks in statement order (F-107): one per marker, so their numbers are the statement's markers.
+    private List<QuestionBlank> OrderedBlanks() => [.. _blanks.OrderBy(blank => blank.Position)];
+
     // The key as stored: the type decides what it is made of (F-97, BR9).
-    private AnswerKey StoredKey() => AnswerKey.From(Type, Drafts(), TrueFalseKey, MatchItemDrafts());
+    private AnswerKey StoredKey()
+    {
+        var blanks = OrderedBlanks();
+
+        return AnswerKey.From(
+            Type,
+            Drafts(),
+            TrueFalseKey,
+            MatchItemDrafts(),
+            [.. blanks.Select(blank => new BlankDraft(blank.Number, blank.AcceptedAnswers))],
+            [.. blanks.Select(blank => blank.Number)]);
+    }
 
     private Result Apply(QuestionContent content)
     {
@@ -566,7 +609,8 @@ public sealed class Question : TenantEntity
         }
 
         // BR4: editing a published question runs the publish check, so it cannot be made incomplete.
-        var key = AnswerKey.From(Type, content.Options, content.TrueFalseKey, matchItems);
+        var key = AnswerKey.From(
+            Type, content.Options, content.TrueFalseKey, matchItems, content.Blanks, content.Statement.BlankMarkers);
         var fault = key.Check(Status == QuestionStatus.Published);
         if (fault is not null)
         {
@@ -588,8 +632,34 @@ public sealed class Question : TenantEntity
         TrueFalseKey = key.TrueFalseValue;
         ReplaceOptions(key.Options);
         ReplaceMatchItems(key.MatchItems);
+        ReplaceBlanks(key.Blanks);
 
         return Result.Success();
+    }
+
+    // F-107: a blank keeps its row while its number stays in the statement (the unique index is over live rows, and a
+    // number that leaves and comes back in one save must not be deleted and inserted again); the others leave as orphans.
+    private void ReplaceBlanks(IReadOnlyList<BlankDraft> drafts)
+    {
+        var byNumber = _blanks.ToDictionary(blank => blank.Number);
+
+        for (var position = 0; position < drafts.Count; position++)
+        {
+            var draft = drafts[position];
+            if (byNumber.Remove(draft.Number, out var existing))
+            {
+                existing.Set(position, draft.AcceptedAnswers);
+            }
+            else
+            {
+                _blanks.Add(new QuestionBlank(draft.Number, position, draft.AcceptedAnswers));
+            }
+        }
+
+        foreach (var orphan in byNumber.Values)
+        {
+            _blanks.Remove(orphan);
+        }
     }
 
     // As the options: rows reused by position, the surplus removed as orphans (F-106).

@@ -24,6 +24,12 @@ public abstract record AnswerKey
     public virtual IReadOnlyList<MatchItemDraft> MatchItems => [];
 
     /// <summary>
+    /// The blanks the question stores, one per marker of the statement in statement order (F-107, BR1); empty for every
+    /// type but fill-in-the-blanks.
+    /// </summary>
+    public virtual IReadOnlyList<BlankDraft> Blanks => [];
+
+    /// <summary>
     /// The first thing wrong with this key, or null (BR3, BR4). A draft may be incomplete; a published question
     /// must be complete. A key given to a type that has none, and options given to a type that has none, are
     /// refused on both: nothing is ignored.
@@ -36,25 +42,36 @@ public abstract record AnswerKey
             ? new OptionFault(new Error(QuestionBankErrorCodes.QuestionMatchItemsNotAllowed, ErrorKind.Validation), null)
             : null;
 
+    /// <summary>F-107 BR7: blanks written to a type that has none; null when there are none.</summary>
+    protected static OptionFault? BlanksRefused(IReadOnlyList<BlankDraft>? written) =>
+        written is { Count: > 0 }
+            ? new OptionFault(new Error(QuestionBankErrorCodes.QuestionBlanksNotAllowed, ErrorKind.Validation), null)
+            : null;
+
     /// <summary>
-    /// The key of a question of <paramref name="type"/> from what was written: the options, the true/false key and
-    /// the left items as they came, so that the key itself can refuse what its type does not have.
+    /// The key of a question of <paramref name="type"/> from what was written: the options, the true/false key, the
+    /// left items and the blanks as they came, so that the key itself can refuse what its type does not have.
+    /// <paramref name="blankMarkers"/> are the marker numbers of the statement, which only a fill-in-the-blanks key reads.
     /// </summary>
     public static AnswerKey From(
         QuestionType type,
         IReadOnlyList<OptionDraft> options,
         bool? trueFalseKey,
-        IReadOnlyList<MatchItemDraft>? matchItems = null)
+        IReadOnlyList<MatchItemDraft>? matchItems = null,
+        IReadOnlyList<BlankDraft>? blanks = null,
+        IReadOnlyList<int>? blankMarkers = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         var items = matchItems ?? [];
+        var written = blanks ?? [];
 
         return type switch
         {
-            QuestionType.TrueFalse => new TrueFalseKey(options, trueFalseKey, items),
-            QuestionType.MultipleAnswer => new MultipleAnswerKey(options, trueFalseKey, items),
-            QuestionType.Matching => new MatchingKey(options, items, trueFalseKey),
-            _ => new SingleChoiceKey(options, trueFalseKey, items)
+            QuestionType.TrueFalse => new TrueFalseKey(options, trueFalseKey, items, written),
+            QuestionType.MultipleAnswer => new MultipleAnswerKey(options, trueFalseKey, items, written),
+            QuestionType.Matching => new MatchingKey(options, items, trueFalseKey, written),
+            QuestionType.FillInTheBlanks => new FillInTheBlanksKey(blankMarkers ?? [], written, options, trueFalseKey, items),
+            _ => new SingleChoiceKey(options, trueFalseKey, items, written)
         };
     }
 }

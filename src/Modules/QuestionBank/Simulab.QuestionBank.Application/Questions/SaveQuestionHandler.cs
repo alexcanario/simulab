@@ -31,7 +31,13 @@ public sealed class SaveQuestionHandler(
         QuestionBankErrorCodes.QuestionMatchingKeyInvalid,
         QuestionBankErrorCodes.QuestionMatchingKeyRepeated,
         QuestionBankErrorCodes.QuestionMatchItemTextRequired,
-        QuestionBankErrorCodes.QuestionMatchItemTooLong
+        QuestionBankErrorCodes.QuestionMatchItemTooLong,
+        // F-107 (architect #4): the position of these is the blank number, 1 to 99, not an index.
+        QuestionBankErrorCodes.QuestionBlankAnswersRequired,
+        QuestionBankErrorCodes.QuestionBlankAnswersCount,
+        QuestionBankErrorCodes.QuestionBlankAnswerRequired,
+        QuestionBankErrorCodes.QuestionBlankAnswerTooLong,
+        QuestionBankErrorCodes.QuestionBlankAnswerRepeated
     ];
 
     public async Task<SaveQuestionOutcome> HandleAsync(
@@ -114,10 +120,16 @@ public sealed class SaveQuestionHandler(
         var matchItems = (request.MatchItems ?? [])
             .Select(item => new MatchItemDraft(sanitizer.Sanitize(item.TextHtml), item.MatchPosition))
             .ToList();
+        // F-107: accepted answers are plain text, never HTML (BR8); the key trims and checks them.
+        var blanks = (request.Blanks ?? [])
+            .Select(blank => new BlankDraft(blank.Number, [.. (blank.AcceptedAnswers ?? []).Select(answer => answer ?? string.Empty)]))
+            .ToList();
+        var type = existing?.Type ?? request.Type ?? QuestionType.SingleChoice;
         var content = new QuestionContent(
             request.TopicId,
             request.ContentLanguage,
-            sanitizer.Sanitize(request.StatementHtml),
+            // F-107 BR3, BR9: only the statement of this type has markers.
+            sanitizer.Sanitize(request.StatementHtml, readBlankMarkers: type == QuestionType.FillInTheBlanks),
             request.BaseTextId,
             // F-103 BR1: the explanation takes no picture, so none of its images is ever owned.
             sanitizer.Sanitize(request.ExplanationHtml, allowImages: false),
@@ -126,9 +138,10 @@ public sealed class SaveQuestionHandler(
             request.ExamEditionId,
             request.PaperNumber,
             request.NoticeSubjectId,
-            existing?.Type ?? request.Type ?? QuestionType.SingleChoice,
+            type,
             request.TrueFalseKey,
-            matchItems);
+            matchItems,
+            blanks);
 
         var question = existing;
         Result applied;
@@ -147,7 +160,7 @@ public sealed class SaveQuestionHandler(
         {
             // The entity answers with the code; the position of the option it is about comes from the same rule.
             var position = OptionCodes.Contains(applied.Error!.Code)
-                ? AnswerKey.From(content.Type, drafts, request.TrueFalseKey, matchItems)
+                ? AnswerKey.From(content.Type, drafts, request.TrueFalseKey, matchItems, blanks, content.Statement.BlankMarkers)
                     .Check(existing?.Status == QuestionStatus.Published)?.Position
                 : null;
 

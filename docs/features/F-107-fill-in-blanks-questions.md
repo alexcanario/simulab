@@ -158,6 +158,9 @@ No mockup (owner, 2026-10-21): the form gains a fifth type card, one toolbar but
 - AC20 All new texts appear in pt-BR, pt-PT and en, including the error code texts.
 
 ## Criterion → test
+
+Tests locked: 5ad60ba0209774fb91aac0c29fa7fb70593524af (8 files); unlocks: 0
+
 | Criterion | Test |
 |---|---|
 | AC1 | `FillInTheBlanksQuestionTests.Create_FillInTheBlanksWithNoMarker_IsADraftOfThatType`, `FillInTheBlanksQuestionEndpointTests.Create_WithNoMarker_IsStoredAsADraftOfThatType_AndListedWithIt` |

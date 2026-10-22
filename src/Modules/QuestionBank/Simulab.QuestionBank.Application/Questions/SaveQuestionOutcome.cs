@@ -10,7 +10,10 @@ namespace Simulab.QuestionBank.Application.Questions;
 /// </summary>
 /// <param name="Question">The stored question; null on a refusal.</param>
 /// <param name="Error">The refusal; null on success.</param>
-/// <param name="OptionPosition">The position of the option a refusal is about, when there is one.</param>
+/// <param name="OptionPosition">
+/// The position, from 0, of the option or left item a refusal is about, when there is one; for the
+/// <c>question.blank_*</c> codes it is the blank number, 1 to 99 (F-107, architect #4).
+/// </param>
 public sealed record SaveQuestionOutcome(QuestionResponse? Question, Error? Error = null, int? OptionPosition = null)
 {
     public bool IsSuccess => Error is null;

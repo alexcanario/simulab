@@ -59,7 +59,7 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer or Matching.");
+            .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching or FillInTheBlanks.");
 
         builder.Property(version => version.ContentLanguage)
             .HasMaxLength(QuestionLimits.ContentLanguageMaxLength)
@@ -104,8 +104,10 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
         builder.OwnsMany(version => version.MatchItems, items => items.ToJson("match_items"));
         builder.Navigation(version => version.MatchItems).UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        // F-107 test phase: not mapped yet.
-        builder.Ignore(version => version.Blanks);
+        // F-107 BR10: the blanks of a fill-in-the-blanks question in statement order, a third JSON column read whole; null
+        // on the versions recorded before it, which the entity reads as none (the architecture test names this exemption).
+        builder.OwnsMany(version => version.Blanks, blanks => blanks.ToJson("blanks"));
+        builder.Navigation(version => version.Blanks).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasOne<Question>()
             .WithMany()

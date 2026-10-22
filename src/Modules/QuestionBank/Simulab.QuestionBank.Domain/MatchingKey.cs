@@ -12,10 +12,12 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="Written">The options (right items) as written.</param>
 /// <param name="Items">The left items as written.</param>
 /// <param name="TrueFalseWritten">A true/false key that came with them; always a refusal.</param>
+/// <param name="BlanksWritten">Blanks that came with them; any of them is a refusal (F-107, BR7).</param>
 public sealed record MatchingKey(
     IReadOnlyList<OptionDraft> Written,
     IReadOnlyList<MatchItemDraft> Items,
-    bool? TrueFalseWritten = null) : AnswerKey
+    bool? TrueFalseWritten = null,
+    IReadOnlyList<BlankDraft>? BlanksWritten = null) : AnswerKey
 {
     public override QuestionType Type => QuestionType.Matching;
 
@@ -33,6 +35,6 @@ public sealed record MatchingKey(
             return new OptionFault(new Error(QuestionBankErrorCodes.QuestionKeyNotAllowed, ErrorKind.Validation), null);
         }
 
-        return QuestionRules.CheckMatching(Written, Items, published);
+        return BlanksRefused(BlanksWritten) ?? QuestionRules.CheckMatching(Written, Items, published);
     }
 }

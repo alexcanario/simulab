@@ -241,7 +241,8 @@ public static class QuestionEndpoints
         return result.IsSuccess ? Results.Ok(result.Value) : Problem(result.Error!);
     }
 
-    // The option a refusal is about travels as the problem's `position`, so the form marks the right row.
+    // The option a refusal is about travels as the problem's `position`, so the form marks the right row. For the
+    // question.blank_* codes it is the blank number, 1 to 99, not an index (F-107).
     private static IResult Refusal(SaveQuestionOutcome outcome) =>
         outcome.OptionPosition is { } position
             ? Problem(outcome.Error!, null, ("position", position))
