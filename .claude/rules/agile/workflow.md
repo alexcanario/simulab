@@ -3,28 +3,24 @@
 - The chat is where ideas mature; the disk is the source of truth. Every decision that matters ends in a file with a `status:` header.
 - Status flow: `idea → refining → approved → building → validating → done`; `cancelled` only from `idea`/`refining`, as a duplicate; `blocked` is a side status (`/agile:change <id> --block|--unblock`, "Blocked" in `conventions.md`). Never skip a status.
 - No production code before the item is `approved`. Reading code to refine is fine; writing it is not.
-- Only the owner's explicit approval ("approve F-<n>" / "aprovo F-<n>") sets `approved`. "ok" alone does not. In `/agile:autopilot`, or with `--autopilot` on `/agile:refine` or `/agile:build`, it is the "Aprovo <id>" answer at stop 1, or the `--assume` flag for that item: assumed answers are recorded in `## Decisions` and shown at validation.
-- Every epic, feature and bug says how it starts (`## Start`): what it depends on, what it waits on to start, what only its validation needs (never a block) and who provides each, the suggested path, what can run beside it. Unknown is written as unknown, never guessed.
+- Only the owner's explicit approval ("approve F-<n>" / "aprovo F-<n>") sets `approved`; "ok" alone does not. In `/agile:autopilot`, or with `--autopilot`, it is the "Aprovo <id>" answer at stop 1 or `--assume`; assumed answers go to `## Decisions`.
+- Every epic, feature and bug says how it starts (`## Start`): what it depends on, what it waits on to start, what only its validation needs (never a block), who provides each, the suggested path, what can run beside it. Unknown is written as unknown.
 - An unanswered item in `## Open questions` blocks approval. Answer it or mark it `deferred (owner, YYYY-MM-DD)`.
-- WIP limit: one item in `building` or `validating` per checkout (`blocked` holds no slot: `/agile:build` on an `approved` item runs `deps.js block` before this check, and an undelivered `Depends on` blocks it instead of taking a slot). A new request during a build becomes an `idea`, not work; a second item built in parallel needs the owner's `/agile:build <id> --worktree`.
-- `/agile:refine` creates the item's branch and worktree before writing anything; every document of that item (file, cause, mockup) is written there, never in another item's checkout.
+- WIP limit: one item in `building` or `validating` per checkout (`blocked` holds no slot: `/agile:build` runs `deps.js block` first, and an undelivered `Depends on` blocks the item). A new request during a build becomes an `idea`; a second item in parallel needs the owner's `/agile:build <id> --worktree`.
 - Confirm the item at session start; other items are only registered, never executed.
-- Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>` is that gate). An approval never carries over to the next gate. In `/agile:autopilot` gates 2 and 3 may come in one message, only when it names the merge ("validado e autorizo o merge de <id>"); "validado" alone stops at `validating`. With `Merge: pr` the third gate is the owner's own merge on the PR, and the ship stops at "PR open".
-- `/agile:epic "<name>" --autopilot` takes the epic's features one at a time, in plan order, each through the autopilot with its own two stops: the merge stays per item ("validado" alone ends the run), any owner-reserved stop ends it, and the same command resumes it.
-- Verify premises in the code before asking. Never ask what the code already answers; a decision a rule, an ADR or an earlier item answers is asked as a confirmation naming its source.
+- Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>`); an approval never carries to the next gate. `/agile:autopilot` may take gates 2 and 3 in one message only when it names the merge; "validado" alone stops at `validating`. With `Merge: pr` the third gate is the owner's merge on the PR; the ship stops at "PR open".
+- Verify premises in the code before asking; a decision a rule, an ADR or an earlier item answers is asked as a confirmation naming its source.
 - Questions go in one numbered round, each with a recommendation and a one-line reason. At most one follow-up round.
 - A false premise or an impossible criterion stops the build: give options A/B with a recommendation; the answer becomes a change note.
 - A change of mind during build is a change note (`/agile:change`); only the affected criteria are re-approved.
-- An item the session judges too large for one session is proposed in smaller parts at refinement and at the build's plan, the owner approves the cut (`references/item-size.md`).
+- An item too large for one session is proposed in smaller parts at refinement and at the build's plan; the owner approves the cut (`references/item-size.md`).
 - Stay inside the item's scope: anything extra you notice becomes an `idea`, reported, not built.
 - When a solution has several moving parts, offer the simpler version with its trade-off (the owner decides); show the first artifact of a repeated pattern before replicating it.
-- Stay alert to an external skill that fits a complex task, from `references/companions.md` or the ones the session offers: propose it, never run it unasked, at most once per item.
-- The main session owns the conversation: a subagent never asks the owner, shows a mockup or takes an approval. A subagent is a fresh-context review, a read-only pass before the code (`system-design` proposes, `architect` reviews it, only for a new project, contract, message between modules or schema change), a producing role (`ux-designer` designs a screen, `frontend` implements an approved mockup), an idea branch (`diverge`, `--wide`), or parallel work on different files; one writer at a time in a worktree, and the session runs the gate after a producing agent.
+- Stay alert to an external skill that fits a complex task (`references/companions.md` or the ones the session offers): propose it, never run it unasked, at most once per item.
+- The main session owns the conversation: a subagent never asks, shows a mockup or takes an approval; one writer at a time in a worktree, and the session runs the gate after a producing agent.
 - Verify what a subagent reports against the files and `git log`. A report is not evidence.
 - The board mirrors the files. If they diverge, trust the file and fix the board; if the board shows unknown work, stop and ask.
-- An issue body is edited only whole: the full text in a file, sent with `gh issue edit <id> --body-file <file>` and read back, never a partial or inline `--body`.
-- Never start, mount or reset a database or volume outside the test containers. "Not measured" is an acceptable answer.
-- Exception: the item worktree's app host (`feature-build` step 12) may start data that belongs to the item (an unnamed `WithDataVolume()` or the project's own knob); shared data needs the owner's yes, once per item.
-- End every step with: what changed (files), what is next, who acts next.
+- An issue body is edited only whole: the full text in a file, sent with `gh issue edit <id> --body-file <file>` and read back, never inline `--body`.
+- Never start, mount or reset a database or volume outside the test containers, except the item's own data in its worktree's app host (`feature-build` step 12); shared data needs the owner's yes, once per item. "Not measured" is an acceptable answer.
 - Quote real build and test output (counts, duration), never a paraphrase.
-- Write or edit files (code, tests, docs; new or existing) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string, `sed -i`): escapes become stray text; a test can pass matching nothing.
+- Write or edit files (code, tests, docs; new or existing) with the Write and Edit tools, never through a script's string literals (a heredoc, a Python or PowerShell string, `sed -i`): escapes become stray text.

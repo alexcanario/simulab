@@ -2,20 +2,17 @@
 
 An item is `done` only when every line is true. "Almost" is `validating`.
 
-- Every acceptance criterion maps to at least one test, kept in `## Criterion → test`, every row filled at ship. A criterion checked only on screen is in the validation script.
+- Every acceptance criterion maps to at least one test in `## Criterion → test`, every row filled at ship; a criterion checked only on screen is in the validation script.
 - A bug has a regression test that was seen failing before the fix.
 - The build has no new warnings (the gate compares with the committed baseline). Accepting a new warning needs the owner's yes.
 - No open critical or high security finding: `agile scan GREEN`, or accepted by the owner, or closed as a false positive by Claude with evidence (ship report).
 - Affected tests are green at the end of every turn; the full suite and the architecture tests are green before merge.
 - Test time is inside the profile budget. An overrun is reported and becomes a retro finding.
 - Every UI text exists in each locale of `UI locales:` and the missing-key test is green.
-- API changes follow the API contract rules: `/api/v1/`, stable error codes, nullable optional ids, shared JSON options, OpenAPI document returns 200.
-- Schema changes have a migration, and unique indexes over nullable tenant columns are `NULLS NOT DISTINCT`.
-- Permissions are checked by the endpoint and by the screen (menu, page and action), by permission and not by role name.
-- A screen that calls the API was opened through the app host by Claude before handing over the validation script.
+- Every `paths:`-scoped rule whose files the diff touches holds (API contracts, UI, i18n, build config).
 - The owner followed the validation script and said it passed, in this conversation.
 - The item file reflects what was built: decisions, change notes, `## Delivery`.
-- The app manual is updated in the three languages when visible behavior changed; the generated technical docs (`docs/architecture/`) pass `DocGen --check` when the project has them; each page of the item's `## Docs` exists and its index row points to it (`techdocs.js check`).
-- The merge was authorized by the owner (typing `/agile:ship <id>`; in `/agile:autopilot`, possibly in the validation message naming the merge), verified (`0 0`, branch and worktree gone) and the board item is closed with evidence.
+- The app manual is updated in the three languages when visible behavior changed; the generated docs (`docs/architecture/`) pass `DocGen --check`; each page of the item's `## Docs` exists and is indexed (`techdocs.js check`).
+- The merge gate passed and was verified, and the board item is closed with evidence.
 - Nothing is left uncommitted in any worktree.
 - The retro ran: at most three lessons, each one proposed as a rule, a skill change or nothing.
