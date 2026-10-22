@@ -1,8 +1,8 @@
 ---
 page: subjects
 locale: pt-BR
-features: [F-79, F-51, F-75, F-95, F-77]
-updated: 2026-10-15
+features: [F-79, F-51, F-75, F-95, F-77, F-90]
+updated: 2026-10-22
 ---
 # Disciplinas e tópicos
 
@@ -49,6 +49,21 @@ esses nomes para que o texto de um edital possa ser ligado à disciplina sem cri
 4. Escolha **Salvar**. O conjunto que você vê é o conjunto que fica salvo: remover um chip remove o nome.
 5. Um outro nome é só texto. Ele acompanha a disciplina ou o tópico: vai com um tópico que muda de disciplina e é
    excluído com o item. Um nome que você removeu fica livre de novo, para este item ou para outro.
+
+### Ver onde uma disciplina ou um tópico é usado
+Quando o botão Excluir está desabilitado porque o item está em uso, a linha mostra também a ação **Onde é usado**.
+Ela só aparece nessas linhas.
+1. Na lista de disciplinas, ou na seção de tópicos da página da disciplina, escolha **Onde é usado** na linha do item.
+2. A janela lista as disciplinas do edital vivas que mapeiam o item, cada uma com o exame e a edição (ano do edital e,
+   quando há, a posição), em ordem de nome do exame, ano do edital do mais novo para o mais antigo e posição. Numa
+   disciplina, só aparecem os mapeamentos da disciplina inteira; os dos tópicos aparecem em cada tópico.
+3. Escolha uma linha para abrir a página da edição, onde o mapeamento é retirado. A janela só mostra: ela não
+   muda nada.
+4. Num tópico, a janela mostra também "Usado por N questões" (rascunho, em revisão ou publicada; as excluídas não
+   contam). Quem tem a permissão de gerenciar questões pode escolher a contagem para abrir a lista de questões já
+   filtrada por aquele tópico; quem não tem vê só o número.
+5. Se alguém liberou o item depois que a tela abriu, a janela mostra "Nada usa mais este item." Ao fechá-la, a lista
+   é recarregada.
 
 ### Excluir uma disciplina
 1. Uma disciplina que ainda tem tópicos não pode ser excluída: o botão Excluir fica desabilitado, e ao apontar
@@ -102,6 +117,7 @@ Os nomes aparecem exatamente como foram digitados, em todos os idiomas do app.
 | Esta disciplina está mapeada em disciplinas do edital e não pode ser excluída. A lista foi recarregada. / Este tópico está mapeado em disciplinas do edital ou é usado por questões e não pode ser excluído. A lista foi recarregada. | Alguém a mapeou, ou escreveu uma questão no tópico, com a sua tela aberta. | Retire o mapeamento ou as questões primeiro. |
 | Esta disciplina não existe mais. Atualize a lista. | Alguém excluiu a disciplina enquanto a sua tela estava aberta. | Recarregue a página. |
 | Este tópico não existe mais. Atualize a lista. | Alguém excluiu o tópico enquanto a sua tela estava aberta. | Recarregue a página. |
+| Nada usa mais este item. | Na janela Onde é usado: alguém retirou o último mapeamento ou a última questão com a sua tela aberta. | Feche a janela; a lista é recarregada e o item já pode ser excluído. |
 | Página não encontrada | Sua conta não gerencia o catálogo. | Fale com um administrador se achar que deveria. |
 
 ## Páginas relacionadas
