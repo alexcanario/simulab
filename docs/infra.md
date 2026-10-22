@@ -15,6 +15,29 @@ Written at bootstrap from ADR-0001 round 6. What is true today; anything that do
 - Background work (F-13): the `Api` host runs the job worker of ADR-0001 #20. It polls `jobs.jobs` every 5 s, retries a failed job 5 times (1-2-4-8-16 minutes) and deletes it as soon as it succeeds. Every identity email leaves through it, so a Mailpit that is stopped delays an email instead of losing it. To watch the queue by hand: `select status, attempts, last_error from jobs.jobs;`.
 - Retention of failed jobs (F-27): a job given up on stays as a `Failed` row — the evidence of what was lost — for **90 days**, counted from `created_at`, and is then deleted. The cleanup runs inside the same worker poll, at most once an hour and always once when the process starts, and logs one line with the count only when it removed something. The number is `JobPolicy.FailedRetention`, a constant and not configuration, so changing it is a code change. `Pending` and `Running` rows are never deleted however old they are.
 
+### Open the local app to the network
+Other devices on the same network (Wi-Fi, LAN) can use the app running on this machine. Verified 2026-10-22 with Aspire 13.6.2: the Web's proxy listens on every interface (`netstat` showed `192.168.1.68:7125` and `:5211` as `LISTENING`) and `https://<ip>:7125/sign-in` answered `200`.
+
+1. Start the app host with the Visual Studio profile **https-lan** (AppHost `launchSettings.json`), or from a terminal with the switch:
+   - Git Bash: `Lan__Enabled=true dotnet run --project src/Hosts/Simulab.AppHost`
+   - PowerShell 7: `$env:Lan__Enabled = "true"; dotnet run --project src/Hosts/Simulab.AppHost`
+   - The links in the emails use `https://<machine name, lowercase>:7125`. To use the IP instead (the machine name does not always resolve on the other device), set `Lan:PublicBaseUrl` and leave `Lan:Enabled` out: `dotnet user-secrets set "Lan:PublicBaseUrl" "https://192.168.1.68:7125" --project src/Hosts/Simulab.AppHost`.
+2. Find the IP: `ipconfig` and read the **IPv4 Address** of the Wi-Fi or Ethernet adapter that has a default gateway (ignore `vEthernet` adapters). PowerShell 7: `(Get-NetIPConfiguration | Where-Object IPv4DefaultGateway).IPv4Address.IPAddress`.
+3. Open the firewall, once, for the Web's https port only. PowerShell as administrator:
+   ```powershell
+   New-NetFirewallRule -DisplayName "Simulab Web LAN" -Direction Inbound -Protocol TCP -LocalPort 7125 -Action Allow -Profile Private
+   ```
+   Profile `Private` only: a Wi-Fi marked **Public** stays closed. Check the profile with `Get-NetConnectionProfile`; to mark the network private: `Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Private` (administrator). Remove the rule with `Remove-NetFirewallRule -DisplayName "Simulab Web LAN"`.
+4. On the other device: `https://<ip>:7125`. The browser warns about the certificate; accept it once.
+
+Limits:
+- **https only.** The Web sets its cookies `Secure` and redirects http to https (`Program.cs`: `CookieSecurePolicy.Always`, `UseHttpsRedirection`), so `http://<ip>:5211` only redirects to `https://<ip>:7125`, and a plain-http sign-in would lose its cookie. Serving the app over plain http needs a change in the Web and is not supported.
+- The certificate is the .NET development certificate: valid for `localhost`, not for the IP or the machine name, and not trusted by other devices. Every device sees a warning, and a phone may refuse to continue.
+- Emails stay in Mailpit on this machine (`localhost`, port in the dashboard); nobody else receives them. A person on another device cannot read the verification email: use the Mailpit page here, or sign in with an account that is already verified.
+- PostgreSQL, Redis, Azurite, Mailpit and the Aspire dashboard stay reachable only from this machine.
+- The machine must stay on, awake and on the same network, with the app host running. The IP can change at the next Wi-Fi connection (DHCP).
+- Do not use it with real people's data: the local database holds fixed development credentials (`docs/privacy/data-processing-register.md`).
+
 ### Useful commands
 The same command works in Git Bash and in PowerShell 7 unless two forms are shown.
 

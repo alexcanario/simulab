@@ -111,4 +111,50 @@ public class AppHostModelTests : IAsyncLifetime
         environment.Should().ContainKey("Identity__VerificationUrl");
         environment["Identity__VerificationUrl"].Should().Contain("web.bindings.https").And.EndWith("/verify-email");
     }
+
+    // Local network access: Lan:PublicBaseUrl opens the Web to the network and points every email link at it.
+    [Fact]
+    public async Task Lan_PublicBaseUrl_OpensTheWebToTheNetworkAndPointsTheEmailLinksAtIt()
+    {
+        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Simulab_AppHost>(
+            ["--Lan:PublicBaseUrl=https://192.168.1.68:7125/"]);
+        var model = new DistributedApplicationModel(builder.Resources);
+        var web = model.Resources.Single(resource => resource.Name == "web");
+        var api = model.Resources.Single(resource => resource.Name == "api");
+
+        web.Annotations.OfType<EndpointAnnotation>().Where(endpoint => endpoint.Name is "http" or "https")
+            .Should().HaveCount(2).And.OnlyContain(endpoint => endpoint.TargetHost == "0.0.0.0");
+
+        var options = new DistributedApplicationExecutionContextOptions(DistributedApplicationOperation.Publish)
+        {
+            Services = builder.Services.BuildServiceProvider(),
+        };
+        var result = await ExecutionConfigurationBuilder.Create(api)
+            .WithEnvironmentVariablesConfig()
+            .BuildAsync(new DistributedApplicationExecutionContext(options));
+        var environment = result.EnvironmentVariables.ToDictionary(pair => pair.Key, pair => pair.Value);
+
+        environment["Identity__VerificationUrl"].Should().Be("https://192.168.1.68:7125/verify-email");
+        environment["Identity__PasswordResetUrl"].Should().Be("https://192.168.1.68:7125/reset-password");
+        environment["Identity__ForgotPasswordUrl"].Should().Be("https://192.168.1.68:7125/forgot-password");
+        environment["Identity__SignUpUrl"].Should().Be("https://192.168.1.68:7125/sign-up");
+    }
+
+    [Fact]
+    public async Task Lan_Enabled_UsesTheMachineNameWhenNoAddressIsGiven()
+    {
+        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.Simulab_AppHost>(
+            ["--Lan:Enabled=true"]);
+        var web = new DistributedApplicationModel(builder.Resources).Resources.Single(resource => resource.Name == "web");
+
+        web.Annotations.OfType<EndpointAnnotation>().Where(endpoint => endpoint.Name is "http" or "https")
+            .Should().OnlyContain(endpoint => endpoint.TargetHost == "0.0.0.0");
+    }
+
+    [Fact]
+    public void Web_StaysOnLocalhostWithoutLanPublicBaseUrl()
+    {
+        Resource("web").Annotations.OfType<EndpointAnnotation>()
+            .Should().OnlyContain(endpoint => endpoint.TargetHost == "localhost");
+    }
 }

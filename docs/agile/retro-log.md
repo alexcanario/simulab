@@ -1495,3 +1495,14 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Lesson 3, score plugin 3 / project 9: the full suite is over budget again — test run 370 s, 356 s and 512 s in the three ship runs (slowest projects 5 m 26 s to 8 m 25 s). Seen many times. Destination: nothing new; evidence for the idea F-144.
 - Not recommended: the validation ticks were not saved again (`Evidence: 0 of 14 tested`, fifth case, note of F-103); the secret-guard placeholder refusal hit the merge commit of main into the branch (second case, evidence added to the F-90 note).
 - Shipped: merge `de09afc`, version 1.14.0, 4885 tests green, `agile gate GREEN`, `agile scan GREEN`, board #153 Done (read back).
+
+## 2026-10-22 - Sync with agile@canary 0.158.0
+- From 0.156.0 to 0.158.0. Copied (owner's OK): `docs/agile/workflow.pt-BR.md` (version line only).
+- Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (upstream unchanged); manual build files (no upstream change). Declined: capture of the two missing capabilities.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Build and tests not run (no build file changed).
+- Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
+## 2026-10-22 - Sync with agile@canary 0.159.0
+- From 0.158.0 to 0.159.0. Copied (owner's OK): `docs/agile/workflow.pt-BR.md`.
+- Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (upstream unchanged); manual build files (no upstream change). Declined: capture of the two missing capabilities (release pipeline 0.64.0, Azure login check 0.2.0).
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Glossary: `Meaning (pt-BR)` column already present on both tables; per-document term scan not run. Build and tests not run (no build file changed).

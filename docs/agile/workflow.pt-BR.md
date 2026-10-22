@@ -1,6 +1,6 @@
 # agile@canary — Manual (pt-BR)
 
-> Versão 0.156.0 (rascunho).
+> Versão 0.159.0 (rascunho).
 
 Sumário
 1. Conceitos em dois minutos

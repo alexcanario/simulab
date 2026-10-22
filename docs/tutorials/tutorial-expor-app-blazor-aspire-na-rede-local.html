@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Expor um app Blazor + Aspire AppHost na rede local (Windows): TargetHost 0.0.0.0, perfil https-lan, firewall, certificado e cookie Secure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --fg: #182029;
+  --fg2: #39434f;
+  --muted: #5b6573;
+  --line: #d7dce2;
+  --edge: #56606d;
+  --accent: #1c5bb8;
+  --api-fill: #e1eaf9; --api-stroke: #2a5cae;
+  --ext-fill: #eceef1; --ext-stroke: #5b6573;
+  --atr-fg: #6a3fb0; --atr-bg: #efe7fb;
+  --lg-fg: #a8231a; --lg-bg: #fbe5e2;
+  --md-fg: #8a5300; --md-bg: #fbeed6;
+  --sm-fg: #39434f; --sm-bg: #e8ebef;
+  --ok-fg: #17703f; --ok-bg: #dff2e6;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101317; --surface: #171b20; --fg: #e6e9ed; --fg2: #c2c8d0; --muted: #9ba5b1;
+    --line: #2a3038; --edge: #9ba5b1; --accent: #8ab6ff;
+    --api-fill: #142440; --api-stroke: #7fa8ef;
+    --ext-fill: #22272e; --ext-stroke: #9ba5b1;
+    --atr-fg: #cdb2ff; --atr-bg: #2a1d40;
+    --lg-fg: #ff9e93; --lg-bg: #3a1714;
+    --md-fg: #f1c06a; --md-bg: #382a0c;
+    --sm-fg: #c2c8d0; --sm-bg: #252a31;
+    --ok-fg: #7bd8a1; --ok-bg: #12301f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101317; --surface: #171b20; --fg: #e6e9ed; --fg2: #c2c8d0; --muted: #9ba5b1;
+  --line: #2a3038; --edge: #9ba5b1; --accent: #8ab6ff;
+  --api-fill: #142440; --api-stroke: #7fa8ef;
+  --ext-fill: #22272e; --ext-stroke: #9ba5b1;
+  --atr-fg: #cdb2ff; --atr-bg: #2a1d40;
+  --lg-fg: #ff9e93; --lg-bg: #3a1714;
+  --md-fg: #f1c06a; --md-bg: #382a0c;
+  --sm-fg: #c2c8d0; --sm-bg: #252a31;
+  --ok-fg: #7bd8a1; --ok-bg: #12301f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--sans); padding-inline: 16px; padding-block: 0 64px; }
+.frame { max-width: 1180px; margin: 0 auto; }
+.col { max-width: 72ch; }
+a { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+h2 { font-size: 26px; font-weight: 700; margin: 0 0 12px; }
+h3 { font-size: 18px; font-weight: 600; margin: 28px 0 8px; }
+p { margin: 0 0 12px; }
+
+header.top { padding-block: 40px 20px; border-bottom: 1px solid var(--line); display: grid; gap: 12px; }
+.lede { font-size: 19px; color: var(--fg2); margin: 0; max-width: 72ch; }
+.meta { font-size: 13px; color: var(--muted); margin: 0; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 8px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+nav.toc a { font-size: 14px; text-decoration: none; color: var(--fg2); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; }
+nav.toc a:hover { color: var(--accent); border-color: var(--accent); }
+
+section { padding-block: 40px 8px; border-bottom: 1px solid var(--line); scroll-margin-top: 12px; }
+section:last-of-type { border-bottom: 0; }
+.kicker { font: 500 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+
+.ev { font: 400 12px/1.5 var(--mono); color: var(--muted); margin: -6px 0 14px; overflow-wrap: anywhere; }
+ul.facts, ol.facts { margin: 0 0 16px; padding-left: 22px; max-width: 84ch; }
+ul.facts li, ol.facts li { margin-bottom: 8px; }
+ul.facts li .ev, ol.facts li .ev { margin: 2px 0 0; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--fg2); margin: 8px 0 16px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; width: fit-content; max-width: 100%; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 18px; height: 12px; border-radius: 3px; border: 1.5px solid; display: inline-block; }
+.sw.api { background: var(--api-fill); border-color: var(--api-stroke); }
+.sw.ext { background: var(--ext-fill); border-color: var(--ext-stroke); }
+
+figure { margin: 12px 0 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+figcaption { font-size: 14px; color: var(--fg2); margin-top: 10px; max-width: 84ch; }
+figcaption b { color: var(--fg); }
+.dg { overflow-x: auto; }
+.dg svg { display: block; width: 100%; height: auto; min-width: 760px; }
+
+svg .n rect { stroke-width: 1.5; }
+svg .api rect { fill: var(--api-fill); stroke: var(--api-stroke); }
+svg .ext rect { fill: var(--ext-fill); stroke: var(--ext-stroke); }
+svg .nm { font: 600 14px var(--sans); fill: var(--fg); text-anchor: middle; }
+svg .cd { font: 400 10.5px var(--mono); fill: var(--fg2); text-anchor: middle; }
+svg .e { fill: none; stroke: var(--edge); stroke-width: 1.5; }
+svg .mk { fill: var(--edge); }
+svg .life { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+svg .lbl { font: 500 11px var(--sans); fill: var(--fg2); text-anchor: middle; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+svg .lbl.st { text-anchor: start; }
+svg .lbl.it { font-style: italic; fill: var(--muted); }
+svg .gut { font: 500 11px var(--mono); fill: var(--fg); text-anchor: start; }
+svg .term { font: 500 11.5px var(--sans); fill: var(--fg); text-anchor: middle; }
+svg .note { font: 400 12px var(--sans); fill: var(--fg2); text-anchor: middle; }
+
+.tw { overflow-x: auto; margin: 8px 0 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td .ev { margin: 4px 0 0; }
+td.k { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+tr.grp td { background: var(--bg); font-weight: 600; color: var(--fg); }
+.t-wide { min-width: 760px; }
+td.num { font-variant-numeric: tabular-nums; }
+
+.src, .chip { display: inline-block; font: 600 11px var(--sans); letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.src.atr { color: var(--atr-fg); background: var(--atr-bg); }
+.src.bd { color: var(--ok-fg); background: var(--ok-bg); }
+.src.cfg { color: var(--accent); background: var(--api-fill); }
+.src.fix { color: var(--md-fg); background: var(--md-bg); }
+.src.calc { color: var(--sm-fg); background: var(--sm-bg); }
+.chip.large { color: var(--lg-fg); background: var(--lg-bg); }
+.chip.medium { color: var(--md-fg); background: var(--md-bg); }
+.chip.small { color: var(--sm-fg); background: var(--sm-bg); }
+.chip.ill { color: var(--atr-fg); background: var(--atr-bg); }
+
+.srclist { display: grid; grid-template-columns: max-content 1fr; gap: 8px 14px; align-items: baseline; max-width: 84ch; margin: 8px 0 18px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; font-size: 15px; }
+.srclist .src { justify-self: start; }
+
+.side { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; max-width: 900px; margin: 8px 0 18px; font-size: 15px; }
+.side p:last-child { margin-bottom: 0; }
+
+.io { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 8px 0 20px; }
+.io > div { min-width: 0; }
+.io h4 { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--fg2); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+@media (max-width: 860px) { .io { grid-template-columns: 1fr; } }
+pre.code { margin: 0; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; font: 400 12.5px/1.55 var(--mono); color: var(--fg); }
+pre.code .c { color: var(--muted); }
+pre.code.solo { margin: 8px 0 20px; }
+
+ol.strip { list-style: none; margin: 12px 0 20px; padding: 0; display: grid; gap: 0; max-width: 960px; }
+ol.strip li { display: grid; grid-template-columns: 44px 1fr; gap: 0 14px; position: relative; padding-bottom: 16px; }
+ol.strip li::before { content: ""; position: absolute; left: 21px; top: 30px; bottom: 0; width: 2px; background: var(--line); }
+ol.strip li:last-child::before { display: none; }
+ol.strip .no { width: 44px; height: 30px; border-radius: 6px; background: var(--api-fill); border: 1.5px solid var(--api-stroke); font: 600 14px var(--mono); display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+ol.strip .body { min-width: 0; padding-top: 3px; }
+ol.strip .what { margin: 0; }
+ol.strip .val { font: 400 12.5px/1.55 var(--mono); color: var(--fg2); margin: 4px 0 0; overflow-wrap: anywhere; }
+ol.strip .meta2 { font: 400 12px/1.5 var(--mono); color: var(--muted); margin: 2px 0 0; overflow-wrap: anywhere; }
+
+.gaps { display: grid; gap: 0; max-width: 940px; margin-bottom: 8px; }
+.gap { padding: 12px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 76px 1fr; gap: 2px 14px; }
+.gap:last-child { border-bottom: 0; }
+.gap .chip { justify-self: start; margin-top: 3px; }
+.gap h4 { margin: 0; font-size: 15.5px; font-weight: 600; }
+.gap .why { margin: 2px 0 0; color: var(--fg2); font-size: 15px; }
+.gap .ev { margin: 4px 0 0; }
+.gap > div { min-width: 0; }
+@media (max-width: 560px) {
+  .gap { grid-template-columns: 1fr; }
+  .srclist { grid-template-columns: 1fr; gap: 2px; }
+  .srclist .src { margin-top: 8px; }
+}
+ol.qs { padding-left: 22px; max-width: 900px; }
+ol.qs li { margin-bottom: 8px; }
+footer { padding-block: 24px; font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* ---- Extensoes do tutorial-make (sobre o leiaute base) ---- */
+/* Faixa de inicio/fim de secao: mesmo tamanho nas duas, mesma cor (regra do skill). */
+.band { font: 600 14px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+.band.end { margin: 24px 0 8px; padding-top: 12px; border-top: 1px dashed var(--line); }
+/* Destaque por cor da fonte, sem caixas. Azul = dica/resultado; vermelho = atencao/armadilha. Uma frase vermelha por vez. */
+.warn { color: var(--lg-fg); }
+.tip, .result { color: var(--accent); }
+.warn b, .tip b, .result b { letter-spacing: 0.02em; }
+/* Bloco continuo: rode tudo de uma vez, sem parar. */
+.cont { border-left: 4px solid var(--lg-fg); padding-left: 12px; margin: 12px 0 20px; }
+.cont > .warn { margin: 0 0 8px; }
+.cont pre.code { margin: 0 0 8px; }
+.lvl { margin-left: 8px; vertical-align: middle; }
+.chip.ini { color: var(--ok-fg); background: var(--ok-bg); }
+.chip.int { color: var(--md-fg); background: var(--md-bg); }
+.chip.adv { color: var(--lg-fg); background: var(--lg-bg); }
+.mermaid { text-align: center; overflow-x: auto; }
+.ficha { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; max-width: 900px; margin: 8px 0 18px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; font-size: 15px; }
+.ficha dt { font-weight: 600; color: var(--fg2); } .ficha dd { margin: 0; }
+@media (max-width: 560px) { .ficha { grid-template-columns: 1fr; gap: 2px; } .ficha dd { margin-bottom: 8px; } }
+a.ref { white-space: nowrap; }
+h4 { font-size: 16px; font-weight: 600; margin: 22px 0 6px; line-height: 1.3; }
+section > p, section > .col { max-width: 72ch; }
+p.cap { font-size: 14px; color: var(--fg2); margin: 18px 0 6px; }
+p.cap b { color: var(--fg); }
+pre.code { position: relative; }
+pre.code[data-lang]::before { content: attr(data-lang); position: absolute; top: 4px; right: 10px; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+pre.code.solo { margin: 4px 0 16px; }
+.warn code, .tip code, .result code { color: inherit; }
+h2 .chip.lvl { font-size: 11px; }
+:target { scroll-margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="frame">
+<header class="top">
+  <div class="kicker">Tutorial</div>
+  <h1>Expor um app Blazor + Aspire AppHost na rede local (Windows): TargetHost 0.0.0.0, perfil https-lan, firewall, certificado e cookie Secure</h1>
+  <p class="lede">Premissas adotadas: <code>--md --html</code>; idioma pt-BR; Windows 11, PowerShell 7, .NET 10, Aspire 13.6.2 e Visual Studio; o exemplo é o próprio Simulab (portas 7125 https e 5211 http no Web). Os fatos do Simulab foram conferidos nos commits <code>2651449</code> e <code>b797e0a</code>, em <code>docs/infra.md</code> (verificado em 2026-10-22) e em <code>Program.cs</code>. <b>Não montei um laboratório do zero para este texto</b>: os trechos genéricos (Código <a class="ref" href="#cod-5-1">5.1</a>) seguem o mesmo padrão do código real e precisam ser rodados por você (Seção <a class="ref" href="#s5-5">5.5</a>).</p>
+  <p class="meta">Convertido de <code>tutorial-expor-app-blazor-aspire-na-rede-local.md</code> com tutorial-make · 22/10/2026</p>
+</header>
+<nav class="toc" aria-label="Seções">
+  <a href="#s0">0 Ficha do tutorial</a>
+  <a href="#s1">1 Pre-requisitos</a>
+  <a href="#s2">2 Glossario e siglas</a>
+  <a href="#s3">3 Indice remissivo</a>
+  <a href="#s4">4 Introducao e conceitos fundamentais</a>
+  <a href="#s5">5 Projeto pratico — iniciante</a>
+  <a href="#s6">6 Projeto pratico — intermediario</a>
+  <a href="#s7">7 Projeto pratico — avancado</a>
+  <a href="#s8">8 Resumo</a>
+</nav>
+<div class="legend" aria-label="Legenda de cores"><span><b class="tip">Azul</b> título, dica, resultado testável</span><span><b class="warn">Vermelho</b> atenção, armadilha, bloco contínuo</span></div>
+<section id="s0">
+  <p class="band">&#9654; Início · 0. Ficha do tutorial</p>
+  <h2>0. Ficha do tutorial</h2>
+<p><b>Título:</b> Expor um app Blazor Interactive Server, iniciado por um Aspire AppHost, para outros dispositivos da mesma rede (Wi-Fi/LAN), no Windows.</p>
+<p><b>Objetivo:</b> ao final, você será capaz de abrir <code>https://&lt;IP-da-sua-máquina&gt;:7125</code> no celular ou em outro computador da mesma rede, entrar com login e senha, e, quando não abrir, dizer em menos de cinco minutos em qual das quatro camadas (processo, <code>TargetHost</code>, firewall, certificado/cookie) está o problema, lendo a saída do <code>netstat</code>.</p>
+<p><b>Motivação e aplicabilidade</b></p>
+<ul class="facts">
+<li>Problema real: o app roda em <code>localhost</code>, que só existe dentro da sua máquina. Para testar no celular de verdade, mostrar uma tela a um colega na sala ou validar um fluxo em outro navegador, a máquina precisa aceitar conexões de fora.</li>
+<li>Cenário 1: o product owner quer validar uma tela no celular dele, na mesma rede, sem publicar nada na nuvem.</li>
+<li>Cenário 2: você precisa testar um layout responsivo num aparelho real, não no emulador do navegador.</li>
+<li>Cenário 3: dois desenvolvedores na mesma sala testam o fluxo de cadastro e e-mail de um só app.</li>
+<li>Quando NÃO usar: com dados de pessoas reais (o banco local tem credenciais fixas de desenvolvimento), em rede pública (café, aeroporto) ou para ficar no ar por dias. Para isso, o caminho é um ambiente de teste na nuvem (staging).</li>
+<li>No dia a dia: "funciona na minha máquina" e "não abre no celular" são os dois problemas de rede mais comuns de quem desenvolve web; as quatro camadas deste tutorial valem para qualquer servidor local, não só Aspire.</li>
+</ul>
+<p><b>Público-alvo:</b> engenheira ou engenheiro júnior que sabe rodar <code>dotnet run</code>, abrir o PowerShell e ler um <code>launchSettings.json</code>, mas nunca expôs um servidor local para a rede.</p>
+<p><b>Tempo estimado (leitura + prática)</b></p>
+<div class="tw"><table>
+<thead><tr>
+<th>Nível</th>
+<th>Seção</th>
+<th>Tempo</th>
+</tr></thead><tbody>
+<tr><td>Inicial</td><td>4 e 5</td><td>cerca de 30 min</td></tr>
+<tr><td>Intermediário</td><td>6</td><td>cerca de 45 min</td></tr>
+<tr><td>Avançado</td><td>7</td><td>cerca de 1h30</td></tr>
+</tbody></table></div>
+<p><b>Stack e ferramentas:</b> Windows 11; PowerShell 7 (e Git Bash, opcional); .NET 10 SDK; Aspire 13.6.2 (AppHost); Visual Studio com perfis de execução; um celular ou segundo computador na mesma rede; permissão de administrador no Windows (só para o firewall).</p>
+  <p class="band end">&#9632; Fim DA SECAO 0 — proxima: Secao 1, Pre-requisitos</p>
+</section>
+<section id="s1">
+  <p class="band">&#9654; Início · 1. Pre-requisitos</p>
+  <h2>1. Pre-requisitos</h2>
+<ol class="facts">
+<li><b>Rodar o app localmente pelo AppHost.</b> Sem isso não há o que expor. Como adquirir: <code>dotnet run --project src/Hosts/Simulab.AppHost</code> (ou o seu AppHost) e confirmar que <code>https://localhost:7125</code> abre. Documentação: Aspire, "App host overview" (aspire.dev).</li>
+<li><b>Ler um <code>launchSettings.json</code>.</b> Os perfis de execução são o centro das Seções <a class="ref" href="#s6-2">6.2</a> e <a class="ref" href="#s6-3">6.3</a>. Como adquirir: documentação oficial de ASP.NET Core, "Use multiple environments" (aprox. 15 min). Não exige tutorial próprio.</li>
+<li><b>Noção de porta e endereço IP.</b> Toda a Seção <a class="ref" href="#s4">4</a> se apoia nisso. Como adquirir: qualquer introdução a TCP/IP; o resumo da Seção <a class="ref" href="#s4-1">4.1</a> basta para seguir. Se você nunca ouviu "porta", vale um tutorial próprio (ver Seção <a class="ref" href="#s8">8</a>).</li>
+<li><b>PowerShell 7 como administrador.</b> O firewall só aceita regras novas com privilégio. Como adquirir: botão direito no Terminal › "Executar como administrador".</li>
+<li><b>Certificado de desenvolvimento .NET confiável.</b> Sem ele nem o <code>localhost</code> abre sem aviso. Como adquirir: <code>dotnet dev-certs https --trust</code> (detalhes na Seção <a class="ref" href="#s6-5">6.5</a>). Sinalizado: merece tutorial próprio (ver Seção <a class="ref" href="#s8">8</a>).</li>
+</ol>
+  <p class="band end">&#9632; Fim DA SECAO 1 — proxima: Secao 2, Glossario</p>
+</section>
+<section id="s2">
+  <p class="band">&#9654; Início · 2. Glossario e siglas</p>
+  <h2>2. Glossario e siglas</h2>
+<div class="tw"><table>
+<thead><tr>
+<th>Termo/Sigla</th>
+<th>Significado por extenso</th>
+<th>Definição em linguagem simples</th>
+</tr></thead><tbody>
+<tr><td>0.0.0.0</td><td>Endereço "qualquer interface"</td><td>Ao escutar nele, o programa aceita conexões chegando por qualquer placa de rede da máquina, não só pela interna.</td></tr>
+<tr><td>AppHost</td><td>Aspire Application Host</td><td>O projeto que descreve e inicia os outros (Web, Api, banco, cache). É o "maestro" do Aspire.</td></tr>
+<tr><td>Aspire</td><td>.NET Aspire</td><td>Conjunto de ferramentas que orquestra os serviços do app no ambiente de desenvolvimento.</td></tr>
+<tr><td>Blazor Interactive Server</td><td>Blazor com renderização interativa no servidor</td><td>Telas C# que rodam no servidor e conversam com o navegador por uma conexão aberta (SignalR/WebSocket).</td></tr>
+<tr><td>Cookie Secure</td><td>Atributo <code>Secure</code> de cookie</td><td>Marca que obriga o navegador a só guardar e devolver o cookie em conexões https.</td></tr>
+<tr><td>Certificado de desenvolvimento</td><td>.NET development certificate</td><td>Certificado https gerado pelo .NET para <code>localhost</code>; não é emitido por autoridade pública.</td></tr>
+<tr><td>DCP</td><td>Developer Control Plane</td><td>Parte do Aspire que sobe os processos e abre os proxies das portas.</td></tr>
+<tr><td>DHCP</td><td>Dynamic Host Configuration Protocol</td><td>O roteador "empresta" um IP à sua máquina; ele pode mudar na próxima conexão.</td></tr>
+<tr><td>Firewall</td><td>Windows Defender Firewall</td><td>Porteiro do Windows: decide quais conexões de entrada passam, por porta e por perfil de rede.</td></tr>
+<tr><td>Gateway padrão</td><td>Default gateway</td><td>O roteador da rede. A placa que tem gateway é a que acessa a rede de verdade.</td></tr>
+<tr><td>HTTPS</td><td>HTTP Secure</td><td>HTTP dentro de uma conexão criptografada por TLS.</td></tr>
+<tr><td>IPv4</td><td>Internet Protocol versão 4</td><td>Endereço do tipo <code>192.168.1.68</code>, o que você digita no celular.</td></tr>
+<tr><td>LAN</td><td>Local Area Network</td><td>Rede local: Wi-Fi ou cabo de casa/escritório.</td></tr>
+<tr><td>Loopback</td><td>Interface de retorno (<code>127.0.0.1</code>, <code>::1</code>)</td><td>Endereço que só leva à própria máquina; é o que <code>localhost</code> significa.</td></tr>
+<tr><td><code>launchSettings.json</code></td><td>Arquivo de perfis de execução</td><td>Lista de "jeitos de iniciar" um projeto (URLs, variáveis de ambiente).</td></tr>
+<tr><td>LISTENING</td><td>Estado "escutando" do <code>netstat</code></td><td>A porta está aberta e esperando conexões.</td></tr>
+<tr><td><code>netstat</code></td><td>Network statistics</td><td>Comando que lista portas abertas e conexões, com o PID do dono.</td></tr>
+<tr><td>Perfil de rede</td><td>Network category (Privada/Pública)</td><td>Rótulo do Windows para a rede; regras de firewall valem só para os perfis escolhidos.</td></tr>
+<tr><td>PID</td><td>Process Identifier</td><td>Número do processo; liga a porta ao programa que a abriu.</td></tr>
+<tr><td>Perfil de execução</td><td>Launch profile</td><td>Uma entrada de <code>launchSettings.json</code>, como <code>http</code>, <code>https</code> ou <code>https-lan</code>.</td></tr>
+<tr><td>Proxy do Aspire</td><td>Proxy de endpoint</td><td>Quem escuta a porta pública (7125) e repassa para o processo do app, que usa uma porta interna.</td></tr>
+<tr><td>SAN</td><td>Subject Alternative Name</td><td>Lista de nomes/IPs para os quais um certificado é válido.</td></tr>
+<tr><td><code>TargetHost</code></td><td>Host de destino do endpoint</td><td>Propriedade do Aspire: em qual endereço o proxy escuta (<code>localhost</code> ou <code>0.0.0.0</code>).</td></tr>
+<tr><td>TLS</td><td>Transport Layer Security</td><td>A criptografia por baixo do https.</td></tr>
+<tr><td>User secrets</td><td>Segredos do usuário</td><td>Configuração local fora do repositório, por projeto.</td></tr>
+</tbody></table></div>
+  <p class="band end">&#9632; Fim DA SECAO 2 — proxima: Secao 3, Indice remissivo</p>
+</section>
+<section id="s3">
+  <p class="band">&#9654; Início · 3. Indice remissivo</p>
+  <h2>3. Indice remissivo</h2>
+<div class="tw"><table>
+<thead><tr>
+<th>Termo / conceito</th>
+<th>Seção</th>
+</tr></thead><tbody>
+<tr><td><code>0.0.0.0</code></td><td>4.1, 6.1</td></tr>
+<tr><td><code>Lan:Enabled</code> / <code>Lan__Enabled</code></td><td>5.3, 6.2</td></tr>
+<tr><td><code>Lan:PublicBaseUrl</code></td><td>6.4</td></tr>
+<tr><td><code>launchSettings.json</code> (AppHost e Web)</td><td>6.2, 6.3</td></tr>
+<tr><td>Aspire e perfil de mesmo nome</td><td>6.3</td></tr>
+<tr><td>Certificado de desenvolvimento</td><td>4.3, 6.5</td></tr>
+<tr><td>Cookie <code>Secure</code></td><td>4.3, 6.5</td></tr>
+<tr><td>Firewall (regra e perfil Privado)</td><td>5.2, 7.3</td></tr>
+<tr><td>IP da máquina (<code>ipconfig</code>)</td><td>5.1</td></tr>
+<tr><td>Loopback / <code>localhost</code></td><td>4.1</td></tr>
+<tr><td><code>netstat</code></td><td>7.2</td></tr>
+<tr><td>Perfil de rede Privado × Público</td><td>5.2</td></tr>
+<tr><td>Proxy do Aspire</td><td>4.2, 6.1</td></tr>
+<tr><td>Script de verificação (<code>lan-check.ps1</code>)</td><td>7.7</td></tr>
+<tr><td><code>TargetHost</code></td><td>6.1</td></tr>
+<tr><td>Testes do AppHost</td><td>7.5</td></tr>
+</tbody></table></div>
+  <p class="band end">&#9632; Fim DA SECAO 3 — proxima: Secao 4, Introducao</p>
+</section>
+<section id="s4">
+  <p class="band">&#9654; Início · 4. Introducao e conceitos fundamentais</p>
+  <h2>4. Introducao e conceitos fundamentais</h2>
+<h3 id="s4-1">4.1 O prédio com várias portarias</h3>
+<p>Pense num prédio com várias portarias: uma interna, que só leva ao seu apartamento, e outras que dão para a rua. O programa que "escuta" uma porta precisa dizer em qual portaria fica. <code>localhost</code> (<code>127.0.0.1</code>, <code>::1</code>) é a portaria interna: só quem já está dentro da máquina chega nela. <code>0.0.0.0</code> significa "em todas as portarias", inclusive a do Wi-Fi, com o IP <code>192.168.x.x</code>. <i>Onde a analogia falha:</i> além da portaria, existe o porteiro (o firewall), que pode barrar quem chega por uma portaria aberta.</p>
+<p>Por isso expor um app tem sempre quatro perguntas, nesta ordem:</p>
+<ol class="facts">
+<li>O app está rodando e escutando? (Seção <a class="ref" href="#s7-2">7.2</a>)</li>
+<li>Ele escuta em <code>0.0.0.0</code> ou só em <code>localhost</code>? (Seção <a class="ref" href="#s6-1">6.1</a>)</li>
+<li>O firewall deixa a conexão passar? (Seção <a class="ref" href="#s5-2">5.2</a>)</li>
+<li>O navegador de fora aceita o certificado e guarda o cookie? (Seção <a class="ref" href="#s6-5">6.5</a>)</li>
+</ol>
+<h3 id="s4-2">4.2 Quem escuta de verdade: o proxy do Aspire</h3>
+<p>No Aspire o Web não abre a porta 7125 sozinho. O Aspire (DCP, ver Glossario) sobe um <b>proxy</b> que escuta a porta pública e repassa o tráfego ao processo do Web, que usa uma porta interna. O que decide se o proxy aceita gente de fora é o <code>TargetHost</code> do endpoint. Não adianta mexer só no <code>applicationUrl</code> do Web: quem manda é o AppHost.</p>
+<figure id="fig-4-1"><div class="dg mermaid">
+flowchart LR
+    A[Celular&lt;br/&gt;https://192.168.1.68:7125] --&gt; B{Firewall do Windows&lt;br/&gt;porta 7125, perfil Privado}
+    B --&gt;|permitido| C[Proxy do Aspire&lt;br/&gt;escuta 0.0.0.0:7125]
+    C --&gt; D[Processo do Web&lt;br/&gt;porta interna]
+    D --&gt; E[Cookie Secure&lt;br/&gt;só volta em https]
+    B --&gt;|bloqueado| X[Timeout no celular]
+</div><figcaption><b>Figura 4.1</b> — O caminho de uma requisição vinda do celular</figcaption></figure>
+<h3 id="s4-3">4.3 Por que o http puro não faz login</h3>
+<p>O Web marca seus cookies de login como <code>Secure</code> e redireciona http para https (código real na Seção <a class="ref" href="#s6-5">6.5</a>). Um cookie <code>Secure</code> só é guardado pelo navegador se chegou por https. Em <code>localhost</code> os navegadores abrem uma exceção; por IP, não. Resultado: via <code>http://&lt;ip&gt;:5211</code> você vê a tela de login, envia a senha, o servidor responde "ok", mas o navegador descarta o cookie e a próxima requisição chega sem login. Por isso o endereço de uso é sempre <code>https://&lt;ip&gt;:7125</code>.</p>
+<p>O segundo efeito do https é o certificado. O certificado de desenvolvimento do .NET vale para <code>localhost</code>, não para o seu IP, e outros aparelhos não confiam nele: todo dispositivo mostra um aviso, e é preciso aceitá-lo uma vez.</p>
+  <p class="band end">&#9632; Fim DA SECAO 4 — proxima: Secao 5, Iniciante</p>
+</section>
+<section id="s5">
+  <p class="band">&#9654; Início · 5. Projeto pratico — iniciante</p>
+  <h2>5. Projeto pratico — iniciante <span class="chip ini lvl">Iniciante</span></h2>
+<p>Meta: abrir o app, rodando na sua máquina, no celular, pelo caminho mais curto: sem tocar em código, só com o interruptor <code>Lan__Enabled</code>.</p>
+<h3 id="s5-1">5.1 Achar o IP da máquina</h3>
+<p>Por quê: o celular precisa de um endereço, e <code>localhost</code> no celular aponta para o próprio celular.</p>
+<pre class="code solo" data-lang="powershell">ipconfig</pre>
+<p>Procure o adaptador de Wi-Fi ou Ethernet <b>que tem "Gateway Padrão"</b> preenchido e leia o "Endereço IPv4" (ex.: <code>192.168.1.68</code>). Ignore adaptadores <code>vEthernet</code> (Docker/WSL/Hyper-V). Forma direta no PowerShell 7:</p>
+<pre class="code solo" data-lang="powershell">(Get-NetIPConfiguration | Where-Object IPv4DefaultGateway).IPv4Address.IPAddress</pre>
+<p class="warn"><b>ARMADILHA:</b> com Docker ou WSL instalados aparecem vários IPv4 (<code>172.x</code>, <code>10.x</code>). O certo é o do adaptador com gateway; o outro só é visível dentro da sua máquina.</p>
+<p class="result"><b>RESULTADO TESTAVEL:</b> um único IPv4, do tipo <code>192.168.x.x</code>, impresso pelo segundo comando.</p>
+<h3 id="s5-2">5.2 Liberar o firewall (uma vez só)</h3>
+<p>Por quê: sem regra de entrada, o Windows descarta a conexão do celular e o navegador fica girando até dar timeout. A regra abre só a porta 7125 (a https do Web) e só no perfil de rede <b>Privado</b>: se você sentar numa rede marcada como <b>Pública</b>, ela continua fechada, que é o comportamento desejado.</p>
+<ol class="facts">
+<li>Veja a categoria da rede atual: <code>Get-NetConnectionProfile</code>. O campo <code>NetworkCategory</code> deve ser <code>Private</code>.</li>
+<li>Se vier <code>Public</code> e a rede é a sua de casa/escritório, marque como privada (administrador): <code>Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Private</code>.</li>
+<li>Crie a regra (PowerShell <b>como administrador</b>):</li>
+</ol>
+<p class="cap" id="cod-5-1"><b>Código 5.1</b> — Regra de firewall para a porta 7125, só no perfil Privado</p>
+<pre class="code solo" data-lang="powershell">New-NetFirewallRule -DisplayName "Simulab Web LAN" -Direction Inbound -Protocol TCP -LocalPort 7125 -Action Allow -Profile Private</pre>
+<p>Para remover quando não precisar mais: <code>Remove-NetFirewallRule -DisplayName "Simulab Web LAN"</code>.</p>
+<p class="warn"><b>ATENCAO:</b> não abra a 5211 (http) nem libere o perfil <code>Public</code>. A 5211 só redireciona para https e um perfil Público é rede de estranhos.</p>
+<p class="result"><b>RESULTADO TESTAVEL:</b> <code>Get-NetFirewallRule -DisplayName "Simulab Web LAN"</code> lista a regra com <code>Enabled : True</code>, <code>Direction : Inbound</code>, <code>Action : Allow</code>.</p>
+<h3 id="s5-3">5.3 Subir o app com o interruptor</h3>
+<p>O AppHost do Simulab lê a configuração <code>Lan:Enabled</code>. Em variável de ambiente, <code>:</code> vira <code>__</code> (dois sublinhados). Escolha o shell:</p>
+<pre class="code solo" data-lang="bash">Lan__Enabled=true dotnet run --project src/Hosts/Simulab.AppHost</pre>
+<pre class="code solo" data-lang="powershell">$env:Lan__Enabled = "true"; dotnet run --project src/Hosts/Simulab.AppHost</pre>
+<p>Deixe o terminal aberto: fechar o terminal derruba o app. No Visual Studio, o equivalente é escolher o perfil <code>https-lan</code> (Seção <a class="ref" href="#s6-2">6.2</a>).</p>
+<p class="result"><b>RESULTADO TESTAVEL:</b> o painel do Aspire (<code>https://localhost:17162</code>) mostra o recurso <code>web</code> com status "Running".</p>
+<h3 id="s5-4">5.4 Abrir no celular</h3>
+<p>Com o celular no <b>mesmo Wi-Fi</b> (não o 4G), abra <code>https://192.168.1.68:7125</code> (troque pelo seu IP). O navegador avisa "conexão não é particular": aceite uma vez (Avançado › Continuar). Depois abra <code>/sign-in</code> e entre com uma conta já verificada.</p>
+<p class="warn"><b>ARMADILHA:</b> Wi-Fi de visitantes/"guest" costuma isolar os aparelhos entre si (AP isolation). Se tudo estiver certo e mesmo assim der timeout, teste com o celular na rede principal ou com um segundo computador.</p>
+<p class="result"><b>RESULTADO TESTAVEL:</b> a página de login do app abre no celular e, após o login, você vê a área logada (não volta para o login).</p>
+<h3 id="s5-5">5.5 Exercícios</h3>
+<ol class="facts">
+<li><b>Medir sem celular.</b> No próprio computador, rode <code>curl.exe -k -I https://192.168.1.68:7125/sign-in</code> (seu IP). <i>Esperado:</i> <code>HTTP/1.1 200 OK</code> (ou 200/302 conforme a rota). Prova que o proxy escuta no IP; se o celular ainda falha, o culpado é firewall ou rede (Seção <a class="ref" href="#s7-3">7.3</a>).</li>
+<li><b>Provar a regra do perfil.</b> Troque a categoria da rede para <code>Public</code> (<code>Set-NetConnectionProfile -InterfaceAlias "Wi-Fi" -NetworkCategory Public</code>), tente abrir no celular e volte para <code>Private</code>. <i>Esperado:</i> com <code>Public</code> dá timeout; com <code>Private</code> abre.</li>
+</ol>
+<h3 id="s5-6">5.6 O que você aprendeu</h3>
+<p>Achou o IP certo (5.1), abriu a porta no porteiro certo (5.2), ligou o interruptor (5.3) e testou de fora (5.4). Tudo que vem depois explica <i>por que</i> isso funciona e o que fazer quando não funciona.</p>
+  <p class="band end">&#9632; Fim DA SECAO 5 — proxima: Secao 6, Intermediario</p>
+</section>
+<section id="s6">
+  <p class="band">&#9654; Início · 6. Projeto pratico — intermediario</p>
+  <h2>6. Projeto pratico — intermediario <span class="chip int lvl">Intermediário</span></h2>
+<p>Partindo do interruptor <code>Lan__Enabled</code> da Seção <a class="ref" href="#s5">5</a> (Seção <a class="ref" href="#s5-3">5.3</a>), vamos agora ver o que ele faz no código, por que existe um perfil <code>https-lan</code> nos <b>dois</b> projetos e como os links de e-mail acompanham o endereço.</p>
+<h3 id="s6-1">6.1 O TargetHost no AppHost</h3>
+<p>É o trecho que muda <code>localhost</code> para <code>0.0.0.0</code> nos endpoints <code>http</code> e <code>https</code> do Web. Sem ele o proxy do Aspire escuta só em loopback (Seção <a class="ref" href="#s4-1">4.1</a>) e nenhuma regra de firewall resolve.</p>
+<p class="cap" id="cod-6-1"><b>Código 6.1</b> — Abrindo os endpoints do Web para a rede (<code>AppHost.cs</code>)</p>
+<pre class="code solo" data-lang="csharp">var lanBaseUrl = publishing
+    ? null
+    : (builder.Configuration["Lan:PublicBaseUrl"]
+        ?? (string.Equals(builder.Configuration["Lan:Enabled"], "true", StringComparison.OrdinalIgnoreCase)
+            ? $"https://{Environment.MachineName.ToLowerInvariant()}:7125"
+            : null))
+        ?.TrimEnd('/');
+if (!string.IsNullOrWhiteSpace(lanBaseUrl))
+{
+    web.WithEndpoint("http", endpoint =&gt; endpoint.TargetHost = "0.0.0.0")
+       .WithEndpoint("https", endpoint =&gt; endpoint.TargetHost = "0.0.0.0");
+}</pre>
+<p>Leitura: se estiver <b>publicando</b> (<code>publishing</code>), nada muda: a abertura é só para execução local. Caso contrário, <code>Lan:PublicBaseUrl</code> ou <code>Lan:Enabled=true</code> ligam o modo rede. Sem nenhum dos dois, o Web continua em <code>localhost</code>, e um teste garante isso (Seção <a class="ref" href="#s7-5">7.5</a>).</p>
+<p>Versão mínima para o seu app, sem a lógica de configuração:</p>
+<p class="cap" id="cod-6-2"><b>Código 6.2</b> — O essencial, em um AppHost qualquer</p>
+<pre class="code solo" data-lang="csharp">var web = builder.AddProject&lt;Projects.MeuApp_Web&gt;("web")
+    .WithEndpoint("https", e =&gt; e.TargetHost = "0.0.0.0");</pre>
+<p class="warn"><b>ARMADILHA:</b> <code>0.0.0.0</code> vale para o ambiente de desenvolvimento. Nunca deixe isso ligado por padrão num AppHost que também publica: por isso o código acima ignora <code>publishing</code>.</p>
+<h3 id="s6-2">6.2 O perfil https-lan do Visual Studio (AppHost)</h3>
+<p>No Visual Studio você não digita variável de ambiente; escolhe um perfil na lista ao lado do botão de executar. O perfil <code>https-lan</code> do AppHost é o interruptor da Seção <a class="ref" href="#s5-3">5.3</a> em forma de clique: ele define <code>Lan__Enabled=true</code>.</p>
+<p class="cap" id="cod-6-3"><b>Código 6.3</b> — Perfil <code>https-lan</code> em <code>Simulab.AppHost/Properties/launchSettings.json</code></p>
+<pre class="code solo" data-lang="json">"https-lan": {
+  "commandName": "Project",
+  "dotnetRunMessages": true,
+  "launchBrowser": true,
+  "applicationUrl": "https://localhost:17162;http://localhost:15071",
+  "environmentVariables": {
+    "ASPNETCORE_ENVIRONMENT": "Development",
+    "DOTNET_ENVIRONMENT": "Development",
+    "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21101",
+    "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22137",
+    "Lan__Enabled": "true"
+  }
+}</pre>
+<p>Note que o painel do Aspire (<code>17162</code>) continua em <code>localhost</code>: só o Web vai para a rede.</p>
+<h3 id="s6-3">6.3 Por que o Web precisa de um perfil de mesmo nome</h3>
+<p>Foi um defeito real (commit <code>b797e0a</code>): com o AppHost no perfil <code>https-lan</code>, o Web subia sem escutar a 7125. O Aspire inicia cada projeto com o perfil <b>de mesmo nome</b> do perfil do AppHost; se o projeto não tem esse perfil, ele cai no <b>primeiro</b> da lista, que no Web era o <code>http</code> (só a 5211). A porta 7125 nunca abria e nem <code>TargetHost</code> nem firewall tinham como ajudar.</p>
+<p>A correção foi copiar o perfil para o projeto Web:</p>
+<p class="cap" id="cod-6-4"><b>Código 6.4</b> — Perfil <code>https-lan</code> em <code>Simulab.Web/Properties/launchSettings.json</code></p>
+<pre class="code solo" data-lang="json">"https-lan": {
+  "commandName": "Project",
+  "dotnetRunMessages": true,
+  "launchBrowser": true,
+  "applicationUrl": "https://localhost:7125;http://localhost:5211",
+  "environmentVariables": { "ASPNETCORE_ENVIRONMENT": "Development" }
+}</pre>
+<p>Regra para lembrar: <b>todo perfil novo no AppHost que você escolher no Visual Studio precisa existir, com o mesmo nome, em cada projeto que ele inicia</b>, e esse perfil precisa listar a URL https. O nome é a ligação; o conteúdo do <code>applicationUrl</code> define as portas que o proxy usará.</p>
+<p class="warn"><b>ARMADILHA:</b> o texto acima descreve o comportamento observado no Simulab e registrado no commit <code>b797e0a</code>; não li o código-fonte do Aspire para confirmar o mecanismo interno. Se uma versão futura do Aspire mudar a regra, o sintoma será o mesmo da Seção <a class="ref" href="#s7-3">7.3</a>, linha "nada escuta a 7125".</p>
+<h3 id="s6-4">6.4 Links de e-mail: nome da máquina ou IP</h3>
+<p>Os e-mails de verificação e de redefinição de senha carregam um link. Fora da rede local, esse link seria <code>https://localhost:&lt;porta&gt;</code>, que no celular não existe. No modo rede, o AppHost reescreve os links (<code>Identity__VerificationUrl</code> e companhia) para <code>lanBaseUrl</code>. Há duas formas de definir o endereço:</p>
+<ul class="facts">
+<li><code>Lan:Enabled=true</code>: usa <code>https://&lt;nome-da-máquina-em-minúsculas&gt;:7125</code>. Simples, mas o nome nem sempre resolve no outro aparelho.</li>
+<li><code>Lan:PublicBaseUrl</code>: o endereço exato, por exemplo o IP. Fica nos segredos do usuário:</li>
+</ul>
+<pre class="code solo" data-lang="powershell">dotnet user-secrets set "Lan:PublicBaseUrl" "https://192.168.1.68:7125" --project src/Hosts/Simulab.AppHost</pre>
+<p>Com <code>PublicBaseUrl</code>, não precisa de <code>Lan:Enabled</code>. Os e-mails continuam no Mailpit <b>da sua máquina</b>: quem está no celular não os recebe. Use uma conta já verificada.</p>
+<p class="tip"><b>DICA:</b> como o IP muda com o DHCP, ao trocar de rede rode de novo o <code>user-secrets set</code> ou remova a chave com <code>dotnet user-secrets remove "Lan:PublicBaseUrl" --project src/Hosts/Simulab.AppHost</code>.</p>
+<h3 id="s6-5">6.5 Certificado de desenvolvimento e cookie Secure no código</h3>
+<p class="cap" id="cod-6-5"><b>Código 6.5</b> — O que força o https no Web (<code>Program.cs</code>)</p>
+<pre class="code solo" data-lang="csharp">options.Cookie.SecurePolicy = CookieSecurePolicy.Always;   // linhas 59 e 80: cookies de login
+app.UseHttpsRedirection();                                  // linha 160: http → https</pre>
+<p><code>CookieSecurePolicy.Always</code> carimba <code>Secure</code> em todo cookie. <code>UseHttpsRedirection</code> responde a <code>http://&lt;ip&gt;:5211</code> com um redirecionamento para <code>https://&lt;ip&gt;:7125</code>. Quem ficar só em http não loga (Seção <a class="ref" href="#s4-3">4.3</a>).</p>
+<p>Sobre o certificado: confira e confie no certificado do .NET na máquina que roda o app:</p>
+<pre class="code solo" data-lang="powershell">dotnet dev-certs https --check --trust</pre>
+<p>Isso resolve o aviso no seu computador. Nos outros aparelhos o aviso permanece, porque o certificado vale para <code>localhost</code> e não lista o seu IP (SAN, ver Glossario). Aceitar a exceção uma vez no navegador é o caminho suportado; um celular pode se recusar a continuar, e então a opção é testar de um computador.</p>
+<p class="warn"><b>ATENCAO:</b> não exporte nem instale a chave privada do certificado de desenvolvimento em outros aparelhos para "tirar o aviso". Ela é de uso local; aceite a exceção por navegador.</p>
+<h3 id="s6-6">6.6 Exercícios</h3>
+<ol class="facts">
+<li><b>Provar o perfil de mesmo nome.</b> Em uma cópia do repositório, renomeie temporariamente o perfil <code>https-lan</code> do Web para <code>https-lan2</code>, suba o AppHost com o perfil <code>https-lan</code> e rode <code>netstat -ano | findstr :7125</code>. <i>Esperado:</i> nenhuma linha <code>LISTENING</code> na 7125 (o Web caiu no perfil <code>http</code>). Desfaça a renomeação.</li>
+<li><b>Link de e-mail.</b> Defina <code>Lan:PublicBaseUrl</code> com o seu IP, peça "Esqueci a senha" e abra o e-mail no Mailpit. <i>Esperado:</i> o link começa com <code>https://&lt;seu-ip&gt;:7125/reset-password</code>.</li>
+</ol>
+  <p class="band end">&#9632; Fim DA SECAO 6 — proxima: Secao 7, Avancado</p>
+</section>
+<section id="s7">
+  <p class="band">&#9654; Início · 7. Projeto pratico — avancado</p>
+  <h2>7. Projeto pratico — avancado <span class="chip adv lvl">Avançado</span></h2>
+<p>Partindo do que o AppHost faz (Seção <a class="ref" href="#s6-1">6.1</a>) e do caminho da requisição (Figura <a class="ref" href="#fig-4-1">4.1</a>), vamos agora diagnosticar de forma sistemática, proteger a exposição, testar e automatizar.</p>
+<h3 id="s7-1">7.1 O fluxo de diagnóstico</h3>
+<figure id="fig-7-1"><div class="dg mermaid">
+flowchart TD
+    A[Não abre no celular] --&gt; B{netstat mostra LISTENING na 7125?}
+    B --&gt;|nenhuma linha| C[Camada 1: app não está de pé&lt;br/&gt;ou perfil errado, Seção 6.3]
+    B --&gt;|127.0.0.1 ou ::1 apenas| D[Camada 2: TargetHost ainda localhost&lt;br/&gt;Seção 6.1]
+    B --&gt;|0.0.0.0 ou o IP| E{curl.exe -k no próprio PC&lt;br/&gt;com o IP responde?}
+    E --&gt;|não| F[Veja o proxy e os logs&lt;br/&gt;Seção 7.6]
+    E --&gt;|sim| G{celular na mesma rede&lt;br/&gt;e perfil Privado?}
+    G --&gt;|timeout| H[Camada 3: firewall ou isolamento&lt;br/&gt;Seção 5.2]
+    G --&gt;|aviso de certificado| I[Camada 4: aceite a exceção&lt;br/&gt;Seção 6.5]
+    G --&gt;|abre mas não loga| J[Está em http: use https&lt;br/&gt;Seção 4.3]
+</div><figcaption><b>Figura 7.1</b> — Da pergunta "não abre" até a camada culpada</figcaption></figure>
+<h3 id="s7-2">7.2 Ler a saída do netstat</h3>
+<p>Por que <code>netstat</code> e não "tentar de novo": ele responde à pergunta mais barata, "alguém escuta essa porta, e em qual endereço?", sem depender de rede nem de firewall.</p>
+<pre class="code solo" data-lang="powershell">netstat -ano | findstr ":7125"</pre>
+<p><b>Tabela 7.1 — O que cada saída significa</b></p>
+<div class="tw"><table>
+<thead><tr>
+<th>Saída</th>
+<th>Significado</th>
+<th>Ação</th>
+</tr></thead><tbody>
+<tr><td>Nenhuma linha</td><td>Ninguém escuta a 7125</td><td>O app caiu, não terminou de subir, ou o perfil errado foi usado (Seção <a class="ref" href="#s6-3">6.3</a>)</td></tr>
+<tr><td><code>TCP 127.0.0.1:7125 ... LISTENING</code> ou <code>[::1]:7125</code></td><td>Só loopback</td><td><code>TargetHost</code> não foi aplicado: <code>Lan__Enabled</code>/<code>PublicBaseUrl</code> ausentes, ou perfil sem a variável (Seção <a class="ref" href="#s6-2">6.2</a>)</td></tr>
+<tr><td><code>TCP 0.0.0.0:7125 ... LISTENING</code></td><td>Todas as interfaces</td><td>Camada 2 ok; falta firewall/rede</td></tr>
+<tr><td><code>TCP 192.168.1.68:7125 ... LISTENING</code></td><td>Escuta já no IP da rede</td><td>Camada 2 ok (foi o que <code>docs/infra.md</code> observou em 2026-10-22)</td></tr>
+<tr><td><code>... ESTABLISHED</code> com o IP do celular</td><td>Alguém conectou</td><td>Firewall passou; o problema é certificado ou cookie</td></tr>
+</tbody></table></div>
+<p>A última coluna da linha traz o <b>PID</b>. Para saber quem é o dono:</p>
+<pre class="code solo" data-lang="powershell">Get-Process -Id 12345</pre>
+<p>O dono esperado é o processo do proxy do Aspire (DCP), não o do <code>Simulab.Web</code>: o Web usa uma porta interna (Seção <a class="ref" href="#s4-2">4.2</a>). Se for outro programa, outra coisa já ocupa a 7125.</p>
+<p>Equivalente em objetos no PowerShell:</p>
+<pre class="code solo" data-lang="powershell">Get-NetTCPConnection -LocalPort 7125 -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess</pre>
+<h3 id="s7-3">7.3 Matriz de sintomas</h3>
+<div class="tw"><table class="t-wide">
+<thead><tr>
+<th>Sintoma no celular</th>
+<th>Camada</th>
+<th>Prova</th>
+<th>Correção</th>
+</tr></thead><tbody>
+<tr><td>Timeout depois de muito tempo</td><td>Firewall ou isolamento</td><td><code>curl.exe -k</code> pelo IP funciona no PC e falha no celular</td><td>Regra do Código <a class="ref" href="#cod-5-1">5.1</a>; perfil de rede Privado; sair do Wi-Fi guest</td></tr>
+<tr><td>"Recusou a conexão" na hora</td><td>Nada escuta na interface</td><td><code>netstat</code> sem linha ou só <code>127.0.0.1</code></td><td>Seções <a class="ref" href="#s6-1">6.1</a> e <a class="ref" href="#s6-3">6.3</a></td></tr>
+<tr><td>Aviso de certificado</td><td>Certificado</td><td>Aparece em todo aparelho</td><td>Aceitar a exceção (Seção <a class="ref" href="#s6-5">6.5</a>)</td></tr>
+<tr><td>Página de login volta ao login</td><td>Cookie <code>Secure</code></td><td>Endereço começa com <code>http://</code></td><td>Usar <code>https://&lt;ip&gt;:7125</code> (Seção <a class="ref" href="#s4-3">4.3</a>)</td></tr>
+<tr><td>IP funcionava ontem e hoje não</td><td>DHCP</td><td><code>ipconfig</code> mostra IP novo</td><td>Trocar o endereço e <code>Lan:PublicBaseUrl</code></td></tr>
+<tr><td>Funciona por IP, não por nome da máquina</td><td>Resolução de nome</td><td><code>ping nome</code> falha no celular</td><td>Usar o IP</td></tr>
+</tbody></table></div>
+<h3 id="s7-4">7.4 Segurança: o que você está abrindo</h3>
+<ul class="facts">
+<li><b>Escopo mínimo:</b> só a 7125, só perfil Privado. PostgreSQL, Redis, Azurite, Mailpit e o painel do Aspire ficam em <code>localhost</code> (Seção <a class="ref" href="#s6-2">6.2</a>) e não devem entrar no firewall.</li>
+<li><b>Sem dados reais:</b> o banco local usa credenciais fixas de desenvolvimento; qualquer pessoa da rede que acessar o app vê o que está no banco local. Só dados de teste.</li>
+<li><b>Redes que você não controla:</b> em Wi-Fi de terceiros, remova a regra (<code>Remove-NetFirewallRule -DisplayName "Simulab Web LAN"</code>) e pare o AppHost.</li>
+<li><b>Não é publicação:</b> o AppHost ignora o modo rede ao publicar, para a abertura nunca viajar para um ambiente real (Seção <a class="ref" href="#s6-1">6.1</a>).</li>
+<li><b>Falha segura do certificado:</b> o aviso existe para você perceber um man-in-the-middle; por isso a regra é aceitar a exceção só no seu IP de teste.</li>
+</ul>
+<h3 id="s7-5">7.5 Testes automatizados do modo rede</h3>
+<p>O projeto cobre os dois lados do interruptor em <code>AppHostModelTests</code>, sem subir containers:</p>
+<ul class="facts">
+<li><code>Lan_PublicBaseUrl_OpensTheWebToTheNetworkAndPointsTheEmailLinksAtIt</code>: com <code>--Lan:PublicBaseUrl=https://192.168.1.68:7125/</code>, os endpoints <code>http</code> e <code>https</code> do <code>web</code> têm <code>TargetHost == "0.0.0.0"</code> e as quatro URLs de e-mail apontam para o endereço (sem barra duplicada).</li>
+<li><code>Lan_Enabled_UsesTheMachineNameWhenNoAddressIsGiven</code>: com <code>--Lan:Enabled=true</code>, a abertura vale sem endereço.</li>
+<li><code>Web_StaysOnLocalhostWithoutLanPublicBaseUrl</code>: sem nenhuma das chaves, o <code>TargetHost</code> continua <code>localhost</code>. É o teste que impede a exposição por acidente.</li>
+</ul>
+<p>Rodar só esses testes: <code>dotnet test tests/Hosts/Simulab.AppHost.Tests --filter "FullyQualifiedName~Lan"</code>. <i>Esperado:</i> 3 testes passando.</p>
+<p class="warn"><b>ARMADILHA:</b> esses testes verificam o modelo (configuração), não a rede. Eles não detectam firewall, nem a falta do perfil no Web (Seção <a class="ref" href="#s6-3">6.3</a>); para isso serve o script da Seção <a class="ref" href="#s7-7">7.7</a>.</p>
+<h3 id="s7-6">7.6 Observabilidade: onde olhar quando o netstat está certo</h3>
+<p>Se há <code>LISTENING</code> em <code>0.0.0.0</code>, o <code>curl.exe</code> pelo IP responde, mas o celular falha, olhe: (1) o painel do Aspire, aba de logs do <code>web</code>, para ver se a requisição chegou; (2) o log do firewall, se ativado, para ver <code>DROP</code> na 7125; (3) o aparelho: modo avião, VPN ligada, rede errada. Se a requisição chega ao <code>web</code> e o login falha, olhe o cabeçalho <code>Set-Cookie</code> no navegador (Ferramentas do desenvolvedor › Rede) e confirme o <code>Secure</code>.</p>
+<h3 id="s7-7">7.7 Desafio final: um script que diz onde está o problema</h3>
+<p>Mini-projeto: um script <code>lan-check.ps1</code> que reúne, de uma vez, o IP, a categoria da rede, a regra de firewall, quem escuta a porta e o status HTTP pelo IP. Parte das Seções <a class="ref" href="#s5">5</a> e <a class="ref" href="#s7-2">7.2</a> num só comando.</p>
+<p class="warn"><b>▶ BLOCO CONTINUO — rode tudo de uma vez, sem parar</b></p>
+<pre class="code solo" data-lang="powershell"><span class="c"># &gt;&gt;&gt; INICIO (sem parar)</span>
+param([int]$Port = 7125)
+$cfg = Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -and $_.NetAdapter.Status -eq 'Up' } | Select-Object -First 1
+$ip = $cfg.IPv4Address.IPAddress
+$category = (Get-NetConnectionProfile -InterfaceIndex $cfg.InterfaceIndex).NetworkCategory
+$rule = Get-NetFirewallRule -DisplayName 'Simulab Web LAN' -ErrorAction SilentlyContinue
+$listen = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+$status = if ($listen) { curl.exe -k -s -o NUL -w "%{http_code}" "https://${ip}:$Port/sign-in" } else { 'n/a' }
+[pscustomobject]@{
+    IP        = $ip
+    Rede      = $category
+    Regra     = if ($rule) { "$($rule.Enabled) / $($rule.Profile)" } else { 'ausente' }
+    Escuta    = if ($listen) { "$($listen.LocalAddress):$($listen.LocalPort) (PID $($listen.OwningProcess))" } else { 'ninguem' }
+    HttpPorIP = $status
+} | Format-List
+<span class="c"># &lt;&lt;&lt; FIM — so agora confira o resultado</span></pre>
+<p class="warn"><b>■ fim do bloco</b></p>
+<p class="cap" id="cod-7-1"><b>Código 7.1</b> — Saída esperada com o app de pé e tudo certo</p>
+<pre class="code solo" data-lang="text">IP        : 192.168.1.68
+Rede      : Private
+Regra     : True / Private
+Escuta    : 0.0.0.0:7125 (PID 12345)
+HttpPorIP : 200</pre>
+<p>Leitura: <code>Escuta : ninguem</code> aponta a camada 1; <code>Escuta : 127.0.0.1:7125</code>, a camada 2; <code>Regra : ausente</code> ou <code>Rede : Public</code>, a camada 3; <code>HttpPorIP</code> diferente de 200 com os três acima certos manda você aos logs (Seção <a class="ref" href="#s7-6">7.6</a>). Salve como <code>lan-check.ps1</code> e rode <code>pwsh ./lan-check.ps1</code>.</p>
+<p class="warn"><b>ARMADILHA:</b> o bloco acima contém <code>param(...)</code> na primeira linha de código; rode-o salvo como arquivo <code>.ps1</code> (como acima), não colado linha a linha, porque <code>param</code> só vale no início de um script. Se <code>Rede</code> vier vazio, a placa escolhida não é a do Wi-Fi: rode <code>Get-NetIPConfiguration</code> e ajuste o filtro.</p>
+<p class="result"><b>RESULTADO TESTAVEL:</b> as cinco linhas do Código <a class="ref" href="#cod-7-1">7.1</a>, com <code>HttpPorIP : 200</code> quando o app está de pé.</p>
+  <p class="band end">&#9632; Fim DA SECAO 7 — proxima: Secao 8, Resumo</p>
+</section>
+<section id="s8">
+  <p class="band">&#9654; Início · 8. Resumo, pre-requisitos pendentes e proximos passos</p>
+  <h2>8. Resumo, pre-requisitos pendentes e proximos passos</h2>
+<p><b>Resumo.</b> Iniciante (Seção <a class="ref" href="#s5">5</a>): IP, firewall no perfil Privado, <code>Lan__Enabled</code>, teste pelo celular. Intermediário (Seção <a class="ref" href="#s6">6</a>): o <code>TargetHost = "0.0.0.0"</code> do AppHost, o perfil <code>https-lan</code> nos <b>dois</b> projetos porque o Aspire casa os perfis pelo nome, os links de e-mail e por que o cookie <code>Secure</code> exige https. Avançado (Seção <a class="ref" href="#s7">7</a>): diagnóstico por camadas com <code>netstat</code>, matriz de sintomas, segurança, testes e o script <code>lan-check.ps1</code>.</p>
+<p><b>Pré-requisitos ainda sem tutorial:</b> (1) Noções de rede: IP, porta, TCP, DHCP (Seção <a class="ref" href="#s1">1</a>, item 3); (2) Certificados de desenvolvimento e TLS: <code>dev-certs</code>, SAN e confiança (Seção <a class="ref" href="#s1">1</a>, item 5); (3) Perfis de execução e variáveis de ambiente do .NET (Seção <a class="ref" href="#s1">1</a>, item 2).</p>
+<p><b>Para onde evoluir:</b> (a) um certificado emitido para o seu IP ou nome (por exemplo com uma autoridade local) para eliminar o aviso nos aparelhos; (b) um túnel de desenvolvimento autenticado para testar de fora da rede, no lugar de abrir a LAN; (c) um ambiente de teste na nuvem para validações com o cliente.</p>
+<div class="side"><p><b>Deseja que eu crie um tutorial dedicado para algum destes pre-requisitos antes de prosseguir para outro assunto?</b> Opções: noções de rede (IP, porta, DHCP), certificados de desenvolvimento e TLS, ou perfis de execução e variáveis de ambiente do .NET.</p></div>
+  <p class="band end">&#9632; Fim DA SECAO 8 — fim do tutorial</p>
+</section>
+<footer>Expor um app Blazor + Aspire AppHost na rede local (Windows): TargetHost 0.0.0.0, perfil https-lan, firewall, certificado e cookie Secure · convertido com tutorial-make</footer>
+</div>
+
+<!-- Mermaid: versao fixa. Se offline, o diagrama aparece como texto (continua legivel). -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  try {
+    var dark = document.documentElement.dataset.theme === 'dark' ||
+      (document.documentElement.dataset.theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+    mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict' });
+  } catch (e) {}
+</script>
+</body>
+</html>
