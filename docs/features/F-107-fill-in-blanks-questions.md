@@ -218,6 +218,14 @@ Tests locked: 5ad60ba0209774fb91aac0c29fa7fb70593524af (8 files); unlocks: 0
 - 2026-10-22 — traps — T1 reusing `ComparableText.Normalize` for BR6: accents stripped, AC9 broken; T2 marker regex over the stored HTML or the plain text: counts alt/href and rejoins split runs; T3 next marker number computed in .NET from the debounced HTML: a reused number answers `blank_repeated`.
 - 2026-10-22 — design trade-off 5 statement order of the blanks — owner chose as proposed: column `question_blanks.position` (statement order, written at save) plus check `ck_question_blanks_number_range` (1 to 99); schema beyond the item, approved by the owner.
 - 2026-10-22: plan — 1 draft with blanks end to end (contracts, marker reading, key with the count check, entity, table, version column mapping, the one migration, loads and responses) → AC1, AC2, AC9, AC16; 2 draft refusals and cross-type refusals → AC3, AC4, AC7, AC8; 3 publish and edit a published question → AC5, AC6, AC17; 4 versions, annulment copy and base-text fan-out → AC10, AC11, AC12; 5 list excerpt, type name, OpenAPI document → AC13; 6 form: fifth card, Insert blank button, key section, checklist, errors, transcription, texts → AC14, AC19, AC20, AC18 (bUnit part); 7 preview boxes and key list → AC15; 8 flow page and manual → techdocs check.
+- 2026-10-22 — Screen check through the app host (database `simulab_f107`): the fifth card, Insert blank only on the Statement toolbar after picking the type, two clicks wrote `[[1]]` and `[[2]]` at the caret and the rows "Blank 1", "Blank 2" appeared, Add answer focused the new field. Not checked on screen (the new database has no subject): save, publish and preview — covered by the HTTP and bUnit tests and steps 3 to 6 of the validation script.
+- 2026-10-22 — Full suite (`gate.js ship`) green with 0 warnings, but it took 5 m 17 s against the budget of 5 min (CLAUDE.md): an overrun, reported for the retro.
+- 2026-10-22 — review #1 (minor) the form's marker reader stopped a tag at a '>' inside a quoted attribute (an alt "a > [[3]]"), drawing a row the Api refuses — confirmed, fixed (tag regex skips quoted values; `StatementBlanksTests`).
+- 2026-10-22 — review #2 (minor) Insert blank wrote `[[100]]` after `[[99]]` — confirmed, fixed (the lowest free number past 99; nothing when all 99 are used).
+- 2026-10-22 — Review coverage: security (routes and permission unchanged, plain-text answers encoded in the preview, markers from text nodes, sanitizer encodes '<' '>' in attributes, tenant-prefixed index), data (the migration's Up and Down, no backfill, null JSON read as none, ReplaceBlanks by number), contracts (trailing optional fields, nine codes, position = blank number, OpenAPI document), localization (28 keys in three files), locks (diff over the 8 locked paths empty), tests (AC1-AC20 mapped), simplicity, rules; read: the diff 91c393a..bdc5a1c, the item file, profile and rules.
+- 2026-10-22: traps — T1 BR6 normalization written again in the Web for the reason field: a rule change must touch two places; T2 the preview splices the boxes into stored HTML by regex: safe while the sanitizer encodes '<' '>' in attributes; T3 the limit 5 written in three resx files: a limit change must touch them.
+- 2026-10-22 — Reuse: the `AnswerKey` seam and the trailing-parameter refusal of F-106, `NextVersion`/`CopyAs`, the F-103 toolbar button pattern and image-button JS branch, kit `AppSectionCard`, `AppTextField`, `AppRowActions`, `AppRadioCards`, the F-106 migration and endpoint test shapes, `IsUniquePerTenant` with a live-row filter as `TopicAliasConfiguration`.
+- 2026-10-22 — Shortcuts: none.
 
 ## Out of scope
 - Scoring: all or nothing, credit per blank, weight per blank — epic E-6 (owner, 2026-10-09).
@@ -305,3 +313,6 @@ Necessário para validar: o app host local — o dono; disponível (o Claude sub
 
 - 2026-10-21 question — asked 9, from context 4
 - 2026-10-22 question — asked 2, from context 0
+- 2026-10-22 rework — review #1: form marker reader skips quoted attribute values
+- 2026-10-22 rework — review #2: Insert blank never writes a number over 99
+- 2026-10-22 question — asked 1, from context 0

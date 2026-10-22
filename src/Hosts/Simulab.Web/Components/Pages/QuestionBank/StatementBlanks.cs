@@ -12,7 +12,9 @@ namespace Simulab.Web.Components.Pages.QuestionBank;
 /// </summary>
 public static partial class StatementBlanks
 {
-    [GeneratedRegex("<[^>]*>")]
+    // A tag, its quoted attribute values skipped: the editor's HTML does not encode '>' inside an attribute (an alt
+    // such as "a > [[3]]"), and the text there is never a marker (review #1).
+    [GeneratedRegex("""<(?:[^>"']|"[^"]*"|'[^']*')*>""")]
     private static partial Regex TagPattern();
 
     [GeneratedRegex(BlankMarker.Pattern)]

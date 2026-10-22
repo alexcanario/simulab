@@ -191,17 +191,38 @@ window.simulabRichText = (function () {
 
   // F-107 BR3: the next blank marker is one more than the highest number the editor holds now (1 when none), read
   // from the editor's own text so a marker typed a moment ago counts. The pattern is BlankMarker.Pattern of the Api.
+  // A marker goes up to 99: past it, the lowest free number is used, and with none free nothing is written (review #2).
+  var blankNumberMax = 99;
+
+  function nextBlankNumber(text) {
+    var markers = /\[\[([1-9][0-9]?)\]\]/g;
+    var used = {};
+    var highest = 0;
+    var match;
+    while ((match = markers.exec(text)) !== null) {
+      var number = parseInt(match[1], 10);
+      used[number] = true;
+      highest = Math.max(highest, number);
+    }
+    if (highest < blankNumberMax) {
+      return highest + 1;
+    }
+    for (var candidate = 1; candidate <= blankNumberMax; candidate++) {
+      if (!used[candidate]) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
   function insertBlank(entry) {
     var quill = entry.quill;
     var range = quill.getSelection(true);
-    var markers = /\[\[([1-9][0-9]?)\]\]/g;
-    var highest = 0;
-    var text = quill.getText();
-    var match;
-    while ((match = markers.exec(text)) !== null) {
-      highest = Math.max(highest, parseInt(match[1], 10));
+    var next = nextBlankNumber(quill.getText());
+    if (next === null) {
+      return;
     }
-    var marker = "[[" + (highest + 1) + "]]";
+    var marker = "[[" + next + "]]";
     var index = range ? range.index : Math.max(quill.getLength() - 1, 0);
     if (range && range.length > 0) {
       quill.deleteText(range.index, range.length, "user");
