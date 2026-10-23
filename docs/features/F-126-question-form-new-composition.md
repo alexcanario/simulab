@@ -1,7 +1,7 @@
 | AC16 | QuestionFormCompositionTests.AnnulDialog_HasItsReasonFieldAndNoAmberAction; QuestionPreviewDialogTests || AC15 | QuestionFormCompositionTests.HistoryCards_StayBelowTheAsideAndAreNotNumbered; QuestionReviewFormTests (review history) || AC14 | QuestionFormCompositionTests.DomOrder_IsTheFormCardThenTheAsideThenTheHistoryCards || AC13 | QuestionFormCompositionTests.Transcription_HasNoPublicationBlockNoAmberActionAndSaveAndContinueIsThePrimary || AC12 | QuestionFormCompositionTests.FrozenQuestion_HasNoSaveAndTheWayOutIsInTheAside || AC11 | QuestionFormCompositionTests.SaveOfADraftWithChanges_SavesAndDoesNotPublishAndIsTheOnlyNavyPrimaryButton || AC10 | AppFormAsideContentTests.AsideBackground_IsThePageOrTheSurfaceColour || AC9 | QuestionFormActionScopeTests (both); ActionColourScopeTests || AC8 | QuestionFormCompositionTests.PublishRunning_TheAmberKeyIsDisabledAndShowsProgress; AppActionButtonFormTests.Busy_* || AC7 | QuestionFormCompositionTests.DraftWithAnIncompleteChecklist_*, DraftWithUnsavedChanges_* || AC6 | QuestionFormCompositionTests.CompleteSavedDraft_PublishIsTheOneEnabledCompactAmberKey... || AC5 | QuestionFormCompositionTests.NewQuestion_TheAsideSaysToSaveFirstAndHasNoPublicationButton || AC4 | QuestionFormCompositionTests.Published_*, InReview_*, Annulled_* || AC3 | QuestionFormCompositionTests.SavedDraft_TheAsideHoldsTheChipPreviewSendForReviewAndPublishAndNoCardBelow || AC2 | AppActionButtonFormTests; AppSectionCardNumberTests; AppFormAsideContentTests.Content_*; UiGalleryFormCompositionTests || AC1 | QuestionFormCompositionTests.Sections_AreNumberedOneToSixWithTheirHeadingsAndIdsUnchanged (5 types); AppSectionCardNumberTests |---
 feature: F-126
 epic: Foundation and identity
-status: building
+status: validating
 board: 177
 version: 1
 ---
@@ -313,6 +313,93 @@ Tests locked: fc0d83100287ad5ac97f678d5997bf9511645e00 (6 files); unlocks: 1
 
 ## Open questions
 - (none)
+
+## Validation script
+### English
+Needed to validate: you, on screen, in both themes, at desktop width and at 1280px or narrower; Docker Desktop running for the app host; a `Curator` account and an `Admin` account (use the Curator one for the steps; the Admin one only to confirm step 5 works the same). Docker Desktop was running during this build; the accounts are yours to provide.
+
+1. Stop any app host you have open (a running one locks `bin/`), then start this item's app host from the worktree folder. It runs on its own database, `simulab_f126`, on the local PostgreSQL server; nothing lands in the shared `simulab` database. Wait until the Aspire dashboard address is printed, then open https://localhost:7125.
+
+```powershell
+cd D:\wt\simulab\f-126-question-form-new
+$env:Database__Name = "simulab_f126"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+```bash
+cd /d/wt/simulab/f-126-question-form-new
+Database__Name=simulab_f126 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+   Expected: a line `Dashboard: https://localhost:<port>/login?t=<token>`; https://localhost:7125 answers with the home page.
+2. The numbered frame of a new question. Sign in as the Curator. In the sidebar (the left menu) click Content, then Questions, then Add (top right).
+   - [ ] 2.1 The form card shows six sections, each with a small blue square holding its number: 1 Classification, 2 Origin, 3 Statement, 4 Base text, 5 Options, 6 Explanation.
+   - [ ] 2.2 Beside the form is the Summary aside (the box on the right with the facts of the question and the "Before publishing" list). Its last block is "Publication" with the text "Save the question first to preview or publish it." and no button.
+   - [ ] 2.3 Under "Question type" choose True/false, then Matching, then Fill in the blanks: the sections stay numbered 1 to 6 and the key section is always number 5. Go back to Single choice.
+   - [ ] 2.4 There is no amber button on the page; Save (bottom right of the form card) is the only navy button, and no "Status" row is in the Summary.
+3. Save a draft and read the Publication block. Pick a subject and a topic, write a statement and two options without marking a correct one, then click Save.
+   - [ ] 3.1 The Publication block now shows a grey "Draft" chip, "Draft. Not available outside the back office.", and one button per line: Preview as a student, Send for review, Publish.
+   - [ ] 3.2 Publish is the amber key (a darker amber edge under it, an arrow pointing down) and it is greyed and disabled. Under it the text "Complete the checklist before publishing." is visible; Send for review is disabled for the same reason.
+   - [ ] 3.3 Change the statement without saving: the text under Publish becomes "Save your changes first." Click Save to go on.
+4. Publish. Mark the first option as correct and click Save, then click the amber Publish key.
+   - [ ] 4.1 Publish is now amber and enabled. Hold the mouse button down on it: the key sinks and its arrow turns to point up.
+   - [ ] 4.2 After the click: the snackbar (the message that appears at the bottom right) says "Question published."; the chip turns green "Published"; the block shows Preview as a student, Unpublish and Annul question; no amber button is left on the page.
+5. The other publication actions, from the aside.
+   - [ ] 5.1 Click Annul question: the dialog asks for a reason and has no amber button; cancel it. Click Unpublish: the question is a draft again and Publish is amber again.
+   - [ ] 5.2 Click Send for review: the chip is yellow "In review", the form is read-only with no Save, and the block shows Preview as a student and Withdraw from review. Click Withdraw from review to go back to a draft.
+   - [ ] 5.3 Publish again, click Annul question, write a reason and confirm: the chip is red "Annulled", the date and the reason show in the block, and the block has Preview as a student and Reinstate question. Click Reinstate question and confirm.
+6. Themes and language.
+   - [ ] 6.1 Click the theme switch (the moon at the top right): the number squares, the chip and the amber key stay readable; the disabled amber key (from a draft with unsaved changes) is grey with no edge on the page colour. Switch back to light.
+   - [ ] 6.2 In the language switch (the globe) choose Português (Brasil): the block reads "Publicação" and the amber key "Publicar". Switch back to English.
+7. Narrow width and keyboard.
+   - [ ] 7.1 Make the window 1280px wide or narrower (or press F12, Ctrl+Shift+M and pick 1024): the Summary aside moves under the form card and above the history cards; its buttons sit in one wrapping row at their natural width.
+   - [ ] 7.2 Back at desktop width, with a tall draft that has a rejection or a long reason, the aside stays in view while you scroll the form and scrolls inside itself when it is taller than the window.
+   - [ ] 7.3 Press Tab from the first field: you go through the form fields, Cancel, Save, then the aside buttons (Preview, Send for review, Publish), then the history cards. Every control shows a blue focus ring.
+8. The UI gallery. In the sidebar, under Development, click UI kit; the page "UI kit gallery" opens.
+   - [ ] 8.1 Under "Section card" one card shows a number square in place of its icon; under "Form aside" the aside has a block with a heading, a subtitle and two buttons.
+   - [ ] 8.2 Under "Buttons", "Action": the compact amber key with an id and the arrow pointing down, a busy one with a spinner and a disabled one.
+
+### pt-BR
+Necessário para validar: você, na tela, nos dois temas, em largura de desktop e em 1280px ou menos; Docker Desktop em execução para o app host; uma conta `Curator` e uma conta `Admin` (use a de Curator nos passos; a de Admin só para confirmar que o passo 5 funciona igual). O Docker Desktop estava em execução durante este build; as contas são suas.
+
+1. Pare qualquer app host que esteja aberto (um em execução trava o `bin/`) e inicie o app host deste item pela pasta do worktree. Ele usa o próprio banco, `simulab_f126`, no servidor PostgreSQL local; nada vai para o banco compartilhado `simulab`. Espere o endereço do painel do Aspire aparecer e abra https://localhost:7125.
+
+```powershell
+cd D:\wt\simulab\f-126-question-form-new
+$env:Database__Name = "simulab_f126"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+```bash
+cd /d/wt/simulab/f-126-question-form-new
+Database__Name=simulab_f126 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+   Esperado: uma linha `Dashboard: https://localhost:<porta>/login?t=<token>`; https://localhost:7125 responde com a página inicial.
+2. A moldura numerada de uma questão nova. Entre como Curator. No menu lateral (o menu à esquerda) clique em Conteúdo, depois em Questões e em Adicionar (canto superior direito).
+   - [ ] 2.1 O cartão do formulário mostra seis seções, cada uma com um quadradinho azul com o número: 1 Classificação, 2 Origem, 3 Enunciado, 4 Texto-base, 5 Alternativas, 6 Explicação.
+   - [ ] 2.2 Ao lado do formulário está a coluna Resumo (a caixa à direita com os dados da questão e a lista "Antes de publicar"). O último bloco dela é "Publicação", com o texto "Salve a questão primeiro para visualizar ou publicar." e nenhum botão.
+   - [ ] 2.3 Em "Tipo de questão" escolha Certo/errado, depois Associação, depois Preencher lacunas: as seções continuam numeradas de 1 a 6 e a seção do gabarito é sempre a 5. Volte para Escolha única.
+   - [ ] 2.4 Não há botão âmbar na página; Salvar (canto inferior direito do cartão do formulário) é o único botão azul-marinho, e não há linha "Situação" no Resumo.
+3. Salve um rascunho e leia o bloco Publicação. Escolha uma disciplina e um tópico, escreva um enunciado e duas alternativas sem marcar a correta e clique em Salvar.
+   - [ ] 3.1 O bloco Publicação agora mostra uma etiqueta cinza "Rascunho", "Rascunho. Não aparece fora do back office." e um botão por linha: Visualizar como aluno, Enviar para revisão, Publicar.
+   - [ ] 3.2 Publicar é a tecla âmbar (com uma borda âmbar mais escura embaixo e uma seta apontando para baixo) e está cinza e desabilitado. Embaixo dele aparece o texto "Complete a lista "Antes de publicar" primeiro."; Enviar para revisão está desabilitado pelo mesmo motivo.
+   - [ ] 3.3 Altere o enunciado sem salvar: o texto embaixo de Publicar passa a ser "Salve suas alterações primeiro." Clique em Salvar para continuar.
+4. Publique. Marque a primeira alternativa como correta, clique em Salvar e depois na tecla âmbar Publicar.
+   - [ ] 4.1 Publicar agora está âmbar e habilitado. Segure o botão do mouse sobre ele: a tecla afunda e a seta gira para apontar para cima.
+   - [ ] 4.2 Depois do clique: a mensagem no canto inferior direito (o snackbar) diz "Questão publicada."; a etiqueta fica verde "Publicada"; o bloco mostra Visualizar como aluno, Despublicar e Anular questão; não sobra nenhum botão âmbar na página.
+5. As outras ações de publicação, a partir da coluna.
+   - [ ] 5.1 Clique em Anular questão: a janela pede um motivo e não tem botão âmbar; cancele. Clique em Despublicar: a questão volta a rascunho e Publicar volta a ser âmbar.
+   - [ ] 5.2 Clique em Enviar para revisão: a etiqueta fica amarela "Em revisão", o formulário fica só para leitura, sem Salvar, e o bloco mostra Visualizar como aluno e Retirar da revisão. Clique em Retirar da revisão para voltar a rascunho.
+   - [ ] 5.3 Publique de novo, clique em Anular questão, escreva um motivo e confirme: a etiqueta fica vermelha "Anulada", a data e o motivo aparecem no bloco, e o bloco tem Visualizar como aluno e Reintegrar questão. Clique em Reintegrar questão e confirme.
+6. Temas e idioma.
+   - [ ] 6.1 Clique no botão de tema (a lua no canto superior direito): os quadradinhos numerados, a etiqueta e a tecla âmbar continuam legíveis; a tecla âmbar desabilitada (um rascunho com alterações não salvas) fica cinza, sem borda, sobre a cor da página. Volte para o claro.
+   - [ ] 6.2 No botão de idioma (o globo) escolha Português (Brasil): o bloco aparece como "Publicação" e a tecla âmbar como "Publicar". Volte para o inglês.
+7. Largura estreita e teclado.
+   - [ ] 7.1 Deixe a janela com 1280px de largura ou menos (ou pressione F12, Ctrl+Shift+M e escolha 1024): a coluna Resumo vai para baixo do cartão do formulário e acima dos cartões de histórico; os botões dela ficam em uma linha que quebra, na largura natural.
+   - [ ] 7.2 De volta à largura de desktop, com um rascunho alto (uma rejeição ou um motivo longo), a coluna continua à vista enquanto você rola o formulário e rola dentro dela quando é mais alta que a janela.
+   - [ ] 7.3 Pressione Tab a partir do primeiro campo: você passa pelos campos do formulário, Cancelar, Salvar, depois pelos botões da coluna (Visualizar, Enviar para revisão, Publicar) e por fim pelos cartões de histórico. Cada controle mostra um anel de foco azul.
+8. A galeria do kit. No menu lateral, em Desenvolvimento, clique em Kit de interface; a página "UI kit gallery" abre.
+   - [ ] 8.1 Em "Section card" um cartão mostra um quadradinho numerado no lugar do ícone; em "Form aside" a coluna tem um bloco com título, subtítulo e dois botões.
+   - [ ] 8.2 Em "Buttons", "Action": a tecla âmbar compacta com id e a seta para baixo, uma ocupada com um indicador de progresso e uma desabilitada.
 
 ## Events
 
