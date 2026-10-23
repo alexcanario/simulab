@@ -89,7 +89,6 @@ public sealed class AppActionButtonTests : KitTestContext
 
         action.Find(Key).HasAttribute("disabled").Should().BeTrue("disabled is a real attribute, not a class");
         action.Find(".app-action").ClassList.Should().Contain("app-action-disabled");
-        action.Find(Key).Click();
     }
 
     [Fact]

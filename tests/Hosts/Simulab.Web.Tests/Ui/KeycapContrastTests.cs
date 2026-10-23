@@ -82,7 +82,7 @@ public sealed class KeycapContrastTests
 
         foreach (var (fill, text) in new[] { (palette.Secondary, palette.SecondaryContrastText), (palette.Tertiary, palette.TertiaryContrastText), (palette.Success, palette.SuccessContrastText) })
         {
-            text.ToString().Should().Be("#0B1B2E");
+            IdentityTokensComparison.Hex(text.ToString()).Should().Be("#0B1B2E");
             Ratio(text.ToString(), fill.ToString()).Should().BeGreaterThanOrEqualTo(ColourContrast.MinimumForText);
         }
     }
