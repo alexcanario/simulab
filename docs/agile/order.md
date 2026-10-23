@@ -94,7 +94,7 @@
 
 ## Summary
 
-- Delivered: 133
+- Delivered: 134
 - First release (ai-assisted-exam-import): cut not defined
 - First release (assessment-catalog, mvp-cadastro-provas): complete: /agile:publish
 - First release (foundation-and-identity, mvp-cadastro-provas): complete: /agile:publish

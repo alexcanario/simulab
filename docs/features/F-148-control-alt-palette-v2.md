@@ -1,7 +1,7 @@
 ---
 feature: F-148
 epic: Foundation and identity
-status: validating
+status: done
 board: 206
 version: 1
 ---
@@ -271,3 +271,14 @@ Database__Name=simulab_f148 dotnet run --project src/Hosts/Simulab.AppHost
 
 - 2026-10-22 question — asked 6, from context 3
 - 2026-10-23 blocked — test wrong: two locked tests had test-side errors: colour format compared with hex, and a click on a disabled button
+
+## Delivery
+
+- Branch: `feature/F-148` (removed), merge commit `e641e78` on `main`, pushed; app version 1.15.0 → 1.16.0.
+- Tests (full gate, `agile gate GREEN`): Web 2445, QuestionBank 677, Catalog 665, Identity 548, Architecture 301, AppHost 122, Api 83, Persistence 25, Jobs 25, Email 19, SharedKernel 12, ApiResults 13, Storage 8, Ai 10; 0 failed. Security scan `agile scan GREEN`.
+- Manual: `docs/manual/pt-BR/getting-around.md` (button edge wording); pt-PT and en are frozen (F-124). Technical page: `docs/flows/brand-identity-theme.md`. ADR-0007.
+- Validation: the owner said "validado" in chat on 2026-10-23; the boxes of the script were not ticked in the tool, so the evidence below reads `not tested` per step.
+- Validation evidence: see the board comment of the issue; step boxes were not ticked.
+
+Gate time: 7 passes, 29 min 24 s — turn 3 (3 min), ship 2 (17 min 27 s), scan 2 (8 min 57 s); 0 red
+Usage: 4881.9k weighted (estimate) — refine 14% · build 76% · ship 10% · other 1% — context per turn 185k → 420k — 2 sessions, 180 turns
