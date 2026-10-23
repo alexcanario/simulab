@@ -55,5 +55,14 @@
 
     [Parameter] public string? Class { get; set; }
 
+    // F-126 skeleton: the parameters exist so the locked tests compile; the screen pass draws the block.
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public string? ContentTitle { get; set; }
+
+    [Parameter] public string? ContentSubtitle { get; set; }
+
+    [Parameter] public string? ContentId { get; set; }
+
     private string TitleId => "app-form-aside-title";
 }

@@ -34,5 +34,8 @@
 
     [Parameter] public string? Class { get; set; }
 
+    // F-126 skeleton: the parameter exists so the locked tests compile; the screen pass draws it.
+    [Parameter] public int? Number { get; set; }
+
     private string TitleId => $"{Id}-title";
 }

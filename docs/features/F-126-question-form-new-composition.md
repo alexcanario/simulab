@@ -1,7 +1,7 @@
----
+| AC16 | QuestionFormCompositionTests.AnnulDialog_HasItsReasonFieldAndNoAmberAction; QuestionPreviewDialogTests || AC15 | QuestionFormCompositionTests.HistoryCards_StayBelowTheAsideAndAreNotNumbered; QuestionReviewFormTests (review history) || AC14 | QuestionFormCompositionTests.DomOrder_IsTheFormCardThenTheAsideThenTheHistoryCards || AC13 | QuestionFormCompositionTests.Transcription_HasNoPublicationBlockNoAmberActionAndSaveAndContinueIsThePrimary || AC12 | QuestionFormCompositionTests.FrozenQuestion_HasNoSaveAndTheWayOutIsInTheAside || AC11 | QuestionFormCompositionTests.SaveOfADraftWithChanges_SavesAndDoesNotPublishAndIsTheOnlyNavyPrimaryButton || AC10 | AppFormAsideContentTests.AsideBackground_IsThePageOrTheSurfaceColour || AC9 | QuestionFormActionScopeTests (both); ActionColourScopeTests || AC8 | QuestionFormCompositionTests.PublishRunning_TheAmberKeyIsDisabledAndShowsProgress; AppActionButtonFormTests.Busy_* || AC7 | QuestionFormCompositionTests.DraftWithAnIncompleteChecklist_*, DraftWithUnsavedChanges_* || AC6 | QuestionFormCompositionTests.CompleteSavedDraft_PublishIsTheOneEnabledCompactAmberKey... || AC5 | QuestionFormCompositionTests.NewQuestion_TheAsideSaysToSaveFirstAndHasNoPublicationButton || AC4 | QuestionFormCompositionTests.Published_*, InReview_*, Annulled_* || AC3 | QuestionFormCompositionTests.SavedDraft_TheAsideHoldsTheChipPreviewSendForReviewAndPublishAndNoCardBelow || AC2 | AppActionButtonFormTests; AppSectionCardNumberTests; AppFormAsideContentTests.Content_*; UiGalleryFormCompositionTests || AC1 | QuestionFormCompositionTests.Sections_AreNumberedOneToSixWithTheirHeadingsAndIdsUnchanged (5 types); AppSectionCardNumberTests |---
 feature: F-126
 epic: Foundation and identity
-status: approved
+status: building
 board: 177
 version: 1
 ---
@@ -247,6 +247,27 @@ No new colour and no new token. One new pairing of existing tokens, the section 
 - AC16 Given the preview and status-reason dialogs, when they open, then their structure is unchanged and they contain no amber action (BR10).
 - AC17 All new texts appear in every locale of `UI locales:` and the missing-key test is green.
 
+## Criterion → test
+| Criterion | Test |
+|---|---|
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
+| AC15 | pending |
+| AC16 | pending |
+| AC17 | pending |
+
 ## Decisions
 - 2026-10-23 — Size L judged; cut in two: this item keeps the frame (numbered cards, aside with publication, amber action, dialogs untouched); the option and key rows as keys are F-149 — the form has 2664 lines, 19 test files and five types, and the two halves are read separately — asked
 - 2026-10-23 — Keep both F-126 and F-137: F-126 moves the publication actions into the aside, F-137 (idea) later adds only the readiness meter; F-137's summary is updated — similar item, asked
@@ -273,6 +294,9 @@ No new colour and no new token. One new pairing of existing tokens, the section 
 - 2026-10-23 — The aside gets `tabindex="0"` when its height is capped, so text below the fold is reachable by keyboard — Claude
 - 2026-10-23 — Build checks, not owner questions: sticky `top` under the fixed app bar and the app bar height variable are read from the MudBlazor CSS and measured in `/dev/ui`; the aside height cap uses the measured value — Claude
 - 2026-10-23 — The pt-BR manual (`docs/manual/pt-BR/questions.md`, "Publicar e despublicar", "cartão Publicação, abaixo do formulário") is updated at the ship; pt-PT and en are frozen (F-124) — Claude
+
+- 2026-10-23 — plan — 1 tests first + skeletons of the kit parameters, shown red and locked → check: the new tests fail for a missing behavior; 2 `frontend` hand-off (kit `AppActionButton`/`AppSectionCard`/`AppFormAside`, gallery, `app.css`, `QuestionForm.razor` with the two key sections; removes nothing: the Publication card is a block inside the page file, the `Aside.Status` row only leaves `AsideRows`) → check: AC1–AC8, AC10–AC16 green; 3 scan scope (`ActionColourScopeTests` names the allowed page) and the existing tests that depend on the card's position or on the amber key → check: AC9 and the whole suite green; 4 one fix round after `gate.js ship` → check: gate GREEN; 5 docs (3 flow pages, `docs/agile/ui-map.md`, pt-BR manual) → check: `techdocs.js check F-126`; 6 review, scan, validation script → check: `validating`
+- 2026-10-23 — Build: the `frontend` agent writes the screen and kit code; the locked tests are mine (kit parameters exist as skeletons so they compile) — Claude
 
 ## Out of scope
 - Option rows as keys, the "Correct" green key, the student preview content: F-149.
