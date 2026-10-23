@@ -1,7 +1,7 @@
 ---
 feature: F-134
 epic: Foundation and identity
-status: building
+status: validating
 board: 185
 version: 1
 ---
@@ -189,6 +189,11 @@ Tests locked: bb041fe1dd945465edd48df969e3240314ad9b8e (6 files); unlocks: 1
 - 2026-10-23: the pre-existing `ActionColourScopeTests.AllowedPages` and the F-126 scan `QuestionFormActionScopeTests.OtherRoutedPages_...` get `Error.razor` (their messages say each screen item adds its own) — Claude
 - 2026-10-23: tests unlocked (the AC2 and AC4 tests ran in Development, where the menu shows its Development section to everyone, and the AC9 test compared markup with per-render Blazor event ids; the code was right, the tests changed) — owner chose "Destravar e corrigir"
 
+- 2026-10-23: Reuse: `AppSectionCard`, `AppAlert`, `AppActionButton`, `AppLink`, `AppIcons` and `NavigationItems.Visible/Sections` (Home and the menu share one registry); the viewport subscription of `MainLayout` (`IBrowserViewportService`) for the compact amber key; `ActionColourScopeTests`' scan helpers; no new package
+- 2026-10-23: Shortcuts: none
+- 2026-10-23: Build checks — gate GREEN (build of `Simulab.Web` and `Simulab.Web.Tests`, no new warning), `Simulab.Web.Tests` 2518 passed in 1 m 11 s, `agile scan GREEN` (two medium findings in `tools/Simulab.DocGen`, older than this item), `techdocs.js check F-134` GREEN; screen check of `/`, `/Error` (desktop and 320px), `/nothing-here` and `/dev/ai` signed out in the app host (own database `simulab_f134`); the signed-in flows are in the validation script. Not run: `/agile:review` (no auth, data, contract or migration change)
+- 2026-10-23: `Simulab.ArchitectureTests` failed once (`AspirePackagesTests.MessagePack_ResolvesToPatchedVersion_InEveryProject`, no resolved package) while only the Web projects were built in this worktree; after `dotnet build Simulab.slnx` (0 warnings, 0 errors) it passes: 301 of 301
+
 ## Out of scope
 - The gallery `/dev/ui` beyond the `AppPageState` example (F-125).
 - The shell: app bar, menu, `#blazor-error-ui`, `ReconnectModal`.
@@ -198,6 +203,87 @@ Tests locked: bb041fe1dd945465edd48df969e3240314ad9b8e (6 files); unlocks: 1
 
 ## Open questions
 - (none)
+
+## Validation script
+### English
+Needed to validate: you, on screen, in both themes, at desktop and phone width, signed out and signed in; Docker Desktop running for the app host; one account with administration permissions (Admin) and one new account with no extra role. Docker Desktop was running during this build; the accounts are yours to provide (a new one is made in step 4).
+
+1. Stop any app host you have open (a running one locks `bin/`), then start this item's app host from the worktree folder. It runs on its own database, `simulab_f134`, on the local PostgreSQL server; nothing lands in the shared `simulab` database. Wait until the Aspire dashboard address is printed, then open https://localhost:7125.
+
+```powershell
+cd D:\wt\simulab\f-134-home-error-pages
+$env:Database__Name = "simulab_f134"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+```bash
+cd /d/wt/simulab/f-134-home-error-pages
+Database__Name=simulab_f134 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+   Expected: a line `Dashboard: https://localhost:<port>/login?t=<token>`; https://localhost:7125 answers with the home page.
+2. Home, signed out. Open https://localhost:7125 with no one signed in.
+   - [ ] 2.1 Where: the page body. The title "Practice like it is exam day", the line under it, then two buttons: "Sign in" (filled navy) and "Create account" (outlined), then the blue notice "Simulab is being built...". No amber button and no cards.
+   - [ ] 2.2 Where: the theme switch (the moon at the top right of the app bar, the bar at the top of the page). Click it: the title, the buttons and the notice stay readable in light and in dark. Leave it in the theme you prefer.
+   - [ ] 2.3 Where: the language switch (the globe, top right of the app bar). Choose Português (Brasil), then Português (Portugal): the title, "Entrar" / "Iniciar sessão" and "Criar conta" change. Switch back to English.
+3. Home, signed in as the Admin. Click "Sign in" and sign in with the Admin account.
+   - [ ] 3.1 Where: the page body. The title is "Welcome back" (no name), the line and the notice stay, and the "Sign in" and "Create account" buttons are gone.
+   - [ ] 3.2 Where: the cards under the notice, one per menu section in the order of the sidebar (the left menu): Study, Content, Administration and, because the app runs in Development, Development. Each link shows the same icon and label as the sidebar. Click one link of each card: it opens the page the sidebar item opens.
+   - [ ] 3.3 Where: the cards at 1280px wide or narrower (press F12, Ctrl+Shift+M and pick 1024, then 375): the cards go from a grid to a single column and nothing scrolls sideways.
+4. Home, signed in with a new account. Sign out (avatar at the top right, then "Sign out"), click "Create account", make a new account and confirm its email (the message arrives in Mailpit, whose address is on the Aspire dashboard), then sign in with it.
+   - [ ] 4.1 Where: the cards on Home. Only the cards for what this account may open appear (for example only Study) and every link on them is also in its sidebar; the cards of the Admin are not here.
+5. Not found, and a page you may not open. Signed in with the new account from step 4:
+   - [ ] 5.1 Where: the address bar. Open https://localhost:7125/nothing-here: an icon, "Page not found", "The page you are looking for does not exist." and one filled navy button "Go to home". No amber button, no "404".
+   - [ ] 5.2 Where: the address bar. Open https://localhost:7125/admin/roles (a page this account may not open): the page looks exactly like the one in 5.1, with no word about permission. Click "Go to home": Home opens.
+6. The error page. Open https://localhost:7125/Error (the page every server error ends on; opened by hand it shows the same page).
+   - [ ] 6.1 Where: the page body. The red error icon, "Something went wrong", the message, the two buttons and, under them, "Request ID: ..." in the mono font. "Try again" is the amber key with Ctrl and Alt before it; "Go to home" is outlined.
+   - [ ] 6.2 Where: the amber key "Try again". Hold the mouse button down on it: it sinks and its icon turns. Click it: the page reloads and stays on the same address with a new request ID.
+   - [ ] 6.3 Where: the window itself, made 320px wide (F12, Ctrl+Shift+M, width 320, then reload): the amber key is alone (no Ctrl and Alt), the two buttons sit one under the other, the long request ID breaks into lines and the page does not scroll sideways.
+7. The AI diagnostics page and the gallery. In the sidebar under Development click "AI gateway".
+   - [ ] 7.1 Where: the page body. One card "Question" with the prompt field and the filled navy "Send" button (not amber), and no "Answer" card. If your API key is configured, write a short prompt and click Send: an "Answer" card appears with the text and four figures (Model, Tokens in / out, Cost, Duration) in the mono font. Without a key the red alert above the cards explains it and no "Answer" card appears.
+   - [ ] 7.2 Where: the sidebar, under Development, "UI kit", then the section "List states", under the three small states. A "Page state" with an icon, a title, a message and two buttons shows.
+8. Keyboard and both themes, on Home signed in as the Admin.
+   - [ ] 8.1 Where: the whole page, from the top with the Tab key. Focus goes through the app bar, the sidebar, the first card's links and then every other card's links, in reading order; each shows a blue focus ring and Enter opens the link.
+   - [ ] 8.2 Where: Home, the error page and the not-found page, each in the light and in the dark theme: no text is hard to read and no colour looks out of the palette.
+
+### pt-BR
+Necessário para validar: você, na tela, nos dois temas, em largura de desktop e de celular, sem e com login; Docker Desktop em execução para o app host; uma conta com permissões de administração (Admin) e uma conta nova sem papel extra. O Docker Desktop estava em execução durante este build; as contas são suas (a nova é criada no passo 4).
+
+1. Pare qualquer app host que esteja aberto (um em execução trava o `bin/`) e inicie o app host deste item pela pasta do worktree. Ele usa o próprio banco, `simulab_f134`, no servidor PostgreSQL local; nada vai para o banco compartilhado `simulab`. Espere o endereço do painel do Aspire aparecer e abra https://localhost:7125.
+
+```powershell
+cd D:\wt\simulab\f-134-home-error-pages
+$env:Database__Name = "simulab_f134"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+```bash
+cd /d/wt/simulab/f-134-home-error-pages
+Database__Name=simulab_f134 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+   Esperado: uma linha `Dashboard: https://localhost:<porta>/login?t=<token>`; https://localhost:7125 responde com a página inicial.
+2. Home, sem login. Abra https://localhost:7125 sem ninguém logado.
+   - [ ] 2.1 Onde: o corpo da página. O título "Practice like it is exam day", a linha abaixo, depois dois botões: "Sign in" (cheio, azul-marinho) e "Create account" (com contorno), depois o aviso azul "Simulab is being built...". Nenhum botão âmbar e nenhum cartão.
+   - [ ] 2.2 Onde: o botão de tema (a lua no canto superior direito da barra superior, a faixa no alto da página). Clique: o título, os botões e o aviso continuam legíveis no claro e no escuro. Deixe no tema que preferir.
+   - [ ] 2.3 Onde: o botão de idioma (o globo, canto superior direito da barra superior). Escolha Português (Brasil) e depois Português (Portugal): o título, "Entrar" / "Iniciar sessão" e "Criar conta" mudam. Volte para English.
+3. Home, logado como Admin. Clique em "Sign in" e entre com a conta Admin.
+   - [ ] 3.1 Onde: o corpo da página. O título é "Welcome back" (sem nome), a linha e o aviso continuam e os botões "Sign in" e "Create account" sumiram.
+   - [ ] 3.2 Onde: os cartões abaixo do aviso, um por seção do menu na ordem da sidebar (o menu lateral esquerdo): Study, Content, Administration e, porque o app roda em Development, Development. Cada link mostra o mesmo ícone e o mesmo rótulo da sidebar. Clique em um link de cada cartão: abre a página que o item da sidebar abre.
+   - [ ] 3.3 Onde: os cartões em 1280px de largura ou menos (F12, Ctrl+Shift+M, escolha 1024 e depois 375): os cartões passam de uma grade para uma coluna só e nada rola para o lado.
+4. Home, logado com uma conta nova. Saia (avatar no canto superior direito, depois "Sign out"), clique em "Create account", crie uma conta nova e confirme o e-mail (a mensagem chega no Mailpit, cujo endereço está no painel do Aspire) e entre com ela.
+   - [ ] 4.1 Onde: os cartões da Home. Só aparecem os cartões do que essa conta pode abrir (por exemplo só Study) e todo link neles também está na sidebar dela; os cartões do Admin não estão aqui.
+5. Não encontrada, e uma página que você não pode abrir. Logado com a conta nova do passo 4:
+   - [ ] 5.1 Onde: a barra de endereço. Abra https://localhost:7125/nothing-here: um ícone, "Page not found", "The page you are looking for does not exist." e um botão cheio azul-marinho "Go to home". Nenhum botão âmbar e nenhum "404".
+   - [ ] 5.2 Onde: a barra de endereço. Abra https://localhost:7125/admin/roles (uma página que essa conta não pode abrir): a página é idêntica à de 5.1, sem nenhuma palavra sobre permissão. Clique em "Go to home": a Home abre.
+6. A página de erro. Abra https://localhost:7125/Error (a página em que todo erro do servidor termina; aberta à mão mostra a mesma página).
+   - [ ] 6.1 Onde: o corpo da página. O ícone vermelho de erro, "Something went wrong", a mensagem, os dois botões e, abaixo, "Request ID: ..." na fonte mono. "Try again" é a tecla âmbar com Ctrl e Alt antes dela; "Go to home" tem contorno.
+   - [ ] 6.2 Onde: a tecla âmbar "Try again". Segure o botão do mouse sobre ela: afunda e o ícone gira. Clique: a página recarrega e continua no mesmo endereço, com um novo request ID.
+   - [ ] 6.3 Onde: a própria janela, com 320px de largura (F12, Ctrl+Shift+M, largura 320 e recarregue): a tecla âmbar fica sozinha (sem Ctrl e Alt), os dois botões ficam um sob o outro, o request ID longo quebra em linhas e a página não rola para o lado.
+7. A página de diagnóstico de IA e a galeria. Na sidebar, em Development, clique em "AI gateway".
+   - [ ] 7.1 Onde: o corpo da página. Um cartão "Question" com o campo do prompt e o botão cheio azul-marinho "Send" (não âmbar), e nenhum cartão "Answer". Se sua chave de API estiver configurada, escreva um prompt curto e clique em Send: aparece um cartão "Answer" com o texto e quatro números (Model, Tokens in / out, Cost, Duration) na fonte mono. Sem chave, o alerta vermelho acima dos cartões explica e nenhum cartão "Answer" aparece.
+   - [ ] 7.2 Onde: a sidebar, em Development, "UI kit", depois a seção "List states", abaixo dos três estados pequenos. Aparece um "Page state" com ícone, título, mensagem e dois botões.
+8. Teclado e os dois temas, na Home logado como Admin.
+   - [ ] 8.1 Onde: a página inteira, do topo com a tecla Tab. O foco passa pela barra superior, pela sidebar, pelos links do primeiro cartão e depois pelos de cada outro cartão, na ordem de leitura; cada um mostra um anel de foco azul e Enter abre o link.
+   - [ ] 8.2 Onde: a Home, a página de erro e a de não encontrada, cada uma no tema claro e no escuro: nenhum texto fica difícil de ler e nenhuma cor parece fora da paleta.
 
 ## Events
 
