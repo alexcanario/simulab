@@ -253,23 +253,23 @@ Tests locked: fc0d83100287ad5ac97f678d5997bf9511645e00 (6 files); unlocks: 1
 
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
+| AC1 | QuestionFormCompositionTests.Sections_AreNumberedOneToSixWithTheirHeadingsAndIdsUnchanged (5 types); AppSectionCardNumberTests |
+| AC2 | AppActionButtonFormTests; AppSectionCardNumberTests; AppFormAsideContentTests.Content_*; UiGalleryFormCompositionTests |
+| AC3 | QuestionFormCompositionTests.SavedDraft_TheAsideHoldsTheChipPreviewSendForReviewAndPublishAndNoCardBelow |
+| AC4 | QuestionFormCompositionTests.Published_TheAsideHoldsPreviewUnpublishAnnulAndNothingAmber, InReview_TheAsideHoldsPreviewAndWithdrawAndNothingAmber, Annulled_TheAsideHoldsTheAnnulmentDateAndReasonPreviewAndReinstateAndNothingAmber |
+| AC5 | QuestionFormCompositionTests.NewQuestion_TheAsideSaysToSaveFirstAndHasNoPublicationButton |
+| AC6 | QuestionFormCompositionTests.CompleteSavedDraft_PublishIsTheOneEnabledCompactAmberKeyAndPublishingEndsInTheBlockOfAPublishedQuestion |
+| AC7 | QuestionFormCompositionTests.DraftWithAnIncompleteChecklist_PublishIsADisabledKeyWithTheVisibleReasonItPointsAt, DraftWithUnsavedChanges_PublishAndSendForReviewAreDisabledWithTheSaveFirstReason |
+| AC8 | QuestionFormCompositionTests.PublishRunning_TheAmberKeyIsDisabledAndShowsProgress; AppActionButtonFormTests.Busy_DisablesTheKeyShowsProgressInPlaceOfTheIconAndKeepsTheLabel |
+| AC9 | QuestionFormActionScopeTests (both tests); ActionColourScopeTests.RoutedPages_PutNoTertiaryColourOnAButtonAndNoActionShortcut |
+| AC10 | AppFormAsideContentTests.AsideBackground_IsThePageOrTheSurfaceColour |
+| AC11 | QuestionFormCompositionTests.SaveOfADraftWithChanges_SavesAndDoesNotPublishAndIsTheOnlyNavyPrimaryButton |
+| AC12 | QuestionFormCompositionTests.FrozenQuestion_HasNoSaveAndTheWayOutIsInTheAside |
+| AC13 | QuestionFormCompositionTests.Transcription_HasNoPublicationBlockNoAmberActionAndSaveAndContinueIsThePrimary |
+| AC14 | QuestionFormCompositionTests.DomOrder_IsTheFormCardThenTheAsideThenTheHistoryCards |
+| AC15 | QuestionFormCompositionTests.HistoryCards_StayBelowTheAsideAndAreNotNumbered; QuestionReviewFormTests (review history card) |
+| AC16 | QuestionFormCompositionTests.AnnulDialog_HasItsReasonFieldAndNoAmberAction; QuestionPreviewDialogTests |
+| AC17 | ResourceParityTests.Every_key_exists_in_every_language (the three new `Gallery.*` keys) |
 
 ## Decisions
 - 2026-10-23 — Size L judged; cut in two: this item keeps the frame (numbered cards, aside with publication, amber action, dialogs untouched); the option and key rows as keys are F-149 — the form has 2664 lines, 19 test files and five types, and the two halves are read separately — asked
@@ -406,3 +406,4 @@ Database__Name=simulab_f126 dotnet run --project src/Hosts/Simulab.AppHost
 - 2026-10-23 question — asked 8, from context 3
 - 2026-10-23 blocked — test wrong: section selector also matched the version history card inside .app-form-card (test bug, owner agreed)
 - 2026-10-23 test-fail — build failed (Simulab.slnx), 2 reds
+- 2026-10-23 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 1 red
