@@ -1,7 +1,7 @@
 ---
 feature: F-134
 epic: Foundation and identity
-status: idea
+status: refining
 board: 185
 version: 1
 ---
