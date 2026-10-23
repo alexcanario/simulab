@@ -6682,3 +6682,62 @@ copied   docs/agile/profile-sections/local-services.md
 O `profile.md` passou de 12.641 para 8.215 palavras: as quatro seções agora são uma linha cada, o ponteiro com o `Read when`, e o texto delas está nos arquivos novos (715, 2.479, 875 e 543 palavras). No próximo `/agile:build` de um item que acrescenta um campo numa tela, o Claude lê o perfil e nenhum desses arquivos; num item que muda a porta do PostgreSQL no AppHost, ele lê também `local-services.md`.
 
 Se você tivesse acrescentado uma linha sua ao `profile.md` (na seção `## Layout`, por exemplo), a tabela o listaria como `edited`, o `apply` recusaria (`refused  docs/agile/profile.md: edited, merge by hand`) e o Claude faria o merge de três vias: a sua linha fica, cada seção movida vira o ponteiro, e os quatro arquivos chegam como `new` do mesmo jeito.
+
+### 14.183 As seções de tema do perfil: o `/agile:sync` traz os três arquivos de um `web-app`
+
+O Simulab é um projeto `web-app` sincronizado na 0.156.0, com o `docs/agile/profile.md` nunca editado e os quatro arquivos de AppHost já copiados. Neste `/agile:sync` o `sync.js plan` lista o perfil como `update`, os três arquivos de tema como `new` e os quatro de AppHost como `same`:
+
+```
+update   docs/agile/profile.md
+new      docs/agile/profile-sections/runtime-themes-mudblazor.md
+new      docs/agile/profile-sections/adminlte-kit.md
+new      docs/agile/profile-sections/adminlte-themes.md
+same     docs/agile/profile-sections/local-services.md
+same     docs/agile/profile-sections/deploy-aspire.md
+same     docs/agile/profile-sections/deploy-aca.md
+same     docs/agile/profile-sections/deploy-compose.md
+```
+
+Você aprova, e o `apply` responde:
+
+```
+copied   docs/agile/profile.md
+copied   docs/agile/profile-sections/runtime-themes-mudblazor.md
+copied   docs/agile/profile-sections/adminlte-kit.md
+copied   docs/agile/profile-sections/adminlte-themes.md
+```
+
+O `profile.md` passou de 8.193 para 2.109 palavras: as três seções de tema agora são uma linha cada, o ponteiro com o `Read when`, e o texto delas está nos arquivos novos (1.956, 1.755 e 2.476 palavras). O Simulab usa MudBlazor (o `CLAUDE.md` não tem a linha `- UI library: adminlte`), então os dois arquivos de AdminLTE estão na pasta mas não são lidos. No próximo `/agile:build` de um item que acrescenta um campo numa tela, o Claude lê o perfil e nenhum arquivo de tema; num item que acrescenta um seletor de tema à página `/appearance`, ele lê também `runtime-themes-mudblazor.md`. Num projeto com `- UI library: adminlte`, o primeiro item lê `adminlte-kit.md` e o segundo, `adminlte-themes.md`.
+
+No Bolso, um projeto `mobile` sincronizado na mesma versão, o `sync.js plan` lista `update` para o `docs/agile/profile.md` e `new` para um único arquivo de tema, e o `apply` responde:
+
+```
+copied   docs/agile/profile.md
+copied   docs/agile/profile-sections/runtime-themes-maui.md
+```
+
+O `profile.md` do Bolso passou de 12.392 para 10.163 palavras (o arquivo novo tem 2.289, e a frase sobre ler o ponteiro só quando o `Read when` combina entrou no primeiro parágrafo). Um item que muda a tela de pedidos não lê o `runtime-themes-maui.md`; um que muda o módulo de temas da cabeça MAUI lê.
+
+Se você tivesse acrescentado uma linha sua ao `profile.md`, a tabela o listaria como `edited`, o `apply` recusaria e o Claude faria o merge de três vias: a sua linha fica, cada seção de tema vira o ponteiro, e os três arquivos chegam como `new` do mesmo jeito.
+
+### 14.184 O corpo de issue quebrado, parado antes do envio: a guarda de corpo do repositório do plugin
+
+Na sessão do plugin, o Claude monta o corpo da issue #303 e o envia. Uma substituição caiu no começo da linha 1 e a linha de status ficou para trás. A guarda lê o arquivo antes de o `gh issue edit` sair e responde:
+
+```
+Claude: gh issue edit 303 --body-file <scratch>/body-303.md
+[agile body-guard] line 1 is not a status line: "| AC16 | check-all.js GREEN | pending |" (<scratch>/body-303.md).
+This body would replace the item's issue as it is. Write the whole body with the Write tool and read line 1 back before the send (.claude/rules/ship.md, "Editing").
+If this body is meant to be sent as it is, ask the owner; with a yes, repeat the command ending with the comment  # agile:body-ok
+```
+
+Nada foi enviado ao GitHub. O Claude reescreve o corpo inteiro com a ferramenta Write, lê a linha 1 (`Status: approved (...)`) e envia de novo. Num corpo de item aberto cuja tabela `## Criterion → test` deixou critérios sem linha, a recusa nomeia todos de uma vez:
+
+```
+Claude: gh issue edit 303 --body-file <scratch>/body-ac.md
+[agile body-guard] AC2, AC3 have no row in ## Criterion → test (<scratch>/body-ac.md).
+This body would replace the item's issue as it is. Write the whole body with the Write tool and read line 1 back before the send (.claude/rules/ship.md, "Editing").
+If this body is meant to be sent as it is, ask the owner; with a yes, repeat the command ending with the comment  # agile:body-ok
+```
+
+Linhas agrupadas (`AC1-AC4`, `AC1, AC2`) contam como cobertura; um corpo com prefixo `Deferred (` ou `Cancelled (` seguido de `Status:`, um corpo `done` e uma seção só com prosa passam sem uma palavra. O comentário de bypass só entra no comando depois do sim do dono.

@@ -1,5 +1,5 @@
 {
-  "version": "0.161.0",
+  "version": "0.165.0",
   "files": {
     ".claude/rules/agile/api-contracts.md": "b89627eeff25fdd7",
     ".claude/rules/agile/build-config.md": "10036965f8131836",
@@ -25,9 +25,10 @@
     "docs/agile/templates/project-claude.md": "5aaf1ddce998c2ea",
     "docs/agile/templates/tech-page.md": "2eff0cc69175555a",
     "docs/agile/templates/ui-map.md": "b05a64b27a3e73a4",
-    "docs/agile/workflow.pt-BR.md": "d3ef4439b45f324f",
-    "docs/agile/workflow-examples.pt-BR.md": "a29382d1a6157f8d",
-    "docs/agile/profile.md": "69010bd2c3b9fefb",
+    "docs/agile/workflow.pt-BR.md": "fe70cecf8c6cbe1b",
+    "docs/agile/workflow-examples.pt-BR.md": "4c765821e144bb92",
+    "docs/agile/profile.md": "4773250a4acb4e64",
+    "docs/agile/profile-sections/runtime-themes-mudblazor.md": "64ab65963ee27cd9",
     "docs/agile/profile-sections/local-services.md": "6f6463ddcd02c9a0",
     "docs/agile/profile-sections/deploy-aspire.md": "949f099498551034",
     "docs/agile/profile-sections/deploy-aca.md": "b6fa3130a1dff67d",
