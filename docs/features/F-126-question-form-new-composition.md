@@ -249,7 +249,7 @@ No new colour and no new token. One new pairing of existing tokens, the section 
 
 ## Criterion → test
 
-Tests locked: 4d26ee4dbad713ebd442af97f567d84f8079db35 (6 files); unlocks: 0
+Tests locked: fc0d83100287ad5ac97f678d5997bf9511645e00 (6 files); unlocks: 1
 
 | Criterion | Test |
 |---|---|
@@ -318,3 +318,4 @@ Tests locked: 4d26ee4dbad713ebd442af97f567d84f8079db35 (6 files); unlocks: 0
 
 - 2026-10-23 question — asked 8, from context 3
 - 2026-10-23 blocked — test wrong: section selector also matched the version history card inside .app-form-card (test bug, owner agreed)
+- 2026-10-23 test-fail — build failed (Simulab.slnx), 2 reds

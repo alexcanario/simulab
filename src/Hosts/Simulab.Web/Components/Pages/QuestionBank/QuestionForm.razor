@@ -96,6 +96,7 @@ else
             <AppSectionCard Id="question-section-classification"
                             Title="@L["Questions.Section.Classification"]"
                             Icon="@AppIcons.Topics"
+                            Number="1"
                             Subtitle="@L["Questions.Section.Classification.Subtitle"]">
                 @* F-97, UC1 and BR2: the type is the first field. It is chosen when the question is created and read
                    only afterwards: changing it would drop options or a key without saying so. *@
@@ -177,6 +178,7 @@ else
             <AppSectionCard Id="question-section-origin"
                             Title="@L["Questions.Section.Origin"]"
                             Icon="@AppIcons.Editions"
+                            Number="2"
                             Subtitle="@L["Questions.Section.Origin.Subtitle"]">
                 <AppFormGrid Columns="2">
                     <AppLookupField Id="question-edition"
@@ -219,6 +221,7 @@ else
             <AppSectionCard Id="question-section-statement"
                             Title="@L["Questions.Section.Statement"]"
                             Icon="@AppIcons.Questions"
+                            Number="3"
                             Subtitle="@L["Questions.Section.Statement.Subtitle"]">
                 <AppRichTextField Id="question-statement"
                                   Label="@L["Questions.Field.Statement"]"
@@ -237,6 +240,7 @@ else
             <AppSectionCard Id="question-section-base-text"
                             Title="@L["Questions.Section.BaseText"]"
                             Icon="@AppIcons.BaseText"
+                            Number="4"
                             Subtitle="@L["Questions.Section.BaseText.Subtitle"]">
                 @* F-102: the base text is picked, never typed here: it has a page of its own, so there is one way to
                    edit it (rule: ui-project). The lookup is the server's search over the texts in the question's
@@ -325,6 +329,7 @@ else
                 <AppSectionCard Id="question-section-true-false-key"
                                 Title="@L["Questions.Section.TrueFalseKey"]"
                                 Icon="@AppIcons.Verified"
+                                Number="5"
                                 Subtitle="@L["Questions.Section.TrueFalseKey.Subtitle"]">
                     @* F-101: the radio cards have no disabled state, so a frozen key is read as a value, as the type is. *@
                     @if (IsFrozen)
@@ -357,7 +362,8 @@ else
             else if (IsMatching)
             {
                 @* F-106: the two columns; the right one is the same options list, the left one is the form's own. *@
-                <MatchingKeySection Options="_options"
+                <MatchingKeySection SectionNumber="5"
+                                    Options="_options"
                                     Items="_matchItems"
                                     Frozen="IsFrozen"
                                     ContentLanguage="@_contentLanguage"
@@ -373,7 +379,8 @@ else
             else if (IsFillIn)
             {
                 @* F-107: one row per marker of the statement; the answers are the form's own. *@
-                <FillInTheBlanksKeySection Markers="BlankNumbers"
+                <FillInTheBlanksKeySection SectionNumber="5"
+                                           Markers="BlankNumbers"
                                            Answers="_blankAnswers"
                                            Frozen="IsFrozen"
                                            Error="@_blanksError"
@@ -390,6 +397,7 @@ else
             <AppSectionCard Id="question-section-options"
                             Title="@L["Questions.Section.Options"]"
                             Icon="@AppIcons.Options"
+                            Number="5"
                             Subtitle="@(IsMultiple ? L["Questions.Section.Options.Multiple.Subtitle"] : L["Questions.Section.Options.Subtitle"])">
                 @* Single choice: the group's value is the position of the correct option, exactly one can be checked
                    (BR4) and a draft may have none (BR3). Multiple answer (F-104): one checkbox per option, any
@@ -523,6 +531,7 @@ else
             <AppSectionCard Id="question-section-explanation"
                             Title="@L["Questions.Section.Explanation"]"
                             Icon="@AppIcons.Explanation"
+                            Number="6"
                             Subtitle="@L["Questions.Section.Explanation.Subtitle"]">
                 <AppRichTextField Id="question-explanation"
                                   Label="@L["Questions.Field.Explanation"]"
@@ -552,174 +561,12 @@ else
                       ChecklistTitle="@L["Questions.Form.Aside.Checklist"]"
                       DoneText="@L["Common.Checklist.Done"]"
                       PendingText="@L["Common.Checklist.Pending"]"
-                      Checklist="AsideChecklist" />
+                      Checklist="AsideChecklist"
+                      ContentId="question-section-publication"
+                      ContentTitle="@L["Questions.Section.Publication"]"
+                      ContentSubtitle="@L["Questions.Section.Publication.Subtitle"]"
+                      ChildContent="@PublicationSlot" />
     </div>
-
-    @* Publication: outside the form. Save never publishes and Publish never saves (BR12); both act on what is
-       stored, so a change that is not saved blocks Publish and the preview says it shows the saved version. *@
-    @if (!IsTranscribing)
-    {
-    <MudPaper Class="app-form-card mt-4" Elevation="0">
-        <AppSectionCard Id="question-section-publication"
-                        Title="@L["Questions.Section.Publication"]"
-                        Icon="@AppIcons.Publish"
-                        Subtitle="@L["Questions.Section.Publication.Subtitle"]">
-            @if (_saved is null)
-            {
-                <MudText Typo="Typo.body2">@L["Questions.Publication.SaveFirst"]</MudText>
-            }
-            else
-            {
-                @if (_publicationError is not null)
-                {
-                    <AppAlert Severity="Severity.Error" Text="@_publicationError" Class="mb-4" />
-                }
-
-                @* F-105 UC6: why the last review sent it back, while the latest entry is that rejection; the next send ends it. *@
-                @if (LatestRejection is { } rejection)
-                {
-                    <div id="question-rejected-alert">
-                        <AppAlert Severity="Severity.Info"
-                                  Text="@L["Questions.Publication.Rejected", rejection.At.ToString("g", CultureInfo.CurrentCulture), rejection.Reason ?? string.Empty]"
-                                  Class="mb-4" />
-                    </div>
-                }
-
-                <div class="app-publication-row">
-                    <AppStatusChip Text="@QuestionText.StatusName(L, _saved.Status)" Tone="QuestionText.StatusTone(_saved.Status)" />
-                    <span>@PublicationText</span>
-                </div>
-
-                @* F-101 UC3: when and why it was annulled, from the version that recorded it. *@
-                @if (IsAnnulled && _saved?.Annulment is { } annulment)
-                {
-                    <div class="app-publication-annulment">
-                        <p id="question-annulment-date">@L["Questions.Annulment.Date", annulment.AnnulledAt.ToString("g", CultureInfo.CurrentCulture)]</p>
-                        <p id="question-annulment-reason">@L["Questions.Annulment.Reason", annulment.Reason]</p>
-                    </div>
-                }
-
-                <div class="app-publication-actions">
-                    <MudButton Variant="Variant.Outlined"
-                               Color="Color.Primary"
-                               StartIcon="@AppIcons.View"
-                               Disabled="_publishing"
-                               OnClick="PreviewAsync"
-                               id="@PreviewButtonId">@L["Questions.Action.Preview"]</MudButton>
-
-                    @if (IsAnnulled)
-                    {
-                        @* F-101 BR6: the only way out of the frozen state; the reason is asked in a dialog. *@
-                        <MudButton Variant="Variant.Outlined"
-                                   Color="Color.Primary"
-                                   StartIcon="@AppIcons.Retry"
-                                   OnClick="ReinstateAsync"
-                                   id="question-reinstate">@L["Questions.Action.Reinstate"]</MudButton>
-                    }
-                    else if (IsInReview)
-                    {
-                        @* F-105 BR4: the way out for a curator; it asks no reason and no confirmation (it is reversible,
-                           as Unpublish is). *@
-                        <MudButton Variant="Variant.Outlined"
-                                   Color="Color.Primary"
-                                   StartIcon="@(_publishing ? null : AppIcons.Withdraw)"
-                                   Disabled="_publishing"
-                                   OnClick="WithdrawAsync"
-                                   id="question-withdraw">
-                            @if (_publishing)
-                            {
-                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
-                            }
-                            @L["Questions.Action.Withdraw"]
-                        </MudButton>
-                    }
-                    else if (IsPublished)
-                    {
-                        <MudButton Variant="Variant.Outlined"
-                                   Color="Color.Primary"
-                                   StartIcon="@(_publishing ? null : AppIcons.Unpublish)"
-                                   Disabled="_publishing"
-                                   OnClick="UnpublishAsync"
-                                   id="question-unpublish">
-                            @if (_publishing)
-                            {
-                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
-                            }
-                            @L["Questions.Action.Unpublish"]
-                        </MudButton>
-
-                        @* F-101 UC1: annulling acts on what is stored, so unsaved changes block it, with the reason said below. *@
-                        <MudButton Variant="Variant.Outlined"
-                                   Color="Color.Error"
-                                   StartIcon="@AppIcons.Archive"
-                                   Disabled="@(_publishing || HasChanges)"
-                                   OnClick="AnnulAsync"
-                                   aria-describedby="@(HasChanges ? "question-annul-reason-hint" : null)"
-                                   id="question-annul">@L["Questions.Action.Annul"]</MudButton>
-                    }
-                    else
-                    {
-                        @* F-105 UC1: a second way to publish, through a reviewer. It is disabled for the same reasons as
-                           Publish, in the same order; the one visible reason below describes both buttons. *@
-                        <MudTooltip Text="@(PublishDisabledReason ?? L["Questions.Action.SendForReview"].Value)">
-                            <MudButton Variant="Variant.Outlined"
-                                       Color="Color.Primary"
-                                       StartIcon="@(_publishing ? null : AppIcons.Send)"
-                                       Disabled="@(_publishing || PublishDisabledReason is not null)"
-                                       OnClick="SubmitForReviewAsync"
-                                       aria-describedby="@(PublishDisabledReason is null ? null : "question-publication-reason")"
-                                       id="question-send-for-review">@L["Questions.Action.SendForReview"]</MudButton>
-                        </MudTooltip>
-
-                        <MudTooltip Text="@(PublishDisabledReason ?? L["Questions.Action.Publish"].Value)">
-                            <MudButton Variant="Variant.Outlined"
-                                       Color="Color.Primary"
-                                       StartIcon="@(_publishing ? null : AppIcons.Publish)"
-                                       Disabled="@(_publishing || PublishDisabledReason is not null)"
-                                       OnClick="PublishAsync"
-                                       aria-describedby="@(PublishDisabledReason is null ? null : "question-publication-reason")"
-                                       id="question-publish">
-                                @if (_publishing)
-                                {
-                                    <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
-                                }
-                                @L["Questions.Action.Publish"]
-                            </MudButton>
-                        </MudTooltip>
-                    }
-                </div>
-
-                @* The reason is visible text, not a tooltip alone: a disabled button is not focusable. *@
-                @if (!IsPublished && !IsAnnulled && !IsInReview && PublishDisabledReason is not null)
-                {
-                    <p id="question-publication-reason" class="app-publication-reason">@PublishDisabledReason</p>
-                }
-                else if (IsPublished && HasChanges)
-                {
-                    <p id="question-annul-reason-hint" class="app-publication-reason">@L["Questions.Publication.Publish.DisabledUnsaved"]</p>
-                }
-
-                @* F-98 BR5, AC16: a draft whose publish would record a key change asks for the reason here, after
-                   the Api refused the first click; the second click sends it. *@
-                @if (!IsPublished && !IsAnnulled && !IsInReview && _publishReasonRequired)
-                {
-                    <div class="app-publication-change-reason">
-                        <AppTextField TValue="string"
-                                      Id="@PublishReasonId"
-                                      Label="@L["Questions.ChangeReason.Label"]"
-                                      Hint="@L["Questions.ChangeReason.Hint"]"
-                                      Value="_publishReason"
-                                      ValueChanged="@((string? value) => OnPublishReasonChanged(value))"
-                                      Lines="3"
-                                      MaxLength="QuestionLimits.ChangeReasonMaxLength"
-                                      Required="true"
-                                      Error="@_publishReasonError" />
-                    </div>
-                }
-            }
-        </AppSectionCard>
-    </MudPaper>
-    }
 
     @* F-105 UC6, BR7: every send, withdrawal, approval and rejection, newest first. No card while there is nothing
        to show, unless the entries failed to load: then the failure is shown, never silent. The person is stored and
@@ -1116,7 +963,6 @@ else
 
     private IReadOnlyList<AppAsideRow> AsideRows =>
     [
-        new(L["Questions.Form.Aside.Status"], _saved is null ? null : QuestionText.StatusName(L, _saved.Status)),
         new(L["Questions.Field.Subject"], _subject?.Text),
         new(L["Questions.Field.Topic"], _topic?.Text),
         new(L["Questions.Field.ContentLanguage"], LanguageDone ? QuestionText.LanguageName(_contentLanguage!) : null),
@@ -1292,6 +1138,161 @@ else
 
     // The field also shows when the Api asked for a reason the form did not expect (the stored key moved meanwhile).
     private bool ShowChangeReason => KeyChangeNeedsReason || _changeReasonForced;
+
+    // F-126, BR3: the publication block lives in the content slot of the aside, absent in transcription mode (BR8).
+    private RenderFragment? PublicationSlot => IsTranscribing ? null : PublicationBlock;
+
+    // Save never publishes and Publish never saves (F-95 BR12); both act on what is stored, so a change that is not saved
+    // blocks Publish and the preview says it shows the saved version. Publish is the screen's one amber action (F-126, BR5).
+    private RenderFragment PublicationBlock =>
+        @<text>
+            @if (_saved is null)
+            {
+                <MudText Typo="Typo.body2">@L["Questions.Publication.SaveFirst"]</MudText>
+            }
+            else
+            {
+                @if (_publicationError is not null)
+                {
+                    <AppAlert Severity="Severity.Error" Text="@_publicationError" />
+                }
+
+                <div class="app-publication-row">
+                    <AppStatusChip Text="@QuestionText.StatusName(L, _saved.Status)" Tone="QuestionText.StatusTone(_saved.Status)" />
+                    <span>@PublicationText</span>
+                </div>
+
+                @* F-101 UC3: when and why it was annulled, from the version that recorded it. *@
+                @if (IsAnnulled && _saved?.Annulment is { } annulment)
+                {
+                    <div class="app-publication-annulment">
+                        <p id="question-annulment-date">@L["Questions.Annulment.Date", annulment.AnnulledAt.ToString("g", CultureInfo.CurrentCulture)]</p>
+                        <p id="question-annulment-reason">@L["Questions.Annulment.Reason", annulment.Reason]</p>
+                    </div>
+                }
+
+                @* F-105 UC6: why the last review sent it back, while the latest entry is that rejection; the next send ends it. *@
+                @if (LatestRejection is { } rejection)
+                {
+                    <div id="question-rejected-alert">
+                        <AppAlert Severity="Severity.Info"
+                                  Text="@L["Questions.Publication.Rejected", rejection.At.ToString("g", CultureInfo.CurrentCulture), rejection.Reason ?? string.Empty]" />
+                    </div>
+                }
+
+                @* F-98 BR5, AC16: a draft whose publish would record a key change asks for the reason here, after
+                   the Api refused the first click; the second click sends it. It sits above the buttons (F-126). *@
+                @if (!IsPublished && !IsAnnulled && !IsInReview && _publishReasonRequired)
+                {
+                    <AppTextField TValue="string"
+                                  Id="@PublishReasonId"
+                                  Label="@L["Questions.ChangeReason.Label"]"
+                                  Hint="@L["Questions.ChangeReason.Hint"]"
+                                  Value="_publishReason"
+                                  ValueChanged="@((string? value) => OnPublishReasonChanged(value))"
+                                  Lines="3"
+                                  MaxLength="QuestionLimits.ChangeReasonMaxLength"
+                                  Required="true"
+                                  Error="@_publishReasonError" />
+                }
+
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@AppIcons.View"
+                               Disabled="_publishing"
+                               OnClick="PreviewAsync"
+                               id="@PreviewButtonId">@L["Questions.Action.Preview"]</MudButton>
+
+                    @if (IsAnnulled)
+                    {
+                        @* F-101 BR6: the only way out of the frozen state; the reason is asked in a dialog. *@
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@AppIcons.Retry"
+                                   OnClick="ReinstateAsync"
+                                   id="question-reinstate">@L["Questions.Action.Reinstate"]</MudButton>
+                    }
+                    else if (IsInReview)
+                    {
+                        @* F-105 BR4: the way out for a curator; it asks no reason and no confirmation (it is reversible,
+                           as Unpublish is). *@
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@(_publishing ? null : AppIcons.Withdraw)"
+                                   Disabled="_publishing"
+                                   OnClick="WithdrawAsync"
+                                   id="question-withdraw">
+                            @if (_publishing)
+                            {
+                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                            }
+                            @L["Questions.Action.Withdraw"]
+                        </MudButton>
+                    }
+                    else if (IsPublished)
+                    {
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@(_publishing ? null : AppIcons.Unpublish)"
+                                   Disabled="_publishing"
+                                   OnClick="UnpublishAsync"
+                                   id="question-unpublish">
+                            @if (_publishing)
+                            {
+                                <MudProgressCircular Indeterminate="true" Size="Size.Small" Class="mr-2" aria-hidden="true" />
+                            }
+                            @L["Questions.Action.Unpublish"]
+                        </MudButton>
+
+                        @* F-101 UC1: annulling acts on what is stored, so unsaved changes block it, with the reason said below. *@
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Error"
+                                   StartIcon="@AppIcons.Archive"
+                                   Disabled="@(_publishing || HasChanges)"
+                                   OnClick="AnnulAsync"
+                                   aria-describedby="@(HasChanges ? "question-annul-reason-hint" : null)"
+                                   id="question-annul">@L["Questions.Action.Annul"]</MudButton>
+                    }
+                    else
+                    {
+                        @* F-105 UC1: a second way to publish, through a reviewer. It is disabled for the same reasons as
+                           Publish, in the same order; the one visible reason below describes both buttons. *@
+                        <MudTooltip Text="@(PublishDisabledReason ?? L["Questions.Action.SendForReview"].Value)">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@(_publishing ? null : AppIcons.Send)"
+                                       Disabled="@(_publishing || PublishDisabledReason is not null)"
+                                       OnClick="SubmitForReviewAsync"
+                                       aria-describedby="@(PublishDisabledReason is null ? null : "question-publication-reason")"
+                                       id="question-send-for-review">@L["Questions.Action.SendForReview"]</MudButton>
+                        </MudTooltip>
+
+                        @* F-126, BR5: the one amber action of the screen, the compact key (the aside is narrower than 360px).
+                           The arrow rests pointing down and turns up while the key is pressed. *@
+                        <MudTooltip Text="@(PublishDisabledReason ?? L["Questions.Action.Publish"].Value)">
+                            <AppActionButton Id="question-publish"
+                                             Label="@L["Questions.Action.Publish"]"
+                                             Compact="true"
+                                             Icon="@AppIcons.Publish"
+                                             IconRestRotation="180"
+                                             Busy="_publishing"
+                                             Disabled="@(PublishDisabledReason is not null)"
+                                             DescribedBy="@(PublishDisabledReason is null ? null : "question-publication-reason")"
+                                             OnClick="PublishAsync" />
+                        </MudTooltip>
+                    }
+
+                @* The reason is visible text, not a tooltip alone: a disabled button is not focusable. *@
+                @if (!IsPublished && !IsAnnulled && !IsInReview && PublishDisabledReason is not null)
+                {
+                    <p id="question-publication-reason" class="app-publication-reason">@PublishDisabledReason</p>
+                }
+                else if (IsPublished && HasChanges)
+                {
+                    <p id="question-annul-reason-hint" class="app-publication-reason">@L["Questions.Publication.Publish.DisabledUnsaved"]</p>
+                }
+            }
+        </text>;
 
     private RenderFragment ChangeReasonField =>
         @<div class="app-change-reason">

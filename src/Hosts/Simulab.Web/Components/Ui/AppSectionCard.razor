@@ -1,9 +1,17 @@
 @* A titled block of a form or a page (F-43, BR1). The only place in content where the accent colour appears
-   besides a chip, a field's leading icon and the focus ring (BR3). Pages never draw this by hand. *@
+   besides a chip, a field's leading icon and the focus ring (BR3). Pages never draw this by hand.
+   With a Number (F-126) the head shows the number tag in place of the icon. *@
 
 <section class="@($"app-section-card {Class}")" aria-labelledby="@TitleId">
     <header class="app-section-card-head">
-        <MudIcon Icon="@Icon" Size="Size.Small" Color="Color.Primary" aria-hidden="true" Class="app-section-card-icon" />
+        @if (Number is { } number)
+        {
+            <span class="app-section-card-number" aria-hidden="true">@number</span>
+        }
+        else
+        {
+            <MudIcon Icon="@Icon" Size="Size.Small" Color="Color.Primary" aria-hidden="true" Class="app-section-card-icon" />
+        }
         <div class="app-section-card-heading">
             <h2 class="app-section-card-title" id="@TitleId">@Title</h2>
             @if (!string.IsNullOrWhiteSpace(Subtitle))
@@ -34,7 +42,7 @@
 
     [Parameter] public string? Class { get; set; }
 
-    // F-126 skeleton: the parameter exists so the locked tests compile; the screen pass draws it.
+    /// <summary>F-126, BR1: the step number, drawn in place of the icon (decorative; the heading keeps its text and id).</summary>
     [Parameter] public int? Number { get; set; }
 
     private string TitleId => $"{Id}-title";

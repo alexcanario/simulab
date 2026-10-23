@@ -588,6 +588,10 @@
                         Icon="@AppIcons.IssuingAuthorities" Subtitle="@L["Gallery.SectionCard.Subtitle"]">
             <MudText Typo="Typo.body2">@L["Gallery.SectionCard.Body"]</MudText>
         </AppSectionCard>
+        @* F-126, BR1 and BR2: with a Number the head shows the number tag in place of the icon (decorative). *@
+        <AppSectionCard Id="gallery-card-numbered" Title="@L["Gallery.SectionCard.Title"]" Icon="@AppIcons.Exams" Number="1">
+            <MudText Typo="Typo.body2">@L["Gallery.SectionCard.Body"]</MudText>
+        </AppSectionCard>
     </div>
 </section>
 
@@ -682,7 +686,13 @@
         <AppFormAside Title="@L["Common.Summary.Title"]" EmptyText="@L["Common.Summary.NotFilled"]"
                       Rows="@AsideRows" ChecklistTitle="@L["Common.Summary.Checklist"]"
                       DoneText="@L["Common.Summary.Done"]" PendingText="@L["Common.Summary.Pending"]"
-                      Checklist="@AsideChecklist" />
+                      Checklist="@AsideChecklist" ContentId="gallery-aside-content"
+                      ContentTitle="@L["Gallery.FormAside.Content.Title"]"
+                      ContentSubtitle="@L["Gallery.FormAside.Content.Subtitle"]">
+            @* F-126, BR3: the content slot holds a block of the page, actions included. *@
+                <MudButton Variant="Variant.Outlined">@L["Gallery.Buttons.Filter"]</MudButton>
+                <AppActionButton Label="@L["Gallery.Buttons.Action"]" Compact="true" Icon="@AppIcons.Publish" IconRestRotation="180" />
+        </AppFormAside>
     </div>
 </section>
 
@@ -883,8 +893,15 @@
     @* F-148, BR7 and BR8: the action is the shortcut, one per screen; no routed page uses it yet. *@
     <p class="gallery-state-caption">@L["Gallery.Buttons.ActionTitle"]</p>
     <div class="gallery-button-row">
-        <AppActionButton Label="@L["Gallery.Buttons.Action"]" />
-        <AppActionButton Label="@L["Gallery.Buttons.Action"]" Compact="true" />
+        <AppActionButton Label="@L["Gallery.Buttons.Action"]" Icon="@AppIcons.Restart" />
+        @* F-126, BR6: the icon is the page's choice (here an arrow that rests turned down), the button can carry an id. *@
+        <AppActionButton Id="gallery-action-publish" Label="@L["Gallery.Buttons.Action"]" Compact="true"
+                         Icon="@AppIcons.Publish" IconRestRotation="180" />
+    </div>
+    @* F-126, BR6: a busy key shows progress in place of the icon and is disabled. *@
+    <p class="gallery-state-caption">@L["Gallery.Buttons.ActionBusy"]</p>
+    <div class="gallery-button-row">
+        <AppActionButton Label="@L["Gallery.Buttons.Action"]" Compact="true" Icon="@AppIcons.Publish" Busy="true" />
     </div>
     <p class="gallery-state-caption">@L["Gallery.Buttons.Small"]</p>
     <div class="gallery-button-row">
@@ -903,7 +920,7 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="true">@L["Common.Save"]</MudButton>
         <MudButton Variant="Variant.Outlined" Disabled="true">@L["Gallery.Buttons.Filter"]</MudButton>
         <MudButton Variant="Variant.Text" Color="Color.Primary" Disabled="true">@L["Common.Cancel"]</MudButton>
-        <AppActionButton Label="@L["Gallery.Buttons.Action"]" Disabled="true" />
+        <AppActionButton Label="@L["Gallery.Buttons.Action"]" Disabled="true" Icon="@AppIcons.Restart" />
     </div>
 </section>
 

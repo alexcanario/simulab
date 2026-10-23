@@ -13,7 +13,7 @@ public sealed partial class ActionColourScopeTests
     public void RoutedPages_PutNoTertiaryColourOnAButtonAndNoActionShortcut()
     {
         var offenders = RazorFiles()
-            .Where(file => !IsKitOrGallery(file))
+            .Where(file => !IsKitOrGallery(file) && !IsAllowedPage(file))
             .SelectMany(file => TertiaryButtons(File.ReadAllText(file)).Select(tag => $"{Path.GetFileName(file)}: {tag}")
                 .Concat(ActionShortcuts(File.ReadAllText(file)).Select(tag => $"{Path.GetFileName(file)}: {tag}")))
             .ToList();
@@ -43,6 +43,12 @@ public sealed partial class ActionColourScopeTests
 
         ActionShortcuts(razor).Should().HaveCount(2);
     }
+
+    /// <summary>F-126 BR11: the pages that picked their amber action; each screen item (F-127 to F-134) adds its own here.</summary>
+    private static readonly string[] AllowedPages = ["/QuestionBank/QuestionForm.razor"];
+
+    private static bool IsAllowedPage(string file) =>
+        AllowedPages.Any(page => file.Replace('\\', '/').EndsWith(page, StringComparison.Ordinal));
 
     private static bool IsKitOrGallery(string file)
     {

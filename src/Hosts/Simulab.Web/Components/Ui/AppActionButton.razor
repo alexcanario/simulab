@@ -1,7 +1,9 @@
 @* The action of the brand (F-148, BR8): Ctrl + Alt + the amber key, or the amber key alone. One screen has one at most;
    no routed page uses it until its screen item picks it (BR7). Ctrl, Alt and the plus signs are brand marks like the
    symbol: decorative and not translated. The look comes from app.css (.app-action). *@
-<span class="app-action @(Compact ? "app-action-compact" : string.Empty) @(Disabled ? "app-action-disabled" : string.Empty)">
+@* F-126, BR6: the icon is the page's choice, the button can carry an id and the id of the visible reason it points at, and
+   a busy key shows progress in place of the icon and is disabled (it shares the sunken look of a disabled one). *@
+<span class="app-action @(Compact ? "app-action-compact" : string.Empty) @(IsDisabled ? "app-action-disabled" : string.Empty)">
     @if (!Compact)
     {
         <span class="app-action-modkey app-action-ctrl" aria-hidden="true">Ctrl</span>
@@ -9,8 +11,17 @@
         <span class="app-action-modkey app-action-alt" aria-hidden="true">Alt</span>
         <span class="app-action-plus" aria-hidden="true">+</span>
     }
-    <button type="button" class="app-action-key" disabled="@Disabled" @onclick="OnClick">
-        <span class="app-action-icon" aria-hidden="true"><MudIcon Icon="@AppIcons.Restart" Size="Size.Small" /></span>
+    <button type="button" class="app-action-key" id="@Id" disabled="@IsDisabled" aria-describedby="@DescribedBy" @onclick="OnClick">
+        <span class="@IconClass" style="@RestStyle" aria-hidden="true">
+            @if (Busy)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" />
+            }
+            else if (!string.IsNullOrEmpty(Icon))
+            {
+                <MudIcon Icon="@Icon" Size="Size.Small" />
+            }
+        </span>
         <span>@Label</span>
     </button>
 </span>
@@ -26,16 +37,24 @@
 
     [Parameter] public EventCallback OnClick { get; set; }
 
-    // F-126 skeleton: the parameters exist so the locked tests compile; the screen pass gives them behaviour.
     /// <summary>An <see cref="AppIcons"/> constant: the action's meaning decides it, so the page must choose it.</summary>
-    [Parameter] public string? Icon { get; set; }
+    [Parameter, EditorRequired] public string Icon { get; set; } = string.Empty;
 
+    /// <summary>The id of the <c>button</c> itself (not of the wrapper).</summary>
     [Parameter] public string? Id { get; set; }
 
+    /// <summary>A call is running: progress takes the icon's place and the key is disabled.</summary>
     [Parameter] public bool Busy { get; set; }
 
+    /// <summary>The id of the visible text that says why the key is disabled (<c>aria-describedby</c>).</summary>
     [Parameter] public string? DescribedBy { get; set; }
 
     /// <summary>Degrees the icon rests turned; pressed, it turns half a circle more.</summary>
     [Parameter] public int IconRestRotation { get; set; }
+
+    private bool IsDisabled => Disabled || Busy;
+
+    private string IconClass => IconRestRotation == 0 ? "app-action-icon" : "app-action-icon app-action-icon-rested";
+
+    private string? RestStyle => IconRestRotation == 0 ? null : $"--app-action-rest: {IconRestRotation}deg";
 }
