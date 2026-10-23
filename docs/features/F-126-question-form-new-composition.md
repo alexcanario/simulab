@@ -331,32 +331,32 @@ Database__Name=simulab_f126 dotnet run --project src/Hosts/Simulab.AppHost
 ```
 
    Expected: a line `Dashboard: https://localhost:<port>/login?t=<token>`; https://localhost:7125 answers with the home page.
-2. The numbered frame of a new question. Sign in as the Curator. In the sidebar (the left menu) click Content, then Questions, then Add (top right).
-   - [ ] 2.1 The form card shows six sections, each with a small blue square holding its number: 1 Classification, 2 Origin, 3 Statement, 4 Base text, 5 Options, 6 Explanation.
-   - [ ] 2.2 Beside the form is the Summary aside (the box on the right with the facts of the question and the "Before publishing" list). Its last block is "Publication" with the text "Save the question first to preview or publish it." and no button.
-   - [ ] 2.3 Under "Question type" choose True/false, then Matching, then Fill in the blanks: the sections stay numbered 1 to 6 and the key section is always number 5. Go back to Single choice.
-   - [ ] 2.4 There is no amber button on the page; Save (bottom right of the form card) is the only navy button, and no "Status" row is in the Summary.
-3. Save a draft and read the Publication block. Pick a subject and a topic, write a statement and two options without marking a correct one, then click Save.
-   - [ ] 3.1 The Publication block now shows a grey "Draft" chip, "Draft. Not available outside the back office.", and one button per line: Preview as a student, Send for review, Publish.
-   - [ ] 3.2 Publish is the amber key (a darker amber edge under it, an arrow pointing down) and it is greyed and disabled. Under it the text "Complete the checklist before publishing." is visible; Send for review is disabled for the same reason.
-   - [ ] 3.3 Change the statement without saving: the text under Publish becomes "Save your changes first." Click Save to go on.
-4. Publish. Mark the first option as correct and click Save, then click the amber Publish key.
-   - [ ] 4.1 Publish is now amber and enabled. Hold the mouse button down on it: the key sinks and its arrow turns to point up.
-   - [ ] 4.2 After the click: the snackbar (the message that appears at the bottom right) says "Question published."; the chip turns green "Published"; the block shows Preview as a student, Unpublish and Annul question; no amber button is left on the page.
-5. The other publication actions, from the aside.
-   - [ ] 5.1 Click Annul question: the dialog asks for a reason and has no amber button; cancel it. Click Unpublish: the question is a draft again and Publish is amber again.
-   - [ ] 5.2 Click Send for review: the chip is yellow "In review", the form is read-only with no Save, and the block shows Preview as a student and Withdraw from review. Click Withdraw from review to go back to a draft.
-   - [ ] 5.3 Publish again, click Annul question, write a reason and confirm: the chip is red "Annulled", the date and the reason show in the block, and the block has Preview as a student and Reinstate question. Click Reinstate question and confirm.
-6. Themes and language.
-   - [ ] 6.1 Click the theme switch (the moon at the top right): the number squares, the chip and the amber key stay readable; the disabled amber key (from a draft with unsaved changes) is grey with no edge on the page colour. Switch back to light.
-   - [ ] 6.2 In the language switch (the globe) choose Português (Brasil): the block reads "Publicação" and the amber key "Publicar". Switch back to English.
+2. The numbered frame of a new question. Sign in as the Curator. In the sidebar (the left menu) click Content, then Questions, then Add (top right of the list page). The page "Add question" opens.
+   - [ ] 2.1 Where: the big white card on the left, under the title "Add question" (the form card). It shows six sections stacked from top to bottom, each with a small blue square holding its number: 1 Classification, 2 Origin, 3 Statement, 4 Base text, 5 Options, 6 Explanation.
+   - [ ] 2.2 Where: the box on the right of the form card (the Summary aside: the facts of the question and the "Before publishing" list). Scroll to the bottom of that box: its last block is "Publication", with the text "Save the question first to preview or publish it." and no button.
+   - [ ] 2.3 Where: in section 1 (Classification), the "Question type" cards at the top. Choose True/false, then Matching, then Fill in the blanks: the section that holds the answer key (Answer key, Matches, Blanks) is always number 5. Go back to Single choice.
+   - [ ] 2.4 Where: the whole page. No button is amber; Save, at the bottom right of the form card (next to the text button Cancel), is the only navy button; the Summary aside has no "Status" row.
+3. Save a draft and read the Publication block. In section 1 pick a subject and a topic, in section 3 write a statement, in section 5 add two options without marking a correct one, then click Save (bottom right of the form card).
+   - [ ] 3.1 Where: the "Publication" block at the bottom of the Summary aside. It shows a grey "Draft" chip, "Draft. Not available outside the back office.", and one button per line: Preview as a student, Send for review, Publish.
+   - [ ] 3.2 Where: the last button of the block, Publish. It is the amber key (a darker amber edge under it, an arrow pointing down) and it is greyed and disabled. Right under it the text "Complete the checklist before publishing." is visible; Send for review, the button above, is disabled for the same reason.
+   - [ ] 3.3 Where: the statement in section 3 and the text under Publish. Change the statement without saving: the text under Publish becomes "Save your changes first." Click Save to go on.
+4. Publish. In section 5 mark the first option as correct and click Save, then click the amber Publish key in the Publication block.
+   - [ ] 4.1 Where: the Publish key, last button of the Publication block. It is now amber and enabled. Hold the mouse button down on it: the key sinks and its arrow turns to point up.
+   - [ ] 4.2 Where: the bottom right of the window and the Publication block. After the click the snackbar (the message that appears at the bottom right) says "Question published."; the chip turns green "Published"; the block shows Preview as a student, Unpublish and Annul question; no amber button is left on the page.
+5. The other publication actions, all in the Publication block at the bottom of the Summary aside.
+   - [ ] 5.1 Where: the buttons Annul question and Unpublish of a published question. Click Annul question: the dialog asks for a reason and has no amber button; cancel it. Click Unpublish: the question is a draft again and Publish is amber again.
+   - [ ] 5.2 Where: the button Send for review (second button of a draft) and, afterwards, the page top and the block. Click Send for review: the chip is yellow "In review", a notice at the top of the form card says it cannot be edited, the form is read-only with no Save, and the block shows Preview as a student and Withdraw from review. Click Withdraw from review to go back to a draft.
+   - [ ] 5.3 Where: Publish, then Annul question in the Publication block. Publish again, click Annul question, write a reason and confirm: the chip is red "Annulled", the date and the reason show in the block, and the block has Preview as a student and Reinstate question. Click Reinstate question and confirm.
+6. Themes and language, on the same question form.
+   - [ ] 6.1 Where: the theme switch (the moon, top right of the app bar, the bar at the top of the page). Click it: the number squares, the chip and the amber key stay readable; the disabled amber key (change the statement without saving, look at Publish in the block) is grey with no edge on the page colour. Switch back to light.
+   - [ ] 6.2 Where: the language switch (the globe, top right of the app bar). Choose Português (Brasil): the block heading reads "Publicação" and the amber key "Publicar". Switch back to English.
 7. Narrow width and keyboard.
-   - [ ] 7.1 Make the window 1280px wide or narrower (or press F12, Ctrl+Shift+M and pick 1024): the Summary aside moves under the form card and above the history cards; its buttons sit in one wrapping row at their natural width.
-   - [ ] 7.2 Back at desktop width, with a tall draft that has a rejection or a long reason, the aside stays in view while you scroll the form and scrolls inside itself when it is taller than the window.
-   - [ ] 7.3 Press Tab from the first field: you go through the form fields, Cancel, Save, then the aside buttons (Preview, Send for review, Publish), then the history cards. Every control shows a blue focus ring.
+   - [ ] 7.1 Where: the browser window itself. Make it 1280px wide or narrower (or press F12, Ctrl+Shift+M and pick 1024): the Summary aside moves under the form card and above the history cards (Review history, History); its buttons sit in one wrapping row at their natural width.
+   - [ ] 7.2 Where: the Summary aside on the right, back at desktop width. With a tall draft (a rejection or a long reason in the block), the aside stays in view while you scroll the form and scrolls inside itself when it is taller than the window.
+   - [ ] 7.3 Where: the whole page, from the first field with the Tab key. You go through the form fields, Cancel, Save, then the aside buttons (Preview, Send for review, Publish), then the history cards below. Every control shows a blue focus ring.
 8. The UI gallery. In the sidebar, under Development, click UI kit; the page "UI kit gallery" opens.
-   - [ ] 8.1 Under "Section card" one card shows a number square in place of its icon; under "Form aside" the aside has a block with a heading, a subtitle and two buttons.
-   - [ ] 8.2 Under "Buttons", "Action": the compact amber key with an id and the arrow pointing down, a busy one with a spinner and a disabled one.
+   - [ ] 8.1 Where: the gallery sections "Section card" and "Form aside" (scroll down the page, or use your browser's Find with the section name). Under "Section card" one card shows a number square in place of its icon; under "Form aside" the aside has a block with a heading, a subtitle and two buttons.
+   - [ ] 8.2 Where: the gallery section "Buttons", the lines under "Action". The compact amber key with an id and the arrow pointing down, a busy one with a spinner and a disabled one.
 
 ### pt-BR
 Necessário para validar: você, na tela, nos dois temas, em largura de desktop e em 1280px ou menos; Docker Desktop em execução para o app host; uma conta `Curator` e uma conta `Admin` (use a de Curator nos passos; a de Admin só para confirmar que o passo 5 funciona igual). O Docker Desktop estava em execução durante este build; as contas são suas.
@@ -374,32 +374,32 @@ Database__Name=simulab_f126 dotnet run --project src/Hosts/Simulab.AppHost
 ```
 
    Esperado: uma linha `Dashboard: https://localhost:<porta>/login?t=<token>`; https://localhost:7125 responde com a página inicial.
-2. A moldura numerada de uma questão nova. Entre como Curator. No menu lateral (o menu à esquerda) clique em Conteúdo, depois em Questões e em Adicionar (canto superior direito).
-   - [ ] 2.1 O cartão do formulário mostra seis seções, cada uma com um quadradinho azul com o número: 1 Classificação, 2 Origem, 3 Enunciado, 4 Texto-base, 5 Alternativas, 6 Explicação.
-   - [ ] 2.2 Ao lado do formulário está a coluna Resumo (a caixa à direita com os dados da questão e a lista "Antes de publicar"). O último bloco dela é "Publicação", com o texto "Salve a questão primeiro para visualizar ou publicar." e nenhum botão.
-   - [ ] 2.3 Em "Tipo de questão" escolha Certo/errado, depois Associação, depois Preencher lacunas: as seções continuam numeradas de 1 a 6 e a seção do gabarito é sempre a 5. Volte para Escolha única.
-   - [ ] 2.4 Não há botão âmbar na página; Salvar (canto inferior direito do cartão do formulário) é o único botão azul-marinho, e não há linha "Situação" no Resumo.
-3. Salve um rascunho e leia o bloco Publicação. Escolha uma disciplina e um tópico, escreva um enunciado e duas alternativas sem marcar a correta e clique em Salvar.
-   - [ ] 3.1 O bloco Publicação agora mostra uma etiqueta cinza "Rascunho", "Rascunho. Não aparece fora do back office." e um botão por linha: Visualizar como aluno, Enviar para revisão, Publicar.
-   - [ ] 3.2 Publicar é a tecla âmbar (com uma borda âmbar mais escura embaixo e uma seta apontando para baixo) e está cinza e desabilitado. Embaixo dele aparece o texto "Complete a lista "Antes de publicar" primeiro."; Enviar para revisão está desabilitado pelo mesmo motivo.
-   - [ ] 3.3 Altere o enunciado sem salvar: o texto embaixo de Publicar passa a ser "Salve suas alterações primeiro." Clique em Salvar para continuar.
-4. Publique. Marque a primeira alternativa como correta, clique em Salvar e depois na tecla âmbar Publicar.
-   - [ ] 4.1 Publicar agora está âmbar e habilitado. Segure o botão do mouse sobre ele: a tecla afunda e a seta gira para apontar para cima.
-   - [ ] 4.2 Depois do clique: a mensagem no canto inferior direito (o snackbar) diz "Questão publicada."; a etiqueta fica verde "Publicada"; o bloco mostra Visualizar como aluno, Despublicar e Anular questão; não sobra nenhum botão âmbar na página.
-5. As outras ações de publicação, a partir da coluna.
-   - [ ] 5.1 Clique em Anular questão: a janela pede um motivo e não tem botão âmbar; cancele. Clique em Despublicar: a questão volta a rascunho e Publicar volta a ser âmbar.
-   - [ ] 5.2 Clique em Enviar para revisão: a etiqueta fica amarela "Em revisão", o formulário fica só para leitura, sem Salvar, e o bloco mostra Visualizar como aluno e Retirar da revisão. Clique em Retirar da revisão para voltar a rascunho.
-   - [ ] 5.3 Publique de novo, clique em Anular questão, escreva um motivo e confirme: a etiqueta fica vermelha "Anulada", a data e o motivo aparecem no bloco, e o bloco tem Visualizar como aluno e Reintegrar questão. Clique em Reintegrar questão e confirme.
-6. Temas e idioma.
-   - [ ] 6.1 Clique no botão de tema (a lua no canto superior direito): os quadradinhos numerados, a etiqueta e a tecla âmbar continuam legíveis; a tecla âmbar desabilitada (um rascunho com alterações não salvas) fica cinza, sem borda, sobre a cor da página. Volte para o claro.
-   - [ ] 6.2 No botão de idioma (o globo) escolha Português (Brasil): o bloco aparece como "Publicação" e a tecla âmbar como "Publicar". Volte para o inglês.
+2. A moldura numerada de uma questão nova. Entre como Curator. No menu lateral (o menu à esquerda) clique em Conteúdo, depois em Questões e em Adicionar (canto superior direito da lista). A página "Adicionar questão" abre.
+   - [ ] 2.1 Onde: o cartão branco grande à esquerda, abaixo do título "Adicionar questão" (o cartão do formulário). Ele mostra seis seções empilhadas de cima para baixo, cada uma com um quadradinho azul com o número: 1 Classificação, 2 Origem, 3 Enunciado, 4 Texto-base, 5 Alternativas, 6 Explicação.
+   - [ ] 2.2 Onde: a caixa à direita do cartão do formulário (a coluna Resumo: os dados da questão e a lista "Antes de publicar"). Role até o fim dessa caixa: o último bloco dela é "Publicação", com o texto "Salve a questão primeiro para visualizar ou publicar." e nenhum botão.
+   - [ ] 2.3 Onde: na seção 1 (Classificação), os cartões "Tipo de questão" no alto. Escolha Certo/errado, depois Associação, depois Preencher lacunas: a seção que guarda o gabarito (Gabarito, Associações, Lacunas) é sempre a 5. Volte para Escolha única.
+   - [ ] 2.4 Onde: a página inteira. Nenhum botão é âmbar; Salvar, no canto inferior direito do cartão do formulário (ao lado do botão de texto Cancelar), é o único botão azul-marinho; a coluna Resumo não tem linha "Situação".
+3. Salve um rascunho e leia o bloco Publicação. Na seção 1 escolha uma disciplina e um tópico, na seção 3 escreva um enunciado, na seção 5 acrescente duas alternativas sem marcar a correta e clique em Salvar (canto inferior direito do cartão do formulário).
+   - [ ] 3.1 Onde: o bloco "Publicação" no fim da coluna Resumo. Ele mostra uma etiqueta cinza "Rascunho", "Rascunho. Não aparece fora do back office." e um botão por linha: Visualizar como aluno, Enviar para revisão, Publicar.
+   - [ ] 3.2 Onde: o último botão do bloco, Publicar. É a tecla âmbar (com uma borda âmbar mais escura embaixo e uma seta apontando para baixo) e está cinza e desabilitado. Logo embaixo dele aparece o texto "Complete a lista "Antes de publicar" primeiro."; Enviar para revisão, o botão acima, está desabilitado pelo mesmo motivo.
+   - [ ] 3.3 Onde: o enunciado na seção 3 e o texto embaixo de Publicar. Altere o enunciado sem salvar: o texto embaixo de Publicar passa a ser "Salve suas alterações primeiro." Clique em Salvar para continuar.
+4. Publique. Na seção 5 marque a primeira alternativa como correta, clique em Salvar e depois na tecla âmbar Publicar do bloco Publicação.
+   - [ ] 4.1 Onde: a tecla Publicar, último botão do bloco Publicação. Ela agora está âmbar e habilitada. Segure o botão do mouse sobre ela: a tecla afunda e a seta gira para apontar para cima.
+   - [ ] 4.2 Onde: o canto inferior direito da janela e o bloco Publicação. Depois do clique a mensagem no canto inferior direito (o snackbar) diz "Questão publicada."; a etiqueta fica verde "Publicada"; o bloco mostra Visualizar como aluno, Despublicar e Anular questão; não sobra nenhum botão âmbar na página.
+5. As outras ações de publicação, todas no bloco Publicação, no fim da coluna Resumo.
+   - [ ] 5.1 Onde: os botões Anular questão e Despublicar de uma questão publicada. Clique em Anular questão: a janela pede um motivo e não tem botão âmbar; cancele. Clique em Despublicar: a questão volta a rascunho e Publicar volta a ser âmbar.
+   - [ ] 5.2 Onde: o botão Enviar para revisão (segundo botão de um rascunho) e, depois, o alto da página e o bloco. Clique em Enviar para revisão: a etiqueta fica amarela "Em revisão", um aviso no alto do cartão do formulário diz que ela não pode ser editada, o formulário fica só para leitura, sem Salvar, e o bloco mostra Visualizar como aluno e Retirar da revisão. Clique em Retirar da revisão para voltar a rascunho.
+   - [ ] 5.3 Onde: Publicar e depois Anular questão, no bloco Publicação. Publique de novo, clique em Anular questão, escreva um motivo e confirme: a etiqueta fica vermelha "Anulada", a data e o motivo aparecem no bloco, e o bloco tem Visualizar como aluno e Reintegrar questão. Clique em Reintegrar questão e confirme.
+6. Temas e idioma, no mesmo formulário de questão.
+   - [ ] 6.1 Onde: o botão de tema (a lua, canto superior direito da barra superior, a faixa no alto da página). Clique nele: os quadradinhos numerados, a etiqueta e a tecla âmbar continuam legíveis; a tecla âmbar desabilitada (altere o enunciado sem salvar e olhe Publicar no bloco) fica cinza, sem borda, sobre a cor da página. Volte para o claro.
+   - [ ] 6.2 Onde: o botão de idioma (o globo, canto superior direito da barra superior). Escolha Português (Brasil): o título do bloco aparece como "Publicação" e a tecla âmbar como "Publicar". Volte para o inglês.
 7. Largura estreita e teclado.
-   - [ ] 7.1 Deixe a janela com 1280px de largura ou menos (ou pressione F12, Ctrl+Shift+M e escolha 1024): a coluna Resumo vai para baixo do cartão do formulário e acima dos cartões de histórico; os botões dela ficam em uma linha que quebra, na largura natural.
-   - [ ] 7.2 De volta à largura de desktop, com um rascunho alto (uma rejeição ou um motivo longo), a coluna continua à vista enquanto você rola o formulário e rola dentro dela quando é mais alta que a janela.
-   - [ ] 7.3 Pressione Tab a partir do primeiro campo: você passa pelos campos do formulário, Cancelar, Salvar, depois pelos botões da coluna (Visualizar, Enviar para revisão, Publicar) e por fim pelos cartões de histórico. Cada controle mostra um anel de foco azul.
+   - [ ] 7.1 Onde: a própria janela do navegador. Deixe-a com 1280px de largura ou menos (ou pressione F12, Ctrl+Shift+M e escolha 1024): a coluna Resumo vai para baixo do cartão do formulário e acima dos cartões de histórico (Histórico de revisão, Histórico); os botões dela ficam em uma linha que quebra, na largura natural.
+   - [ ] 7.2 Onde: a coluna Resumo à direita, de volta à largura de desktop. Com um rascunho alto (uma rejeição ou um motivo longo no bloco), a coluna continua à vista enquanto você rola o formulário e rola dentro dela quando é mais alta que a janela.
+   - [ ] 7.3 Onde: a página inteira, a partir do primeiro campo, com a tecla Tab. Você passa pelos campos do formulário, Cancelar, Salvar, depois pelos botões da coluna (Visualizar, Enviar para revisão, Publicar) e por fim pelos cartões de histórico abaixo. Cada controle mostra um anel de foco azul.
 8. A galeria do kit. No menu lateral, em Desenvolvimento, clique em Kit de interface; a página "UI kit gallery" abre.
-   - [ ] 8.1 Em "Section card" um cartão mostra um quadradinho numerado no lugar do ícone; em "Form aside" a coluna tem um bloco com título, subtítulo e dois botões.
-   - [ ] 8.2 Em "Buttons", "Action": a tecla âmbar compacta com id e a seta para baixo, uma ocupada com um indicador de progresso e uma desabilitada.
+   - [ ] 8.1 Onde: as seções "Section card" e "Form aside" da galeria (role a página ou use a busca do navegador com o nome da seção). Em "Section card" um cartão mostra um quadradinho numerado no lugar do ícone; em "Form aside" a coluna tem um bloco com título, subtítulo e dois botões.
+   - [ ] 8.2 Onde: a seção "Buttons" da galeria, as linhas sob "Action". A tecla âmbar compacta com id e a seta para baixo, uma ocupada com um indicador de progresso e uma desabilitada.
 
 ## Events
 
