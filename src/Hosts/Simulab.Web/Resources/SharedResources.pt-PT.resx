@@ -101,7 +101,9 @@
   <data name="Gallery.Section.ErrorSummary" xml:space="preserve"><value>Resumo de erros</value></data>
   <data name="Gallery.ErrorSummary.Hint" xml:space="preserve"><value>Tudo o que uma gravação recusou, de uma vez, no topo do cartão. Cada linha leva o foco ao seu campo.</value></data>
   <data name="Gallery.Section.FormAside" xml:space="preserve"><value>Coluna-resumo</value></data>
-  <data name="Gallery.FormAside.Hint" xml:space="preserve"><value>Só leitura: o que está preenchido e o que falta. Não tem botão.</value></data>
+  <data name="Gallery.FormAside.Hint" xml:space="preserve"><value>O que está preenchido e o que falta. O espaço de conteúdo, abaixo da lista, guarda um bloco da página com as suas ações.</value></data>
+  <data name="Gallery.FormAside.Content.Title" xml:space="preserve"><value>Publicação</value></data>
+  <data name="Gallery.FormAside.Content.Subtitle" xml:space="preserve"><value>Um bloco da página que guarda ações.</value></data>
   <data name="Gallery.Section.ItemRows" xml:space="preserve"><value>Linhas de item</value></data>
   <data name="Gallery.ItemRows.Hint" xml:space="preserve"><value>Itens filhos do registo em edição, com ações próprias. O estado vazio vem abaixo.</value></data>
   <data name="Gallery.ItemRows.Empty" xml:space="preserve"><value>Ainda não há edições.</value></data>
@@ -1036,6 +1038,7 @@
   <data name="Gallery.Section.Buttons" xml:space="preserve"><value>Botões</value></data>
   <data name="Gallery.Buttons.Hint" xml:space="preserve"><value>As quatro variantes da marca: primária, secundária, texto e a ação âmbar, uma por ecrã. A página define apenas Variant e Color; o aspeto vem do kit.</value></data>
   <data name="Gallery.Buttons.ActionTitle" xml:space="preserve"><value>Ação (uma por ecrã): o atalho e a variante compacta, para áreas com menos de 360px e barras de ferramentas.</value></data>
+  <data name="Gallery.Buttons.ActionBusy" xml:space="preserve"><value>Ação enquanto a chamada decorre: progresso no lugar do ícone, desativada.</value></data>
   <data name="Gallery.Buttons.Variants" xml:space="preserve"><value>Variantes</value></data>
   <data name="Gallery.Buttons.Small" xml:space="preserve"><value>Tamanho pequeno</value></data>
   <data name="Gallery.Buttons.States" xml:space="preserve"><value>Estados</value></data>

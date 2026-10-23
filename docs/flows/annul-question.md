@@ -1,7 +1,7 @@
 ---
 title: Annul and reinstate a question
 summary: How a curator annuls a published question and reinstates it, what the frozen state refuses, and the versions each step records.
-items: [F-101]
+items: [F-101, F-126]
 ---
 # Annul and reinstate a question
 
@@ -10,7 +10,7 @@ Technical terms: [glossary](../glossary.md)
 Manual page for the user: [Questions](../manual/en/questions.md)
 
 ## Trigger
-A curator with `questions.manage` opens a saved question at `/admin/questions/{id}` and presses **Annul question** (the question is `Published`) or **Reinstate question** (it is `Annulled`). Annulling is only in the Publication card; the list shows the chip and the filter.
+A curator with `questions.manage` opens a saved question at `/admin/questions/{id}` and presses **Annul question** (the question is `Published`) or **Reinstate question** (it is `Annulled`). Annulling is only in the Publication block of the aside; the list shows the chip and the filter.
 
 ## Steps
 1. The curator presses the button; it is disabled while the form has unsaved changes (the action acts on what is stored).
@@ -34,7 +34,7 @@ flowchart LR
 - Practice reads `Published` only, so an annulled question leaves it by its status; how an edition simulation scores it is the edition's rule (epic E-6).
 
 ## Wireframe
-The Publication card, for a published question and for an annulled one:
+The Publication block (F-126: in the aside beside the form, see [question-form-composition.md](question-form-composition.md)), for a published question and for an annulled one. Mockup: [F-126-question-form-new-composition.html](../features/mockups/F-126-question-form-new-composition.html)
 ```text
 +--------------------------------------------------------+
 | Publication                                            |

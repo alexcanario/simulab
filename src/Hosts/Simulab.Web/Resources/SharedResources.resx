@@ -101,7 +101,9 @@
   <data name="Gallery.Section.ErrorSummary" xml:space="preserve"><value>Error summary</value></data>
   <data name="Gallery.ErrorSummary.Hint" xml:space="preserve"><value>Everything a failed save refused, once, at the top of the card. Each line moves focus to its field.</value></data>
   <data name="Gallery.Section.FormAside" xml:space="preserve"><value>Form aside</value></data>
-  <data name="Gallery.FormAside.Hint" xml:space="preserve"><value>Read-only: what is filled and what is missing. It carries no button.</value></data>
+  <data name="Gallery.FormAside.Hint" xml:space="preserve"><value>What is filled and what is missing. Its content slot, below the checklist, holds a block of the page with its actions.</value></data>
+  <data name="Gallery.FormAside.Content.Title" xml:space="preserve"><value>Publication</value></data>
+  <data name="Gallery.FormAside.Content.Subtitle" xml:space="preserve"><value>A block of the page that holds actions.</value></data>
   <data name="Gallery.Section.ItemRows" xml:space="preserve"><value>Item rows</value></data>
   <data name="Gallery.ItemRows.Hint" xml:space="preserve"><value>Child items of the record being edited, with their own actions. Empty state below.</value></data>
   <data name="Gallery.ItemRows.Empty" xml:space="preserve"><value>No edition yet.</value></data>
@@ -1036,6 +1038,7 @@
   <data name="Gallery.Section.Buttons" xml:space="preserve"><value>Buttons</value></data>
   <data name="Gallery.Buttons.Hint" xml:space="preserve"><value>The four variants of the brand: primary, secondary, text and the amber action, one per screen. A page sets only Variant and Color; the look comes from the kit.</value></data>
   <data name="Gallery.Buttons.ActionTitle" xml:space="preserve"><value>Action (one per screen): the shortcut, and the compact variant for areas narrower than 360px and toolbars.</value></data>
+  <data name="Gallery.Buttons.ActionBusy" xml:space="preserve"><value>Action while its call runs: progress in place of the icon, disabled.</value></data>
   <data name="Gallery.Buttons.Variants" xml:space="preserve"><value>Variants</value></data>
   <data name="Gallery.Buttons.Small" xml:space="preserve"><value>Small size</value></data>
   <data name="Gallery.Buttons.States" xml:space="preserve"><value>States</value></data>

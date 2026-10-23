@@ -1,11 +1,17 @@
 @* The read-only summary beside a long form (F-43, BR1, UC5): what is filled, and what is still missing.
    It is also the detail summary of a read-only page (F-36: the facts of an exam beside its editions): with
    no checklist it is a titled list of label and value pairs, and every row has a value.
-   It carries no button — the only primary action on the page is Save, at the bottom right of the form (BR4).
+   By default it carries no button — the only primary action on the page is Save, at the bottom right of the form
+   (F-43, BR4). F-126 (BR3) changes that: a content slot after the checklist, with a divider, a heading and a subtitle
+   the kit draws, holds a block of the page (the publication block of the question form), actions included. Save stays
+   the only navy primary of the page. A button or amber key that is a direct child of the slot is styled by the kit:
+   beside the form it takes the full width of the aside, stacked; stacked under the form it returns to its natural
+   width, in one wrapping row. Beside the form the aside is capped at the viewport and scrolls
+   inside itself (app.css); with a slot it is focusable so text below the fold is reachable by keyboard.
    It is not a live region: the error summary is what announces a failed save, and an aside that spoke on every
    keystroke would talk over the reader. *@
 
-<aside class="@($"app-form-aside {Class}")" aria-labelledby="@TitleId">
+<aside class="@($"app-form-aside {Class}")" aria-labelledby="@TitleId" tabindex="@(ChildContent is null ? null : "0")">
     <h2 class="app-form-aside-title" id="@TitleId">@Title</h2>
     <dl class="app-form-aside-rows">
         @foreach (var row in Rows)
@@ -33,6 +39,17 @@
             }
         </ul>
     }
+    @if (ChildContent is not null)
+    {
+        <section class="app-form-aside-content" id="@ContentId" aria-labelledby="@ContentTitleId">
+            <h2 class="app-form-aside-title" id="@ContentTitleId">@ContentTitle</h2>
+            @if (!string.IsNullOrWhiteSpace(ContentSubtitle))
+            {
+                <p class="app-form-aside-content-subtitle">@ContentSubtitle</p>
+            }
+            @ChildContent
+        </section>
+    }
 </aside>
 
 @code {
@@ -55,5 +72,18 @@
 
     [Parameter] public string? Class { get; set; }
 
+    /// <summary>F-126, BR3: a block after the checklist; absent when null. Its divider, heading and subtitle are drawn here.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>The block's heading, already translated; it names the block's <c>section</c>.</summary>
+    [Parameter] public string? ContentTitle { get; set; }
+
+    [Parameter] public string? ContentSubtitle { get; set; }
+
+    /// <summary>The id of the block's <c>section</c>; its heading carries <c>&lt;ContentId&gt;-title</c>.</summary>
+    [Parameter] public string? ContentId { get; set; }
+
     private string TitleId => "app-form-aside-title";
+
+    private string ContentTitleId => $"{ContentId ?? "app-form-aside-content"}-title";
 }
