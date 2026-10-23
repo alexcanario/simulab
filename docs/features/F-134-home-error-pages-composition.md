@@ -150,21 +150,21 @@ Give the pages every visitor meets first or in trouble (home, error, not found) 
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
+| AC1 | `HomeCompositionTests.Visitor_SeesTheWelcomeTheNoticeAndTheTwoWaysIn_AndNoCardAndNoAmberAction`, `Visitor_SignInIsThePrimaryActionAndCreateAccountIsSecondary` |
+| AC2 | `HomeCompositionTests.SignedInWithOnlyTheCatalogPermission_SeesOneStudyCardWithOneLink_AndNoSignInLink` |
+| AC3 | `HomeCompositionTests.SignedInAsAdministrator_SeesTheCardsInMenuOrder_WithTheLinksTheMenuShows`, `SignedInAsAdministratorInProduction_SeesNoDevelopmentLink` |
+| AC4 | `HomeCompositionTests.SignedInWithNoPermission_SeesOnlyTheTitleTheTaglineAndTheNotice` |
+| AC5 | `ErrorPageTests.Error_ShowsTheIconTheTitleTheMessageAndTheRequestId`, `Error_HasTheAmberTryAgainActionAndASecondaryGoToHomeLink` |
+| AC6 | `ErrorPageTests.TryAgain_ReloadsTheAddressTheUserWasOn`, `Error_WithoutARequestId_ShowsNoRequestIdLine` |
+| AC7 | `ErrorPageTests.Error_OnAViewportUnder360_TakesTheCompactActionAndWrapsItsActions`, `Error_OnAWiderViewport_TakesTheFullAction` |
+| AC8 | `NotFoundPageTests.NotFound_ShowsTheIconTheTitleTheMessageAndOnlyGoToHome` |
+| AC9 | `NotFoundPageTests.RouteWithoutPermission_RendersTheSameMarkupAsAPageThatDoesNotExist`, `Router_AnswersARouteTheUserIsNotAuthorizedForWithTheNotFoundContent` |
+| AC10 | `AppPageStateTests` (4 tests), `UiGalleryPageStateTests.Gallery_StatesSection_ShowsAPageStateWithIconTitleMessageAndTwoActions` |
+| AC11 | `AiDiagnosticsCardsTests` (3 tests) |
+| AC12 | existing `AiDiagnosticsPageTests.Page_OutsideDevelopment_RendersNothing`, `DevPagesHostTests.Get_AiDiagnosticsOutsideDevelopment_Returns404` |
+| AC13 | `HomeAndErrorPagesScanTests.OnlyTheErrorPage_UsesTheAmberAction`, `PagesAndTheirStylesheetRules_CarryNoLiteralColour`, existing `ActionColourScopeTests.RoutedPages_PutNoTertiaryColourOnAButtonAndNoActionShortcut` |
+| AC14 | `HomeAndErrorPagesScanTests.PagesAndTheirStylesheetRules_CarryNoLiteralColour` (the pages add no colour) with the existing `ThemeContrastTests` |
+| AC15 | `HomeAndErrorPagesScanTests.TheNewTexts_ExistInEveryLocale`, `TheNewTexts_AreTranslatedNotCopiedIntoPortuguese`, existing `ResourceParityTests.Every_key_exists_in_every_language` |
 
 ## Decisions
 - 2026-10-23 — Unauthorized and not found look the same, with no "404" number — F-6 BR7 (the `Routes.razor` comment), still true — confirmed: src/Hosts/Simulab.Web/Components/Routes.razor
