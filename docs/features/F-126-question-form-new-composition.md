@@ -1,7 +1,7 @@
 | AC16 | QuestionFormCompositionTests.AnnulDialog_HasItsReasonFieldAndNoAmberAction; QuestionPreviewDialogTests || AC15 | QuestionFormCompositionTests.HistoryCards_StayBelowTheAsideAndAreNotNumbered; QuestionReviewFormTests (review history) || AC14 | QuestionFormCompositionTests.DomOrder_IsTheFormCardThenTheAsideThenTheHistoryCards || AC13 | QuestionFormCompositionTests.Transcription_HasNoPublicationBlockNoAmberActionAndSaveAndContinueIsThePrimary || AC12 | QuestionFormCompositionTests.FrozenQuestion_HasNoSaveAndTheWayOutIsInTheAside || AC11 | QuestionFormCompositionTests.SaveOfADraftWithChanges_SavesAndDoesNotPublishAndIsTheOnlyNavyPrimaryButton || AC10 | AppFormAsideContentTests.AsideBackground_IsThePageOrTheSurfaceColour || AC9 | QuestionFormActionScopeTests (both); ActionColourScopeTests || AC8 | QuestionFormCompositionTests.PublishRunning_TheAmberKeyIsDisabledAndShowsProgress; AppActionButtonFormTests.Busy_* || AC7 | QuestionFormCompositionTests.DraftWithAnIncompleteChecklist_*, DraftWithUnsavedChanges_* || AC6 | QuestionFormCompositionTests.CompleteSavedDraft_PublishIsTheOneEnabledCompactAmberKey... || AC5 | QuestionFormCompositionTests.NewQuestion_TheAsideSaysToSaveFirstAndHasNoPublicationButton || AC4 | QuestionFormCompositionTests.Published_*, InReview_*, Annulled_* || AC3 | QuestionFormCompositionTests.SavedDraft_TheAsideHoldsTheChipPreviewSendForReviewAndPublishAndNoCardBelow || AC2 | AppActionButtonFormTests; AppSectionCardNumberTests; AppFormAsideContentTests.Content_*; UiGalleryFormCompositionTests || AC1 | QuestionFormCompositionTests.Sections_AreNumberedOneToSixWithTheirHeadingsAndIdsUnchanged (5 types); AppSectionCardNumberTests |---
 feature: F-126
 epic: Foundation and identity
-status: validating
+status: done
 board: 177
 version: 1
 ---
@@ -407,3 +407,15 @@ Database__Name=simulab_f126 dotnet run --project src/Hosts/Simulab.AppHost
 - 2026-10-23 blocked — test wrong: section selector also matched the version history card inside .app-form-card (test bug, owner agreed)
 - 2026-10-23 test-fail — build failed (Simulab.slnx), 2 reds
 - 2026-10-23 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 1 red
+
+## Delivery
+
+Gate time: 11 passes, 38 min 10 s — turn 3 (1 min 6 s), ship 6 (28 min 42 s), scan 2 (8 min 22 s); 3 red
+Usage: 6160.9k weighted (estimate) — refine 42% · build 47% · ship 10% — agents 45% — context per turn 150k → 406k — 2 sessions, 159 turns
+
+- Branch: `feature/F-126` (removed), merge commit `0916129` on `main`, app version 1.17.0.
+- Tests (full gate, `agile gate GREEN`): Web 2489, QuestionBank 677, Identity 548, Catalog 665, Api 83, AppHost 122, Architecture 301, Email 19, Storage 8, Ai 10, Persistence 25, Jobs 25, ApiResults 13, SharedKernel 12; 0 failed. 30 new tests locked at the test commit, 1 unlock (a selector bug in `QuestionFormCompositionTests`, owner agreed).
+- Scan: `agile scan GREEN` (2 medium findings in `tools/Simulab.DocGen`, outside the diff).
+- Manual: `docs/manual/pt-BR/questions.md` (pt-PT and en frozen, F-124). Technical pages: 3 (`docs/flows/question-form-composition.md`, `review-before-publishing.md`, `annul-question.md`). Glossary: 2 rows added (aside, content slot).
+- Validation evidence: the owner said "validado" in the conversation; the 19 boxes were not ticked on this machine, so `validation-ticks.js evidence` recorded 0 of 19 (`not tested` for each).
+- Not checked on screen by the build: the question form itself (behind sign-in); the gallery `/dev/ui` was read at 1440px (sticky, cap 704px, full-width buttons). The owner's validation covered the form.
