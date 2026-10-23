@@ -103,7 +103,7 @@ public sealed class QuestionFormCompositionTests : QuestionPageTestContext
 
         var page = RenderEdit(question);
 
-        var sections = page.FindAll(".app-form-card section.app-section-card");
+        var sections = page.FindAll(".app-form-layout .app-form-card section.app-section-card");
         sections.Should().HaveCount(6);
         sections.Select(section => section.QuerySelector(".app-section-card-number")?.TextContent.Trim())
             .Should().Equal("1", "2", "3", "4", "5", "6");

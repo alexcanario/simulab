@@ -248,6 +248,9 @@ No new colour and no new token. One new pairing of existing tokens, the section 
 - AC17 All new texts appear in every locale of `UI locales:` and the missing-key test is green.
 
 ## Criterion → test
+
+Tests locked: 4d26ee4dbad713ebd442af97f567d84f8079db35 (6 files); unlocks: 0
+
 | Criterion | Test |
 |---|---|
 | AC1 | pending |
@@ -297,6 +300,9 @@ No new colour and no new token. One new pairing of existing tokens, the section 
 
 - 2026-10-23 — plan — 1 tests first + skeletons of the kit parameters, shown red and locked → check: the new tests fail for a missing behavior; 2 `frontend` hand-off (kit `AppActionButton`/`AppSectionCard`/`AppFormAside`, gallery, `app.css`, `QuestionForm.razor` with the two key sections; removes nothing: the Publication card is a block inside the page file, the `Aside.Status` row only leaves `AsideRows`) → check: AC1–AC8, AC10–AC16 green; 3 scan scope (`ActionColourScopeTests` names the allowed page) and the existing tests that depend on the card's position or on the amber key → check: AC9 and the whole suite green; 4 one fix round after `gate.js ship` → check: gate GREEN; 5 docs (3 flow pages, `docs/agile/ui-map.md`, pt-BR manual) → check: `techdocs.js check F-126`; 6 review, scan, validation script → check: `validating`
 - 2026-10-23 — Build: the `frontend` agent writes the screen and kit code; the locked tests are mine (kit parameters exist as skeletons so they compile) — Claude
+- 2026-10-23 — tests unlocked (the section selector of `QuestionFormCompositionTests` also matched the version history card inside `.app-form-card`; test bug, owner agreed): selector narrowed to `.app-form-layout .app-form-card section.app-section-card` — owner
+- 2026-10-23 — The two key-section components take `SectionNumber`, not `Number`: `MatchingKeySection` already has a method `Number(int)` — Claude
+- 2026-10-23 — The slot's buttons are direct children of the slot and the kit styles them (`.app-form-aside-content > *`): a page may not spell `app-form-aside-actions` (`UiKitBoundaryTests`) — Claude
 
 ## Out of scope
 - Option rows as keys, the "Correct" green key, the student preview content: F-149.
@@ -311,3 +317,4 @@ No new colour and no new token. One new pairing of existing tokens, the section 
 ## Events
 
 - 2026-10-23 question — asked 8, from context 3
+- 2026-10-23 blocked — test wrong: section selector also matched the version history card inside .app-form-card (test bug, owner agreed)
