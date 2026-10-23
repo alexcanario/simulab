@@ -60,7 +60,8 @@ public sealed class HomeCompositionTests : ShellTestContext
     {
         SignInWith(CatalogPermissions.Browse);
 
-        var home = RenderHome();
+        // Production: in Development the menu also shows its Development section to everyone.
+        var home = RenderHome("Production");
 
         home.Find("h1").TextContent.Trim().Should().Be("Welcome back");
         Titles(home).Should().Equal("Study");
@@ -102,7 +103,8 @@ public sealed class HomeCompositionTests : ShellTestContext
     {
         SignInWith();
 
-        var home = RenderHome();
+        // Production, for the same reason as the catalog-only user above.
+        var home = RenderHome("Production");
 
         home.Find("h1").TextContent.Trim().Should().Be("Welcome back");
         home.Markup.Should().Contain("Realistic practice exams, and a coach that tells you what to study next.");

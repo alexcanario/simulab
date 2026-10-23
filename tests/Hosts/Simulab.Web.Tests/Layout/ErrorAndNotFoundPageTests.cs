@@ -118,8 +118,9 @@ public sealed class NotFoundPageTests : KitTestContext
     [Fact]
     public void RouteWithoutPermission_RendersTheSameMarkupAsAPageThatDoesNotExist()
     {
-        var notFound = Render<NotFound>().Find(".app-page-state").OuterHtml;
-        var forbidden = Render<NotFoundContent>().Find(".app-page-state").OuterHtml;
+        // Blazor numbers the event handlers of each render; the numbers are not part of what the user sees.
+        var notFound = WithoutHandlerIds(Render<NotFound>().Find(".app-page-state").OuterHtml);
+        var forbidden = WithoutHandlerIds(Render<NotFoundContent>().Find(".app-page-state").OuterHtml);
 
         forbidden.Should().Be(notFound);
         forbidden.Should().NotContainAny("permission", "authorized", "forbidden", "403");
@@ -133,6 +134,9 @@ public sealed class NotFoundPageTests : KitTestContext
         routes.Should().MatchRegex(@"<NotAuthorized>\s*<NotFoundContent\s*/>\s*</NotAuthorized>");
         routes.Should().Contain("NotFoundPage=\"typeof(Pages.NotFound)\"");
     }
+
+    private static string WithoutHandlerIds(string markup) =>
+        System.Text.RegularExpressions.Regex.Replace(markup, @"blazor:onclick=""\d+""", "blazor:onclick");
 
     private static string WebRoot()
     {
