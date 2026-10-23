@@ -56,7 +56,7 @@ public sealed class ThemeContrastTests
         {
             { "light on surface", light.Primary.ToString(), light.Surface.ToString() },
             { "light on background", light.Primary.ToString(), light.Background.ToString() },
-            { "dark on surface", dark.Primary.ToString(), dark.Surface.ToString() },
+            // F-148: the dark primary is a fill (4.12:1 as text on the surface); dark text in blue is the link role.
             { "dark on background", dark.Primary.ToString(), dark.Background.ToString() }
         };
     }

@@ -1,0 +1,28 @@
+@* The action of the brand (F-148, BR8): Ctrl + Alt + the amber key, or the amber key alone. One screen has one at most;
+   no routed page uses it until its screen item picks it (BR7). Ctrl, Alt and the plus signs are brand marks like the
+   symbol: decorative and not translated. The look comes from app.css (.app-action). *@
+<span class="app-action @(Compact ? "app-action-compact" : string.Empty) @(Disabled ? "app-action-disabled" : string.Empty)">
+    @if (!Compact)
+    {
+        <span class="app-action-modkey app-action-ctrl" aria-hidden="true">Ctrl</span>
+        <span class="app-action-plus" aria-hidden="true">+</span>
+        <span class="app-action-modkey app-action-alt" aria-hidden="true">Alt</span>
+        <span class="app-action-plus" aria-hidden="true">+</span>
+    }
+    <button type="button" class="app-action-key" disabled="@Disabled" @onclick="OnClick">
+        <span class="app-action-icon" aria-hidden="true"><MudIcon Icon="@AppIcons.Restart" Size="Size.Small" /></span>
+        <span>@Label</span>
+    </button>
+</span>
+
+@code {
+    /// <summary>The verb of the action, in the imperative; it is the accessible name of the one clickable element.</summary>
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>The amber key alone, for areas narrower than 360px and toolbars.</summary>
+    [Parameter] public bool Compact { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public EventCallback OnClick { get; set; }
+}

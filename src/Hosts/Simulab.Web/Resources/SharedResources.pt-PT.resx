@@ -1034,7 +1034,8 @@
   <data name="RichText.Hint.Keyboard" xml:space="preserve"><value>Tab sai do editor.</value></data>
   <data name="Gallery.Section.RichText" xml:space="preserve"><value>Campo de texto formatado</value></data>
   <data name="Gallery.Section.Buttons" xml:space="preserve"><value>Botões</value></data>
-  <data name="Gallery.Buttons.Hint" xml:space="preserve"><value>As quatro variantes da marca: primária, secundária, texto e a ação laranja, uma por ecrã. A página define apenas Variant e Color; o aspeto vem do kit.</value></data>
+  <data name="Gallery.Buttons.Hint" xml:space="preserve"><value>As quatro variantes da marca: primária, secundária, texto e a ação âmbar, uma por ecrã. A página define apenas Variant e Color; o aspeto vem do kit.</value></data>
+  <data name="Gallery.Buttons.ActionTitle" xml:space="preserve"><value>Ação (uma por ecrã): o atalho e a variante compacta, para áreas com menos de 360px e barras de ferramentas.</value></data>
   <data name="Gallery.Buttons.Variants" xml:space="preserve"><value>Variantes</value></data>
   <data name="Gallery.Buttons.Small" xml:space="preserve"><value>Tamanho pequeno</value></data>
   <data name="Gallery.Buttons.States" xml:space="preserve"><value>Estados</value></data>

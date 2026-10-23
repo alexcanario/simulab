@@ -10,8 +10,8 @@ namespace Simulab.Identity.Infrastructure.Email;
 /// </summary>
 public static class EmailHtml
 {
-    /// <summary>The app's light primary since F-125, the brand's dark blue. White on it reads at 8.61:1.</summary>
-    public const string ButtonColour = "#064F80";
+    /// <summary>The app's light primary since F-148, the brand navy. White on it reads at 12.59:1.</summary>
+    public const string ButtonColour = "#0F3266";
 
     /// <summary>Ink: the text of the email (17.35:1 on white).</summary>
     public const string TextColour = "#0B1B2E";

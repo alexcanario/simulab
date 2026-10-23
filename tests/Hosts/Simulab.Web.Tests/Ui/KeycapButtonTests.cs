@@ -57,11 +57,12 @@ public sealed class KeycapButtonTests : KitTestContext
     }
 
     [Fact]
-    public void TextVariant_IsAnUnderlinedInfoLink()
+    public void TextVariant_IsAnUnderlinedLink()
     {
         const string selector = ".mud-button-root.mud-button-text";
 
-        AppCssColours.Declaration(selector, "color").Should().Be("var(--mud-palette-info)");
+        // F-148 BR6: the link role, no longer the info blue.
+        AppCssColours.Declaration(selector, "color").Should().Be("var(--app-link)");
         AppCssColours.Declaration(selector, "text-decoration").Should().StartWith("underline");
         AppCssColours.Declaration(selector, "background-color").Should().Be("transparent");
     }
@@ -115,6 +116,27 @@ public sealed class KeycapButtonTests : KitTestContext
         provider.Markup.Should().Contain($"--app-keycap-primary-edge: {edges.Primary};")
             .And.Contain($"--app-keycap-secondary-edge: {edges.Secondary};")
             .And.Contain($"--app-keycap-tertiary-edge: {edges.Tertiary};")
+            .And.Contain($"--app-keycap-info-edge: {edges.Info};")
             .And.Contain($"--app-keycap-error-edge: {edges.Error};");
+    }
+
+    /// <summary>F-148 BR2, BR6, BR9: the link colour and the brand name reach the stylesheet as variables of the theme in use.</summary>
+    [Theory]
+    [InlineData(false, "#1D64A8", "#0F3266")]
+    [InlineData(true, "#8CC4F5", "#F2F5FB")]
+    public void ThemeProvider_WritesTheLinkAndTheBrandNameOfTheThemeInUse(bool dark, string link, string brandName)
+    {
+        var provider = Render<SimulabThemeProvider>(parameters => parameters
+            .Add(p => p.Theme, SimulabTheme.Create())
+            .Add(p => p.IsDarkMode, dark));
+
+        provider.Markup.Should().Contain($"--app-link: {link};").And.Contain($"--app-brand-name: {brandName};");
+    }
+
+    /// <summary>F-148 AC4: a link of the app takes the link role as well, never the info blue.</summary>
+    [Fact]
+    public void Links_TakeTheLinkRole()
+    {
+        AppCssColours.Declaration(".app-link", "color").Should().Be("var(--app-link)");
     }
 }

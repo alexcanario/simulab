@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.Json.Nodes;
 using MudBlazor;
 using MudBlazor.Utilities;
+using Simulab.Web.Theme;
 
 namespace Simulab.Web.Tests.Ui;
 
@@ -30,6 +31,10 @@ internal static class IdentityTokensComparison
                 colours[CamelCase(property.Name)] = (light, dark);
             }
         }
+
+        // F-148: the two colours MudBlazor's palette has no slot for; SimulabThemeProvider writes them as CSS variables.
+        colours["link"] = (Hex(SimulabTheme.LightLink), Hex(SimulabTheme.DarkLink));
+        colours["brandName"] = (Hex(SimulabTheme.LightBrandName), Hex(SimulabTheme.DarkBrandName));
 
         return colours;
     }

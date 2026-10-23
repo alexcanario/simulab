@@ -48,7 +48,7 @@ public sealed class IdentityTokensTests
         theme.PaletteDark.Primary = "#000000";
 
         IdentityTokensComparison.CompareColours(theme, Tokens).Should().ContainSingle()
-            .Which.Should().Contain("'primary'").And.Contain("dark").And.Contain("#000000").And.Contain("#2AA8F0");
+            .Which.Should().Contain("'primary'").And.Contain("dark").And.Contain("#000000").And.Contain("#47A0EB");
     }
 
     [Fact]

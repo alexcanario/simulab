@@ -28,7 +28,12 @@ public sealed class UiGalleryIdentityTests : KitTestContext
         section.QuerySelectorAll("button.mud-button-filled-primary").Should().NotBeEmpty();
         section.QuerySelectorAll("button.mud-button-outlined").Should().NotBeEmpty();
         section.QuerySelectorAll("button.mud-button-text").Should().NotBeEmpty();
-        section.QuerySelectorAll("button.mud-button-filled-tertiary").Should().ContainSingle("one orange action per screen (BR5)");
+        // F-148 BR7/BR8 (AC11): the action is the shortcut, with its compact variant and a disabled one.
+        section.QuerySelectorAll(".app-action:not(.app-action-compact) .app-action-key:not([disabled])").Should().ContainSingle("the shortcut");
+        section.QuerySelectorAll(".app-action.app-action-compact .app-action-key").Should().ContainSingle("the compact variant");
+        section.QuerySelectorAll(".app-action-disabled .app-action-key[disabled]").Should().ContainSingle("the disabled shortcut");
+        section.QuerySelectorAll(".app-action-ctrl, .app-action-alt").Should().HaveCount(4, "the shortcut and the disabled one show Ctrl and Alt");
+        section.QuerySelectorAll("button.mud-button-filled-tertiary").Should().BeEmpty("the action is the shortcut component, not a tertiary MudButton");
         section.QuerySelectorAll("button.mud-button-filled-error, button.mud-button-outlined-error").Should().NotBeEmpty();
         section.QuerySelectorAll("button[class*='-size-small']").Should().NotBeEmpty();
         section.QuerySelectorAll("button[disabled]").Should().NotBeEmpty();
@@ -65,5 +70,10 @@ public sealed class UiGalleryIdentityTests : KitTestContext
             swatch.Should().NotBeNull(role);
             swatch!.TextContent.Should().Contain(role).And.Contain(IdentityTokensComparison.Hex(value)[..7]);
         }
+
+        // F-148 AC11: the link role is listed with the value of the theme in use.
+        var link = section.QuerySelector("[data-role='link']");
+        link.Should().NotBeNull("link");
+        link!.TextContent.Should().Contain("link").And.Contain(SimulabTheme.LightLink);
     }
 }

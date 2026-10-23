@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using MudBlazor;
+using Simulab.Web.Theme;
 
 namespace Simulab.Web.Tests.Ui;
 
@@ -61,6 +62,12 @@ internal static partial class AppCssColours
             return string.Create(CultureInfo.InvariantCulture, $"rgba({red},{green},{blue},{alpha * share})");
         }
 
+        var app = AppTokenPattern().Match(value);
+        if (app.Success)
+        {
+            return AppToken(app.Groups[1].Value, palette is PaletteDark);
+        }
+
         var variable = TokenPattern().Match(value);
         if (!variable.Success)
         {
@@ -75,6 +82,23 @@ internal static partial class AppCssColours
                 : null);
         property.Should().NotBeNull($"'{variable.Groups[1].Value}' must be a palette token");
         return property!.GetValue(palette)!.ToString()!;
+    }
+
+    /// <summary>F-148: the variables <c>SimulabThemeProvider</c> writes next to the palette (<c>--app-link</c>, <c>--app-brand-name</c>, the keycap edges), for the theme in use.</summary>
+    public static string AppToken(string name, bool dark)
+    {
+        var edges = dark ? SimulabTheme.DarkKeycapEdges : SimulabTheme.LightKeycapEdges;
+        return name switch
+        {
+            "link" => dark ? SimulabTheme.DarkLink : SimulabTheme.LightLink,
+            "brand-name" => dark ? SimulabTheme.DarkBrandName : SimulabTheme.LightBrandName,
+            "keycap-primary-edge" => edges.Primary,
+            "keycap-secondary-edge" => edges.Secondary,
+            "keycap-tertiary-edge" => edges.Tertiary,
+            "keycap-info-edge" => edges.Info,
+            "keycap-error-edge" => edges.Error,
+            _ => throw new ArgumentOutOfRangeException(nameof(name), name, "not a variable of SimulabThemeProvider"),
+        };
     }
 
     /// <summary>A translucent colour painted over <paramref name="under"/>, as the browser composites it.</summary>
@@ -191,6 +215,9 @@ internal static partial class AppCssColours
 
     [GeneratedRegex(@"var\(\s*--mud-palette-([a-z0-9-]+)\s*\)")]
     private static partial Regex TokenPattern();
+
+    [GeneratedRegex(@"^var\(\s*--app-(link|brand-name|keycap-[a-z]+-edge)\s*\)$")]
+    private static partial Regex AppTokenPattern();
 
     [GeneratedRegex(@"^color-mix\(\s*in srgb\s*,\s*(var\([^)]+\))\s+([0-9.]+)%\s*,\s*transparent\s*\)$")]
     private static partial Regex MixPattern();
