@@ -104,6 +104,17 @@
         </MudItem>
         <MudItem xs="12" md="4"><MudPaper Outlined="true"><AppErrorState OnRetry="@(() => Done(L["Common.TryAgain"]))" /></MudPaper></MudItem>
     </MudGrid>
+    @* F-134, BR6: the state of a whole page - the error and not-found pages are this component with other texts and actions. *@
+    <p class="gallery-state-caption">@L["Gallery.States.PageState"]</p>
+    <MudPaper Outlined="true">
+        <AppPageState Icon="@AppIcons.Error" IconColor="Color.Error" TitleLevel="2"
+                      Title="@L["Gallery.States.PageStateTitle"]" Message="@L["Gallery.States.PageStateMessage"]">
+            <Actions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@AppIcons.Retry" OnClick="@(() => Done(L["Common.TryAgain"]))">@L["Common.TryAgain"]</MudButton>
+                <MudButton Variant="Variant.Outlined" StartIcon="@AppIcons.Home" Href="/">@L["Common.GoHome"]</MudButton>
+            </Actions>
+        </AppPageState>
+    </MudPaper>
 </section>
 
 <section id="gallery-confirm" class="gallery-section">

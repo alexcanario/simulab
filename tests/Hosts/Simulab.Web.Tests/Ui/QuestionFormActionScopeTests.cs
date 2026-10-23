@@ -25,6 +25,7 @@ public sealed class QuestionFormActionScopeTests
             .Select(file => file.Replace('\\', '/'))
             .Where(file => !file.Contains("/Components/Pages/Dev/", StringComparison.Ordinal) && !file.Contains("/Components/Ui/", StringComparison.Ordinal))
             .Where(file => !file.EndsWith("/QuestionBank/QuestionForm.razor", StringComparison.Ordinal))
+            .Where(file => !file.EndsWith("/Pages/Error.razor", StringComparison.Ordinal))
             .Where(file => ActionColourScopeTests.ActionShortcuts(File.ReadAllText(file)).Count > 0 || ActionColourScopeTests.TertiaryButtons(File.ReadAllText(file)).Count > 0)
             .Select(Path.GetFileName)
             .ToList();

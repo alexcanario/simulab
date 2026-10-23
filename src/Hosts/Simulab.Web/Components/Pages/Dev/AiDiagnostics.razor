@@ -24,37 +24,52 @@
     <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
 }
 
-<AppTextField TValue="string"
-              Id="ai-prompt"
-              Label="@L["AiDiagnostics.Prompt.Label"]"
-              Hint="@L["AiDiagnostics.Prompt.Hint"]"
-              Value="@_prompt"
-              ValueChanged="@((string? value) => _prompt = value ?? string.Empty)"
-              Lines="5"
-              Required="true"
-              Disabled="@_sending" />
+@* F-134, BR7: the question and, after a call, the answer are two cards. "Send" stays primary: it restarts nothing. *@
+<AppSectionCard Id="ai-question" Title="@L["AiDiagnostics.Question"]" Icon="@AppIcons.Questions">
+    <AppTextField TValue="string"
+                  Id="ai-prompt"
+                  Label="@L["AiDiagnostics.Prompt.Label"]"
+                  Hint="@L["AiDiagnostics.Prompt.Hint"]"
+                  Value="@_prompt"
+                  ValueChanged="@((string? value) => _prompt = value ?? string.Empty)"
+                  Lines="5"
+                  Required="true"
+                  Disabled="@_sending" />
 
-<div class="app-form-actions">
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Primary"
-               StartIcon="@AppIcons.Send"
-               Disabled="@(_sending || string.IsNullOrWhiteSpace(_prompt))"
-               OnClick="SendAsync">
-        @(_sending ? L["AiDiagnostics.Sending"] : L["AiDiagnostics.Send"])
-    </MudButton>
-</div>
+    <div class="app-form-actions">
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@AppIcons.Send"
+                   Disabled="@(_sending || string.IsNullOrWhiteSpace(_prompt))"
+                   OnClick="SendAsync">
+            @(_sending ? L["AiDiagnostics.Sending"] : L["AiDiagnostics.Send"])
+        </MudButton>
+    </div>
+</AppSectionCard>
 
 @if (_answer is not null)
 {
-    <MudPaper Class="pa-4 mt-4" Elevation="0" Outlined="true">
-        <MudText Typo="Typo.subtitle1" Class="mb-2">@L["AiDiagnostics.Answer"]</MudText>
-        <MudText Typo="Typo.body1" Class="mb-4" Style="white-space: pre-wrap;">@_answer.Text</MudText>
-        <MudDivider Class="mb-3" />
-        <MudText Typo="Typo.body2">@L["AiDiagnostics.Model", _answer.Model]</MudText>
-        <MudText Typo="Typo.body2">@L["AiDiagnostics.Tokens", _answer.InputTokens, _answer.OutputTokens]</MudText>
-        <MudText Typo="Typo.body2">@L["AiDiagnostics.Cost", _answer.CostUsd.ToString("0.000000", CultureInfo.InvariantCulture)]</MudText>
-        <MudText Typo="Typo.body2">@L["AiDiagnostics.Duration", _answer.DurationMs]</MudText>
-    </MudPaper>
+    <AppSectionCard Id="ai-answer" Title="@L["AiDiagnostics.Answer"]" Icon="@AppIcons.Ai">
+        <MudText Typo="Typo.body1" Style="white-space: pre-wrap;">@_answer.Text</MudText>
+        <dl class="ai-metrics">
+            <div>
+                <dt class="ai-metric-label">@L["AiDiagnostics.Metric.Model"]</dt>
+                <dd class="ai-metric-value">@_answer.Model</dd>
+            </div>
+            <div>
+                <dt class="ai-metric-label">@L["AiDiagnostics.Metric.Tokens"]</dt>
+                <dd class="ai-metric-value">@L["AiDiagnostics.Metric.TokensValue", _answer.InputTokens, _answer.OutputTokens]</dd>
+            </div>
+            <div>
+                <dt class="ai-metric-label">@L["AiDiagnostics.Metric.Cost"]</dt>
+                <dd class="ai-metric-value">@_answer.CostUsd.ToString("0.000000", CultureInfo.InvariantCulture)</dd>
+            </div>
+            <div>
+                <dt class="ai-metric-label">@L["AiDiagnostics.Metric.Duration"]</dt>
+                <dd class="ai-metric-value">@L["AiDiagnostics.Metric.DurationValue", _answer.DurationMs]</dd>
+            </div>
+        </dl>
+    </AppSectionCard>
 }
 
 @code {

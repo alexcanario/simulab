@@ -45,7 +45,7 @@ public sealed partial class ActionColourScopeTests
     }
 
     /// <summary>F-126 BR11: the pages that picked their amber action; each screen item (F-127 to F-134) adds its own here.</summary>
-    private static readonly string[] AllowedPages = ["/QuestionBank/QuestionForm.razor"];
+    private static readonly string[] AllowedPages = ["/QuestionBank/QuestionForm.razor", "/Pages/Error.razor"];
 
     private static bool IsAllowedPage(string file) =>
         AllowedPages.Any(page => file.Replace('\\', '/').EndsWith(page, StringComparison.Ordinal));

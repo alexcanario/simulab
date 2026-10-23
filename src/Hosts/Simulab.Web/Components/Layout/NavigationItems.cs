@@ -30,6 +30,16 @@ public static class NavigationItems
         new(NavigationSection.Development, "/dev/ai", AppIcons.Ai, "Nav.Dev.Ai", DevelopmentOnly: true),
     ];
 
+    /// <summary>F-134: the icon that stands for a section on the home page.</summary>
+    public static string SectionIcon(NavigationSection section) => section switch
+    {
+        NavigationSection.Study => AppIcons.SectionStudy,
+        NavigationSection.Content => AppIcons.SectionContent,
+        NavigationSection.Administration => AppIcons.SectionAdministration,
+        NavigationSection.Development => AppIcons.SectionDevelopment,
+        _ => throw new ArgumentOutOfRangeException(nameof(section), section, "A new menu section needs an icon here.")
+    };
+
     /// <summary>Items the current user may see (F-6, BR6): a permission-gated item needs <paramref name="hasPermission"/> to say yes.</summary>
     public static IReadOnlyList<NavigationItem> Visible(IEnumerable<NavigationItem> items, bool isDevelopment, Func<string, bool> hasPermission) =>
         [.. items.Where(item =>

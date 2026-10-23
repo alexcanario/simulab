@@ -1,18 +1,34 @@
 @page "/Error"
 @using System.Diagnostics
+@implements IAsyncDisposable
 @inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+@inject IBrowserViewportService Viewport
 
 <PageTitle>@L["Error.Title"]</PageTitle>
 
-<MudText Typo="Typo.h1" Color="Color.Error" GutterBottom="true">@L["Error.Title"]</MudText>
-<MudText Typo="Typo.body1">@L["Error.Message"]</MudText>
-
-@if (ShowRequestId)
-{
-    <MudText Typo="Typo.body2" Class="mt-4">@L["Error.RequestId", RequestId!]</MudText>
-}
+@* F-134, BR4: the one amber action of the item lives here: a restart appeal. *@
+<AppPageState Icon="@AppIcons.Error" IconColor="Color.Error" Title="@L["Error.Title"]" Message="@L["Error.Message"]">
+    <Actions>
+        <AppActionButton Label="@L["Common.TryAgain"]" Icon="@AppIcons.Restart" Compact="_compact" OnClick="TryAgain" />
+        <MudButton Variant="Variant.Outlined" StartIcon="@AppIcons.Home" Href="/">@L["Common.GoHome"]</MudButton>
+    </Actions>
+    <ChildContent>
+        @if (ShowRequestId)
+        {
+            <p class="app-page-state-request-id">@L["Error.RequestId", RequestId!]</p>
+        }
+    </ChildContent>
+</AppPageState>
 
 @code {
+    // Under this width of free space the shortcut keeps only its amber key (BR4).
+    private const int CompactBelowPixels = 360;
+
+    private readonly Guid _viewportId = Guid.NewGuid();
+    private bool _compact;
+    private bool _subscribed;
+
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
 
@@ -21,4 +37,34 @@
 
     protected override void OnInitialized() =>
         RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _subscribed = true;
+            await Viewport.SubscribeAsync(_viewportId, OnViewportChanged, fireImmediately: true);
+        }
+    }
+
+    private async Task OnViewportChanged(BrowserViewportEventArgs args)
+    {
+        var compact = args.BrowserWindowSize.Width < CompactBelowPixels;
+        if (compact != _compact)
+        {
+            _compact = compact;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    // The handler re-executes /Error and the address in the bar stays the one the user was on, so a reload asks the server again.
+    private void TryAgain() => Navigation.Refresh(forceReload: true);
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_subscribed)
+        {
+            await Viewport.UnsubscribeAsync(_viewportId);
+        }
+    }
 }

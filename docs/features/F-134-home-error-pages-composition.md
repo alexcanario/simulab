@@ -148,6 +148,9 @@ Give the pages every visitor meets first or in trouble (home, error, not found) 
 - AC15 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en) and the missing-key test is green (BR11).
 
 ## Criterion → test
+
+Tests locked: bb041fe1dd945465edd48df969e3240314ad9b8e (6 files); unlocks: 1
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `HomeCompositionTests.Visitor_SeesTheWelcomeTheNoticeAndTheTwoWaysIn_AndNoCardAndNoAmberAction`, `Visitor_SignInIsThePrimaryActionAndCreateAccountIsSecondary` |
@@ -183,7 +186,8 @@ Give the pages every visitor meets first or in trouble (home, error, not found) 
 - 2026-10-23 — No wireframe-only mockup file: the screens use kit components only, so the text wireframes decide them; `/agile:screen F-134` is still available before approval — Claude
 
 - 2026-10-23: plan — 1 `AppPageState` kit component + gallery example + css → AC10; 2 not-found (`NotFoundContent`) on it → AC8, AC9; 3 error page on it: amber "Try again", "Go to home", request ID, compact under 360px → AC5, AC6, AC7; 4 Home signed out (welcome, notice, sign-in and create-account) → AC1; 5 Home signed in (section cards from `NavigationItems`) → AC2, AC3, AC4; 6 `/dev/ai` as two cards → AC11, AC12; 7 scans (one amber action, no literal colour, contrast inherited) and the three locales → AC13, AC14, AC15; 8 flow page `docs/flows/home-and-error-pages.md` → `techdocs.js check`
-- 2026-10-23: the pre-existing `ActionColourScopeTests.AllowedPages` gets `/Error.razor` (its comment says each screen item adds its own) — Claude
+- 2026-10-23: the pre-existing `ActionColourScopeTests.AllowedPages` and the F-126 scan `QuestionFormActionScopeTests.OtherRoutedPages_...` get `Error.razor` (their messages say each screen item adds its own) — Claude
+- 2026-10-23: tests unlocked (the AC2 and AC4 tests ran in Development, where the menu shows its Development section to everyone, and the AC9 test compared markup with per-render Blazor event ids; the code was right, the tests changed) — owner chose "Destravar e corrigir"
 
 ## Out of scope
 - The gallery `/dev/ui` beyond the `AppPageState` example (F-125).
@@ -198,3 +202,4 @@ Give the pages every visitor meets first or in trouble (home, error, not found) 
 ## Events
 
 - 2026-10-23 question — asked 6, from context 3
+- 2026-10-23 blocked — test wrong: AC2 and AC4 tests ran in Development, where the Development section shows for everyone; AC9 compared markup with per-render Blazor event ids
