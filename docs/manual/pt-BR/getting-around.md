@@ -11,7 +11,7 @@ Todas as páginas do Simulab têm a mesma barra superior e o mesmo menu lateral,
 ## A aparência do Simulab
 O Simulab usa a identidade visual da Control Alt Systems:
 - **Barra superior**: branca no modo claro. Da esquerda para a direita mostra o botão de menu, o símbolo das três teclas (Ctrl, Alt e reiniciar), o nome "Simulab" com "Control Alt Systems" embaixo, e os botões de modo, de idioma e da sua conta. Clicar no nome leva à página inicial.
-- **Botões em forma de tecla**: o botão principal de cada tela é azul-escuro e tem uma borda mais escura embaixo, como uma tecla; quando você o pressiona, ele desce. Botões secundários têm só um contorno, e ações menores aparecem como links azuis sublinhados. Quando um botão está desativado, ele fica cinza.
+- **Botões em forma de tecla**: o botão principal de cada tela é azul-escuro (azul mais claro no modo escuro) e tem uma borda embaixo, como uma tecla; quando você o pressiona, ele desce. Botões secundários têm só um contorno, e ações menores aparecem como links azuis sublinhados. Quando um botão está desativado, ele fica cinza.
 - **Cartões**: os blocos de cada página têm cantos arredondados e uma linha fina em volta, sem sombra.
 - **E-mails**: os e-mails do Simulab (verificação, senha, apagamento da conta e exportação de dados) começam com "Simulab" e "Control Alt Systems" e trazem o botão no mesmo azul-escuro.
 
