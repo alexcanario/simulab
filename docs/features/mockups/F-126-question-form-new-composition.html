@@ -194,6 +194,11 @@ a, button, [role="button"] { cursor: pointer; }
 .radio.is-on { border-color: var(--primary); }
 .radio.is-on::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
 .radio.is-disabled { border-color: var(--divider); }
+.check { width: 20px; height: 20px; border-radius: 4px; border: 2px solid var(--action-default); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.check.is-on { border-color: var(--primary); background: var(--primary); }
+.check.is-on::after { content: ""; width: 5px; height: 10px; border: solid var(--primary-text); border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+.check.is-disabled { border-color: var(--divider); }
+.check.is-disabled.is-on { background: var(--text-secondary); border-color: var(--text-secondary); }
 .radio.is-disabled.is-on::after { background: var(--text-secondary); }
 
 /* option rows: today's look (keycap rows are F-149) */
@@ -848,7 +853,7 @@ function keySection(c, frozen) {
     const letter = String.fromCharCode(65 + i);
     const on = filled && c.complete && (multiple ? (i === 1 || i === 3) : i === DATA.correct);
     const actions = frozen ? '' : `<span class="icon-btn" aria-hidden="true">${ic('up')}</span><span class="icon-btn" aria-hidden="true">${ic('down')}</span><span class="icon-btn" aria-hidden="true">${ic('del')}</span>`;
-    return `<li class="app-item-row"><span class="app-option-letter">${letter}</span><span class="radio${on ? ' is-on' : ''}${frozen ? ' is-disabled' : ''}" aria-hidden="true"></span>
+    return `<li class="app-item-row"><span class="app-option-letter">${letter}</span><span class="${multiple ? 'check' : 'radio'}${on ? ' is-on' : ''}${frozen ? ' is-disabled' : ''}" aria-hidden="true"></span>
       <span class="app-option-text${frozen ? ' is-disabled' : ''}" lang="pt-BR">${esc(o || t('Questions.Options.Field.Placeholder'))}</span>${actions}</li>`;
   }).join('');
   const footer = `<div class="app-options-footer">${frozen ? '<span></span>' : btn({ id: 'question-option-add', icon: 'add', label: t('Questions.Options.Add') })}
