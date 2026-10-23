@@ -30,8 +30,8 @@ public sealed class UiGalleryIdentityTests : KitTestContext
         section.QuerySelectorAll("button.mud-button-text").Should().NotBeEmpty();
         // F-148 BR7/BR8 (AC11): the action is the shortcut, with its compact variant and a disabled one.
         section.QuerySelectorAll(".app-action:not(.app-action-compact) .app-action-key:not([disabled])").Should().ContainSingle("the shortcut");
-        section.QuerySelectorAll(".app-action.app-action-compact .app-action-key").Should().ContainSingle("the compact variant");
-        section.QuerySelectorAll(".app-action-disabled .app-action-key[disabled]").Should().ContainSingle("the disabled shortcut");
+        section.QuerySelectorAll(".app-action.app-action-compact .app-action-key").Should().HaveCount(2, "the compact variant and the busy one (F-126)");
+        section.QuerySelectorAll(".app-action-disabled .app-action-key[disabled]").Should().HaveCount(2, "the disabled shortcut and the busy key (F-126)");
         section.QuerySelectorAll(".app-action-ctrl, .app-action-alt").Should().HaveCount(4, "the shortcut and the disabled one show Ctrl and Alt");
         section.QuerySelectorAll("button.mud-button-filled-tertiary").Should().BeEmpty("the action is the shortcut component, not a tertiary MudButton");
         section.QuerySelectorAll("button.mud-button-filled-error, button.mud-button-outlined-error").Should().NotBeEmpty();

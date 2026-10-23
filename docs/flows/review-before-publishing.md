@@ -1,7 +1,7 @@
 ---
 title: Review before publishing
 summary: How a curator sends a complete draft for review, how a reviewer approves or rejects it, what the frozen state refuses and what the history records.
-items: [F-105]
+items: [F-105, F-126]
 ---
 # Review before publishing
 
@@ -16,7 +16,7 @@ A curator with `questions.manage` opens a saved, complete draft at `/admin/quest
 3. The reviewer opens the queue (`GET /api/v1/question-bank/review-queue`): the questions in review, oldest latest send first, zero-based pages capped at 100, no search or filter.
 4. The review screen reads `GET .../review-queue/{id}` (a `QuestionResponse`, with `SubmittedAt` while in review; a question that is not in review answers 409 `question.not_in_review`) and shows the question as a student sees it, with the key and the explanation always shown, and the classification beside it. Nothing there edits content.
 5. **Approve** (`POST .../review-queue/{id}/approve`, optional note) publishes it exactly as a direct publish does: the same completeness check, status `Published` and the version F-98 makes (the note is also the reason of the version when the answer key moved since the latest one); an `Approved` entry holds the trimmed note. **Reject** (`POST .../reject`, required reason) makes it a draft again with a `Rejected` entry; there is no `Rejected` status. Both send the `SubmittedAt` the reviewer saw.
-6. The curator sees the rejection reason in the Publication card (while the latest entry is that rejection) and the whole history in the **Review history** card (`GET .../questions/{id}/reviews`, oldest first, shown newest first), fixes the draft and sends it again.
+6. The curator sees the rejection reason in the Publication block of the aside (while the latest entry is that rejection) and the whole history in the **Review history** card (`GET .../questions/{id}/reviews`, oldest first, shown newest first), fixes the draft and sends it again.
 
 ```mermaid
 flowchart LR
@@ -38,7 +38,9 @@ flowchart LR
 - `questions.review` is seeded to `Curator` through the module's `PermissionCatalog.InitialGrants`, applied by Identity in the start that creates the permission row; `Admin` has every permission. The row and the grant are added in the same commit.
 
 ## Wireframe
-#### Question form, Publication card
+#### Question form, Publication block
+Since F-126 the block is in the aside beside the form (stacked under it below 1280px), not a card below it; its buttons are one per line there and Publish is the amber key. The frame is in [question-form-composition.md](question-form-composition.md). The contents below are unchanged.
+Mockup: [F-126-question-form-new-composition.html](../features/mockups/F-126-question-form-new-composition.html)
 ```text
 +--------------------------------------------------------+
 | Publication                                            |

@@ -165,8 +165,9 @@ Use para digitar todas as questões de uma prova anterior de uma vez, sem reabri
 Os cinco tipos de questão podem ser transcritos. O contador existe apenas na tela: se você sair e voltar, ele recomeça em 1 e o número sugerido segue o que já está salvo.
 
 ### Publicar e despublicar
-1. Abra a questão e veja o cartão **Publicação**, abaixo do formulário.
-2. **Publicar** fica disponível quando a questão está salva e a lista está completa: tópico, idioma,
+1. Abra a questão e veja o bloco **Publicação**, na coluna **Resumo** ao lado do formulário (abaixo do formulário,
+   quando a janela tem menos de 1280 px). As seções do formulário são numeradas de 1 a 6.
+2. **Publicar** é o botão âmbar da tela, só em um rascunho salvo. Fica disponível quando a questão está salva e a lista está completa: tópico, idioma,
    enunciado, de duas a cinco alternativas, todas com texto e exatamente uma correta (numa questão
    certo/errado: o gabarito definido; numa de múltiplas respostas: de três a cinco alternativas, ao menos duas
    corretas e ao menos uma errada; numa de associação: de 2 a 8 itens, ao menos tantas correspondências, todos
@@ -178,21 +179,21 @@ Os cinco tipos de questão podem ser transcritos. O contador existe apenas na te
 ### Enviar para revisão
 A publicação direta continua como está. Enviar para revisão é um segundo caminho: a questão só é publicada
 depois que outra pessoa, com a permissão "Revisar questões", a aprova.
-1. Abra um rascunho salvo e, no cartão **Publicação**, escolha **Enviar para revisão**. O botão fica
+1. Abra um rascunho salvo e, no bloco **Publicação**, escolha **Enviar para revisão**. O botão fica
    desabilitado pelos mesmos motivos de **Publicar**: alterações não salvas e lista "Antes de publicar"
    incompleta; a linha de motivo embaixo vale para os dois.
 2. A questão passa a **Em revisão**: um aviso amarelo diz que ela não pode ser editada, todos os campos ficam
-   só para leitura e o cartão mostra desde quando ela espera um revisor.
+   só para leitura e o bloco mostra desde quando ela espera um revisor.
 3. Enquanto estiver em revisão, a questão não pode ser salva, publicada, despublicada nem excluída, e a lista
    não oferece Publicar nem Despublicar para ela. **Visualizar como aluno** e o histórico continuam
    funcionando. Um tópico usado só por uma questão em revisão também não pode ser excluído.
 4. Para mudar algo, escolha **Retirar da revisão**. Não pede motivo: a questão volta a rascunho, com o mesmo
    conteúdo, e pode ser editada.
-5. Se o revisor **rejeitar**, a questão volta a rascunho e um aviso azul no cartão **Publicação** mostra a data
+5. Se o revisor **rejeitar**, a questão volta a rascunho e um aviso azul no bloco **Publicação** mostra a data
    e o motivo da rejeição. Corrija e envie de novo; o aviso some no próximo envio.
 6. Se o revisor **aprovar**, a questão é publicada na hora (versão 1), com a observação do revisor, se houver,
    guardada no histórico.
-7. O cartão **Histórico de revisão**, entre os cartões **Publicação** e **Histórico**, lista da mais nova para
+7. O cartão **Histórico de revisão**, abaixo do formulário e antes do cartão **Histórico**, lista da mais nova para
    a mais antiga cada envio, retirada, aprovação e rejeição, com a data e o motivo ou a observação. Ele só
    aparece quando a questão já teve alguma dessas etapas. O nome de quem agiu é guardado, mas ainda não é
    exibido.
@@ -218,7 +219,7 @@ mudou e o motivo.
    remover uma lacuna, ou acrescentar, remover ou trocar uma resposta aceita, conta como troca; mudar o texto em
    volta dos marcadores, a ordem deles, a ordem das respostas ou só as maiúsculas de uma resposta não.
 5. Se o gabarito mudou enquanto a questão era rascunho, **Publicar** é recusado na primeira vez com "Escreva o
-   motivo da troca de gabarito." O campo de motivo aparece no cartão **Publicação**; digite-o e escolha
+   motivo da troca de gabarito." O campo de motivo aparece no bloco **Publicação**, acima dos botões; digite-o e escolha
    **Publicar** de novo.
 6. No cartão **Histórico**, escolha **Ver** numa linha para abrir aquela versão como foi registrada, só para
    leitura. A resposta correta fica oculta até **Mostrar resposta**. A versão atual leva a marca **Atual**.
@@ -230,11 +231,11 @@ Versões nunca são editadas nem removidas. O nome de quem fez a mudança é gua
 ### Anular e reintegrar uma questão
 Quando a banca de uma prova anula uma questão, registre isso para que a prática deixe de usá-la. A questão
 continua no banco, na edição e no histórico; só a situação dela muda.
-1. Abra uma questão **publicada** e olhe o cartão **Publicação**. Um rascunho não pode ser anulado.
-2. Escolha **Anular questão**. Se o formulário tem alterações não salvas, o botão fica desabilitado e o cartão
+1. Abra uma questão **publicada** e olhe o bloco **Publicação**. Um rascunho não pode ser anulado.
+2. Escolha **Anular questão**. Se o formulário tem alterações não salvas, o botão fica desabilitado e o bloco
    diz "Salve suas alterações primeiro."
 3. Na janela, escreva o **motivo** (até 500 caracteres; é obrigatório) e escolha **Anular**. A questão passa a
-   **Anulada**: um aviso amarelo no alto diz que ela não pode ser editada, o cartão mostra a data e o motivo,
+   **Anulada**: um aviso amarelo no alto diz que ela não pode ser editada, o bloco mostra a data e o motivo,
    todos os campos ficam só para leitura e o cartão Histórico ganha uma linha "Anulada" com o motivo.
 4. Enquanto estiver anulada, a questão não pode ser salva, publicada, despublicada nem excluída, e a lista não
    oferece Publicar nem Despublicar para ela. **Visualizar como aluno** continua funcionando e mostra a data e

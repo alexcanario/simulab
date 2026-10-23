@@ -10,6 +10,7 @@
 <AppSectionCard Id="question-section-blanks"
                 Title="@L["Questions.Section.Blanks"]"
                 Icon="@AppIcons.FillInTheBlanks"
+                Number="SectionNumber"
                 Subtitle="@L["Questions.Section.Blanks.Subtitle"]">
     <div role="group" aria-describedby="question-blanks-description">
         @if (Markers.Count == 0)
@@ -87,6 +88,9 @@
 
     /// <summary>The answers typed per blank number, owned by the form and kept across a change of type.</summary>
     [Parameter, EditorRequired] public Dictionary<int, List<string>> Answers { get; set; } = [];
+
+    /// <summary>F-126: the step number the page gives the section (5), drawn by the section card.</summary>
+    [Parameter] public int? SectionNumber { get; set; }
 
     /// <summary>F-101, F-105: an annulled question or one in review is read only.</summary>
     [Parameter] public bool Frozen { get; set; }

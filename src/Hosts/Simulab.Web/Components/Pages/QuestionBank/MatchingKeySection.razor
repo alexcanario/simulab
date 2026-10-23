@@ -10,6 +10,7 @@
 <AppSectionCard Id="question-section-matching"
                 Title="@L["Questions.Section.Matching"]"
                 Icon="@AppIcons.Matching"
+                Number="SectionNumber"
                 Subtitle="@L["Questions.Section.Matching.Subtitle"]">
     <div class="app-matching-columns" role="group" aria-describedby="question-matching-description">
         <div>
@@ -166,6 +167,9 @@
 
     /// <summary>The left column, owned by the form.</summary>
     [Parameter, EditorRequired] public List<MatchItemDraft> Items { get; set; } = [];
+
+    /// <summary>F-126: the step number the page gives the section (5), drawn by the section card.</summary>
+    [Parameter] public int? SectionNumber { get; set; }
 
     /// <summary>F-101, F-105: an annulled question or one in review is read only.</summary>
     [Parameter] public bool Frozen { get; set; }

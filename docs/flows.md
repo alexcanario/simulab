@@ -4,13 +4,14 @@
 | Page | Summary | Items |
 |---|---|---|
 | [Accepting a new version of the legal documents](flows/accept-new-legal-version.md) | How a signed-in user who has not accepted the current terms or privacy policy is stopped, shown what changed and recorded as accepting it. | F-85 |
-| [Annul and reinstate a question](flows/annul-question.md) | How a curator annuls a published question and reinstates it, what the frozen state refuses, and the versions each step records. | F-101 |
+| [Annul and reinstate a question](flows/annul-question.md) | How a curator annuls a published question and reinstates it, what the frozen state refuses, and the versions each step records. | F-101, F-126 |
 | [Author and publish a multiple-answer question](flows/multiple-answer-questions.md) | How a curator writes a question with several correct options, what a draft and a published one need, how its key change is versioned and where the type is declared. | F-104 |
 | [Brand identity and theme](flows/brand-identity-theme.md) | How the Control Alt Systems identity (palette v2) reaches every screen from one theme, how the keycap buttons, the link role, the action shortcut, borders and fonts are styled on MudBlazor's classes, and which tests hold each value. | F-125, F-148 |
 | [Fill-in-the-blanks questions](flows/fill-in-the-blanks-questions.md) | How a curator authors, publishes, versions and previews a fill-in-the-blanks question, how markers and blanks form the key, and the one rule that compares a typed answer. | F-107 |
 | [Matching questions](flows/matching-questions.md) | How a curator authors, publishes, versions and previews a matching question, and where its key lives. | F-106 |
 | [Put images in questions](flows/images-in-questions.md) | How a curator inserts, removes and sees a picture in a statement, an option or a base text, what the Api stores and refuses, and when a picture's file is deleted. | F-103 |
-| [Review before publishing](flows/review-before-publishing.md) | How a curator sends a complete draft for review, how a reviewer approves or rejects it, what the frozen state refuses and what the history records. | F-105 |
+| [Question form composition](flows/question-form-composition.md) | How the question form is framed — six numbered sections, one aside that holds the state and every publication action, and Publish as the screen's single amber action. | F-126 |
+| [Review before publishing](flows/review-before-publishing.md) | How a curator sends a complete draft for review, how a reviewer approves or rejects it, what the frozen state refuses and what the history records. | F-105, F-126 |
 | [Rotating the OpenIddict certificates without signing users out](flows/rotate-openiddict-certificates.md) | How a certificate renewal keeps sessions, what the overlap window costs and how to cut an old certificate off. | F-84 |
 | [Search the back-office exam list](flows/exam-list-search.md) | How an editor finds an exam in /admin/exams by a word of its name, its authority or its place, word by word, and the one behavior that changed. | F-80 |
 | [See where a subject or topic is used](flows/subject-topic-where-used.md) | How the "Where used" dialog gathers the live notice subjects that map a subject or topic and each module's count for a topic, and where each row leads. | F-90 |

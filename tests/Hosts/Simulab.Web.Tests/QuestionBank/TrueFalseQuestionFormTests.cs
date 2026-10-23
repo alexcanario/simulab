@@ -90,7 +90,7 @@ public sealed class TrueFalseQuestionFormTests : QuestionPageTestContext
         page.Find("#question-type-TrueFalse").Click();
 
         page.WaitForAssertion(() => Headings(page).Should().Equal(
-            "Classification", "Origin", "Statement", "Base text", "Answer key", "Explanation", "Publication"));
+            "Classification", "Origin", "Statement", "Base text", "Answer key", "Explanation"));
         page.FindAll("#question-section-options-title").Should().BeEmpty();
         page.Find("#question-true-false-key").GetAttribute("role").Should().Be("radiogroup");
         page.Find("#question-true-false-key-True").TextContent.Should().Contain("True");
