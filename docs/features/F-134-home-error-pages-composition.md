@@ -1,7 +1,7 @@
 ---
 feature: F-134
 epic: Foundation and identity
-status: approved
+status: building
 board: 185
 version: 1
 ---
@@ -181,6 +181,9 @@ Give the pages every visitor meets first or in trouble (home, error, not found) 
 - 2026-10-23 — Try again reloads the address (`NavigationManager.Refresh(forceReload: true)`) — the handler re-executes `/Error` and the original URL stays in the bar — Claude
 - 2026-10-23 — Home cards reuse the registry `NavigationItems` and `AppSectionCard`, so Home and the menu cannot disagree — Claude
 - 2026-10-23 — No wireframe-only mockup file: the screens use kit components only, so the text wireframes decide them; `/agile:screen F-134` is still available before approval — Claude
+
+- 2026-10-23: plan — 1 `AppPageState` kit component + gallery example + css → AC10; 2 not-found (`NotFoundContent`) on it → AC8, AC9; 3 error page on it: amber "Try again", "Go to home", request ID, compact under 360px → AC5, AC6, AC7; 4 Home signed out (welcome, notice, sign-in and create-account) → AC1; 5 Home signed in (section cards from `NavigationItems`) → AC2, AC3, AC4; 6 `/dev/ai` as two cards → AC11, AC12; 7 scans (one amber action, no literal colour, contrast inherited) and the three locales → AC13, AC14, AC15; 8 flow page `docs/flows/home-and-error-pages.md` → `techdocs.js check`
+- 2026-10-23: the pre-existing `ActionColourScopeTests.AllowedPages` gets `/Error.razor` (its comment says each screen item adds its own) — Claude
 
 ## Out of scope
 - The gallery `/dev/ui` beyond the `AppPageState` example (F-125).
