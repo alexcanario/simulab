@@ -1034,7 +1034,8 @@
   <data name="RichText.Hint.Keyboard" xml:space="preserve"><value>Tab leaves the editor.</value></data>
   <data name="Gallery.Section.RichText" xml:space="preserve"><value>Rich text field</value></data>
   <data name="Gallery.Section.Buttons" xml:space="preserve"><value>Buttons</value></data>
-  <data name="Gallery.Buttons.Hint" xml:space="preserve"><value>The four variants of the brand: primary, secondary, text and the orange action, one per screen. A page sets only Variant and Color; the look comes from the kit.</value></data>
+  <data name="Gallery.Buttons.Hint" xml:space="preserve"><value>The four variants of the brand: primary, secondary, text and the amber action, one per screen. A page sets only Variant and Color; the look comes from the kit.</value></data>
+  <data name="Gallery.Buttons.ActionTitle" xml:space="preserve"><value>Action (one per screen): the shortcut, and the compact variant for areas narrower than 360px and toolbars.</value></data>
   <data name="Gallery.Buttons.Variants" xml:space="preserve"><value>Variants</value></data>
   <data name="Gallery.Buttons.Small" xml:space="preserve"><value>Small size</value></data>
   <data name="Gallery.Buttons.States" xml:space="preserve"><value>States</value></data>

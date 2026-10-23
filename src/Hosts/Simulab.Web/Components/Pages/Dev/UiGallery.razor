@@ -877,9 +877,14 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary">@L["Common.Save"]</MudButton>
         <MudButton Variant="Variant.Outlined">@L["Gallery.Buttons.Filter"]</MudButton>
         <MudButton Variant="Variant.Text" Color="Color.Primary">@L["Common.Cancel"]</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Tertiary">@L["Gallery.Buttons.Action"]</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@AppIcons.Delete">@L["Common.Delete"]</MudButton>
         <MudButton Variant="Variant.Outlined" Color="Color.Error">@L["Common.Delete"]</MudButton>
+    </div>
+    @* F-148, BR7 and BR8: the action is the shortcut, one per screen; no routed page uses it yet. *@
+    <p class="gallery-state-caption">@L["Gallery.Buttons.ActionTitle"]</p>
+    <div class="gallery-button-row">
+        <AppActionButton Label="@L["Gallery.Buttons.Action"]" />
+        <AppActionButton Label="@L["Gallery.Buttons.Action"]" Compact="true" />
     </div>
     <p class="gallery-state-caption">@L["Gallery.Buttons.Small"]</p>
     <div class="gallery-button-row">
@@ -898,6 +903,7 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="true">@L["Common.Save"]</MudButton>
         <MudButton Variant="Variant.Outlined" Disabled="true">@L["Gallery.Buttons.Filter"]</MudButton>
         <MudButton Variant="Variant.Text" Color="Color.Primary" Disabled="true">@L["Common.Cancel"]</MudButton>
+        <AppActionButton Label="@L["Gallery.Buttons.Action"]" Disabled="true" />
     </div>
 </section>
 
@@ -926,7 +932,7 @@
         @foreach (var (role, colour) in PaletteRoles)
         {
             <li class="gallery-swatch" data-role="@role">
-                <span class="gallery-swatch-chip" style="background-color: var(--mud-palette-@role)" aria-hidden="true"></span>
+                <span class="gallery-swatch-chip" style="background-color: @(role == "link" ? "var(--app-link)" : $"var(--mud-palette-{role})")" aria-hidden="true"></span>
                 <code>@role</code>
                 <code>@Hex(colour)</code>
             </li>
@@ -953,7 +959,8 @@
             Palette palette = ThemeState.IsDarkMode ? Identity.PaletteDark : Identity.PaletteLight;
             return
             [
-                ("primary", palette.Primary.ToString()), ("info", palette.Info.ToString()), ("secondary", palette.Secondary.ToString()),
+                ("primary", palette.Primary.ToString()), ("info", palette.Info.ToString()),
+                ("link", ThemeState.IsDarkMode ? SimulabTheme.DarkLink : SimulabTheme.LightLink), ("secondary", palette.Secondary.ToString()),
                 ("tertiary", palette.Tertiary.ToString()), ("success", palette.Success.ToString()), ("warning", palette.Warning.ToString()),
                 ("error", palette.Error.ToString()), ("background", palette.Background.ToString()), ("surface", palette.Surface.ToString()),
                 ("background-gray", palette.BackgroundGray.ToString()), ("text-primary", palette.TextPrimary.ToString()),

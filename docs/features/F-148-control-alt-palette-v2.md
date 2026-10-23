@@ -106,6 +106,9 @@ Give every screen the new Control Alt Systems colours in the one place that alre
 - AC13 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en) and the missing-key test is green.
 
 ## Criterion → test
+
+Tests locked: 95b68456c88cd6ede3830be9734854e8dbc0141c (11 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `ApprovedPaletteTests` (`Role_HoldsTheApprovedValue`, `KeycapEdges_HoldTheApprovedValues`, `LinkAndBrandName_HoldTheApprovedValues`); `IdentityTokensTests` (`Colours_EqualTheThemeInBothModes`, `DesignMd_FrontMatterGivesTheValueOfEveryToken`) |
@@ -169,6 +172,9 @@ Light / dark. Hover tones (the `*Darken` slots) and the keycap edges not listed 
 - 2026-10-22 — No new package; the old item mockups under `docs/features/mockups/` keep their colours (historical records) — Claude
 - 2026-10-22 — Manual: `docs/manual/pt-BR/getting-around.md` (lines 13, 14 and 16) names the primary button and the email button "azul-escuro" and the app bar white; navy `#0F3266` is still a dark blue, so those lines stay true and the manual is unchanged. The build re-reads them against the screen; if one is false, it is fixed in pt-BR only (pt-PT and en are frozen, F-124) — Claude
 - 2026-10-22: plan — 1 tests first: bring the F-125 palette, contrast, tokens, brand, email and gallery tests to v2 values and add the action shortcut, link, amber edge, SVG, ADR tests → red, `test(F-148)` commit and lock; 2 `SimulabTheme` palettes and `SimulabThemeProvider` (`link`, edges incl. primary) → AC1, AC2; 3 `app.css` buttons, links, brand name via variables → AC3, AC4, AC8; 4 brand SVGs, `MainLayout`, `EmailHtml` → AC8, AC9, AC10; 5 `AppActionButton` + `AppIcons.RestartAlt` + css + gallery + resources in three locales → AC5, AC6, AC7, AC11, AC13; 6 `identity.tokens.json`, `DESIGN.md`, ADR-0007, ADR-0006 line, glossary, flow page `brand-identity-theme.md` → AC1, AC12; 7 gate, coverage table, review/scan, validation script.
+- 2026-10-23: tests unlocked (owner chose "Destravar e corrigir"): `TealAndAmber_CarryInkNeverWhite` compared an rgba string with a hex and `Disabled_IsARealDisabledAndMarksTheWholeShortcut` clicked a disabled button; assertions of the criteria unchanged — Claude, asked
+- 2026-10-23: dark primary and info blue are fills, not text (4.12:1 on the dark surface): blue text in the app is the `link` role, and section titles and the auth app name take `--app-brand-name`; `ThemePaletteTests` and `ThemeContrastTests` no longer measure the dark primary as text — Claude
+- 2026-10-23: `link` and `brandName` are tokens of `identity.tokens.json` and `DESIGN.md` beside the palette's own (`IdentityTokensComparison` adds them to the theme side) — Claude
 
 ## Out of scope
 - Composition of each screen and which screen gets the amber action: F-126 to F-134.
@@ -185,3 +191,4 @@ Light / dark. Hover tones (the `*Darken` slots) and the keycap edges not listed 
 ## Events
 
 - 2026-10-22 question — asked 6, from context 3
+- 2026-10-23 blocked — test wrong: two locked tests had test-side errors: colour format compared with hex, and a click on a disabled button

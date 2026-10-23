@@ -14,6 +14,7 @@ public static class AppIcons
     public const string Search = Icons.Material.Outlined.Search;
     public const string More = Icons.Material.Outlined.MoreVert;
     public const string Retry = Icons.Material.Outlined.Refresh;
+    public const string Restart = Icons.Material.Outlined.RestartAlt;
     public const string Close = Icons.Material.Outlined.Close;
     public const string History = Icons.Material.Outlined.History;
     public const string Back = Icons.Material.Outlined.ArrowBack;

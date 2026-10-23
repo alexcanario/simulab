@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
-  "$description": "Simulab in the Control Alt Systems identity (F-125, ADR-0006), recorded from SimulabTheme. IdentityTokensTests keeps it equal to the theme.",
+  "$description": "Simulab in the Control Alt Systems identity, palette v2 (F-148, ADR-0007; F-125, ADR-0006), recorded from SimulabTheme. IdentityTokensTests keeps it equal to the theme.",
   "color": {
     "$type": "color",
     "primary": {
-      "$description": "Primary dark blue: filled primary button, selected item. Also a text colour on the page and the surface.",
-      "$value": { "colorSpace": "srgb", "components": [0.0235, 0.3098, 0.502], "hex": "#064F80" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1647, 0.6588, 0.9412], "hex": "#2AA8F0" } } }
+      "$description": "Primary: navy in light (the filled primary button, selected item), blue in dark. Not a text colour: text in blue is the link role.",
+      "$value": { "colorSpace": "srgb", "components": [0.0588, 0.1961, 0.4], "hex": "#0F3266" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.2784, 0.6275, 0.9216], "hex": "#47A0EB" } } }
     },
     "primaryContrastText": {
       "$description": "Text on a filled primary surface.",
@@ -15,58 +15,58 @@
     },
     "primaryDarken": {
       "$description": "Hover tone of the filled primary: 8% brighter.",
-      "$value": { "colorSpace": "srgb", "components": [0.0235, 0.3333, 0.5412], "hex": "#06558A" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1765, 0.7098, 1], "hex": "#2DB5FF" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.0627, 0.2118, 0.4314], "hex": "#10366E" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.302, 0.6784, 0.9961], "hex": "#4DADFE" } } }
     },
     "primaryLighten": {
       "$description": "Tint blue: informative highlights, the role badge, a selected radio card.",
-      "$value": { "colorSpace": "srgb", "components": [0.8627, 0.9216, 0.9686], "hex": "#DCEBF7" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0863, 0.2039, 0.3098], "hex": "#16344F" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.8627, 0.9098, 0.9608], "hex": "#DCE8F5" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.102, 0.2706, 0.5137], "hex": "#1A4583" } } }
     },
     "secondary": {
-      "$description": "Brand green (the Ctrl key).",
-      "$value": { "colorSpace": "srgb", "components": [0, 0.502, 0.4196], "hex": "#00806B" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0, 0.651, 0.549], "hex": "#00A68C" } } }
+      "$description": "Teal (the Ctrl key). Text on it is ink, never white.",
+      "$value": { "colorSpace": "srgb", "components": [0.102, 0.6196, 0.549], "hex": "#1A9E8C" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.102, 0.6196, 0.549], "hex": "#1A9E8C" } } }
     },
     "secondaryContrastText": {
-      "$description": "Text on a filled green surface.",
-      "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" },
+      "$description": "Ink on a filled teal surface.",
+      "$value": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" },
       "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" } } }
     },
     "secondaryDarken": {
-      "$description": "Hover tone of the green: 8% darker in light (white text keeps 4.5:1 on no brighter tone), 8% brighter in dark.",
-      "$value": { "colorSpace": "srgb", "components": [0, 0.4627, 0.3843], "hex": "#007662" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0, 0.702, 0.5922], "hex": "#00B397" } } }
+      "$description": "Hover tone of the teal: 8% brighter.",
+      "$value": { "colorSpace": "srgb", "components": [0.1098, 0.6706, 0.5922], "hex": "#1CAB97" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1098, 0.6706, 0.5922], "hex": "#1CAB97" } } }
     },
     "secondaryLighten": {
       "$description": "A light tone of the green, pinned in the theme; no kit component paints with it.",
-      "$value": { "colorSpace": "srgb", "components": [0, 0.6392, 0.5333], "hex": "#00A388" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0, 0.8, 0.6784], "hex": "#00CCAD" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.1294, 0.7725, 0.6863], "hex": "#21C5AF" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1294, 0.7725, 0.6863], "hex": "#21C5AF" } } }
     },
     "tertiary": {
-      "$description": "Brand orange: the one action of a screen (the restart key).",
-      "$value": { "colorSpace": "srgb", "components": [0.9098, 0.3961, 0.0392], "hex": "#E8650A" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 0.4784, 0.1804], "hex": "#FF7A2E" } } }
+      "$description": "Amber: the one action of a screen (the restart key). Its edge #B87410 identifies it in the light theme.",
+      "$value": { "colorSpace": "srgb", "components": [0.9608, 0.6275, 0.1255], "hex": "#F5A020" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.9608, 0.6275, 0.1255], "hex": "#F5A020" } } }
     },
     "tertiaryContrastText": {
-      "$description": "Ink on the orange action.",
+      "$description": "Ink on the amber action.",
       "$value": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" },
       "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" } } }
     },
     "tertiaryDarken": {
-      "$description": "Hover tone of the orange action: 8% brighter.",
-      "$value": { "colorSpace": "srgb", "components": [0.9843, 0.4275, 0.0431], "hex": "#FB6D0B" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 0.5176, 0.1961], "hex": "#FF8432" } } }
+      "$description": "Hover tone of the amber action: 8% brighter.",
+      "$value": { "colorSpace": "srgb", "components": [1, 0.6784, 0.1373], "hex": "#FFAD23" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 0.6784, 0.1373], "hex": "#FFAD23" } } }
     },
     "tertiaryLighten": {
       "$description": "Derived by MudBlazor; no kit component paints with it.",
-      "$value": { "colorSpace": "srgb", "components": [0.9647, 0.4706, 0.1176], "hex": "#F6781E" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 0.5686, 0.3216], "hex": "#FF9152" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.9647, 0.6902, 0.2745], "hex": "#F6B046" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.9647, 0.6902, 0.2745], "hex": "#F6B046" } } }
     },
     "info": {
-      "$description": "Brand blue (the Alt key): links, the text button, the focus ring, informational alerts.",
-      "$value": { "colorSpace": "srgb", "components": [0.0314, 0.4471, 0.7216], "hex": "#0872B8" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1647, 0.6588, 0.9412], "hex": "#2AA8F0" } } }
+      "$description": "Brand blue (the Alt key), the focus ring and informational alerts. Links are the link role.",
+      "$value": { "colorSpace": "srgb", "components": [0.1412, 0.4706, 0.7725], "hex": "#2478C5" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.2784, 0.6275, 0.9216], "hex": "#47A0EB" } } }
     },
     "infoContrastText": {
       "$description": "Text on a filled info surface.",
@@ -75,33 +75,33 @@
     },
     "infoDarken": {
       "$description": "Hover tone of the info fill: 8% darker in light, 8% brighter in dark.",
-      "$value": { "colorSpace": "srgb", "components": [0.0275, 0.4118, 0.6627], "hex": "#0769A9" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1765, 0.7098, 1], "hex": "#2DB5FF" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.1294, 0.4314, 0.7098], "hex": "#216EB5" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.302, 0.6784, 0.9961], "hex": "#4DADFE" } } }
     },
     "infoLighten": {
       "$description": "Derived by MudBlazor; no kit component paints with it.",
-      "$value": { "colorSpace": "srgb", "components": [0.0353, 0.5451, 0.8824], "hex": "#098BE1" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.2902, 0.7098, 0.949], "hex": "#4AB5F2" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.2235, 0.549, 0.8588], "hex": "#398CDB" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.4235, 0.7059, 0.9373], "hex": "#6CB4EF" } } }
     },
     "success": {
-      "$description": "The brand green, for what went right.",
-      "$value": { "colorSpace": "srgb", "components": [0, 0.502, 0.4196], "hex": "#00806B" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0, 0.651, 0.549], "hex": "#00A68C" } } }
+      "$description": "The teal, for what went right.",
+      "$value": { "colorSpace": "srgb", "components": [0.102, 0.6196, 0.549], "hex": "#1A9E8C" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.102, 0.6196, 0.549], "hex": "#1A9E8C" } } }
     },
     "successContrastText": {
-      "$description": "Text on a filled success alert.",
-      "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" },
+      "$description": "Ink on a filled success alert.",
+      "$value": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" },
       "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" } } }
     },
     "successDarken": {
-      "$description": "Hover tone of the success fill, as the green's.",
-      "$value": { "colorSpace": "srgb", "components": [0, 0.4627, 0.3843], "hex": "#007662" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0, 0.702, 0.5922], "hex": "#00B397" } } }
+      "$description": "Hover tone of the success fill, as the teal's.",
+      "$value": { "colorSpace": "srgb", "components": [0.1098, 0.6706, 0.5922], "hex": "#1CAB97" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1098, 0.6706, 0.5922], "hex": "#1CAB97" } } }
     },
     "successLighten": {
       "$description": "A light tone of the green, pinned in the theme; no kit component paints with it.",
-      "$value": { "colorSpace": "srgb", "components": [0, 0.6392, 0.5333], "hex": "#00A388" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0, 0.8, 0.6784], "hex": "#00CCAD" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.1294, 0.7725, 0.6863], "hex": "#21C5AF" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1294, 0.7725, 0.6863], "hex": "#21C5AF" } } }
     },
     "warning": {
       "$description": "Simulab's amber, kept apart from the orange action.",
@@ -124,9 +124,9 @@
       "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.9059, 0.6078, 0.1961], "hex": "#E79B32" } } }
     },
     "error": {
-      "$description": "Simulab's red: error text and the destructive button.",
-      "$value": { "colorSpace": "srgb", "components": [0.7451, 0.2157, 0.2157], "hex": "#BE3737" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.8784, 0.4235, 0.4235], "hex": "#E06C6C" } } }
+      "$description": "The design system's danger: error text and the destructive button.",
+      "$value": { "colorSpace": "srgb", "components": [0.7216, 0.1961, 0.1961], "hex": "#B83232" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 0.6118, 0.5804], "hex": "#FF9C94" } } }
     },
     "errorContrastText": {
       "$description": "Text on a filled destructive button.",
@@ -134,19 +134,19 @@
       "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" } } }
     },
     "errorDarken": {
-      "$description": "Hover tone of the destructive fill: 8% brighter.",
-      "$value": { "colorSpace": "srgb", "components": [0.8039, 0.2314, 0.2314], "hex": "#CD3B3B" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.949, 0.4588, 0.4588], "hex": "#F27575" } } }
+      "$description": "Hover tone of the destructive fill: 8% darker in light, 8% brighter in dark.",
+      "$value": { "colorSpace": "srgb", "components": [0.7804, 0.2118, 0.2118], "hex": "#C73636" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 0.6588, 0.6275], "hex": "#FFA8A0" } } }
     },
     "errorLighten": {
       "$description": "Derived by MudBlazor; no kit component paints with it.",
-      "$value": { "colorSpace": "srgb", "components": [0.7961, 0.302, 0.302], "hex": "#CB4D4D" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.902, 0.5373, 0.5373], "hex": "#E68989" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.8039, 0.2784, 0.2784], "hex": "#CD4747" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [1, 0.7373, 0.7216], "hex": "#FFBCB8" } } }
     },
     "textPrimary": {
       "$description": "Ink: body text and headings.",
       "$value": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.9569, 0.9647, 0.9765], "hex": "#F4F6F9" } } }
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.949, 0.9608, 0.9843], "hex": "#F2F5FB" } } }
     },
     "textSecondary": {
       "$description": "Ink-muted: helper text, captions, the company line of the app bar.",
@@ -165,28 +165,28 @@
     },
     "actionDisabledBackground": {
       "$description": "Fill of a disabled control (surface sunken).",
-      "$value": { "colorSpace": "srgb", "components": [0.9137, 0.9294, 0.949], "hex": "#E9EDF2" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0314, 0.0824, 0.1333], "hex": "#081522" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.902, 0.9255, 0.9608], "hex": "#E6ECF5" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0314, 0.098, 0.2196], "hex": "#081938" } } }
     },
     "background": {
       "$description": "The page.",
-      "$value": { "colorSpace": "srgb", "components": [0.9569, 0.9647, 0.9765], "hex": "#F4F6F9" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.949, 0.9608, 0.9843], "hex": "#F2F5FB" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0431, 0.1294, 0.2863], "hex": "#0B2149" } } }
     },
     "backgroundGray": {
       "$description": "Surface sunken: wells and the disabled fill.",
-      "$value": { "colorSpace": "srgb", "components": [0.9137, 0.9294, 0.949], "hex": "#E9EDF2" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0314, 0.0824, 0.1333], "hex": "#081522" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.902, 0.9255, 0.9608], "hex": "#E6ECF5" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0314, 0.098, 0.2196], "hex": "#081938" } } }
     },
     "surface": {
       "$description": "Cards, dialogs, menus and form panels.",
       "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0706, 0.149, 0.2275], "hex": "#12263A" } } }
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0706, 0.2196, 0.4353], "hex": "#12386F" } } }
     },
     "drawerBackground": {
-      "$description": "The sidebar: Simulab's navy in light, the sunken surface in dark.",
+      "$description": "The sidebar: the brand navy in light, the sunken surface in dark.",
       "$value": { "colorSpace": "srgb", "components": [0.0588, 0.1961, 0.4], "hex": "#0F3266" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0314, 0.0824, 0.1333], "hex": "#081522" } } }
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0314, 0.098, 0.2196], "hex": "#081938" } } }
     },
     "drawerText": {
       "$description": "Text in the sidebar: white at 92% in light, ink-muted in dark.",
@@ -201,101 +201,289 @@
     "appbarBackground": {
       "$description": "The app bar: white in light, the raised surface in dark.",
       "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#FFFFFF" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0706, 0.149, 0.2275], "hex": "#12263A" } } }
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.0706, 0.2196, 0.4353], "hex": "#12386F" } } }
     },
     "appbarText": {
       "$description": "Text and icons of the app bar (ink).",
       "$value": { "colorSpace": "srgb", "components": [0.0431, 0.1059, 0.1804], "hex": "#0B1B2E" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.9569, 0.9647, 0.9765], "hex": "#F4F6F9" } } }
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.949, 0.9608, 0.9843], "hex": "#F2F5FB" } } }
     },
     "linesDefault": {
       "$description": "Line: the border of an outlined paper.",
-      "$value": { "colorSpace": "srgb", "components": [0.8667, 0.8902, 0.9176], "hex": "#DDE3EA" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.149, 0.251, 0.3529], "hex": "#26405A" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.851, 0.8824, 0.9333], "hex": "#D9E1EE" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1412, 0.2863, 0.498], "hex": "#24497F" } } }
     },
     "linesInputs": {
       "$description": "Line-strong: the border of every field and of the secondary button; a control boundary (3:1).",
       "$value": { "colorSpace": "srgb", "components": [0.4196, 0.4863, 0.5686], "hex": "#6B7C91" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.4157, 0.5098, 0.6039], "hex": "#6A829A" } } }
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.498, 0.6078, 0.7529], "hex": "#7F9BC0" } } }
     },
     "tableLines": {
       "$description": "Line: table rules, decorative.",
-      "$value": { "colorSpace": "srgb", "components": [0.8667, 0.8902, 0.9176], "hex": "#DDE3EA" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.149, 0.251, 0.3529], "hex": "#26405A" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.851, 0.8824, 0.9333], "hex": "#D9E1EE" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1412, 0.2863, 0.498], "hex": "#24497F" } } }
     },
     "divider": {
       "$description": "Line: dividers and the 1px border around cards, the app bar, the sidebar, menus and dialogs.",
-      "$value": { "colorSpace": "srgb", "components": [0.8667, 0.8902, 0.9176], "hex": "#DDE3EA" },
-      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.149, 0.251, 0.3529], "hex": "#26405A" } } }
+      "$value": { "colorSpace": "srgb", "components": [0.851, 0.8824, 0.9333], "hex": "#D9E1EE" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.1412, 0.2863, 0.498], "hex": "#24497F" } } }
+    },
+    "link": {
+      "$description": "Link: text buttons and every link. A CSS variable (--app-link) written by SimulabThemeProvider; MudBlazor's palette has no slot for it.",
+      "$value": { "colorSpace": "srgb", "components": [0.1137, 0.3922, 0.6588], "hex": "#1D64A8" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.549, 0.7686, 0.9608], "hex": "#8CC4F5" } } }
+    },
+    "brandName": {
+      "$description": "The name \"Simulab\" in the app bar and the plus signs of the action shortcut (--app-brand-name): navy in light, ink in dark.",
+      "$value": { "colorSpace": "srgb", "components": [0.0588, 0.1961, 0.4], "hex": "#0F3266" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.949, 0.9608, 0.9843], "hex": "#F2F5FB" } } }
     }
   },
   "typography": {
     "fontFamily": {
       "$type": "fontFamily",
-      "$value": ["Bricolage Grotesque", "system-ui", "sans-serif"]
+      "$value": [
+        "Bricolage Grotesque",
+        "system-ui",
+        "sans-serif"
+      ]
     },
-    "fontWeight": { "$type": "fontWeight", "$value": 500 },
+    "fontWeight": {
+      "$type": "fontWeight",
+      "$value": 500
+    },
     "h1": {
-      "fontSize": { "$type": "dimension", "$value": { "value": 1.75, "unit": "rem" } },
-      "fontWeight": { "$type": "fontWeight", "$value": 800 },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 2, "unit": "rem" } },
-      "letterSpacing": { "$type": "dimension", "$value": { "value": -0.02, "unit": "em" } }
+      "fontSize": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1.75,
+          "unit": "rem"
+        }
+      },
+      "fontWeight": {
+        "$type": "fontWeight",
+        "$value": 800
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 2,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "dimension",
+        "$value": {
+          "value": -0.02,
+          "unit": "em"
+        }
+      }
     },
     "h2": {
-      "fontSize": { "$type": "dimension", "$value": { "value": 1.25, "unit": "rem" } },
-      "fontWeight": { "$type": "fontWeight", "$value": 800 },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 1.5, "unit": "rem" } },
-      "letterSpacing": { "$type": "dimension", "$value": { "value": -0.01, "unit": "em" } }
+      "fontSize": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1.25,
+          "unit": "rem"
+        }
+      },
+      "fontWeight": {
+        "$type": "fontWeight",
+        "$value": 800
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1.5,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "dimension",
+        "$value": {
+          "value": -0.01,
+          "unit": "em"
+        }
+      }
     },
     "h3": {
-      "fontSize": { "$type": "dimension", "$value": { "value": 1, "unit": "rem" } },
-      "fontWeight": { "$type": "fontWeight", "$value": 800 },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 1.25, "unit": "rem" } },
-      "letterSpacing": { "$type": "dimension", "$value": { "value": -0.01, "unit": "em" } }
+      "fontSize": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1,
+          "unit": "rem"
+        }
+      },
+      "fontWeight": {
+        "$type": "fontWeight",
+        "$value": 800
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1.25,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "dimension",
+        "$value": {
+          "value": -0.01,
+          "unit": "em"
+        }
+      }
     },
     "subtitle1": {
-      "fontWeight": { "$type": "fontWeight", "$value": 800 },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 1.25, "unit": "rem" } },
-      "letterSpacing": { "$type": "dimension", "$value": { "value": -0.01, "unit": "em" } }
+      "fontWeight": {
+        "$type": "fontWeight",
+        "$value": 800
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1.25,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "dimension",
+        "$value": {
+          "value": -0.01,
+          "unit": "em"
+        }
+      }
     },
     "body1": {
-      "fontSize": { "$type": "dimension", "$value": { "value": 0.9375, "unit": "rem" } },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 1.375, "unit": "rem" } },
-      "letterSpacing": { "$type": "number", "$value": 0 }
+      "fontSize": {
+        "$type": "dimension",
+        "$value": {
+          "value": 0.9375,
+          "unit": "rem"
+        }
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1.375,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "number",
+        "$value": 0
+      }
     },
     "body2": {
-      "fontSize": { "$type": "dimension", "$value": { "value": 0.875, "unit": "rem" } },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 1.25, "unit": "rem" } },
-      "letterSpacing": { "$type": "number", "$value": 0 }
+      "fontSize": {
+        "$type": "dimension",
+        "$value": {
+          "value": 0.875,
+          "unit": "rem"
+        }
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1.25,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "number",
+        "$value": 0
+      }
     },
     "button": {
-      "fontSize": { "$type": "dimension", "$value": { "value": 0.875, "unit": "rem" } },
-      "fontWeight": { "$type": "fontWeight", "$value": 800 },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 1.25, "unit": "rem" } },
-      "letterSpacing": { "$type": "number", "$value": 0 },
-      "textTransform": { "$type": "string", "$value": "none" }
+      "fontSize": {
+        "$type": "dimension",
+        "$value": {
+          "value": 0.875,
+          "unit": "rem"
+        }
+      },
+      "fontWeight": {
+        "$type": "fontWeight",
+        "$value": 800
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1.25,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "number",
+        "$value": 0
+      },
+      "textTransform": {
+        "$type": "string",
+        "$value": "none"
+      }
     },
     "caption": {
-      "fontSize": { "$type": "dimension", "$value": { "value": 0.75, "unit": "rem" } },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 1, "unit": "rem" } },
-      "letterSpacing": { "$type": "number", "$value": 0 }
+      "fontSize": {
+        "$type": "dimension",
+        "$value": {
+          "value": 0.75,
+          "unit": "rem"
+        }
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "number",
+        "$value": 0
+      }
     },
     "overline": {
-      "fontSize": { "$type": "dimension", "$value": { "value": 0.75, "unit": "rem" } },
-      "fontWeight": { "$type": "fontWeight", "$value": 800 },
-      "lineHeight": { "$type": "dimension", "$value": { "value": 1, "unit": "rem" } },
-      "letterSpacing": { "$type": "dimension", "$value": { "value": 0.04, "unit": "em" } }
+      "fontSize": {
+        "$type": "dimension",
+        "$value": {
+          "value": 0.75,
+          "unit": "rem"
+        }
+      },
+      "fontWeight": {
+        "$type": "fontWeight",
+        "$value": 800
+      },
+      "lineHeight": {
+        "$type": "dimension",
+        "$value": {
+          "value": 1,
+          "unit": "rem"
+        }
+      },
+      "letterSpacing": {
+        "$type": "dimension",
+        "$value": {
+          "value": 0.04,
+          "unit": "em"
+        }
+      }
     }
   },
   "shape": {
-    "borderRadius": { "$type": "dimension", "$value": { "value": 12, "unit": "px" } }
+    "borderRadius": {
+      "$type": "dimension",
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      }
+    }
   },
   "$extensions": {
     "agile": {
       "iconFamily": "Material Outlined",
       "source": "file",
       "sourceRef": "src/Hosts/Simulab.Web/Theme/SimulabTheme.cs",
-      "date": "2026-10-18"
+      "date": "2026-10-22"
     }
   }
 }

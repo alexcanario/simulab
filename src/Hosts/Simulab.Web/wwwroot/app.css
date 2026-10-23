@@ -205,10 +205,10 @@ code, kbd, pre, samp {
     color: var(--mud-palette-text-secondary);
 }
 
-/* Text: a link — no fill, the info blue, underlined. A destructive text button keeps the error colour. */
+/* Text: a link — no fill, the link role (F-148, BR6), underlined. A destructive text button keeps the error colour. */
 .mud-button-root.mud-button-text {
     background-color: transparent;
-    color: var(--mud-palette-info);
+    color: var(--app-link);
     text-decoration: underline;
     text-underline-offset: 3px;
 }
@@ -223,6 +223,109 @@ code, kbd, pre, samp {
 
 @media (prefers-reduced-motion: reduce) {
     .mud-button-root.mud-button {
+        transition: none;
+    }
+}
+
+/* ---- Action shortcut (F-148, BR8): Ctrl + Alt + the amber key, or the amber key alone (AppActionButton). One element is
+   clickable; Ctrl, Alt and the plus signs are decorative. It sits on the page, the surface or white, never on the sunken
+   fill or the tint. ---- */
+.app-action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-2);
+}
+
+.app-action-modkey {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--app-space-4);
+    border-radius: var(--app-radius-md);
+    font-size: var(--app-font-md);
+    font-weight: 800;
+    user-select: none;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+}
+
+.app-action-ctrl {
+    background-color: var(--mud-palette-secondary);
+    color: var(--mud-palette-secondary-text);
+    box-shadow: 0 var(--app-keycap-depth) 0 var(--app-keycap-secondary-edge);
+}
+
+.app-action-alt {
+    background-color: var(--mud-palette-info);
+    color: var(--mud-palette-info-text);
+    box-shadow: 0 var(--app-keycap-depth) 0 var(--app-keycap-info-edge);
+}
+
+.app-action-plus {
+    color: var(--app-brand-name);
+    font-weight: 800;
+}
+
+.app-action-key {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    min-height: 44px;
+    padding: 0 var(--app-space-5);
+    border: 0;
+    border-radius: var(--app-radius-md);
+    background-color: var(--mud-palette-tertiary);
+    color: var(--mud-palette-tertiary-text);
+    box-shadow: 0 var(--app-keycap-depth) 0 var(--app-keycap-tertiary-edge);
+    font: inherit;
+    font-weight: 800;
+    transition: background-color 150ms ease, transform 80ms ease, box-shadow 80ms ease;
+}
+
+.app-action-key:hover:not(:disabled) {
+    background-color: var(--mud-palette-tertiary-darken);
+}
+
+/* Pressed, the amber key moves down while its edge shrinks; in the shortcut Ctrl and Alt sink too. */
+.app-action-key:active:not(:disabled) {
+    transform: translateY(var(--app-keycap-press));
+    box-shadow: 0 var(--app-keycap-press) 0 var(--app-keycap-tertiary-edge);
+}
+
+.app-action:has(.app-action-key:active:not(:disabled)) .app-action-ctrl {
+    transform: translateY(var(--app-keycap-press));
+    box-shadow: 0 var(--app-keycap-press) 0 var(--app-keycap-secondary-edge);
+}
+
+.app-action:has(.app-action-key:active:not(:disabled)) .app-action-alt {
+    transform: translateY(var(--app-keycap-press));
+    box-shadow: 0 var(--app-keycap-press) 0 var(--app-keycap-info-edge);
+}
+
+.app-action-icon {
+    display: inline-flex;
+    transition: transform 0.4s ease;
+}
+
+.app-action-key:active:not(:disabled) .app-action-icon {
+    transform: rotate(200deg);
+}
+
+/* Disabled: the sunken fill, ink-muted text, no edge; Ctrl and Alt of a disabled shortcut sink to the same fill. */
+.app-action-key:disabled,
+.app-action-disabled .app-action-ctrl,
+.app-action-disabled .app-action-alt {
+    background-color: var(--mud-palette-background-gray);
+    color: var(--mud-palette-text-secondary);
+    box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-action-key,
+    .app-action-modkey {
+        transition: none;
+    }
+
+    .app-action-icon {
         transition: none;
     }
 }
@@ -455,7 +558,7 @@ code, kbd, pre, samp {
     margin: 0;
     font-size: var(--app-font-lg);
     font-weight: 600;
-    color: var(--mud-palette-primary);
+    color: var(--app-brand-name);
 }
 
 .app-section-card-subtitle {
@@ -748,7 +851,7 @@ code, kbd, pre, samp {
     background: none;
     border: 0;
     font: inherit;
-    color: var(--mud-palette-primary);
+    color: var(--app-link);
     cursor: pointer;
 }
 
@@ -909,7 +1012,7 @@ code, kbd, pre, samp {
     padding: var(--app-space-2) var(--app-space-3);
     border-radius: var(--app-radius-sm);
     background: var(--mud-palette-surface);
-    color: var(--mud-palette-primary);
+    color: var(--app-link);
     font-weight: 600;
     transform: translateY(-200%);
 }
@@ -943,6 +1046,7 @@ code, kbd, pre, samp {
 }
 
 .app-brand-name {
+    color: var(--app-brand-name);
     font-size: var(--app-font-lg);
     font-weight: 800;
     line-height: 1.25rem;
@@ -1063,7 +1167,7 @@ code, kbd, pre, samp {
 
 .app-auth-name {
     font-weight: 700;
-    color: var(--mud-palette-primary);
+    color: var(--app-brand-name);
 }
 
 .app-auth-main {
@@ -1119,9 +1223,9 @@ code, kbd, pre, samp {
     margin-top: var(--app-space-4);
 }
 
-/* The kit link (B-6): underlined, in the text colour of its surface, AA in both themes. */
+/* The kit link (B-6): underlined, in the link role (F-148, BR6), AA in both themes. */
 .app-link {
-    color: var(--mud-palette-text-primary);
+    color: var(--app-link);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
@@ -2229,7 +2333,7 @@ code, kbd, pre, samp {
 /* Pressed is the primary text on its lighten tone (4.79:1 light, 5.70:1 dark); the state is also aria-pressed. */
 .app-rt-frame .ql-toolbar.ql-snow .app-rt-btn[aria-pressed="true"] {
     background: var(--mud-palette-primary-lighten);
-    color: var(--mud-palette-primary);
+    color: var(--app-link);
 }
 
 .app-rt-frame .ql-toolbar.ql-snow .app-rt-btn:disabled {
@@ -2530,7 +2634,7 @@ code, kbd, pre, samp {
 }
 
 .app-question-content a {
-    color: var(--mud-palette-primary);
+    color: var(--app-link);
     text-decoration: underline;
 }
 
