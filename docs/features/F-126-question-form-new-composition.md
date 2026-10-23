@@ -264,6 +264,7 @@ No new colour and no new token. One new pairing of existing tokens, the section 
 - 2026-10-23 — The mockup of `/agile:screen` shows every state at 1280×720; the tallest state decides the fallback if the sticky aside is taller than the viewport — Claude
 - 2026-10-23 — The change-reason field (F-98) sits above the action buttons of the block — asked; owner chose the recommended option
 - 2026-10-23 — The "Status" summary row is removed from the question form's summary; the chip of the block is the one place for the status — asked; owner chose the recommended option
+- 2026-10-23 — The Publish key's arrow rests pointing down and turns up while the key is pressed (replaces the 200-degree press spin for this key); the kit takes it as an optional `IconRestRotation` of `AppActionButton`, the gallery keeps `Restart` with the spin — owner (screen review)
 - 2026-10-23 — Stitch offered — declined
 - 2026-10-23 — The kit draws the publication block's divider, heading and subtitle from `AppFormAside` parameters (`ContentTitle`, `ContentSubtitle`, `ContentId`); pages never draw section chrome by hand — Claude (ui rule)
 - 2026-10-23 — `AppSectionCard.Icon` stays `[EditorRequired]` and is not shown when `Number` is set: the history cards still need it, and a conditional requirement cannot be enforced at build time — Claude

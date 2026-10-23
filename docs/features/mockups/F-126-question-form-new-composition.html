@@ -145,6 +145,9 @@ a, button, [role="button"] { cursor: pointer; }
 .app-action-icon { display: inline-flex; transition: transform .4s ease; }
 .app-action-icon svg { width: 18px; height: 18px; }
 .app-action-key:active:not(:disabled) .app-action-icon { transform: rotate(200deg); }
+/* Publish: the arrow rests pointing down and turns up while the key is pressed (owner, 2026-10-23). */
+.app-action-icon.is-flipped { transform: rotate(180deg); }
+.app-action-key:active:not(:disabled) .app-action-icon.is-flipped { transform: rotate(360deg); }
 @media (prefers-reduced-motion: reduce) { .app-action-key, .app-action-icon { transition: none; } }
 
 /* ---- surfaces ---- */
@@ -698,7 +701,7 @@ function btn(o) {
   return `<button type="button" class="${cls.join(' ')}"${o.id ? ` id="${o.id}"` : ''}${o.disabled ? ' disabled' : ''}${o.describedBy ? ` aria-describedby="${o.describedBy}"` : ''}>${lead}<span>${esc(o.label)}</span></button>`;
 }
 function actionKey(o) {
-  const icon = o.busy ? '<span class="spinner" aria-hidden="true"></span>' : `<span class="app-action-icon" aria-hidden="true">${ic(o.icon)}</span>`;
+  const icon = o.busy ? '<span class="spinner" aria-hidden="true"></span>' : `<span class="app-action-icon${o.flip ? ' is-flipped' : ''}" aria-hidden="true">${ic(o.icon)}</span>`;
   return `<span class="app-action app-action-compact${o.disabled ? ' app-action-disabled' : ''}">
     <button type="button" class="app-action-key" id="${o.id}"${o.disabled ? ' disabled' : ''}${o.describedBy ? ` aria-describedby="${o.describedBy}"` : ''}>${icon}<span>${esc(o.label)}</span></button>
   </span>`;
@@ -794,7 +797,7 @@ function publicationBlock(c) {
   } else {
     const off = c.busy || reason !== null;
     h += btn({ id: 'question-send-for-review', icon: 'send', label: t('Questions.Action.SendForReview'), disabled: off, describedBy: reason ? 'question-publication-reason' : null });
-    h += actionKey({ id: 'question-publish', icon: 'publish', label: t('Questions.Action.Publish'), disabled: off, busy: c.busy, describedBy: reason ? 'question-publication-reason' : null });
+    h += actionKey({ id: 'question-publish', icon: 'publish', flip: true, label: t('Questions.Action.Publish'), disabled: off, busy: c.busy, describedBy: reason ? 'question-publication-reason' : null });
   }
   h += '</div>';
   if (c.status === 'Draft' && reason) h += `<p id="question-publication-reason" class="app-publication-reason">${esc(reason)}</p>`;
