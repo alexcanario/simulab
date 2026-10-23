@@ -1,7 +1,7 @@
 ---
 feature: F-148
 epic: Foundation and identity
-status: building
+status: validating
 board: 206
 version: 1
 ---
@@ -187,6 +187,85 @@ Light / dark. Hover tones (the `*Darken` slots) and the keycap edges not listed 
 - (none)
 
 ## Change notes
+
+## Validation script
+### English
+Needed to validate: you, on screen, in both themes, at desktop and phone width, and Docker Desktop running for the app host. Both are in place now (Docker Desktop was running during this build).
+
+1. Stop any app host you have open (a running one locks `bin/`), then start this item's app host from the worktree folder. It runs on its own database, `simulab_f148`, on the local PostgreSQL server; nothing lands in the shared `simulab` database. Wait until the Aspire dashboard address is printed, then open https://localhost:7125.
+
+```powershell
+cd D:\wt\simulab\f-148-control-alt-palette
+$env:Database__Name = "simulab_f148"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+```bash
+cd /d/wt/simulab/f-148-control-alt-palette
+Database__Name=simulab_f148 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+   Expected: a line `Dashboard: https://localhost:<port>/login?t=<token>`; https://localhost:7125 answers with the home page.
+2. The app bar (the bar at the top of every page) and the sidebar in the light theme:
+   - [ ] 2.1 The page is a pale blue-grey; the app bar is white with a thin line under it; "Simulab" is navy and "Control Alt Systems" is grey under it.
+   - [ ] 2.2 The brand symbol has three keys: teal Ctrl, blue Alt and an amber restart key. The browser tab shows the new app icon (amber key on navy).
+   - [ ] 2.3 The sidebar (left menu) is navy.
+3. The UI gallery: in the sidebar, under Development, click UI kit; the page "UI kit gallery" opens. Scroll to "Buttons".
+   - [ ] 3.1 Save is a navy key with white text and a grey edge under it; Filter has a grey 2px border; Cancel is an underlined blue link; Delete appears red, filled and outlined.
+   - [ ] 3.2 Under "Action (one per screen)": the shortcut shows a teal Ctrl key, a blue Alt key, two plus signs and an amber key with the restart icon and "Start exam"; the line below shows the amber key alone. The amber key has a darker amber edge under it, and its text and icon are dark navy, not white.
+   - [ ] 3.3 Point at Save (it turns a little brighter), hold the mouse button down on it (it sinks onto its edge); hold it down on the amber key of the shortcut: the amber key, Ctrl and Alt sink and the restart arrow turns half way.
+   - [ ] 3.4 In the disabled row (the row with the greyed buttons), all keys of the disabled shortcut are grey with no edge and the amber key does not react to the mouse.
+   - [ ] 3.5 "Palette" lists each role with its value, `link` included: primary `#0F3266`, link `#1D64A8`, secondary `#1A9E8C`, tertiary `#F5A020`, background `#F2F5FB`.
+4. The dark theme: click the theme switch (the moon at the top right).
+   - [ ] 4.1 The page turns deep navy, cards a lighter navy, the app bar takes the card colour, "Simulab" is light (not navy), the sidebar is the darkest navy and the brand symbol shows a lighter blue Alt key.
+   - [ ] 4.2 In the gallery, Save is a light blue key with dark text, Cancel is a light blue link, and "Palette" now shows primary `#47A0EB`, link `#8CC4F5` and background `#0B2149`.
+   - [ ] 4.3 Every text is easy to read on its background; the Alt key label of the shortcut is dark. Switch back to light with the theme switch.
+5. [ ] Phone width: open the browser developer tools (F12), turn on the device toolbar (Ctrl+Shift+M) and choose 375 px wide. The app bar keeps the symbol, "Simulab" and "Control Alt Systems" on one line each, nothing runs off the right edge, and the compact action (the amber key alone) is the one to use there: it fits the gallery column.
+6. [ ] Language: in the language switch (the globe at the top right) choose Português (Brasil). The gallery (sidebar > Desenvolvimento > Kit de interface) reads "Ação (uma por tela)" over the shortcut. Switch back to English.
+7. Keyboard only, on the UI gallery, without the mouse:
+   - [ ] 7.1 Press Tab from the top of the page: each control you reach shows a blue focus ring; the shortcut shows one ring, on the amber key only (Ctrl and Alt are skipped).
+   - [ ] 7.2 Tab to the amber key and hold Space: it sinks onto its edge; press Enter on Save: the button reacts.
+8. The emails: open https://localhost:7125/sign-up and create an account with an address of your choice (any, Mailpit catches it); then open Mailpit from the Aspire dashboard (the "mailpit" resource, its web link).
+   - [ ] 8.1 The verification email opens with "Simulab" and "Control Alt Systems" as text, then its heading; its button is navy (`#0F3266`) with white text.
+   - [ ] 8.2 At https://localhost:7125/forgot-password ask a reset for the same address: the reset email has the same top lines and the same button.
+
+### pt-BR
+Necessário para validar: você, na tela, nos dois temas, em largura de computador e de celular, e o Docker Desktop rodando para o app host. Os dois estão disponíveis agora (o Docker Desktop estava rodando durante esta construção).
+
+1. Pare qualquer app host que esteja aberto (um app host rodando trava a pasta `bin/`) e suba o app host deste item a partir da pasta do worktree. Ele roda no seu próprio banco, `simulab_f148`, no PostgreSQL local; nada cai no banco compartilhado `simulab`. Espere o endereço do painel do Aspire aparecer e abra https://localhost:7125.
+
+```powershell
+cd D:\wt\simulab\f-148-control-alt-palette
+$env:Database__Name = "simulab_f148"; dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+```bash
+cd /d/wt/simulab/f-148-control-alt-palette
+Database__Name=simulab_f148 dotnet run --project src/Hosts/Simulab.AppHost
+```
+
+   Esperado: uma linha `Dashboard: https://localhost:<porta>/login?t=<token>`; https://localhost:7125 responde com a página inicial.
+2. A barra superior (a barra no topo de toda página) e o menu lateral no tema claro:
+   - [ ] 2.1 A página é um cinza-azulado claro; a barra superior é branca com uma linha fina embaixo; "Simulab" está em azul-marinho e "Control Alt Systems" em cinza embaixo.
+   - [ ] 2.2 O símbolo da marca tem três teclas: Ctrl verde-água, Alt azul e a tecla âmbar de reiniciar. A aba do navegador mostra o ícone novo do app (tecla âmbar sobre azul-marinho).
+   - [ ] 2.3 O menu lateral (à esquerda) é azul-marinho.
+3. A galeria do kit: no menu lateral, em Desenvolvimento, clique em Kit de interface; abre a página da galeria. Role até "Botões".
+   - [ ] 3.1 Salvar é uma tecla azul-marinho com texto branco e uma aresta cinza embaixo; Filtrar tem borda cinza de 2px; Cancelar é um link azul sublinhado; Excluir aparece vermelho, cheio e contornado.
+   - [ ] 3.2 Em "Ação (uma por tela)": o atalho mostra a tecla Ctrl verde-água, a tecla Alt azul, dois sinais de mais e a tecla âmbar com o ícone de reiniciar e "Iniciar simulado"; a linha de baixo mostra só a tecla âmbar. A tecla âmbar tem uma aresta âmbar mais escura embaixo, e o texto e o ícone são azul-marinho escuro, não brancos.
+   - [ ] 3.3 Passe o mouse em Salvar (fica um pouco mais claro) e segure o botão do mouse nele (afunda sobre a aresta); segure na tecla âmbar do atalho: a tecla âmbar, o Ctrl e o Alt afundam e a seta de reiniciar gira meia volta.
+   - [ ] 3.4 Na linha dos desativados (a linha dos botões acinzentados), todas as teclas do atalho desativado ficam cinza, sem aresta, e a tecla âmbar não reage ao mouse.
+   - [ ] 3.5 "Paleta" lista cada papel com seu valor, `link` incluído: primary `#0F3266`, link `#1D64A8`, secondary `#1A9E8C`, tertiary `#F5A020`, background `#F2F5FB`.
+4. O tema escuro: clique no botão de tema (a lua, no canto superior direito).
+   - [ ] 4.1 A página fica azul-marinho profundo, os cartões um azul-marinho mais claro, a barra superior toma a cor do cartão, "Simulab" fica claro (não azul-marinho), o menu lateral é o azul mais escuro e o símbolo mostra a tecla Alt num azul mais claro.
+   - [ ] 4.2 Na galeria, Salvar é uma tecla azul clara com texto escuro, Cancelar é um link azul claro, e "Paleta" agora mostra primary `#47A0EB`, link `#8CC4F5` e background `#0B2149`.
+   - [ ] 4.3 Todo texto é fácil de ler sobre o fundo; o rótulo da tecla Alt do atalho é escuro. Volte ao claro com o botão de tema.
+5. [ ] Largura de celular: abra as ferramentas do desenvolvedor do navegador (F12), ligue a barra de dispositivos (Ctrl+Shift+M) e escolha 375 px de largura. A barra superior mantém o símbolo, "Simulab" e "Control Alt Systems" em uma linha cada, nada sai pela borda direita, e a ação compacta (só a tecla âmbar) é a que deve ser usada ali: ela cabe na coluna da galeria.
+6. [ ] Idioma: no seletor de idioma (o globo no canto superior direito) escolha Português (Brasil). A galeria (menu lateral > Desenvolvimento > Kit de interface) mostra "Ação (uma por tela)" sobre o atalho. Volte para o inglês.
+7. Só com o teclado, na galeria:
+   - [ ] 7.1 Aperte Tab a partir do topo da página: cada controle alcançado mostra um anel de foco azul; o atalho mostra um único anel, só na tecla âmbar (Ctrl e Alt são pulados).
+   - [ ] 7.2 Vá com Tab até a tecla âmbar e segure Espaço: ela afunda sobre a aresta; aperte Enter em Salvar: o botão reage.
+8. Os e-mails: abra https://localhost:7125/sign-up e crie uma conta com um endereço qualquer (o Mailpit recebe); depois abra o Mailpit pelo painel do Aspire (o recurso "mailpit", seu link web).
+   - [ ] 8.1 O e-mail de verificação abre com "Simulab" e "Control Alt Systems" como texto, depois o título; o botão é azul-marinho (`#0F3266`) com texto branco.
+   - [ ] 8.2 Em https://localhost:7125/forgot-password peça a redefinição para o mesmo endereço: o e-mail de redefinição tem as mesmas linhas no topo e o mesmo botão.
 
 ## Events
 
