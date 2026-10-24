@@ -35,17 +35,16 @@
 | 29 | F-131 | Catalog screens in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
 | 30 | F-132 | Question bank lists in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
 | 31 | F-133 | Identity screens in the new composition | idea | - | Foundation and identity | - | - | level 1; feature |
-| 32 | F-134 | Home, error and diagnostics pages in the new composition | approved | sonnet | Foundation and identity | - | - | level 1; feature |
-| 33 | F-135 | Sticky section index on long forms | idea | - | Foundation and identity | - | - | level 1; feature |
-| 34 | F-136 | Inline student preview on the question form | idea | - | Question bank | - | - | level 1; feature |
-| 35 | F-137 | Publishing readiness meter on the question form | idea | - | Question bank | - | - | level 1; feature |
-| 36 | F-138 | Keyboard shortcuts on forms | idea | - | Foundation and identity | - | - | level 1; feature |
-| 37 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - | level 1; feature |
-| 38 | F-140 | Check library class names against the package CSS | idea | - | Foundation and identity | - | - | level 1; feature |
-| 39 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
-| 40 | F-145 | E-mail notice of a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
-| 41 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
-| 42 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
+| 32 | F-135 | Sticky section index on long forms | idea | - | Foundation and identity | - | - | level 1; feature |
+| 33 | F-136 | Inline student preview on the question form | idea | - | Question bank | - | - | level 1; feature |
+| 34 | F-137 | Publishing readiness meter on the question form | idea | - | Question bank | - | - | level 1; feature |
+| 35 | F-138 | Keyboard shortcuts on forms | idea | - | Foundation and identity | - | - | level 1; feature |
+| 36 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - | level 1; feature |
+| 37 | F-140 | Check library class names against the package CSS | idea | - | Foundation and identity | - | - | level 1; feature |
+| 38 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
+| 39 | F-145 | E-mail notice of a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
+| 40 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
+| 41 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
 
 ## Checklist
 
@@ -80,21 +79,20 @@
 - [ ] 29. F-131 — Catalog screens in the new composition [idea] — why level 1; feature
 - [ ] 30. F-132 — Question bank lists in the new composition [idea] — why level 1; feature
 - [ ] 31. F-133 — Identity screens in the new composition [idea] — why level 1; feature
-- [ ] 32. F-134 — Home, error and diagnostics pages in the new composition [approved] — model sonnet — why level 1; feature
-- [ ] 33. F-135 — Sticky section index on long forms [idea] — why level 1; feature
-- [ ] 34. F-136 — Inline student preview on the question form [idea] — why level 1; feature
-- [ ] 35. F-137 — Publishing readiness meter on the question form [idea] — why level 1; feature
-- [ ] 36. F-138 — Keyboard shortcuts on forms [idea] — why level 1; feature
-- [ ] 37. F-139 — Partner brand in place of Control Alt Systems [idea] — why level 1; feature
-- [ ] 38. F-140 — Check library class names against the package CSS [idea] — why level 1; feature
-- [ ] 39. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
-- [ ] 40. F-145 — E-mail notice of a new legal document version [idea] — why level 1; feature
-- [ ] 41. F-146 — Acceptance history on the account page [idea] — why level 1; feature
-- [ ] 42. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
+- [ ] 32. F-135 — Sticky section index on long forms [idea] — why level 1; feature
+- [ ] 33. F-136 — Inline student preview on the question form [idea] — why level 1; feature
+- [ ] 34. F-137 — Publishing readiness meter on the question form [idea] — why level 1; feature
+- [ ] 35. F-138 — Keyboard shortcuts on forms [idea] — why level 1; feature
+- [ ] 36. F-139 — Partner brand in place of Control Alt Systems [idea] — why level 1; feature
+- [ ] 37. F-140 — Check library class names against the package CSS [idea] — why level 1; feature
+- [ ] 38. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
+- [ ] 39. F-145 — E-mail notice of a new legal document version [idea] — why level 1; feature
+- [ ] 40. F-146 — Acceptance history on the account page [idea] — why level 1; feature
+- [ ] 41. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
 
 ## Summary
 
-- Delivered: 135
+- Delivered: 136
 - First release (ai-assisted-exam-import): cut not defined
 - First release (assessment-catalog, mvp-cadastro-provas): complete: /agile:publish
 - First release (foundation-and-identity, mvp-cadastro-provas): complete: /agile:publish

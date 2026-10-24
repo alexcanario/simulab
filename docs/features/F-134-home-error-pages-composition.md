@@ -1,7 +1,7 @@
 ---
 feature: F-134
 epic: Foundation and identity
-status: validating
+status: done
 board: 185
 version: 1
 ---
@@ -291,3 +291,14 @@ Database__Name=simulab_f134 dotnet run --project src/Hosts/Simulab.AppHost
 - 2026-10-23 question — asked 6, from context 3
 - 2026-10-23 blocked — test wrong: AC2 and AC4 tests ran in Development, where the Development section shows for everyone; AC9 compared markup with per-render Blazor event ids
 - 2026-10-24 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 1 red
+
+## Delivery
+
+Gate time: 8 passes, 11 min 43 s — turn 5 (2 min 39 s), ship 1 (4 min 31 s), scan 2 (4 min 33 s); 1 red
+Usage: 3659.8k weighted (estimate) — build 67% · ship 7% · other 26% — context per turn 270k → 144k — 2 sessions, 148 turns
+- Branch: `feature/F-134` (removed), merge commit `a61979f` on `main`, app version 1.18.0.
+- Tests (full gate, `agile gate GREEN`): Web 2525, QuestionBank 677, Identity 548, Catalog 665, Api 83, AppHost 122, Architecture 301, Email 19, Storage 8, Ai 10, Persistence 25, Jobs 25, SharedKernel 12; 0 failed. Tests locked at `bb041fe` (6 files), 1 unlock (AC2, AC4 and AC9 tests, owner agreed).
+- Scan: `agile scan GREEN` (2 medium findings in `tools/Simulab.DocGen`, outside the diff). Docs: `agile docs GREEN`, `agile techdocs GREEN: 1 page`.
+- Manual: `docs/manual/pt-BR/getting-around.md` (pt-PT and en frozen, F-124). Technical pages: 1 (`docs/flows/home-and-error-pages.md`). Glossary: 2 rows added (request ID, page state).
+- Validation evidence: the owner said "validado" in the conversation; the 16 boxes were not ticked on this machine, so `validation-ticks.js evidence` recorded 0 of 16 (`not tested` for each).
+- Not covered by the gate: the signed-in flows and the amber "Try again" key on screen; the owner's validation covered them.
