@@ -1560,3 +1560,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (edited, upstream unchanged); manual build files (no upstream change). Merged: none. Declined: none.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: not scanned. Build and tests not run (no build file changed).
 - Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
+## 2026-10-24 - F-108 Short-answer questions
+- Cycle: Events: question 1, blocked 1 (the test unlock), rework 0, test-fail 0; Gate time 13 min 45 s, 0 red; Usage 4159.1k weighted.
+- Lesson 1, score 4/6: `dotnet ef migrations remove --no-build` deleted the previous item's migration because the built assembly did not hold the new one; restored with `git checkout` (evidence: the status showed `D` on the F-107 migration after the command). Went to `.claude/rules/agile/project-dotnet.md` (new file, `**/*.cs` and the other .NET globs).
+- Lesson 2, score 2/5: the tests written first had three bugs of their own (a tuple holding a list compared by reference, a camelCase seed for a `ToJson` column), found only when the code made them run, which forced an unlock (evidence: 3 failures at the first green run, `Expected BlanksOf(...)[0] to be equal to ... but found ...`). Went to `.claude/rules/agile/question-bank-tests-project.md`.
+- Lesson 3, score 3/5: the seeded development admin lands on the terms-acceptance page on a fresh database, so a signed-in screen cannot be checked by an agent that does not accept terms (evidence: the redirect to `/accept-terms`, F-108 build). Became the idea F-160 (board #219, epic test-infrastructure).
+- Decisions sorted: item decisions stay in F-108 (17 lines); the short-answer error texts use plain UI keys because `ErrorCodeTextTests` reads any `question.*` key as an error code (a hidden fact kept in the item, not promoted: seen once).
