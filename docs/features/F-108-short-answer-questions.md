@@ -1,7 +1,7 @@
 ---
 feature: F-108
 epic: Question bank
-status: validating
+status: done
 board: 154
 version: 1
 ---
@@ -291,3 +291,17 @@ Necessário para validar: o app host local — o dono; ainda não iniciado, o pa
 
 - 2026-10-24 question — asked 2, from context 4
 - 2026-10-24 blocked — test wrong: three test bugs of the test author: tuple-with-list reference equality (2) and the seed JSON property name of question_versions.blanks (1); no criterion changes
+
+## Delivery
+
+Gate time: 6 passes, 13 min 45 s — turn 3 (3 min 3 s), ship 1 (5 min 20 s), scan 2 (5 min 22 s); 0 red
+Usage: 4159.1k weighted (estimate) — refine 18% · build 70% · ship 11% · other 1% — context per turn 203k → 445k — 2 sessions, 169 turns
+
+- Branch: `feature/F-108` (never pushed; removed with its worktree `D:\wt\simulab\f-108-short-answer`).
+- Merge: `bf97038` on `main` (`--no-ff`, board #154); app version 1.19.0.
+- Tests: `gate.js ship` GREEN before the merge on the branch tree — 14 projects, 0 failures, 0 warnings (baseline 0 entries): Web 2560, QuestionBank 724 (new: 55 for this item across 3 files plus 37 screen tests), Architecture 301; 28 s build, 292 s test run (inside the 5 min budget). `main` moved by one docs-only commit (D-5) after the gate; merged into the branch, no code changed. Scan GREEN; test lock `a1a875b` unchanged, 1 unlock (owner, test-author bugs).
+- Validated by the owner in the conversation on 2026-10-24 ("validado"); no box was ticked in the widget, so the evidence reads "not tested" for every path (the full block is in the comment on #154).
+- App manual: `docs/manual/pt-BR/questions.md` (the only live manual locale; `pt-PT` and `en` are frozen). Technical page: `docs/flows/short-answer-questions.md`. Generated docs: `docs/architecture/QuestionBank/` and `docs/api/Simulab.Api.json`.
+- Glossary: no technical row added; the business row `Blank` was widened at the build.
+- Validation evidence: 0 of 15 tested.
+- Not done in the build: the signed-in screen was not driven on the app host (the terms-acceptance page needs a click Claude does not make); the owner's validation covers it.
