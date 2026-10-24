@@ -12,11 +12,15 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="OptionsWritten">Options that came with them; any of them is a refusal.</param>
 /// <param name="TrueFalseWritten">A true/false key that came with them; always a refusal.</param>
 /// <param name="MatchItemsWritten">Left items that came with them; any of them is a refusal.</param>
+/// <param name="RubricWritten">A rubric that came with them; any criterion is a refusal (F-109, BR8).</param>
+/// <param name="SizeWritten">True when a size limit came with them; always a refusal (F-109, BR8).</param>
 public sealed record ShortAnswerKey(
     IReadOnlyList<BlankDraft> Written,
     IReadOnlyList<OptionDraft>? OptionsWritten = null,
     bool? TrueFalseWritten = null,
-    IReadOnlyList<MatchItemDraft>? MatchItemsWritten = null) : AnswerKey
+    IReadOnlyList<MatchItemDraft>? MatchItemsWritten = null,
+    IReadOnlyList<CriterionDraft>? RubricWritten = null,
+    bool SizeWritten = false) : AnswerKey
 {
     /// <summary>The number of the one blank of the type.</summary>
     public const int BlankNumber = 1;
@@ -48,7 +52,7 @@ public sealed record ShortAnswerKey(
             return FillInTheBlanksKey.Fault(QuestionBankErrorCodes.QuestionKeyNotAllowed, null);
         }
 
-        if (MatchItemsRefused(MatchItemsWritten) is { } refused)
+        if ((MatchItemsRefused(MatchItemsWritten) ?? RubricAndSizeRefused(RubricWritten, SizeWritten)) is { } refused)
         {
             return refused;
         }

@@ -8,7 +8,10 @@ namespace Simulab.QuestionBank.Contracts;
 /// the status is <see cref="QuestionStatus.InReview"/> (F-105). <c>MatchItems</c> are the left items of a matching
 /// question in order (F-106); the Api always sends the list, empty for the other types. <c>Blanks</c> are the blanks
 /// of a fill-in-the-blanks question in the order their markers appear in the statement (F-107); the Api always sends
-/// the list, empty for the other types.
+/// the list, empty for the other types. <c>Rubric</c> are the criteria of an open-answer or essay question in order, from
+/// position 1 (F-109); the Api always sends the list, empty for the other types. <c>AnswerSizeMin</c> and
+/// <c>AnswerSizeMax</c> are its size limit, null when not set (minimum lines and maximum lines of an essay, maximum
+/// characters of an open answer).
 /// </summary>
 public sealed record QuestionResponse(
     Guid Id,

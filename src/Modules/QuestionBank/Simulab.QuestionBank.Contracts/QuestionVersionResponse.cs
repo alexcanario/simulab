@@ -27,6 +27,12 @@ namespace Simulab.QuestionBank.Contracts;
 /// The blanks of a fill-in-the-blanks question in statement order (F-107, BR10); the Api always sends the list, empty
 /// for the other types and for versions recorded before F-107.
 /// </param>
+/// <param name="Rubric">
+/// The criteria of an open-answer or essay question in order (F-109, BR10); the Api always sends the list, empty for
+/// the other types and for versions recorded before F-109.
+/// </param>
+/// <param name="AnswerSizeMin">The minimum lines of an essay when the version was recorded; null when not set (F-109, BR10).</param>
+/// <param name="AnswerSizeMax">The maximum lines of an essay or characters of an open answer when the version was recorded; null when not set.</param>
 public sealed record QuestionVersionResponse(
     Guid Id,
     Guid QuestionId,

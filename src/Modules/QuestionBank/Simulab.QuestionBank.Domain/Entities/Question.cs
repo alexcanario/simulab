@@ -21,6 +21,7 @@ public sealed class Question : TenantEntity
     private readonly List<QuestionOption> _options = [];
     private readonly List<QuestionMatchItem> _matchItems = [];
     private readonly List<QuestionBlank> _blanks = [];
+    private readonly List<QuestionRubricCriterion> _rubric = [];
 
     private Question()
     {
@@ -73,14 +74,13 @@ public sealed class Question : TenantEntity
     public IReadOnlyList<QuestionBlank> Blanks => _blanks;
 
     /// <summary>The criteria of an open-answer or essay question in position order; empty for any other type (F-109, BR1).</summary>
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped] // skeleton: removed when the table exists
-    public IReadOnlyList<QuestionRubricCriterion> Rubric => [];
+    public IReadOnlyList<QuestionRubricCriterion> Rubric => OrderedRubric();
 
     /// <summary>An essay's minimum lines; null when not set and for any other type (F-109, BR7).</summary>
-    public int? AnswerSizeMin => null;
+    public int? AnswerSizeMin { get; private set; }
 
     /// <summary>An essay's maximum lines or an open answer's maximum characters; null when not set (F-109, BR7).</summary>
-    public int? AnswerSizeMax => null;
+    public int? AnswerSizeMax { get; private set; }
 
     public static Result<Question> Create(QuestionContent content)
     {
@@ -156,9 +156,18 @@ public sealed class Question : TenantEntity
             .OrderBy(blank => blank.Position)
             .Select(blank => new QuestionVersionBlank { Number = blank.Number, AcceptedAnswers = [.. blank.AcceptedAnswers] })
             .ToList();
+        var rubric = OrderedRubric()
+            .Select(criterion => new QuestionVersionCriterion
+            {
+                Position = criterion.Position,
+                Name = criterion.Name,
+                Description = criterion.Description,
+                MaxPoints = criterion.MaxPoints
+            })
+            .ToList();
 
         // BR3: nothing differs from the latest version, so nothing is recorded and a reason is ignored (BR5).
-        if (latest is not null && SameVersionedContent(latest, options, matchItems, blanks, baseTextHtml))
+        if (latest is not null && SameVersionedContent(latest, options, matchItems, blanks, rubric, baseTextHtml))
         {
             return Result.Success<QuestionVersion?>(null);
         }
@@ -174,7 +183,8 @@ public sealed class Question : TenantEntity
                     .SequenceEqual(CorrectPositions(options.Select(option => (option.Position, option.IsCorrect))))
                 || !latest.MatchItems.OrderBy(item => item.Position).Select(item => item.MatchPosition)
                     .SequenceEqual(matchItems.Select(item => item.MatchPosition))
-                || BlanksKeyChanged(latest.Blanks, blanks));
+                || BlanksKeyChanged(latest.Blanks, blanks)
+                || RubricKeyChanged(latest.Rubric, rubric));
 
         if (keyChanged && reason is null)
         {
@@ -201,7 +211,10 @@ public sealed class Question : TenantEntity
             keyChanged,
             reason,
             matchItems: matchItems,
-            blanks: blanks));
+            blanks: blanks,
+            rubric: rubric,
+            answerSizeMin: AnswerSizeMin,
+            answerSizeMax: AnswerSizeMax));
     }
 
     private static List<int> CorrectPositions(IEnumerable<(int Position, bool IsCorrect)> options) =>
@@ -223,6 +236,16 @@ public sealed class Question : TenantEntity
             || old.Any(pair => !now.TryGetValue(pair.Key, out var answers) || !answers.SetEquals(pair.Value));
     }
 
+    // F-109 BR10: the key of a rubric is the set of its (name, maximum points) pairs, the name under the comparison rule
+    // of typed answers; a description, the order of the criteria and the size limit are not part of it.
+    private static bool RubricKeyChanged(IReadOnlyList<QuestionVersionCriterion> before, IReadOnlyList<QuestionVersionCriterion> after)
+    {
+        static HashSet<(string Name, int Points)> KeyOf(IEnumerable<QuestionVersionCriterion> criteria) =>
+            [.. criteria.Select(criterion => (AcceptedAnswer.Normalize(criterion.Name), criterion.MaxPoints))];
+
+        return !KeyOf(before).SetEquals(KeyOf(after));
+    }
+
     // BR1: what is versioned is exactly the language, the statement, the base text, the explanation, the options
     // with their mark, the true/false key and the left items with their match (F-106 BR8); topic, difficulty and
     // origin are catalog data and never compared.
@@ -231,9 +254,20 @@ public sealed class Question : TenantEntity
         List<QuestionVersionOption> options,
         List<QuestionVersionMatchItem> matchItems,
         List<QuestionVersionBlank> blanks,
+        List<QuestionVersionCriterion> rubric,
         string? baseTextHtml) =>
+        // F-109 BR10: the rubric exactly as stored, in order, and the size limit.
+        version.Rubric.Count == rubric.Count
+        && version.Rubric
+            .Zip(rubric)
+            .All(pair => pair.First.Position == pair.Second.Position
+                && pair.First.Name == pair.Second.Name
+                && pair.First.Description == pair.Second.Description
+                && pair.First.MaxPoints == pair.Second.MaxPoints)
+        && version.AnswerSizeMin == AnswerSizeMin
+        && version.AnswerSizeMax == AnswerSizeMax
         // F-107 BR10: the blanks, exactly as stored, in statement order.
-        version.Blanks.Count == blanks.Count
+        && version.Blanks.Count == blanks.Count
         && version.Blanks
             .Zip(blanks)
             .All(pair => pair.First.Number == pair.Second.Number
@@ -532,6 +566,9 @@ public sealed class Question : TenantEntity
     // The stored blanks in statement order (F-107): one per marker, so their numbers are the statement's markers.
     private List<QuestionBlank> OrderedBlanks() => [.. _blanks.OrderBy(blank => blank.Position)];
 
+    // The stored criteria in rubric order (F-109).
+    private List<QuestionRubricCriterion> OrderedRubric() => [.. _rubric.OrderBy(criterion => criterion.Position)];
+
     // The key as stored: the type decides what it is made of (F-97, BR9).
     private AnswerKey StoredKey()
     {
@@ -543,7 +580,10 @@ public sealed class Question : TenantEntity
             TrueFalseKey,
             MatchItemDrafts(),
             [.. blanks.Select(blank => new BlankDraft(blank.Number, blank.AcceptedAnswers))],
-            [.. blanks.Select(blank => blank.Number)]);
+            [.. blanks.Select(blank => blank.Number)],
+            [.. OrderedRubric().Select(criterion => new CriterionDraft(criterion.Name, criterion.Description, criterion.MaxPoints))],
+            AnswerSizeMin,
+            AnswerSizeMax);
     }
 
     private Result Apply(QuestionContent content)
@@ -620,7 +660,15 @@ public sealed class Question : TenantEntity
 
         // BR4: editing a published question runs the publish check, so it cannot be made incomplete.
         var key = AnswerKey.From(
-            Type, content.Options, content.TrueFalseKey, matchItems, content.Blanks, content.Statement.BlankMarkers);
+            Type,
+            content.Options,
+            content.TrueFalseKey,
+            matchItems,
+            content.Blanks,
+            content.Statement.BlankMarkers,
+            content.Rubric,
+            content.AnswerSizeMin,
+            content.AnswerSizeMax);
         var fault = key.Check(Status == QuestionStatus.Published);
         if (fault is not null)
         {
@@ -643,8 +691,37 @@ public sealed class Question : TenantEntity
         ReplaceOptions(key.Options);
         ReplaceMatchItems(key.MatchItems);
         ReplaceBlanks(key.Blanks);
+        ReplaceRubric(key.Rubric);
+        AnswerSizeMin = key.AnswerSizeMin;
+        AnswerSizeMax = key.AnswerSizeMax;
 
         return Result.Success();
+    }
+
+    // F-109: a criterion keeps its row by position (the unique index is over live rows, and a criterion that moves must
+    // not be deleted and inserted in one save); the surplus rows leave as orphans, as the options do.
+    private void ReplaceRubric(IReadOnlyList<CriterionDraft> drafts)
+    {
+        var ordered = OrderedRubric();
+
+        for (var index = 0; index < drafts.Count; index++)
+        {
+            var draft = drafts[index];
+            var position = index + 1;
+            if (index < ordered.Count)
+            {
+                ordered[index].Set(position, draft.Name!, draft.Description, draft.MaxPoints!.Value);
+            }
+            else
+            {
+                _rubric.Add(new QuestionRubricCriterion(position, draft.Name!, draft.Description, draft.MaxPoints!.Value));
+            }
+        }
+
+        foreach (var orphan in ordered.Skip(drafts.Count))
+        {
+            _rubric.Remove(orphan);
+        }
     }
 
     // F-107: a blank keeps its row while its number stays in the statement (the unique index is over live rows, and a

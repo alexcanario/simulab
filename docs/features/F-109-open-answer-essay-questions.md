@@ -163,6 +163,9 @@ No mockup (owner, 2026-10-24): the form gains two type cards and one rubric sect
 - AC21 All new texts appear in pt-BR, pt-PT and en, including the texts of the new error codes.
 
 ## Criterion → test
+
+Tests locked: 31f3f4b22b5f2964a75dcf0afa5e0354f8c5f42b (7 files); unlocks: 0
+
 | Criterion | Test |
 |---|---|
 | AC1 | `RubricQuestionTests.Create_WithNoRubric_IsADraftOfThatType_WithAnEmptyRubricAndNoSize`; `RubricQuestionEndpointTests.Create_WithNoRubric_IsStoredAsADraftOfThatType_WithAnEmptyRubric_AndListedWithIt` |
