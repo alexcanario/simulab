@@ -18,6 +18,7 @@ A partner can rent Simulab and run it as its own: its company name and logo in p
 | Id | Feature | Value | Priority | Size | Depends on | Waits on | Screen design | Status |
 |---|---|---|---|---|---|---|---|---|
 | F-139 | Partner brand in place of Control Alt Systems | A partner's name and logo on its users' screens and emails | unknown | unknown | F-125 | - | unknown | idea |
+| F-150 | Grader role and user-to-tenant link | A grader signs in and grades essays; a curator or grader linked to a tenant sees only that tenant's data (D-5) | unknown | unknown | F-9 | - | unknown | idea |
 
 ## Execution plan
 1. F-139 — unknown — settled at /agile:epic
