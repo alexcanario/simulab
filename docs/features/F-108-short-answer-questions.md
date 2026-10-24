@@ -1,7 +1,7 @@
 ---
 feature: F-108
 epic: Question bank
-status: refining
+status: approved
 board: 154
 version: 1
 ---
@@ -165,6 +165,7 @@ No mockup (owner, 2026-10-24): the form gains a sixth type card and one key sect
 - 2026-10-24 — No new package — the item needs nothing the solution lacks — Claude
 - 2026-10-24 — No security section: no door (no upload, permission change, personal data or authentication); the routes and the permission are unchanged — Claude
 - 2026-10-24 — Size S, fits one session: one domain unit, one enum value, a comment-only migration, one card, one key section, one preview change — Claude, from the code read
+- 2026-10-24 — Approved by the owner ("aprovo F-108"); every dependency delivered (`deps.js block`: FREE); main session model: sonnet.
 - 2026-10-24 — Reuse: `AnswerKey`, `AcceptedAnswer`, `QuestionBlank`, `NextVersion`, `CopyAs`, the F-107 form row logic and `FillInTheBlanksKeySection` rows (extract what is shared, do not copy), kit `AppSectionCard`, `AppTextField`, `AppRowActions`, `AppRadioCards`, the F-107 endpoint, migration and form test shapes — Claude
 
 ## Out of scope
