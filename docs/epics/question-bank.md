@@ -36,8 +36,10 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): one `Questions` table 
 | F-106 | Matching questions | The matching type | Could | M | F-95 | - | no | idea |
 | F-107 | Fill-in-the-blanks questions | The fill-in-the-blanks type | Could | M | F-95 | - | no | idea |
 | F-108 | Short-answer questions | The short-answer type with accepted answers | Could | S | F-95 | - | no | idea |
-| F-109 | Open-answer and essay questions | The open-answer and essay types with their rubric | Could | M | F-95 | how they are graded (person, AI or out of v1) — owner | no | idea |
+| F-109 | Open-answer and essay questions | The open-answer and essay types with their rubric; grading moves to F-150 to F-152 (D-5) | Could | M | F-95 | - | no | idea |
 | F-110 | Sample questions of the municipal guard editions | Seeded questions for the F-37 editions, for local work and testers | Could | S | F-96, F-97 | source questions and the right to use them — owner | no | idea |
+| F-151 | Essay and open-answer correction queue | A grader scores the essays and open answers waiting for a grade, by rubric criterion (D-5) | Could | M | F-109, F-150 | the item that stores a student's answers (simulator epics) — owner | unknown | idea |
+| F-152 | AI-suggested essay grade | The AI proposes a score per criterion and a grader confirms (D-5) | Could | M | F-151 | AI cost and per-plan limit — owner | unknown | idea |
 | F-142 | Question similarity search | Duplicate and reused questions across editions, similar questions, topic suggestion by neighbourhood; full-text first, vectors later | Could | M | - | questions in volume; embedding model choice (E-9 ADR) — owner | no | idea |
 
 ## Execution plan
@@ -53,14 +55,14 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): one `Questions` table 
 10. F-103 — after F-89 is built — path: `/agile:refine` → `/agile:build` — parallel with: F-104.
 11. F-105 — before or with epic E-9, where every AI-extracted item needs human review — path: `/agile:refine` with `/agile:screen` → `/agile:build` — parallel with: none.
 12. F-106, F-107, F-108 — remaining objective types, by demand — path: `/agile:autopilot` each — parallel with: each other.
-13. F-109 — only after the grading decision — path: `/agile:discuss` first — parallel with: none.
+13. F-109 — the grading decision is settled in D-5 (2026-10-24) — path: `/agile:refine` → `/agile:build` — parallel with: none. Then F-151 (after F-150 and the item that stores a student's answers) and F-152.
 14. F-110 — once the source questions are in hand — path: `/agile:refine` → `/agile:build` — parallel with: any.
 
 ## Waiting outside the epic
 | What | For | Who provides it | Who asks |
 |---|---|---|---|
 | Which past-exam sources may be reproduced and what the source line must show (brief open note "Rights to reproduce past exams") | F-96, F-110 | owner | Claude, at F-96 refinement |
-| How open answers and essays are graded: by a person, by AI, or out of v1 (brief open note) | F-109 | owner | Claude, at F-109 discussion |
+| ~~How open answers and essays are graded~~ — settled in D-5 (2026-10-24): a person grades; AI only suggests, later (F-152) | F-109 | owner | done |
 | The questions of the municipal guard editions and the right to use them | F-110 | owner | Claude, at F-110 refinement |
 | `IFileStorage` built (F-89) | F-103 | F-89 build | Claude |
 
@@ -76,6 +78,7 @@ F-95, F-96, F-97, F-98, F-99
 - Translating question content — ADR-0001 #27.
 
 ## Decisions
+- 2026-10-24 — Essays and open answers are graded by a person (a new `Grader` role, F-150); F-109 delivers only the types and the rubric, the correction queue is F-151 and the AI-suggested grade F-152 — no student attempt exists to produce answers to grade (D-5, owner).
 - 2026-10-09 — Questions live in a new module `QuestionBank` (schema `question_bank`), five-project shape (imported from Simulae, ADR-0001 #2b); it references `Topic` and `ExamEdition` by id through `Catalog.Contracts` — own lifecycle (versions, review) and consumed by E-5, E-6 and E-9 through contracts; the topic delete guard becomes a cross-module query (owner, question 1).
 - 2026-10-09 — The wrong-answer penalty belongs to the edition's scoring rules (E-6), not to each question; the question keeps only its answer key — same reasoning as the weight per notice subject (decision of 2026-10-04); E-5 applies the origin edition's rule when there is one (owner, question 2).
 - 2026-10-09 — F-95 has only `Draft` and `Published`, like editions; `InReview` and the review queue arrive with F-105, which may move to E-9 — shortest path to testers; the glossary already says `InReview` joins with the AI import (owner, question 3).
