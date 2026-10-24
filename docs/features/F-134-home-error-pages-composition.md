@@ -191,6 +191,7 @@ Tests locked: bb041fe1dd945465edd48df969e3240314ad9b8e (6 files); unlocks: 1
 
 - 2026-10-23: Reuse: `AppSectionCard`, `AppAlert`, `AppActionButton`, `AppLink`, `AppIcons` and `NavigationItems.Visible/Sections` (Home and the menu share one registry); the viewport subscription of `MainLayout` (`IBrowserViewportService`) for the compact amber key; `ActionColourScopeTests`' scan helpers; no new package
 - 2026-10-23: Shortcuts: none
+- 2026-10-24: change from the owner's validation — the Development section (`/dev/ui`, `/dev/ai`) is for the administrator only: both registry items now require `IdentityPermissions.RolesManage` besides `DevelopmentOnly`, so a student or a visitor sees it neither on Home nor in the menu (before, any account saw it in Development). The menu changes with Home because both read `NavigationItems` (AC3). The page routes are not guarded by this (a student who types `/dev/ui` in Development still opens it). New tests `DevelopmentSectionAdminOnlyTests` (6); `NavMenuTests`, `MainLayoutTests`, `ShellHostTests` and `NavigationItemsTests` updated to sign an administrator in; `Simulab.Web.Tests` 2525 passed in 39 s, gate GREEN, architecture tests 301 of 301
 - 2026-10-23: Build checks — gate GREEN (build of `Simulab.Web` and `Simulab.Web.Tests`, no new warning), `Simulab.Web.Tests` 2518 passed in 1 m 11 s, `agile scan GREEN` (two medium findings in `tools/Simulab.DocGen`, older than this item), `techdocs.js check F-134` GREEN; screen check of `/`, `/Error` (desktop and 320px), `/nothing-here` and `/dev/ai` signed out in the app host (own database `simulab_f134`); the signed-in flows are in the validation script. Not run: `/agile:review` (no auth, data, contract or migration change)
 - 2026-10-23: `Simulab.ArchitectureTests` failed once (`AspirePackagesTests.MessagePack_ResolvesToPatchedVersion_InEveryProject`, no resolved package) while only the Web projects were built in this worktree; after `dotnet build Simulab.slnx` (0 warnings, 0 errors) it passes: 301 of 301
 
@@ -289,3 +290,4 @@ Database__Name=simulab_f134 dotnet run --project src/Hosts/Simulab.AppHost
 
 - 2026-10-23 question — asked 6, from context 3
 - 2026-10-23 blocked — test wrong: AC2 and AC4 tests ran in Development, where the Development section shows for everyone; AC9 compared markup with per-render Blazor event ids
+- 2026-10-24 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 1 red

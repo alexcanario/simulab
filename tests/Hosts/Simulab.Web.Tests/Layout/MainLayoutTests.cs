@@ -54,17 +54,24 @@ public class MainLayoutTests : ShellTestContext
     [Fact]
     public void Render_Desktop_MenuExpandedByDefault()
     {
+        SignInAsAdministrator();
         var shell = RenderShell();
 
         shell.WaitForAssertion(() => MenuLabel(shell).Should().Be("Collapse menu"));
         DrawerOpen(shell).Should().BeTrue();
         shell.Find(".app-menu-button").GetAttribute("aria-expanded").Should().Be("true");
-        shell.FindAll(".app-nav-section").Should().ContainSingle();
+        shell.FindAll(".app-nav-section").Should().HaveCount(2, "an administrator sees Administration and Development");
     }
+
+    // F-134: the Development section is for the administrator only, so the menu tests that look at it sign one in.
+    private void SignInAsAdministrator() =>
+        Authorization.SetAuthorized("admin@exemplo.com")
+            .SetClaims(new System.Security.Claims.Claim(Simulab.Web.Services.Auth.WebAuthClaims.Permission, Simulab.Identity.Contracts.IdentityPermissions.RolesManage));
 
     [Fact]
     public void MenuButton_Desktop_TogglesCollapsedAndWritesCookie()
     {
+        SignInAsAdministrator();
         var shell = RenderShell();
 
         shell.Find(".app-menu-button").Click();
@@ -73,7 +80,7 @@ public class MainLayoutTests : ShellTestContext
         MenuLabel(shell).Should().Be("Expand menu");
         shell.Find(".app-menu-button").GetAttribute("aria-expanded").Should().Be("false");
         shell.FindAll(".app-nav-section").Should().BeEmpty();
-        shell.FindAll(".app-nav-divider").Should().ContainSingle();
+        shell.FindAll(".app-nav-divider").Should().HaveCount(2);
 
         shell.Find(".app-menu-button").Click();
 
@@ -95,6 +102,7 @@ public class MainLayoutTests : ShellTestContext
     [Fact]
     public void Render_Phone_MenuClosedAndClosesAfterNavigating()
     {
+        SignInAsAdministrator();
         var shell = RenderShell(Breakpoint.Sm);
 
         shell.WaitForAssertion(() => MenuLabel(shell).Should().Be("Open menu"));
@@ -103,7 +111,7 @@ public class MainLayoutTests : ShellTestContext
         shell.Find(".app-menu-button").Click();
         DrawerOpen(shell).Should().BeTrue();
         MenuLabel(shell).Should().Be("Close menu");
-        shell.FindAll(".app-nav-section").Should().ContainSingle("the phone menu shows labels and headers");
+        shell.FindAll(".app-nav-section").Should().HaveCount(2, "the phone menu shows labels and headers");
 
         shell.Find("a[data-route='/dev/ui']").GetAttribute("href").Should().Be("/dev/ui");
         Services.GetRequiredService<Bunit.TestDoubles.BunitNavigationManager>().NavigateTo("/dev/ui");

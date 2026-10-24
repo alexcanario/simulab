@@ -25,6 +25,13 @@ public class NavMenuTests : ShellTestContext
         });
     }
 
+    // F-134: the Development section is for the administrator only; these tests look at that section alone.
+    private IRenderedComponent<NavMenu> RenderDevelopmentMenu(string url = "/")
+    {
+        Authorization.SetAuthorized("admin@exemplo.com").SetClaims(new Claim(WebAuthClaims.Permission, "identity.roles.manage"));
+        return RenderMenu(url: url, items: [.. NavigationItems.All.Where(item => item.Section is null or NavigationSection.Development)]);
+    }
+
     private static List<string> Labels(IRenderedComponent<NavMenu> menu) =>
         [.. menu.FindAll(".mud-nav-link").Select(l => l.TextContent.Trim())];
 
@@ -34,7 +41,7 @@ public class NavMenuTests : ShellTestContext
     [Fact]
     public void Render_Development_ShowsHomeAndDevelopmentSection()
     {
-        var menu = RenderMenu();
+        var menu = RenderDevelopmentMenu();
 
         Labels(menu).Should().Equal("Home", "UI kit", "AI gateway");
         Headers(menu).Should().Equal("Development");
@@ -84,7 +91,7 @@ public class NavMenuTests : ShellTestContext
     [Fact]
     public void Render_OnUiKit_OnlyUiKitIsCurrent()
     {
-        var menu = RenderMenu(url: "/dev/ui");
+        var menu = RenderDevelopmentMenu(url: "/dev/ui");
 
         menu.Find("a[data-route='/dev/ui']").GetAttribute("aria-current").Should().Be("page");
         menu.Find("a[data-route='/dev/ui']").ClassList.Should().Contain("active");
@@ -95,7 +102,7 @@ public class NavMenuTests : ShellTestContext
     [Fact]
     public void Render_OnHome_OnlyHomeIsCurrent()
     {
-        var menu = RenderMenu(url: "/");
+        var menu = RenderDevelopmentMenu(url: "/");
 
         menu.Find("a[data-route='/']").GetAttribute("aria-current").Should().Be("page");
         menu.Find("a[data-route='/dev/ui']").HasAttribute("aria-current").Should().BeFalse();
@@ -106,7 +113,7 @@ public class NavMenuTests : ShellTestContext
     {
         System.Globalization.CultureInfo.CurrentUICulture = new("pt-BR");
 
-        var menu = RenderMenu();
+        var menu = RenderDevelopmentMenu();
 
         Labels(menu).Should().Equal("Início", "Kit de interface", "Gateway de IA");
         Headers(menu).Should().Equal("Desenvolvimento");
