@@ -3802,6 +3802,8 @@
           "Matching",
           "FillInTheBlanks",
           "ShortAnswer",
+          "OpenAnswer",
+          "Essay",
           null
         ]
       },
@@ -4007,6 +4009,36 @@
           }
         },
         "description": "One blank of a fill-in-the-blanks question as the form sends it (F-107, BR1): the number of its marker\r\n`[[n]]` in the statement and the answers it accepts, plain text."
+      },
+      "SaveCriterionRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The name, plain text; trimmed, 1 to 100 characters, unique in the rubric ignoring case and extra white space."
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "What the grader looks for, plain text; trimmed, up to 500 characters; null or empty means none."
+          },
+          "maxPoints": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "The most points the criterion gives, a whole number from 1 to 100; null is refused.",
+            "format": "int32"
+          }
+        },
+        "description": "One criterion of the rubric of an open-answer or essay question as the form sends it (F-109, BR3): what a grader\r\nscores and the most points it can give."
       },
       "SaveExamEditionRequest": {
         "type": "object",
@@ -4410,6 +4442,36 @@
               "$ref": "#/components/schemas/SaveBlankRequest"
             },
             "description": "The blanks of a fill-in-the-blanks question, each naming a marker of the statement and its accepted answers\r\n(F-107, BR1); null counts as none. Refused on any other type when not empty (BR7)."
+          },
+          "rubric": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SaveCriterionRequest"
+            },
+            "description": "The criteria of an open-answer or essay question in order (F-109, BR3); null counts as none and, on an update, the\r\nlist sent replaces the stored one. Refused on any other type when not empty (BR8)."
+          },
+          "answerSizeMin": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "An essay's minimum lines (F-109, BR7); null when not set. Refused on any other type.",
+            "format": "int32"
+          },
+          "answerSizeMax": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "An essay's maximum lines or an open answer's maximum characters (F-109, BR7); null when not set. Refused on any other type.",
+            "format": "int32"
           }
         },
         "description": "What the question form sends, for a create and for an update (F-95, UC1 and UC2). The type is implied:\r\nsingle choice is the only one (BR2). Every text is HTML written by a person; the Api sanitizes it (BR8)."

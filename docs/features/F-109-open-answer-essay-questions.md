@@ -164,7 +164,7 @@ No mockup (owner, 2026-10-24): the form gains two type cards and one rubric sect
 
 ## Criterion → test
 
-Tests locked: 31f3f4b22b5f2964a75dcf0afa5e0354f8c5f42b (7 files); unlocks: 0
+Tests locked: b3f16faef0071496cd091cb67356347098cf2c2c (7 files); unlocks: 1
 
 | Criterion | Test |
 |---|---|
