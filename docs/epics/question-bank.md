@@ -40,6 +40,9 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): one `Questions` table 
 | F-110 | Sample questions of the municipal guard editions | Seeded questions for the F-37 editions, for local work and testers | Could | S | F-96, F-97 | source questions and the right to use them — owner | no | idea |
 | F-151 | Essay and open-answer correction queue | A grader scores the essays and open answers waiting for a grade, by rubric criterion (D-5) | Could | M | F-109, F-150 | the item that stores a student's answers (simulator epics) — owner | unknown | idea |
 | F-152 | AI-suggested essay grade | The AI proposes a score per criterion and a grader confirms (D-5) | Could | M | F-151 | AI cost and per-plan limit — owner | unknown | idea |
+| F-154 | Question form field polish | Subject list on click, difficulty labels, character counters (D-6) | Could | S | - | - | unknown | idea |
+| F-155 | Autosave of the question draft | Unsaved edits kept without a click on Save (D-6) | Could | M | - | - | unknown | idea |
+| F-158 | Review queue count in the menu | How many questions wait for review, beside the menu item (D-6) | Could | S | - | - | no | idea |
 | F-142 | Question similarity search | Duplicate and reused questions across editions, similar questions, topic suggestion by neighbourhood; full-text first, vectors later | Could | M | - | questions in volume; embedding model choice (E-9 ADR) — owner | no | idea |
 
 ## Execution plan
