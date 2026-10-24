@@ -160,10 +160,13 @@
   <data name="AiDiagnostics.Send" xml:space="preserve"><value>Enviar</value></data>
   <data name="AiDiagnostics.Sending" xml:space="preserve"><value>A enviar…</value></data>
   <data name="AiDiagnostics.Answer" xml:space="preserve"><value>Resposta</value></data>
-  <data name="AiDiagnostics.Model" xml:space="preserve"><value>Modelo: {0}</value></data>
-  <data name="AiDiagnostics.Tokens" xml:space="preserve"><value>Tokens: {0} de entrada, {1} de saída</value></data>
-  <data name="AiDiagnostics.Cost" xml:space="preserve"><value>Custo: US$ {0}</value></data>
-  <data name="AiDiagnostics.Duration" xml:space="preserve"><value>Duração: {0} ms</value></data>
+  <data name="AiDiagnostics.Question" xml:space="preserve"><value>Pergunta</value></data>
+  <data name="AiDiagnostics.Metric.Model" xml:space="preserve"><value>Modelo</value></data>
+  <data name="AiDiagnostics.Metric.Tokens" xml:space="preserve"><value>Tokens de entrada / saída</value></data>
+  <data name="AiDiagnostics.Metric.Cost" xml:space="preserve"><value>Custo (US$)</value></data>
+  <data name="AiDiagnostics.Metric.Duration" xml:space="preserve"><value>Duração</value></data>
+  <data name="AiDiagnostics.Metric.TokensValue" xml:space="preserve"><value>{0} / {1}</value></data>
+  <data name="AiDiagnostics.Metric.DurationValue" xml:space="preserve"><value>{0} ms</value></data>
   <data name="ai.not_configured" xml:space="preserve"><value>Não há chave de API configurada, por isso o gateway não consegue chamar o modelo.</value></data>
   <data name="ai.no_user" xml:space="preserve"><value>Inicie sessão primeiro: cada chamada é cobrada a um utilizador.</value></data>
   <data name="ai.quota_exceeded" xml:space="preserve"><value>O seu plano não permite mais chamadas de IA este mês.</value></data>
@@ -1315,4 +1318,11 @@
   <data name="storage.not_configured" xml:space="preserve"><value>O armazenamento de ficheiros não está configurado neste servidor, por isso o PDF não pode ser guardado.</value></data>
   <data name="Gallery.Section.FileField" xml:space="preserve"><value>Campo de ficheiro</value></data>
   <data name="Gallery.FileField.Hint" xml:space="preserve"><value>Escolher um ficheiro altera o formulário e não envia nada; quem envia é o Guardar. Vazio, escolhido, guardado, a remover, com erro e com um nome de ficheiro longo.</value></data>
+  <data name="Home.SignIn" xml:space="preserve"><value>Iniciar sessão</value></data>
+  <data name="Home.SignUp" xml:space="preserve"><value>Criar conta</value></data>
+  <data name="Home.Welcome" xml:space="preserve"><value>Olá novamente</value></data>
+  <data name="Common.GoHome" xml:space="preserve"><value>Ir para o início</value></data>
+  <data name="Gallery.States.PageState" xml:space="preserve"><value>Estado de página: uma mensagem e o que fazer a seguir, para um erro ou uma página não encontrada.</value></data>
+  <data name="Gallery.States.PageStateTitle" xml:space="preserve"><value>Algo precisa da sua atenção</value></data>
+  <data name="Gallery.States.PageStateMessage" xml:space="preserve"><value>Uma mensagem curta que diz o que aconteceu e o que o utilizador pode fazer a seguir.</value></data>
 </root>

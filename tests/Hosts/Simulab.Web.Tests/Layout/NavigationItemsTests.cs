@@ -12,12 +12,21 @@ public class NavigationItemsTests
     private static bool NoPermissions(string permission) => false;
 
     [Fact]
-    public void Visible_Development_ShowsHomeAndTheDevelopmentPages()
+    public void Visible_Development_ShowsAnAdministratorHomeTheAdministrationAndTheDevelopmentPages()
+    {
+        var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: true, permission => permission == IdentityPermissions.RolesManage);
+
+        visible.Select(i => i.Route).Should().Equal(
+            "/", "/admin/roles", "/admin/users", "/admin/role-history", "/admin/account-events", "/dev/ui", "/dev/ai");
+        NavigationItems.Sections(visible).Select(s => s.Key).Should().Equal(NavigationSection.Administration, NavigationSection.Development);
+    }
+
+    [Fact]
+    public void Visible_Development_ShowsAVisitorOnlyHome()
     {
         var visible = NavigationItems.Visible(NavigationItems.All, isDevelopment: true, NoPermissions);
 
-        visible.Select(i => i.Route).Should().Equal("/", "/dev/ui", "/dev/ai");
-        NavigationItems.Sections(visible).Select(s => s.Key).Should().Equal(NavigationSection.Development);
+        visible.Select(i => i.Route).Should().Equal("/");
     }
 
     [Fact]

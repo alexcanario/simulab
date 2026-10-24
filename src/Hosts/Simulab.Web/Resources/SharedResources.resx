@@ -160,10 +160,13 @@
   <data name="AiDiagnostics.Send" xml:space="preserve"><value>Send</value></data>
   <data name="AiDiagnostics.Sending" xml:space="preserve"><value>Sending…</value></data>
   <data name="AiDiagnostics.Answer" xml:space="preserve"><value>Answer</value></data>
-  <data name="AiDiagnostics.Model" xml:space="preserve"><value>Model: {0}</value></data>
-  <data name="AiDiagnostics.Tokens" xml:space="preserve"><value>Tokens: {0} in, {1} out</value></data>
-  <data name="AiDiagnostics.Cost" xml:space="preserve"><value>Cost: US$ {0}</value></data>
-  <data name="AiDiagnostics.Duration" xml:space="preserve"><value>Duration: {0} ms</value></data>
+  <data name="AiDiagnostics.Question" xml:space="preserve"><value>Question</value></data>
+  <data name="AiDiagnostics.Metric.Model" xml:space="preserve"><value>Model</value></data>
+  <data name="AiDiagnostics.Metric.Tokens" xml:space="preserve"><value>Tokens in / out</value></data>
+  <data name="AiDiagnostics.Metric.Cost" xml:space="preserve"><value>Cost (US$)</value></data>
+  <data name="AiDiagnostics.Metric.Duration" xml:space="preserve"><value>Duration</value></data>
+  <data name="AiDiagnostics.Metric.TokensValue" xml:space="preserve"><value>{0} / {1}</value></data>
+  <data name="AiDiagnostics.Metric.DurationValue" xml:space="preserve"><value>{0} ms</value></data>
   <data name="ai.not_configured" xml:space="preserve"><value>No API key is configured, so the gateway cannot call the model.</value></data>
   <data name="ai.no_user" xml:space="preserve"><value>Sign in first: every call is charged to a user.</value></data>
   <data name="ai.quota_exceeded" xml:space="preserve"><value>Your plan allows no more AI calls this month.</value></data>
@@ -1315,4 +1318,11 @@
   <data name="storage.not_configured" xml:space="preserve"><value>File storage is not set up on this server, so the PDF cannot be saved.</value></data>
   <data name="Gallery.Section.FileField" xml:space="preserve"><value>File field</value></data>
   <data name="Gallery.FileField.Hint" xml:space="preserve"><value>Choosing a file changes the form and sends nothing; Save sends it. Empty, chosen, stored, to be removed, in error and with a long file name.</value></data>
+  <data name="Home.SignIn" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Home.SignUp" xml:space="preserve"><value>Create account</value></data>
+  <data name="Home.Welcome" xml:space="preserve"><value>Welcome back</value></data>
+  <data name="Common.GoHome" xml:space="preserve"><value>Go to home</value></data>
+  <data name="Gallery.States.PageState" xml:space="preserve"><value>Page state: one message and what to do next, for an error or a page that was not found.</value></data>
+  <data name="Gallery.States.PageStateTitle" xml:space="preserve"><value>Something needs your attention</value></data>
+  <data name="Gallery.States.PageStateMessage" xml:space="preserve"><value>A short message that says what happened and what the user can do next.</value></data>
 </root>

@@ -22,6 +22,15 @@ public static class AppIcons
     public const string Warning = Icons.Material.Outlined.WarningAmber;
     public const string Error = Icons.Material.Outlined.ErrorOutline;
     public const string Empty = Icons.Material.Outlined.Inbox;
+
+    /// <summary>F-134: a page that was not found (also what a user sees on a route the user may not open).</summary>
+    public const string NotFound = Icons.Material.Outlined.SearchOff;
+
+    /// <summary>F-134: the menu sections on the home page, one icon each.</summary>
+    public const string SectionStudy = Icons.Material.Outlined.School;
+    public const string SectionContent = Icons.Material.Outlined.LibraryBooks;
+    public const string SectionAdministration = Icons.Material.Outlined.AdminPanelSettings;
+    public const string SectionDevelopment = Icons.Material.Outlined.Build;
     public const string LightMode = Icons.Material.Outlined.LightMode;
     public const string DarkMode = Icons.Material.Outlined.DarkMode;
     public const string Language = Icons.Material.Outlined.Language;

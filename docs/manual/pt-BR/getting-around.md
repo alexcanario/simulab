@@ -1,8 +1,8 @@
 ---
 page: getting-around
 locale: pt-BR
-features: [F-2, F-8, F-17, F-50, F-125]
-updated: 2026-10-18
+features: [F-2, F-8, F-17, F-50, F-125, F-134]
+updated: 2026-10-24
 ---
 # Como navegar
 
@@ -19,6 +19,16 @@ O Simulab usa a identidade visual da Control Alt Systems:
 Todos, com ou sem login.
 
 ## Como fazer
+### Usar a página inicial
+1. Sem login, a página inicial mostra o aviso de que o Simulab está sendo construído e dois botões: "Sign in" (entrar, [Entrar e sair](sign-in-and-sign-out.md)) e "Create account" (criar conta, [Criar conta](create-account.md)).
+2. Com login, ela mostra "Welcome back" (sem o seu nome) e um cartão para cada seção do menu lateral em que você pode abrir ao menos uma página, na mesma ordem do menu. Cada link tem o mesmo ícone e o mesmo nome do menu. Se a sua conta não pode abrir nenhuma página, só aparecem o título e o aviso.
+3. Os cartões são um atalho para o menu: o que você não pode abrir não aparece neles nem no menu. A seção "Development" só existe quando o Simulab roda em ambiente de desenvolvimento e só aparece para quem administra papéis.
+
+### Quando uma página não abre
+1. Se você abrir um endereço que não existe, ou uma página que a sua conta não pode abrir, aparece "Page not found" com o botão "Go to home". As duas situações têm a mesma tela de propósito: ela não diz qual das duas aconteceu.
+2. Se o Simulab tiver um erro ao montar a página, aparece "Something went wrong" com o botão âmbar "Try again", que recarrega o mesmo endereço, e o botão "Go to home". Se o erro continuar, cite ao suporte o "Request ID" que aparece embaixo dos botões.
+3. Numa janela muito estreita (menos de 360px), o botão "Try again" aparece só como a tecla âmbar e os dois botões ficam um embaixo do outro.
+
 ### Abrir uma página pelo menu
 1. Escolha um item no menu lateral. A página em que você está fica destacada.
 2. No celular ou numa janela estreita, o menu fica oculto: toque no botão de menu (três linhas, no canto superior esquerdo) para abri-lo. Ele fecha depois que você escolhe um item, ao pressionar Esc ou ao tocar fora dele.

@@ -1,8 +1,64 @@
 @page "/"
+@using Simulab.Web.Services.Auth
 @inject IStringLocalizer<SharedResources> L
+@inject IHostEnvironment Environment
 
 <PageTitle>@L["App.Name"]</PageTitle>
 
-<MudText Typo="Typo.h1" GutterBottom="true">@L["Home.Title"]</MudText>
+@* F-134: a welcome plus the way on. A visitor gets the two ways in; a signed-in user gets one card per menu section with the
+   links the menu shows for that user (BR3) - comfort only, the endpoints still enforce the permissions. No amber action (BR8). *@
+<MudText Typo="Typo.h1" GutterBottom="true">@(_signedIn ? L["Home.Welcome"] : L["Home.Title"])</MudText>
 <MudText Typo="Typo.body1" GutterBottom="true">@L["Home.Tagline"]</MudText>
+
+@if (!_signedIn)
+{
+    <div class="app-home-actions">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/sign-in">@L["Home.SignIn"]</MudButton>
+        <MudButton Variant="Variant.Outlined" Href="/sign-up">@L["Home.SignUp"]</MudButton>
+    </div>
+}
+
 <AppAlert Severity="Severity.Info" Text="@L["Home.Status"]" Class="mt-4" />
+
+@if (_sections.Count > 0)
+{
+    <div class="app-home-sections">
+        @foreach (var section in _sections)
+        {
+            <AppSectionCard Id="@($"home-section-{section.Key.ToString().ToLowerInvariant()}")"
+                            Title="@L[$"Nav.Section.{section.Key}"]"
+                            Icon="@NavigationItems.SectionIcon(section.Key)">
+                <ul class="app-home-links">
+                    @foreach (var item in section)
+                    {
+                        <li>
+                            <AppLink Href="@item.Route" Class="app-home-link">
+                                <MudIcon Icon="@item.Icon" Size="Size.Small" aria-hidden="true" />@L[item.ResourceKey]
+                            </AppLink>
+                        </li>
+                    }
+                </ul>
+            </AppSectionCard>
+        }
+    </div>
+}
+
+@code {
+    private bool _signedIn;
+    private IReadOnlyList<IGrouping<NavigationSection, NavigationItem>> _sections = [];
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        _signedIn = user?.Identity?.IsAuthenticated == true;
+
+        // The same registry and the same permission claims as the menu, so the two cannot disagree (F-134, BR3).
+        var visible = NavigationItems.Visible(
+            NavigationItems.All,
+            Environment.IsDevelopment(),
+            permission => user?.HasClaim(WebAuthClaims.Permission, permission) == true);
+        _sections = _signedIn ? NavigationItems.Sections(visible) : [];
+    }
+}

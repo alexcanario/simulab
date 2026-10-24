@@ -26,9 +26,20 @@ public static class NavigationItems
         new(NavigationSection.Administration, "/admin/users", AppIcons.Users, "Nav.Users", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/role-history", AppIcons.History, "Nav.RoleHistory", RequiredPermission: IdentityPermissions.RolesManage),
         new(NavigationSection.Administration, "/admin/account-events", AppIcons.Security, "Nav.AccountEvents", RequiredPermission: IdentityPermissions.RolesManage),
-        new(NavigationSection.Development, "/dev/ui", AppIcons.Build, "Nav.Dev.UiKit", DevelopmentOnly: true),
-        new(NavigationSection.Development, "/dev/ai", AppIcons.Ai, "Nav.Dev.Ai", DevelopmentOnly: true),
+        // F-134 (owner's validation): the Development section is for the administrator only, besides being Development-only.
+        new(NavigationSection.Development, "/dev/ui", AppIcons.Build, "Nav.Dev.UiKit", RequiredPermission: IdentityPermissions.RolesManage, DevelopmentOnly: true),
+        new(NavigationSection.Development, "/dev/ai", AppIcons.Ai, "Nav.Dev.Ai", RequiredPermission: IdentityPermissions.RolesManage, DevelopmentOnly: true),
     ];
+
+    /// <summary>F-134: the icon that stands for a section on the home page.</summary>
+    public static string SectionIcon(NavigationSection section) => section switch
+    {
+        NavigationSection.Study => AppIcons.SectionStudy,
+        NavigationSection.Content => AppIcons.SectionContent,
+        NavigationSection.Administration => AppIcons.SectionAdministration,
+        NavigationSection.Development => AppIcons.SectionDevelopment,
+        _ => throw new ArgumentOutOfRangeException(nameof(section), section, "A new menu section needs an icon here.")
+    };
 
     /// <summary>Items the current user may see (F-6, BR6): a permission-gated item needs <paramref name="hasPermission"/> to say yes.</summary>
     public static IReadOnlyList<NavigationItem> Visible(IEnumerable<NavigationItem> items, bool isDevelopment, Func<string, bool> hasPermission) =>

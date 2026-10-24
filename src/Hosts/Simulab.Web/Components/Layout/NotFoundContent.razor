@@ -1,4 +1,8 @@
 @inject IStringLocalizer<SharedResources> L
 
-<MudText Typo="Typo.h1" GutterBottom="true">@L["NotFound.Title"]</MudText>
-<MudText Typo="Typo.body1">@L["NotFound.Message"]</MudText>
+@* F-134, BR5: a page that does not exist and a page the user may not open look the same; nothing here says which. *@
+<AppPageState Icon="@AppIcons.NotFound" Title="@L["NotFound.Title"]" Message="@L["NotFound.Message"]">
+    <Actions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@AppIcons.Home" Href="/">@L["Common.GoHome"]</MudButton>
+    </Actions>
+</AppPageState>

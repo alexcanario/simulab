@@ -13,6 +13,8 @@ public class HomePageTests : BunitContext
     {
         Services.AddLocalization();
         Services.AddMudServices();
+        Services.AddSingleton<Microsoft.Extensions.Hosting.IHostEnvironment>(new FakeHostEnvironment("Production"));
+        AddAuthorization();
         JSInterop.Mode = JSRuntimeMode.Loose;
     }
 

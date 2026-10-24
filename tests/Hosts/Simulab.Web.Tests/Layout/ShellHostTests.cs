@@ -65,13 +65,14 @@ public class ShellHostTests(WebApplicationFactory<Program> factory) : IClassFixt
     }
 
     [Theory]
-    [InlineData("Development", true)]
-    [InlineData("Production", false)]
-    public async Task Get_Home_DevelopmentSectionOnlyInDevelopment(string environment, bool expected)
+    [InlineData("Development")]
+    [InlineData("Production")]
+    public async Task Get_Home_DevelopmentSectionIsNeverShownToAnAnonymousVisitor(string environment)
     {
+        // F-134: the Development section is for the administrator only; DevelopmentSectionAdminOnlyTests shows it to one.
         var html = await GetHomeAsync(environment);
 
-        html.Contains("data-route=\"/dev/ui\"", StringComparison.Ordinal).Should().Be(expected);
+        html.Contains("data-route=\"/dev/ui\"", StringComparison.Ordinal).Should().BeFalse();
         html.Should().Contain("data-route=\"/\"");
     }
 }
