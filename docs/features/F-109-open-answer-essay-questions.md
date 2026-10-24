@@ -1,7 +1,7 @@
 ---
 feature: F-109
 epic: Question bank
-status: refining
+status: approved
 board: 155
 version: 1
 ---
@@ -209,6 +209,7 @@ No mockup (owner, 2026-10-24): the form gains two type cards and one rubric sect
 - 2026-10-24 — No new package, production or test — the item needs nothing the solution lacks — Claude
 - 2026-10-24 — No security section: no door (no upload, permission change, personal data or authentication); routes and permission unchanged — Claude
 - 2026-10-24 — Size M, fits one session: one module, one additive migration, one flow (author, publish, preview, version); doubt keeps it whole — Claude, from the code read
+- 2026-10-24 — Approved by the owner ("aprovo F-109"); every dependency delivered (`deps.js block`: FREE); main session model: sonnet.
 
 ## Out of scope
 - Grading, a grader role, the correction queue and the AI-suggested grade — F-150, F-151, F-152.
