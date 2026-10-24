@@ -1,6 +1,6 @@
 ---
 feature: F-129
-epic: Foundation and identity
+epic: Interface and screen composition
 status: idea
 board: 180
 version: 1

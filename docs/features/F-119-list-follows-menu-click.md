@@ -1,6 +1,6 @@
 ---
 feature: F-119
-epic: Question bank
+epic: Interface and screen composition
 status: idea
 board: 169
 version: 1

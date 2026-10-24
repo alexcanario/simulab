@@ -1,6 +1,6 @@
 ---
 feature: F-148
-epic: Foundation and identity
+epic: Interface and screen composition
 status: done
 board: 206
 version: 1

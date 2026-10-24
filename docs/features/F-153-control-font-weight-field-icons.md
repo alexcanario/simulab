@@ -1,6 +1,6 @@
 ---
 feature: F-153
-epic: Foundation and identity
+epic: Interface and screen composition
 status: idea
 board: 212
 version: 1

@@ -4,7 +4,7 @@ feature: F-34
 status: done
 board: 164
 severity: low
-epic: Foundation and identity
+epic: Interface and screen composition
 ---
 # AppLookupField live region may keep the previous count after a search
 

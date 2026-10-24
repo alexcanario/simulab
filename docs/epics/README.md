@@ -22,6 +22,7 @@ Created on the board at bootstrap (2026-09-17). Each epic gets its own file `doc
 | — | Institutions | `institutions` | 703 | idea, not ordered |
 | — | Portugal exams | `portugal-exams` | 704 | idea, not ordered |
 | — | Cloud hosting and operations | `cloud-hosting-and-operations` | GitHub #138 | idea, not ordered (F-62, F-64 to F-68, F-81, F-82, F-87, F-88) |
+| — | Interface and screen composition | `interface-and-screen-composition` | GitHub #211 | agreed (first cut F-140, F-133, F-129, F-127, F-128, F-132, F-131, F-159) |
 
 The order of epics 2 to 6 and 9 is a proposal for the brief's open note "first release order"; the owner may change it.
 

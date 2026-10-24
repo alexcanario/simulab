@@ -1,6 +1,6 @@
 ---
 feature: F-134
-epic: Foundation and identity
+epic: Interface and screen composition
 status: done
 board: 185
 version: 1
