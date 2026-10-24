@@ -2,7 +2,7 @@
 feature: F-34
 epic: Assessment catalog
 status: done
-board: 753
+board: 224
 version: 2
 ---
 # Exams back office

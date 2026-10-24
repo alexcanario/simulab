@@ -2,7 +2,7 @@
 feature: F-36
 epic: Assessment catalog
 status: done
-board: 755
+board: 226
 version: 1
 ---
 # Catalog browsing for students

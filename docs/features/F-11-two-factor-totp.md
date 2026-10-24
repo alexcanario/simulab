@@ -2,7 +2,7 @@
 feature: F-11
 epic: Foundation and identity
 status: done
-board: 715
+board: 222
 version: 4
 ---
 # Two-factor sign-in with an authenticator app (TOTP)

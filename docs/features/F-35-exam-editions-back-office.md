@@ -2,7 +2,7 @@
 feature: F-35
 epic: Assessment catalog
 status: done
-board: 754
+board: 225
 version: 1
 ---
 # Exam editions back office
