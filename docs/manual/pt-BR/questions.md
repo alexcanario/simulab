@@ -1,18 +1,18 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105, F-106, F-107]
-updated: 2026-10-22
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105, F-106, F-107, F-108]
+updated: 2026-10-24
 ---
 # Questões
 
 O banco de questões é onde os curadores escrevem as questões de que provas e treinos são feitos. Uma questão
 tem enunciado, texto-base opcional, de duas a cinco alternativas com uma correta, explicação opcional,
 dificuldade, tópico e o idioma em que está escrita. Uma questão é de múltipla escolha, certo/errado,
-múltiplas respostas, associação ou lacunas; a questão certo/errado tem um gabarito, certo ou errado, no lugar das
+múltiplas respostas, associação, lacunas ou resposta curta; a questão certo/errado tem um gabarito, certo ou errado, no lugar das
 alternativas, a de múltiplas respostas tem várias alternativas corretas, a de associação liga cada item
 numerado da esquerda a uma correspondência com letra da direita, e a de lacunas tem espaços numerados no
-enunciado que o aluno preenche digitando.
+enunciado que o aluno preenche digitando, e a de resposta curta tem uma caixa em que o aluno digita a resposta.
 
 ## Quem pode usar
 Uma conta com a permissão "Gerenciar o banco de questões". Curadores e Administradores a têm. Todas as outras
@@ -45,7 +45,7 @@ revisão também são de quem gerencia o banco. Aprovar ou rejeitar é de quem t
 
 ### Escrever uma questão
 1. Escolha **Adicionar**. O primeiro campo, **Tipo de questão**, oferece **Múltipla escolha** (o padrão),
-   **Certo/errado**, **Múltiplas respostas**, **Associação** e **Lacunas**. O tipo é escolhido agora e não pode ser alterado depois que a questão é criada; numa
+   **Certo/errado**, **Múltiplas respostas**, **Associação**, **Lacunas** e **Resposta curta**. O tipo é escolhido agora e não pode ser alterado depois que a questão é criada; numa
    questão salva ele aparece como um valor.
 2. Escolha a **disciplina** e depois o **tópico** (a lista mostra só os tópicos daquela disciplina). O
    **idioma do conteúdo** começa com o seu idioma; troque pelo idioma em que a questão está escrita. Informe
@@ -105,12 +105,22 @@ traz uma linha vazia. Marcadores só valem no enunciado: no texto-base, nas alte
 menos uma resposta. Na lista de questões e na busca, cada marcador aparece como `____`. Como uma resposta
 parcialmente certa pontua não faz parte da questão: vem das regras de pontuação da edição.
 
+Numa questão de **resposta curta** o cartão **Alternativas** dá lugar ao cartão **Respostas aceitas**, que começa
+com um campo vazio. A barra do enunciado não tem **Inserir lacuna**, e `[[1]]` no enunciado é texto comum:
+1. Digite no campo uma resposta que o aluno pode escrever (até 100 caracteres, texto simples). Escolha
+   **Adicionar resposta** para cada variante (até 5) e use o botão de remover de cada uma para tirá-la. Um
+   campo deixado vazio é ignorado.
+2. Maiúsculas e espaços a mais não contam na hora de comparar a resposta do aluno; acentos contam. Para aceitar
+   "Brasilia" além de "Brasília", cadastre as duas grafias. Duas respostas iguais nessa comparação são recusadas.
+3. Um rascunho aceita uma questão sem resposta; para publicar, é preciso ao menos uma resposta aceita. Se trocar
+   o tipo antes de salvar, as respostas que você digitou continuam na página.
+
 Um rascunho pode ser salvo sem alternativas e sem correta, ou sem gabarito. A lista "Antes de publicar", ao
 lado do formulário, mostra o que ainda falta; numa questão certo/errado ela tem um item, "Gabarito definido",
 numa de múltiplas respostas pede "Ao menos duas corretas e uma errada", numa de associação pede "De 2 a 8
 itens à esquerda", "Ao menos o mesmo número de correspondências à direita" e "Todo item tem texto e uma
-correspondência", e numa de lacunas pede "De 1 a 10 lacunas no enunciado" e "Toda lacuna tem uma resposta
-aceita".
+correspondência", numa de lacunas pede "De 1 a 10 lacunas no enunciado" e "Toda lacuna tem uma resposta
+aceita", e numa de resposta curta pede "Pelo menos uma resposta aceita".
 
 ### Pôr imagens no texto
 O enunciado, o texto-base, cada alternativa e cada item e correspondência de uma associação aceitam imagens; a
@@ -171,7 +181,8 @@ Os cinco tipos de questão podem ser transcritos. O contador existe apenas na te
    enunciado, de duas a cinco alternativas, todas com texto e exatamente uma correta (numa questão
    certo/errado: o gabarito definido; numa de múltiplas respostas: de três a cinco alternativas, ao menos duas
    corretas e ao menos uma errada; numa de associação: de 2 a 8 itens, ao menos tantas correspondências, todos
-   com texto e com letra; numa de lacunas: de 1 a 10 lacunas, cada uma com ao menos uma resposta).
+   com texto e com letra; numa de lacunas: de 1 a 10 lacunas, cada uma com ao menos uma resposta; numa de resposta curta: ao menos
+   uma resposta aceita).
    **Salvar** nunca publica.
 3. Uma questão publicada ainda pode ser editada, mas toda edição precisa mantê-la completa.
 4. **Despublicar** devolve a questão a rascunho com o mesmo conteúdo.
@@ -217,7 +228,9 @@ mudou e o motivo.
    Numa associação, trocar a letra de um item, acrescentar ou remover um item, ou mover uma correspondência
    usada para outra letra conta como troca; mudar só o texto de um item não. Numa de lacunas, acrescentar ou
    remover uma lacuna, ou acrescentar, remover ou trocar uma resposta aceita, conta como troca; mudar o texto em
-   volta dos marcadores, a ordem deles, a ordem das respostas ou só as maiúsculas de uma resposta não.
+   volta dos marcadores, a ordem deles, a ordem das respostas ou só as maiúsculas de uma resposta não. Numa de
+   resposta curta, acrescentar ou remover uma resposta aceita conta como troca; mudar o enunciado, a ordem das
+   respostas ou só as maiúsculas de uma resposta não.
 5. Se o gabarito mudou enquanto a questão era rascunho, **Publicar** é recusado na primeira vez com "Escreva o
    motivo da troca de gabarito." O campo de motivo aparece no bloco **Publicação**, acima dos botões; digite-o e escolha
    **Publicar** de novo.
@@ -256,10 +269,12 @@ citar o ato oficial.
    mostra duas linhas, Certo e Errado, uma de múltiplas respostas começa com "Marque N alternativas." acima
    das alternativas, uma de associação mostra "Associe cada número a uma letra.", os itens numerados e as
    correspondências com letra, na ordem em que foram escritos, e uma de lacunas mostra no enunciado uma caixa
-   sublinhada com o número de cada lacuna, sem pista do tamanho da resposta, e "Preencha cada lacuna.".
+   sublinhada com o número de cada lacuna, sem pista do tamanho da resposta, e "Preencha cada lacuna.", e uma de resposta curta mostra uma caixa vazia e
+   desabilitada, "Sua resposta", com a linha "Digite sua resposta.".
 3. Escolha **Mostrar resposta** para ver a alternativa correta (ou o gabarito; numa associação, "1 → C" ao lado
    de cada item e a marca em cada correspondência usada; numa de lacunas, a primeira resposta aceita dentro de
-   cada caixa e a lista "Lacuna N: resposta, resposta") e a explicação. A visualização sempre mostra a
+   cada caixa e a lista "Lacuna N: resposta, resposta"; numa de resposta curta, a lista "Respostas aceitas:
+   resposta, resposta") e a explicação. A visualização sempre mostra a
    versão salva; salve antes para ver as últimas alterações.
 
 ### Excluir uma questão
@@ -270,7 +285,7 @@ citar o ato oficial.
 ## Campos
 | Campo | Significado | Regras |
 |---|---|---|
-| Tipo de questão | Como a questão é respondida | Múltipla escolha, certo/errado, múltiplas respostas, associação ou lacunas. Escolhido ao criar a questão; não pode ser alterado depois |
+| Tipo de questão | Como a questão é respondida | Múltipla escolha, certo/errado, múltiplas respostas, associação, lacunas ou resposta curta. Escolhido ao criar a questão; não pode ser alterado depois |
 | Disciplina | Serve para escolher o tópico | Obrigatória na tela; a questão guarda só o tópico |
 | Tópico | O tópico a que a questão pertence | Obrigatório. Um tópico não pode ser excluído enquanto uma questão o usa |
 | Idioma do conteúdo | O idioma em que a questão está escrita | Obrigatório, um dos idiomas do app. O conteúdo nunca é traduzido |
@@ -286,6 +301,7 @@ citar o ato oficial.
 | Correspondências (associação) | Os itens com letra da direita | Até 8. Para publicar: ao menos tantos quanto os itens, todos com texto; os que nenhum item usa são extras. Cada um até 2.000 caracteres |
 | Lacunas | Os marcadores `[[N]]` do enunciado, um por lacuna | Só em lacunas. Até 10, números de 1 a 99, cada um uma vez. Para publicar: de 1 a 10, cada uma com resposta |
 | Respostas aceitas | O que uma lacuna aceita como certo | Até 5 por lacuna, texto simples, cada uma até 100 caracteres. Maiúsculas e espaços a mais não contam; acentos contam |
+| Respostas aceitas (resposta curta) | O que o aluno pode digitar como certo | De 0 a 5, texto simples, cada uma até 100 caracteres. Maiúsculas e espaços a mais não contam; acentos contam. Para publicar: ao menos uma |
 | Gabarito | Se o enunciado de uma questão certo/errado está certo ou errado | Só em certo/errado. Pode ficar vazio no rascunho; obrigatório para publicar. Uma questão publicada não pode perdê-lo |
 | Explicação | Por que o gabarito está certo | Opcional, até 10.000 caracteres |
 | Motivo da troca de gabarito | Por que o gabarito de uma questão publicada mudou | Obrigatório quando um salvamento ou uma publicação registra uma versão cujo gabarito difere da anterior; de 1 a 500 caracteres. Um motivo em qualquer outra versão nova fica como nota |
@@ -325,6 +341,9 @@ removidos ao salvar, e a página mostra o que foi mantido.
 | Uma resposta passa de 100 caracteres. | A resposta passou do limite. | Encurte-a. |
 | Duas respostas desta lacuna são iguais quando se ignoram maiúsculas e espaços extras. | Duas respostas da mesma lacuna só diferem em maiúsculas ou espaços. | Remova uma delas. |
 | Só uma questão de lacunas tem lacunas. | Um salvamento de outro tipo trouxe lacunas. | Recarregue a página e salve de novo. |
+| Escreva pelo menos uma resposta aceita. | Uma questão de resposta curta ficou sem resposta ao publicar. | Escreva ao menos uma resposta. |
+| Uma resposta curta aceita no máximo 5 respostas. | Respostas demais numa questão de resposta curta. | Remova algumas. |
+| Duas respostas são iguais quando se ignoram maiúsculas e espaços extras. | Duas respostas de uma questão de resposta curta só diferem em maiúsculas ou espaços. | Remova uma delas. |
 | Defina o gabarito (certo ou errado) para publicar. | A questão certo/errado não tem gabarito. | Escolha Certo ou Errado em Gabarito. |
 | O tipo de uma questão não pode ser alterado. | Um salvamento citou outro tipo que o guardado. | Recarregue a página; crie uma questão nova para o outro tipo. |
 | Uma questão certo/errado não tem alternativas. / Uma questão de múltipla escolha não tem gabarito certo/errado. | Um salvamento trouxe uma resposta que o tipo não tem. | Recarregue a página e salve de novo. |
