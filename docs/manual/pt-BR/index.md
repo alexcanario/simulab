@@ -32,7 +32,7 @@ As páginas entram aqui à medida que cada funcionalidade é lançada.
 O Simulab está disponível em português (Brasil), português (Portugal) e inglês. Você escolhe o idioma no seu perfil. As questões das provas aparecem sempre no idioma original.
 
 ## Páginas relacionadas
-- [Como navegar](getting-around.md): menu, modo claro e escuro, idioma e teclado
+- [Como navegar](getting-around.md): página inicial, páginas de erro, menu, modo claro e escuro, idioma e teclado
 - [Criar uma conta](create-account.md): cadastro e confirmação do e-mail
 - [Entrar e sair](sign-in-and-sign-out.md): login, logout, bloqueio por tentativas
 - [Senha](password.md): esqueci a senha, redefinir e alterar
