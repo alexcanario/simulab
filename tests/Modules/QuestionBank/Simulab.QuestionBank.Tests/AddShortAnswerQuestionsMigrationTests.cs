@@ -43,7 +43,7 @@ public sealed class AddShortAnswerQuestionsMigrationTests
             INSERT INTO {{Schema}}.question_blanks (id, question_id, number, position, accepted_answers, created_at, is_deleted)
             VALUES ('{{Guid.CreateVersion7()}}', '{{questionId}}', 1, 0, ARRAY['Brasília'], now(), false);
             INSERT INTO {{Schema}}.question_versions (id, question_id, number, type, content_language, statement_html, options, match_items, blanks, answer_key_changed, annulled, created_at, is_deleted)
-            VALUES ('{{Guid.CreateVersion7()}}', '{{questionId}}', 1, 'FillInTheBlanks', 'pt-BR', '<p>[[1]]</p>', '[]'::jsonb, '[]'::jsonb, '[{"number":1,"acceptedAnswers":["Brasília"]}]'::jsonb, false, false, now(), false);
+            VALUES ('{{Guid.CreateVersion7()}}', '{{questionId}}', 1, 'FillInTheBlanks', 'pt-BR', '<p>[[1]]</p>', '[]'::jsonb, '[]'::jsonb, '[{"Number":1,"AcceptedAnswers":["Brasília"]}]'::jsonb, false, false, now(), false);
             """);
 
         (await TypeCommentsAsync(connection)).Should().OnlyContain(comment => !comment.Contains("ShortAnswer"));

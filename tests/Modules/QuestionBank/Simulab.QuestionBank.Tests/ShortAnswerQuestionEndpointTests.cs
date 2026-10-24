@@ -79,7 +79,9 @@ public sealed class ShortAnswerQuestionEndpointTests : OriginApiTests
         question.Type.Should().Be(QuestionType.ShortAnswer);
         question.Status.Should().Be(QuestionStatus.Draft);
         question.Options.Should().BeEmpty();
-        BlanksOf(question.Blanks).Should().ContainSingle().Which.Should().Be((1, (IReadOnlyList<string>)[]));
+        var blank = BlanksOf(question.Blanks).Should().ContainSingle().Subject;
+        blank.Number.Should().Be(1);
+        blank.Answers.Should().BeEmpty();
         (await ListAsync(admin, "?pageSize=100")).Items.Single(item => item.Id == question.Id)
             .Type.Should().Be(QuestionType.ShortAnswer);
     }

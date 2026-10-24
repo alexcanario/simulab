@@ -64,7 +64,9 @@ public sealed class ShortAnswerQuestionTests
         result.Value.Status.Should().Be(QuestionStatus.Draft);
         result.Value.Options.Should().BeEmpty();
         result.Value.TrueFalseKey.Should().BeNull();
-        BlanksOf(result.Value).Should().ContainSingle().Which.Should().Be((1, (IReadOnlyList<string>)[]));
+        var blank = BlanksOf(result.Value).Should().ContainSingle().Subject;
+        blank.Number.Should().Be(1);
+        blank.Answers.Should().BeEmpty();
     }
 
     // AC2, BR4, BR6: stored trimmed, in the order written; the accent counts.
