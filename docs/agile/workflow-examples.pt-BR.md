@@ -6741,3 +6741,93 @@ If this body is meant to be sent as it is, ask the owner; with a yes, repeat the
 ```
 
 Linhas agrupadas (`AC1-AC4`, `AC1, AC2`) contam como cobertura; um corpo com prefixo `Deferred (` ou `Cancelled (` seguido de `Status:`, um corpo `done` e uma seção só com prosa passam sem uma palavra. O comentário de bypass só entra no comando depois do sim do dono.
+
+### 14.185 Três projetos de teste lado a lado no fim do turno, e um RED que nomeia todos
+
+O Claude muda uma classe de `LibA`, uma biblioteca que três projetos de teste referenciam (`T1`, `T2`, `T3`, cada um com um teste de 5 s). No fim do turno o gate compila os três e os roda ao mesmo tempo:
+
+```
+agile gate
+sdk 11.0.100-rc.2.26504.105 (.)
+built tests/T1/T1.csproj (2 s)
+built tests/T2/T2.csproj (2 s)
+built tests/T3/T3.csproj (2 s)
+tested tests/T1/T1.csproj (7 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: 5 s - T1.dll (net11.0)
+tested tests/T2/T2.csproj (7 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: 5 s - T2.dll (net11.0)
+tested tests/T3/T3.csproj (7 s)
+  Passed! - Failed: 0, Passed: 1, Skipped: 0, Total: 1, Duration: 5 s - T3.dll (net11.0)
+tests side by side: 3 project(s), 3 at once (7 s)
+agile gate GREEN
+```
+
+O turno levou 12 s; com `"testParallel": 1` no `.claude/agile/build.json` o mesmo turno levou 25 s, os três `tested` um depois do outro e sem a linha `tests side by side`. Cada linha `tested` guarda os segundos do próprio projeto, e a linha de baixo diz quanto o passo de testes levou de verdade.
+
+No turno seguinte, um teste de `T1` falha e um de `T2` trava (o gate rodou com `AGILE_GATE_HANG_TIMEOUT` em 15 s). `T3` roda até o fim, e o RED traz os dois projetos quebrados, cada um com o seu corpo (as linhas da pilha de chamadas foram cortadas aqui):
+
+```
+[agile gate] [<scratch>\repo]
+sdk 11.0.100-rc.2.26504.105 (.)
+tests failed: tests/T1/T1.csproj
+Test run for <scratch>\repo\tests\T1\bin\Debug\net11.0\T1.dll (.NETCoreApp,Version=v11.0)
+A total of 1 test files matched the specified pattern.
+Data collector 'Blame' message: All tests finished running, Sequence file will not be generated.
+  Failed Probe_T1 [5 s]
+  Error Message:
+   Assert.Fail failed. planted failure of T1
+
+Failed!  - Failed:     1, Passed:     0, Skipped:     0, Total:     1, Duration: 5 s - T1.dll (net11.0)
+a test hung (more than 15 s) or the test host crashed: tests/T2/T2.csproj
+not finished: T.Probe.Probe_T2
+full output: <scratch>\tmp\agile-canary\gate-logs\20261023-141013-434-stop.log
+agile gate RED: a test hung (tests/T2/T2.csproj); tests failed (tests/T1/T1.csproj: Probe_T1) — full output: <scratch>\tmp\agile-canary\gate-logs\20261023-141013-434-stop.log
+```
+
+O veredito cita o travamento primeiro; o log salvo tem a saída inteira dos três projetos, cada uma sob `===== tests/T<n>/T<n>.csproj (...) =====`. O Claude corrige os dois no mesmo turno. Com `"testParallel": 1` o gate faz como antes deste item: para em `T1`, o primeiro vermelho (`agile gate RED: tests failed (tests/T1/T1.csproj): Probe_T1`), e `T2` só aparece no turno seguinte.
+
+### 14.186 O plugin largou duas regras e um template: o `/agile:sync` pergunta, apaga a intacta e só avisa da editada
+
+O plugin atualizou e deixou de ter `rules/core/old-rule.md`, `rules/core/old-two.md` e `templates/old.md`. O projeto ainda tem as três cópias, gravadas no `.claude/agile/sync.json`, e editou uma delas (`old-two.md`). O `plan` as lista em `removedCopies`, cada uma com o arquivo do plugin que sumiu:
+
+```
+removed  .claude/rules/agile/old-rule.md   (plugin file gone: rules/core/old-rule.md)
+edited   .claude/rules/agile/old-two.md   (plugin file gone: rules/core/old-two.md)
+removed  docs/agile/templates/old.md   (plugin file gone: templates/old.md)
+```
+
+O Claude mostra uma linha por cópia, em pt-BR: `.claude/rules/agile/old-rule.md — o plugin removeu esta regra/template; apagar? (ok ou não)`, o mesmo para o template, e para a editada `.claude/rules/agile/old-two.md — removido no plugin e editado no projeto: mover as escolhas para <nome>-project.md ou apagar à mão; nada é apagado`. Você diz ok só para a regra intacta e o Claude passa os caminhos ao `remove` (o terceiro, `docs/agile/profile.md`, entra aqui só para mostrar a recusa):
+
+```
+removed  .claude/rules/agile/old-rule.md
+refused  .claude/rules/agile/old-two.md: edited, decide by hand
+skip     docs/agile/profile.md: not a removed copy
+```
+
+A regra intacta foi apagada e saiu do `sync.json`; a editada ficou, porque o script nunca apaga o que o projeto mexeu. O Claude roda o `record`, e a linha que você não aprovou volta:
+
+```
+recorded agile@canary 0.169.0: 2 files -> .claude/agile/sync.json
+edited   .claude/rules/agile/old-two.md   (plugin file gone: rules/core/old-two.md)
+removed  docs/agile/templates/old.md   (plugin file gone: templates/old.md)
+```
+
+No sync seguinte o Claude pergunta de novo pelo template; a regra editada continua só como aviso até você mover as suas escolhas para um `old-two-project.md` e apagar o arquivo à mão. A apagada vai no commit do sync, e o retro-log diz quais cópias saíram, ficaram ou estão editadas.
+
+### 14.187 Antes do `reviewer`, a sessão grande para e oferece uma sessão nova
+
+No acme-shop, a F-3 está em `validating` e a sessão que a construiu já passou de 130k por resposta. Você digita `/agile:review F-3`. Logo antes de chamar o `reviewer`, o Claude roda `usage.js fresh --at review --id F-3`; o contexto está acima do limite de 120k, então a resposta termina com esta linha, depois de um commit `wip(F-3): before review` com o que ainda não estava commitado:
+
+```
+Contexto desta sessão: 130k por turno; uma sessão nova abre em ~65k. Para economizar uso: /clear e depois /agile:review F-3. Ou responda segue para continuar nesta sessão.
+```
+
+Não há cartão nem evento. Você digita `/clear` e depois `/agile:review F-3`, e a revisão recomeça do item no disco numa sessão de cerca de 90k; ou responde `segue`, e o `reviewer` é chamado nesta mesma sessão, como antes. Numa sessão abaixo de 120k o comando não imprime nada e a revisão segue sem parar.
+
+O mesmo vale antes das passadas de desenho e do `frontend` no `/agile:build` (o comando da linha é `/agile:build F-3`) e antes do `ux-designer` no `/agile:screen`. Num `/agile:autopilot F-3`, a mesma sessão imprime:
+
+```
+Contexto desta sessão: 130k por turno; uma sessão nova abre em ~65k. Para economizar uso: /clear e depois /agile:autopilot F-3.
+```
+
+A execução termina ali com o evento `stop` `fresh context before review`; `/agile:autopilot F-3` numa sessão limpa continua do disco.
