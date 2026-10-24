@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -99,7 +100,7 @@ public sealed class AddOpenAnswerAndEssayQuestionsMigrationTests
         await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync();
 
-        string Insert(string type, string size) =>
+        static string Insert(string type, string size) =>
             $$"""
             INSERT INTO {{Schema}}.questions (id, type, status, topic_id, content_language, statement_html, statement_text, normalized_statement, {{size.Split('=')[0]}}, created_at, is_deleted)
             VALUES ('{{Guid.CreateVersion7()}}', '{{type}}', 'Draft', '{{Guid.CreateVersion7()}}', 'pt-BR', '<p>x</p>', 'x', 'X', {{size.Split('=')[1]}}, now(), false)
@@ -132,7 +133,7 @@ public sealed class AddOpenAnswerAndEssayQuestionsMigrationTests
             $"""
             SELECT count(*)::text FROM information_schema.tables
             WHERE table_schema = '{Schema}' AND table_name = 'question_rubric_criteria'
-            """))[0]);
+            """))[0], CultureInfo.InvariantCulture);
 
     private static Task<List<string>> TypeCommentsAsync(NpgsqlConnection connection) =>
         ValuesAsync(

@@ -59,7 +59,7 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching, FillInTheBlanks or ShortAnswer.");
+            .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching, FillInTheBlanks, ShortAnswer, OpenAnswer or Essay.");
 
         builder.Property(version => version.ContentLanguage)
             .HasMaxLength(QuestionLimits.ContentLanguageMaxLength)
@@ -108,6 +108,18 @@ public sealed class QuestionVersionConfiguration : IEntityTypeConfiguration<Ques
         // on the versions recorded before it, which the entity reads as none (the architecture test names this exemption).
         builder.OwnsMany(version => version.Blanks, blanks => blanks.ToJson("blanks"));
         builder.Navigation(version => version.Blanks).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        // F-109 BR10: the criteria of an open-answer or essay question in rubric order, a fourth JSON column read whole;
+        // null on the versions recorded before it, which the entity reads as none (the architecture test names this
+        // exemption). The size limit is what the student was shown, two plain columns.
+        builder.OwnsMany(version => version.Rubric, rubric => rubric.ToJson("rubric"));
+        builder.Navigation(version => version.Rubric).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Property(version => version.AnswerSizeMin)
+            .HasComment("The fewest lines of an essay when the version was recorded. Null when not set, and for any other type.");
+
+        builder.Property(version => version.AnswerSizeMax)
+            .HasComment("The most lines of an essay or characters of an open answer when the version was recorded. Null when not set, and for any other type.");
 
         builder.HasOne<Question>()
             .WithMany()

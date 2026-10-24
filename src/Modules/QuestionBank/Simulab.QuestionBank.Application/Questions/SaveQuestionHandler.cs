@@ -37,7 +37,13 @@ public sealed class SaveQuestionHandler(
         QuestionBankErrorCodes.QuestionBlankAnswersCount,
         QuestionBankErrorCodes.QuestionBlankAnswerRequired,
         QuestionBankErrorCodes.QuestionBlankAnswerTooLong,
-        QuestionBankErrorCodes.QuestionBlankAnswerRepeated
+        QuestionBankErrorCodes.QuestionBlankAnswerRepeated,
+        // F-109: the position of these is the criterion's in the rubric, from 1.
+        QuestionBankErrorCodes.QuestionCriterionNameRequired,
+        QuestionBankErrorCodes.QuestionCriterionNameTooLong,
+        QuestionBankErrorCodes.QuestionCriterionDescriptionTooLong,
+        QuestionBankErrorCodes.QuestionCriterionPointsOutOfRange,
+        QuestionBankErrorCodes.QuestionCriterionNameRepeated
     ];
 
     public async Task<SaveQuestionOutcome> HandleAsync(
@@ -124,6 +130,11 @@ public sealed class SaveQuestionHandler(
         var blanks = (request.Blanks ?? [])
             .Select(blank => new BlankDraft(blank.Number, [.. (blank.AcceptedAnswers ?? []).Select(answer => answer ?? string.Empty)]))
             .ToList();
+        // F-109: names and descriptions are plain text, never HTML; the key trims and checks them. A request that omits
+        // the rubric counts as an empty one, so a published question cannot lose its rubric silently (BR6).
+        var rubric = (request.Rubric ?? [])
+            .Select(criterion => new CriterionDraft(criterion.Name, criterion.Description, criterion.MaxPoints))
+            .ToList();
         var type = existing?.Type ?? request.Type ?? QuestionType.SingleChoice;
         var content = new QuestionContent(
             request.TopicId,
@@ -141,7 +152,10 @@ public sealed class SaveQuestionHandler(
             type,
             request.TrueFalseKey,
             matchItems,
-            blanks);
+            blanks,
+            rubric,
+            request.AnswerSizeMin,
+            request.AnswerSizeMax);
 
         var question = existing;
         Result applied;
@@ -160,7 +174,16 @@ public sealed class SaveQuestionHandler(
         {
             // The entity answers with the code; the position of the option it is about comes from the same rule.
             var position = OptionCodes.Contains(applied.Error!.Code)
-                ? AnswerKey.From(content.Type, drafts, request.TrueFalseKey, matchItems, blanks, content.Statement.BlankMarkers)
+                ? AnswerKey.From(
+                        content.Type,
+                        drafts,
+                        request.TrueFalseKey,
+                        matchItems,
+                        blanks,
+                        content.Statement.BlankMarkers,
+                        rubric,
+                        request.AnswerSizeMin,
+                        request.AnswerSizeMax)
                     .Check(existing?.Status == QuestionStatus.Published)?.Position
                 : null;
 

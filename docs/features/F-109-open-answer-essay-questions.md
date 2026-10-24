@@ -217,6 +217,8 @@ Tests locked: 31f3f4b22b5f2964a75dcf0afa5e0354f8c5f42b (7 files); unlocks: 0
 - 2026-10-24 — Design coverage: scope, contracts (callers of the positional records listed), data (table, indexes, checks, comments, JSON exemption), simplicity, layout; not run: `ErrorCodeTextTests`, vocabulary test (need compiled code).
 - 2026-10-24 — Traps: T1 rubric in `blanks` (wrong error codes), T2 one JSON column on `questions` (no child-row pattern, no future FK), T3 inline branches in `QuestionForm.razor` (already ~2,470 lines).
 - 2026-10-24 — design trade-off 5 size-column ranges — owner chose as proposed (checks in the database by type, like `ck_questions_difficulty_range`).
+- 2026-10-24 — tests unlocked (owner: two lint warnings in `AddOpenAnswerAndEssayQuestionsMigrationTests`, IDE0062 and CA1305; style only, no assertion changed) and locked again.
+- 2026-10-24 — `InitialQuestionBankMigrationTests` lists the module's tables; it gained `question_rubric_criteria` (a test of the module, not of this item, edited with the migration that adds the table, as F-107 did for `question_blanks`).
 - 2026-10-24 — plan — 1 glossary rows `Rubric` and `Rubric criterion`, then the six keys take the trailing parameters and refusal helpers → build + F-98, F-104, F-106, F-107, F-108 suites unedited; 2 create and save an `Essay` and an `OpenAnswer` end to end (enum, limits, codes, keys, entity, `question_rubric_criteria`, size columns, migration, contracts, handler, queries) → AC1, AC2, AC3, AC6, AC7, AC8, AC9, AC13, AC17, AC18; 3 publish and edit a published rubric → AC4, AC5; 4 versions (`question_versions` rubric and size, `RubricKeyChanged`, `CopyAs`, base-text fan-out, annul and reinstate) → AC10, AC11, AC12; 5 form: rubric section, size fields, labels, checklist, transcription 6 → 8, three locales → AC14, AC15, AC20, AC21 (AC19 on screen); 6 preview and list → AC16; 7 flow page, pt-BR manual, regenerated docs, validation script → `techdocs.js check F-109`. No `frontend` agent (no mockup).
 
 ## Out of scope
@@ -239,5 +241,6 @@ Tests locked: 31f3f4b22b5f2964a75dcf0afa5e0354f8c5f42b (7 files); unlocks: 0
 ## Events
 
 - 2026-10-24 question — asked 7, from context 3
+- 2026-10-24 blocked — test wrong: owner: fix two lint warnings (IDE0062, CA1305) in the migration test, no assertion changes
 
 ## Delivery

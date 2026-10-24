@@ -25,6 +25,9 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
     /// <summary>F-97 BR1: only a true/false question carries a true/false key.</summary>
     public const string TrueFalseKeyCheck = "ck_questions_true_false_key";
 
+    /// <summary>F-109 BR7: only an open answer or an essay has a size limit, within the range of its type.</summary>
+    public const string AnswerSizeCheck = "ck_questions_answer_size";
+
     public void Configure(EntityTypeBuilder<Question> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -33,7 +36,7 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             "questions",
             table =>
             {
-                table.HasComment("A question of the bank, written by a curator. Its options are in question_options and, for a matching question, its left items in question_match_items and, for a fill-in-the-blanks question, its blanks in question_blanks.");
+                table.HasComment("A question of the bank, written by a curator. Its options are in question_options and, for a matching question, its left items in question_match_items and, for a fill-in-the-blanks question, its blanks in question_blanks and, for an open-answer or essay question, its rubric in question_rubric_criteria.");
                 table.HasCheckConstraint(
                     DifficultyCheck,
                     $"difficulty IS NULL OR difficulty BETWEEN {QuestionLimits.DifficultyMin} AND {QuestionLimits.DifficultyMax}");
@@ -42,6 +45,13 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
                     "(exam_edition_id IS NULL AND paper_number IS NULL AND notice_subject_id IS NULL) OR "
                     + $"(exam_edition_id IS NOT NULL AND paper_number IS NOT NULL AND paper_number BETWEEN {QuestionLimits.PaperNumberMin} AND {QuestionLimits.PaperNumberMax})");
                 table.HasCheckConstraint(TrueFalseKeyCheck, "true_false_key IS NULL OR type = 'TrueFalse'");
+                table.HasCheckConstraint(
+                    AnswerSizeCheck,
+                    "(answer_size_min IS NULL AND answer_size_max IS NULL) OR "
+                    + $"(type = 'Essay' AND (answer_size_min IS NULL OR answer_size_min BETWEEN 1 AND {QuestionLimits.EssayLinesMax}) "
+                    + $"AND (answer_size_max IS NULL OR answer_size_max BETWEEN 1 AND {QuestionLimits.EssayLinesMax}) "
+                    + "AND (answer_size_min IS NULL OR answer_size_max IS NULL OR answer_size_min <= answer_size_max)) OR "
+                    + $"(type = 'OpenAnswer' AND answer_size_min IS NULL AND answer_size_max BETWEEN 1 AND {QuestionLimits.OpenAnswerCharactersMax})");
             });
         builder.HasKey(question => question.Id);
 
@@ -49,7 +59,7 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasConversion<string>()
             .HasMaxLength(40)
             .IsRequired()
-            .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching, FillInTheBlanks or ShortAnswer.");
+            .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching, FillInTheBlanks, ShortAnswer, OpenAnswer or Essay.");
 
         // F-101: a write that read another status than the stored one is a lost race (an annulment against an
         // unpublish, a save against an annulment) and answers 409 instead of last-writer-wins.
@@ -120,6 +130,14 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
         builder.Property(question => question.TrueFalseKey)
             .HasComment("The key of a true/false question: true means right (certo), false wrong (errado), null not set yet. Always null for a single-choice question.");
 
+        // F-109 BR7: the size limit of an open answer (characters) or an essay (lines); the unit follows the type, so a
+        // column is never read without it.
+        builder.Property(question => question.AnswerSizeMin)
+            .HasComment("The fewest lines of an essay (1 to 100), not above answer_size_max. Null when not set, and always null for any other type, an open answer included.");
+
+        builder.Property(question => question.AnswerSizeMax)
+            .HasComment("The most lines of an essay (1 to 100) or the most characters of an open answer (1 to 5000). Null when not set, and always null for any other type.");
+
         builder.HasMany(question => question.Options)
             .WithOne()
             .HasForeignKey(option => option.QuestionId)
@@ -142,6 +160,14 @@ public sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasConstraintName("fk_question_blanks_question")
             .OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(question => question.Blanks).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        // F-109: the criteria of the rubric of an open-answer or essay question, owned like the options.
+        builder.HasMany(question => question.Rubric)
+            .WithOne()
+            .HasForeignKey(criterion => criterion.QuestionId)
+            .HasConstraintName("fk_question_rubric_criteria_question")
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.Navigation(question => question.Rubric).UsePropertyAccessMode(PropertyAccessMode.Field);
 
         // The topic delete guard and the topic's "in use" flag filter by the topic alone.
         builder.HasIndex(question => question.TopicId)

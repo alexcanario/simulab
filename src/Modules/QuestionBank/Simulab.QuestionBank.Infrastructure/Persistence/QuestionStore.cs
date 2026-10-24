@@ -21,6 +21,7 @@ public sealed class QuestionStore(
             .Include(question => question.Options)
             .Include(question => question.MatchItems)
             .Include(question => question.Blanks)
+            .Include(question => question.Rubric)
             .AsSplitQuery()
             .FirstOrDefaultAsync(question => question.Id == id, cancellationToken);
 
