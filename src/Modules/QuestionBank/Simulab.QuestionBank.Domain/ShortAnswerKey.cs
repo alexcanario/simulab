@@ -1,5 +1,4 @@
 using Simulab.QuestionBank.Contracts;
-using Simulab.SharedKernel.Results;
 
 namespace Simulab.QuestionBank.Domain;
 
