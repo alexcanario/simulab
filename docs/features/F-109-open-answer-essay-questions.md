@@ -165,27 +165,27 @@ No mockup (owner, 2026-10-24): the form gains two type cards and one rubric sect
 ## Criterion → test
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | pending |
-| AC19 | pending |
-| AC20 | pending |
-| AC21 | pending |
+| AC1 | `RubricQuestionTests.Create_WithNoRubric_IsADraftOfThatType_WithAnEmptyRubricAndNoSize`; `RubricQuestionEndpointTests.Create_WithNoRubric_IsStoredAsADraftOfThatType_WithAnEmptyRubric_AndListedWithIt` |
+| AC2 | `RubricQuestionTests.Create_WithThreeCriteria_StoresThemTrimmedInOrderFromPosition1`; `RubricQuestionEndpointTests.Create_WithThreeCriteria_StoresThemTrimmedInOrder` |
+| AC3 | `RubricQuestionTests` (`Create_WithElevenCriteria_*`, `Create_WithAnEmptyName_*`, `Create_WithANameOf101Characters_*`, `Create_WithADescriptionOf501Characters_*`, `Create_WithPointsMissingOrOutsideOneTo100_*`, `Create_WithPointsAtTheEdges_IsAccepted`, `Create_WithTwoNamesEqualUnderTheRule_*`, `Update_WithABrokenRubric_*`); `RubricQuestionEndpointTests.Create_BreakingTheLimitsOfTheRubric_*`, `Create_WithTheLimitsThemselves_IsAccepted` |
+| AC4 | `RubricQuestionTests.Publish_WithNoCriterion_*`; `RubricQuestionEndpointTests.Publish_WithNoCriterion_IsRefused_AndWithOne_IsPublished`, `Submit_CompleteDraft_GoesToReview_*` |
+| AC5 | `RubricQuestionTests.Update_Published_RemovingEveryCriterion_*`, `Update_Published_WithAnotherValidRubric_StaysPublished`; `RubricQuestionEndpointTests.Update_Published_RemovingEveryCriterion_*` |
+| AC6 | `RubricQuestionTests` (`Create_AnEssayWith*`, `Create_AnOpenAnswerWith*`); `RubricQuestionEndpointTests.Create_AnEssayWithALineLimit_*`, `Create_AnOpenAnswerWithACharacterLimit_*` |
+| AC7 | `RubricQuestionTests` (`Create_OfAnotherType_WithARubric_*`, `Create_OfAnotherType_WithASizeLimit_*`, `Create_WithOptions_*`, `Create_WithATrueFalseKey_*`, `Create_WithMatchItems_*`, `Create_WithBlanks_*`); `RubricQuestionEndpointTests` (`Create_OfAnotherType_WithARubricOrASize_*`, `Create_WithOptionsAKeyMatchItemsOrBlanks_*`) |
+| AC8 | `RubricQuestionTests.Update_WithContentOfAnotherType_IsAConflict`; `RubricQuestionEndpointTests.Update_NamingAnotherType_Is409TypeChanged_AndNamingItsOwnIsAccepted` |
+| AC9 | `RubricQuestionTests.Create_WithStatementTextThatLooksLikeAMarker_KeepsItAsText`; `RubricQuestionEndpointTests.Create_WithStatementTextThatLooksLikeAMarker_*` |
+| AC10 | `RubricQuestionTests.NextVersion_ChangingTheKeyOfTheRubric_NeedsAReason_*`; `RubricQuestionEndpointTests` (`Update_Published_ChangingThePointsOfACriterion_*`, `Update_Published_AddingRemovingOrRenamingACriterion_NeedsAReason`) |
+| AC11 | `RubricQuestionTests` (`NextVersion_ChangingOnlyADescription_*`, `NextVersion_ReorderingTheCriteria_*`, `NextVersion_ChangingTheNameOnlyInCaseOrSpacing_*`, `NextVersion_ChangingOnlyTheStatementTheExplanationOrTheSize_*`, `NextVersion_RecordsTheSizeLimitTheQuestionHad`, `NextVersion_NothingChanged_MakesNothing`); `RubricQuestionEndpointTests.Update_Published_ChangingOnlyDescriptionOrderStatementExplanationOrSize_*`; the F-98, F-104, F-106, F-107 and F-108 suites unedited |
+| AC12 | `RubricQuestionTests.AnnulAndReinstate_CopyTheRubricAndTheSizeOfTheLatestVersion`; `RubricQuestionEndpointTests` (`UpdateBaseText_LinkedToAPublishedEssay_*`, `Create_SanitizesTheStatement`, `Create_WithElevenImagesInTheStatement_*`, `Create_WithADifficultyOutOfRange_*`, `Create_WithAPaperNumberAlreadyTaken_*`, `Delete_Published_IsRefused_*`, `DeleteTopic_WithOnlyAnEssayQuestion_*`, `AnnulAndReinstate_KeepTheRubricAndTheSizeInTheirVersions`) |
+| AC13 | `RubricQuestionEndpointTests.List_QuestionsOfTheEightTypes_*`, `VersionsRecordedBeforeTheRubric_*`; `RubricQuestionPreviewAndListTests.List_NamesTheOpenAnswerAndEssayTypes` |
+| AC14 | `RubricQuestionFormTests` (`Add_OffersTheSeventhAndEighthTypeCards_*`, `Add_ChoosingEssay_*`, `Add_ChoosingOpenAnswer_*`, `Add_Rubric_AddCriterionGoesUpToTen_*`, `Add_Essay_SavesTheTypeTheRubricInOrderAndTheLineLimit`, `Add_OpenAnswer_SavesTheCharacterLimitAndNoMinimum`, `Add_GoingToAnotherTypeAndBack_*`, `Edit_Essay_ShowsTheTypeAsAReadOnlyValue_*`, the refusal, reason and annulled tests) |
+| AC15 | `RubricQuestionFormTests.Edit_Essay_LabelsTheExplanationAsTheModelAnswer_WithItsHint`, `Edit_Essay_ChecklistIsDoneOnlyWithACriterionNamedWithItsPoints` |
+| AC16 | `RubricQuestionPreviewAndListTests` (`Preview_Essay_*`, `Preview_OpenAnswer_*`, `Preview_EssayDraftWithNoCriterion_SaysNoRubricYet`) |
+| AC17 | `AddOpenAnswerAndEssayQuestionsMigrationTests` (both); `TableDescriptionTests` (JSON exemption) |
+| AC18 | `RubricQuestionEndpointTests.CreateAndUpdate_WithoutThePermission_AnswerForbidden` |
+| AC19 | pending (validation step: keyboard and screen reader on the rubric section; the accessible names are asserted by `RubricQuestionFormTests.Add_ChoosingEssay_ShowsTheRubricWithOneEmptyRow_AndTheLineFields` and the error announcement by `Edit_Essay_WhenTheApiRefusesTheRubricOrTheSize_*`) |
+| AC20 | `QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements`, `Open_ChoosingTheEssay_ShowsTheRubricSection` |
+| AC21 | `RubricQuestionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `ResourceParityTests`; `ErrorCodeTextTests` |
 
 ## Decisions
 - 2026-10-24 — F-109 delivers only the `OpenAnswer` and `Essay` types with a rubric; grading is a person (a `Grader` role, F-150), the queue is F-151 and the AI-suggested grade F-152 — no student attempt exists to produce answers to grade — confirmed: docs/discussions/D-5-essay-grading-and-grader-role.md

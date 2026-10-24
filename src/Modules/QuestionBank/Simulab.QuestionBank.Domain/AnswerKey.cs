@@ -59,7 +59,10 @@ public abstract record AnswerKey
         bool? trueFalseKey,
         IReadOnlyList<MatchItemDraft>? matchItems = null,
         IReadOnlyList<BlankDraft>? blanks = null,
-        IReadOnlyList<int>? blankMarkers = null)
+        IReadOnlyList<int>? blankMarkers = null,
+        IReadOnlyList<CriterionDraft>? rubric = null,
+        int? answerSizeMin = null,
+        int? answerSizeMax = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         var items = matchItems ?? [];

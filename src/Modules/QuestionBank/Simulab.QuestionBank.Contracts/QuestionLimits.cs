@@ -45,6 +45,27 @@ public static class QuestionLimits
     /// <summary>The most characters an accepted answer has, after trimming (F-107, BR4).</summary>
     public const int BlankAnswerMaxLength = 100;
 
+    /// <summary>The most criteria a rubric has, draft or published (F-109, BR3).</summary>
+    public const int RubricCriteriaMax = 10;
+
+    /// <summary>The most characters a criterion name has, after trimming (F-109, BR3).</summary>
+    public const int CriterionNameMaxLength = 100;
+
+    /// <summary>The most characters a criterion description has, after trimming (F-109, BR3).</summary>
+    public const int CriterionDescriptionMaxLength = 500;
+
+    /// <summary>The fewest maximum points of a criterion (F-109, BR3).</summary>
+    public const int CriterionPointsMin = 1;
+
+    /// <summary>The most maximum points of a criterion (F-109, BR3).</summary>
+    public const int CriterionPointsMax = 100;
+
+    /// <summary>The most lines an essay size limit has, for the minimum and the maximum; the fewest is 1 (F-109, BR7).</summary>
+    public const int EssayLinesMax = 100;
+
+    /// <summary>The most characters an open-answer size limit has; the fewest is 1 (F-109, BR7).</summary>
+    public const int OpenAnswerCharactersMax = 5000;
+
     public const int DifficultyMin = 1;
     public const int DifficultyMax = 5;
 

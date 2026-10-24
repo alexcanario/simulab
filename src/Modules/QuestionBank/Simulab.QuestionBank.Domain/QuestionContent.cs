@@ -20,6 +20,9 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="TrueFalseKey">The key of a true/false question; null when not set. Refused on any other type (F-97, BR3).</param>
 /// <param name="MatchItems">The left items of a matching question; null counts as none. Refused on any other type (F-106, BR6).</param>
 /// <param name="Blanks">The blanks of a fill-in-the-blanks question; null counts as none. Refused on any other type (F-107, BR7).</param>
+/// <param name="Rubric">The criteria of an open-answer or essay question; null counts as none. Refused on any other type (F-109, BR8).</param>
+/// <param name="AnswerSizeMin">An essay's minimum lines; null when not set. Refused on any other type (F-109, BR7, BR8).</param>
+/// <param name="AnswerSizeMax">An essay's maximum lines or an open answer's maximum characters; null when not set. Refused on any other type.</param>
 public sealed record QuestionContent(
     Guid? TopicId,
     string? ContentLanguage,
@@ -34,4 +37,7 @@ public sealed record QuestionContent(
     QuestionType Type = QuestionType.SingleChoice,
     bool? TrueFalseKey = null,
     IReadOnlyList<MatchItemDraft>? MatchItems = null,
-    IReadOnlyList<BlankDraft>? Blanks = null);
+    IReadOnlyList<BlankDraft>? Blanks = null,
+    IReadOnlyList<CriterionDraft>? Rubric = null,
+    int? AnswerSizeMin = null,
+    int? AnswerSizeMax = null);

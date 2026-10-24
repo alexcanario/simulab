@@ -30,4 +30,7 @@ public sealed record QuestionResponse(
     QuestionAnnulmentResponse? Annulment = null,
     DateTimeOffset? SubmittedAt = null,
     IReadOnlyList<MatchItemResponse>? MatchItems = null,
-    IReadOnlyList<BlankResponse>? Blanks = null);
+    IReadOnlyList<BlankResponse>? Blanks = null,
+    IReadOnlyList<CriterionResponse>? Rubric = null,
+    int? AnswerSizeMin = null,
+    int? AnswerSizeMax = null);

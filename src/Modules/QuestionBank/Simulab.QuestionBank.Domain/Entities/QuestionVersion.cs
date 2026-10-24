@@ -118,6 +118,19 @@ public sealed class QuestionVersion : TenantEntity
     /// </summary>
     public IReadOnlyList<QuestionVersionBlank> Blanks => _blanks ?? [];
 
+    /// <summary>
+    /// The criteria of an open-answer or essay question in rubric order (F-109, BR10); empty for any other type and for a
+    /// version recorded before F-109, whose JSON column is null.
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped] // skeleton: removed when the column exists
+    public IReadOnlyList<QuestionVersionCriterion> Rubric => [];
+
+    /// <summary>The size limit the question had (F-109, BR10): minimum lines of an essay; null when not set.</summary>
+    public int? AnswerSizeMin => null;
+
+    /// <summary>The size limit the question had (F-109, BR10): maximum lines of an essay or characters of an open answer; null when not set.</summary>
+    public int? AnswerSizeMax => null;
+
     /// <summary>True when the answer key differs from the previous version's (BR4); never true for version 1.</summary>
     public bool AnswerKeyChanged { get; private set; }
 

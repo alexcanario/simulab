@@ -72,6 +72,16 @@ public sealed class Question : TenantEntity
     /// <summary>The blanks of a fill-in-the-blanks question, one per marker, in no set order; empty for any other type (F-107, BR1).</summary>
     public IReadOnlyList<QuestionBlank> Blanks => _blanks;
 
+    /// <summary>The criteria of an open-answer or essay question in position order; empty for any other type (F-109, BR1).</summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped] // skeleton: removed when the table exists
+    public IReadOnlyList<QuestionRubricCriterion> Rubric => [];
+
+    /// <summary>An essay's minimum lines; null when not set and for any other type (F-109, BR7).</summary>
+    public int? AnswerSizeMin => null;
+
+    /// <summary>An essay's maximum lines or an open answer's maximum characters; null when not set (F-109, BR7).</summary>
+    public int? AnswerSizeMax => null;
+
     public static Result<Question> Create(QuestionContent content)
     {
         ArgumentNullException.ThrowIfNull(content);

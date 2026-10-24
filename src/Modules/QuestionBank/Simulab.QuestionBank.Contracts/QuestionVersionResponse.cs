@@ -43,4 +43,7 @@ public sealed record QuestionVersionResponse(
     DateTimeOffset CreatedAt,
     bool Annulled,
     IReadOnlyList<MatchItemResponse>? MatchItems = null,
-    IReadOnlyList<BlankResponse>? Blanks = null);
+    IReadOnlyList<BlankResponse>? Blanks = null,
+    IReadOnlyList<CriterionResponse>? Rubric = null,
+    int? AnswerSizeMin = null,
+    int? AnswerSizeMax = null);
