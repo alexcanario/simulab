@@ -27,7 +27,7 @@ Indexes:
 
 ## question_blanks
 
-Entity: `QuestionBlank` — One blank of a fill-in-the-blanks question: a marker [[n]] of the statement and the answers it accepts.
+Entity: `QuestionBlank` — One blank of a question and the answers it accepts: for a fill-in-the-blanks question a marker [[n]] of the statement, for a short-answer question its one blank numbered 1, with no marker.
 
 | Column | Type | Null | Key | Default | Notes |
 |---|---|---|---|---|---|
@@ -38,9 +38,9 @@ Entity: `QuestionBlank` — One blank of a fill-in-the-blanks question: a marker
 | deleted_at | timestamp with time zone | yes |  |  | When the row was deleted, in UTC. Null while it is not deleted. |
 | deleted_by | uuid | yes |  |  | Who deleted the row. Null while it is not deleted, or when no one was signed in. |
 | is_deleted | boolean | no |  |  | True once the row was deleted. Rows are never removed; a global query filter hides the deleted ones. |
-| number | integer | no |  |  | The number of its marker [[n]] in the statement, 1 to 99; unique for the question among the live rows. |
-| position | integer | no |  |  | Where its marker sits among the markers of the statement, from 0: the order the blanks are shown in. |
-| question_id | uuid | no | FK → questions |  | The fill-in-the-blanks question the blank belongs to. |
+| number | integer | no |  |  | The number of its marker [[n]] in the statement, 1 to 99 (always 1 for a short-answer question, which has no marker); unique for the question among the live rows. |
+| position | integer | no |  |  | Where its marker sits among the markers of the statement, from 0: the order the blanks are shown in (0 for a short-answer question). |
+| question_id | uuid | no | FK → questions |  | The fill-in-the-blanks or short-answer question the blank belongs to. |
 | tenant_id | uuid | yes |  |  | The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant. |
 | updated_at | timestamp with time zone | yes |  |  | When the row was last changed, in UTC. Null while it has never been changed. |
 | updated_by | uuid | yes |  |  | Who last changed the row. Null while it has never been changed, or when no one was signed in. |
@@ -165,7 +165,7 @@ Entity: `QuestionVersion` — An immutable snapshot of a published question: wha
 | statement_html | character varying(10000) | no |  |  | max 10000; The statement as sanitized HTML, as it was when the version was recorded. |
 | tenant_id | uuid | yes |  |  | The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant. |
 | true_false_key | boolean | yes |  |  | The key of a true/false question: true means right (certo), false wrong (errado). Null for a single-choice question. |
-| type | character varying(40) | no |  |  | max 40; How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching or FillInTheBlanks. |
+| type | character varying(40) | no |  |  | max 40; How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching, FillInTheBlanks or ShortAnswer. |
 | updated_at | timestamp with time zone | yes |  |  | When the row was last changed, in UTC. Null while it has never been changed. |
 | updated_by | uuid | yes |  |  | Who last changed the row. Null while it has never been changed, or when no one was signed in. |
 | blanks | jsonb | yes |  |  | JSON: QuestionVersionBlank (AcceptedAnswers, Number) |
@@ -202,7 +202,7 @@ Entity: `Question` — A question of the bank, written by a curator. Its options
 | tenant_id | uuid | yes |  |  | The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant. |
 | topic_id | uuid | no |  |  | The catalog topic the question belongs to. Held by id; there is no foreign key to the catalog. |
 | true_false_key | boolean | yes |  |  | The key of a true/false question: true means right (certo), false wrong (errado), null not set yet. Always null for a single-choice question. |
-| type | character varying(40) | no |  |  | max 40; How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching or FillInTheBlanks. |
+| type | character varying(40) | no |  |  | max 40; How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching, FillInTheBlanks or ShortAnswer. |
 | updated_at | timestamp with time zone | yes |  |  | When the row was last changed, in UTC. Null while it has never been changed. |
 | updated_by | uuid | yes |  |  | Who last changed the row. Null while it has never been changed, or when no one was signed in. |
 

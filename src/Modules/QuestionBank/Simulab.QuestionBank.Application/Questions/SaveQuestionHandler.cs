@@ -32,7 +32,7 @@ public sealed class SaveQuestionHandler(
         QuestionBankErrorCodes.QuestionMatchingKeyRepeated,
         QuestionBankErrorCodes.QuestionMatchItemTextRequired,
         QuestionBankErrorCodes.QuestionMatchItemTooLong,
-        // F-107 (architect #4): the position of these is the blank number, 1 to 99, not an index.
+        // F-107 (architect #4): the position of these is the blank number, 1 to 99, not an index; F-108: always 1.
         QuestionBankErrorCodes.QuestionBlankAnswersRequired,
         QuestionBankErrorCodes.QuestionBlankAnswersCount,
         QuestionBankErrorCodes.QuestionBlankAnswerRequired,

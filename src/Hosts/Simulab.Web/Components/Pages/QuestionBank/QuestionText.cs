@@ -63,6 +63,7 @@ public static class QuestionText
             QuestionType.MultipleAnswer => l["Questions.Type.MultipleAnswer"],
             QuestionType.Matching => l["Questions.Type.Matching"],
             QuestionType.FillInTheBlanks => l["Questions.Type.FillInTheBlanks"],
+            QuestionType.ShortAnswer => l["Questions.Type.ShortAnswer"],
             _ => l["Questions.Type.SingleChoice"]
         };
     }

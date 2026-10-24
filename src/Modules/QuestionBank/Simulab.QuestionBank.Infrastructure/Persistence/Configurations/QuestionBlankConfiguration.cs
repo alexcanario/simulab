@@ -27,7 +27,7 @@ public sealed class QuestionBlankConfiguration : IEntityTypeConfiguration<Questi
             "question_blanks",
             table =>
             {
-                table.HasComment("One blank of a fill-in-the-blanks question: a marker [[n]] of the statement and the answers it accepts.");
+                table.HasComment("One blank of a question and the answers it accepts: for a fill-in-the-blanks question a marker [[n]] of the statement, for a short-answer question its one blank numbered 1, with no marker.");
                 table.HasCheckConstraint(NumberCheck, $"number BETWEEN 1 AND {QuestionLimits.BlankNumberMax}");
             });
         builder.HasKey(blank => blank.Id);
@@ -37,15 +37,15 @@ public sealed class QuestionBlankConfiguration : IEntityTypeConfiguration<Questi
 
         builder.Property(blank => blank.QuestionId)
             .IsRequired()
-            .HasComment("The fill-in-the-blanks question the blank belongs to.");
+            .HasComment("The fill-in-the-blanks or short-answer question the blank belongs to.");
 
         builder.Property(blank => blank.Number)
             .IsRequired()
-            .HasComment("The number of its marker [[n]] in the statement, 1 to 99; unique for the question among the live rows.");
+            .HasComment("The number of its marker [[n]] in the statement, 1 to 99 (always 1 for a short-answer question, which has no marker); unique for the question among the live rows.");
 
         builder.Property(blank => blank.Position)
             .IsRequired()
-            .HasComment("Where its marker sits among the markers of the statement, from 0: the order the blanks are shown in.");
+            .HasComment("Where its marker sits among the markers of the statement, from 0: the order the blanks are shown in (0 for a short-answer question).");
 
         builder.Property(blank => blank.AcceptedAnswers)
             .HasField("_acceptedAnswers")

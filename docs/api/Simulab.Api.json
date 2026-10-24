@@ -3801,6 +3801,7 @@
           "MultipleAnswer",
           "Matching",
           "FillInTheBlanks",
+          "ShortAnswer",
           null
         ]
       },
