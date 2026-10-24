@@ -1,7 +1,7 @@
 ---
 feature: F-108
 epic: Question bank
-status: building
+status: validating
 board: 154
 version: 1
 ---
@@ -198,6 +198,10 @@ Tests locked: a1a875bde93430590b2f2329c6ba90ab4f1cf073 (3 files); unlocks: 1
 
 - 2026-10-24: plan — 1 `ShortAnswer` enum value, `ShortAnswerKey` (answer checks shared with `FillInTheBlanksKey`), one line in `AnswerKey.From`, comment-only migration → AC1-AC9, AC16 (domain, endpoint and migration tests); 2 key change, versions, shared rules, list and permission over HTTP → AC10-AC13, AC17; 3 form: sixth type card, `ShortAnswerKeySection`, publish checklist, errors, resources in 3 locales → AC14, AC19, AC20; 4 preview text box and reveal, list chip text → AC15; 5 glossary, flow page, manual, validation script → AC18 (on screen), `techdocs.js check`.
 - 2026-10-24: tests unlocked (owner yes) — three bugs of the test author, no criterion changed: a tuple holding a list compared by reference in two tests, and the seed JSON of `question_versions.blanks` written camelCase where EF's `ToJson` reads PascalCase; fixed and locked again. Two guard theories ("another type with blanks") were dropped before the first lock: they passed without code and F-107 tests already cover them.
+- 2026-10-24: Reuse: `FillInTheBlanksKey.CheckAnswers` and `Fault` (made `internal` and called by `ShortAnswerKey`, one place for the limits), `AcceptedAnswer.Normalize`, `QuestionBlank` rows and `question_versions.blanks`, `NextVersion`/`CopyAs`/base-text fan-out unchanged, kit `AppSectionCard`, `AppTextField`, `AppRowActions`, the `app-blank-answer` and `app-options-*` styles, and the F-107 test shapes. The key section is its own small component (`ShortAnswerKeySection`, one list instead of one list per marker), so nothing of `FillInTheBlanksKeySection` was copied.
+- 2026-10-24: Shortcuts: none.
+- 2026-10-24: `/agile:review` not run: no door (routes, permission and tables unchanged), the migration changes comments only. Scan GREEN (two older medium `unsafe-path-combine` findings in `tools/Simulab.DocGen`, outside this diff). Screen check on the app host: started on `simulab_f108`, the sign-in page and the sign-in of the development admin worked, then the page "Our documents changed" asks to accept the legal documents; Claude does not accept terms, so the signed-in screen is covered by the validation script and by bUnit (2560 Web tests green).
+- 2026-10-24: the error texts that differ for a short answer (`blank_answers_required`, `blank_answers_count`, `blank_answer_repeated`) are resource keys `Questions.ShortAnswer.Error.*` chosen in `QuestionForm.BlankErrorText`; they are not named like error codes because `ErrorCodeTextTests` treats any `question.*` key as a code.
 
 ## Out of scope
 - Lenient matching: ignoring punctuation, number formats, typo tolerance (owner, 2026-10-24).
@@ -212,6 +216,76 @@ Tests locked: a1a875bde93430590b2f2329c6ba90ab4f1cf073 (3 files); unlocks: 1
 - (none)
 
 ## Change notes
+
+## Validation script
+
+### English
+Needed to validate: the local app host — the owner; not started yet, step 1 starts it from this worktree on its own database.
+
+1. Stop any app host you have open (other worktrees share its ports), then start this worktree's app host on its own database `simulab_f108` (the item's migration, comments only, lands only there), from the worktree folder `D:\wt\simulab\f-108-short-answer`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f108 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f108"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Expected: the line `Dashboard:` with a link; the site answers at https://localhost:7125. To repeat, press Ctrl+C and run the same command.
+2. [ ] Open https://localhost:7125 and sign in as `admin@simulab.local` (the development password of `appsettings.Development.json`); if the page "Our documents changed" appears, click "Accept and continue". The database `simulab_f108` is new: if the subject field of step 3.2 finds nothing, first add a subject with one topic in the sidebar (menu lateral esquerdo) at Content > Subjects.
+3. Create a short-answer draft:
+   - [ ] 3.1 In the sidebar click Content > Questions, then Add. In "Question type" click the type card (cartão de tipo: each card of the "Question type" field) "Short answer": the Options card is replaced by the card "Accepted answers" (cartão de respostas aceitas) with one empty field and "1 of 5 answers", and the Statement toolbar has no Insert blank button.
+   - [ ] 3.2 Pick a subject and a topic. In Statement type "What is the capital of Brazil? Type [[1]] as shown.". In the first answer field type Brasília, click "Add answer" and type Brasilia ("2 of 5 answers").
+   - [ ] 3.3 Click Save: the page becomes the edit page, the type reads "Short answer", not editable; the text [[1]] stays in the statement; the checklist "Before publishing" (lista "Before publishing" no painel lateral) shows "At least one accepted answer" done and Publish is enabled.
+4. Rules of the answers:
+   - [ ] 4.1 Click "Add answer" and type " brasília " (spaces around, lower case), then Save: under the answers the message "Two answers are the same once case and extra spaces are ignored." appears. Remove that answer with its remove button.
+   - [ ] 4.2 Remove both remaining answers: the checklist shows "At least one accepted answer" pending and Publish is disabled. Type Brasília and Brasilia again.
+   - [ ] 4.3 Click Save, then Publish: the status becomes Published.
+5. Preview:
+   - [ ] 5.1 In the Publication card click "Preview as a student": the statement, then a disabled empty box "Your answer" (no answer, no hint of its length) and the line "Type your answer.".
+   - [ ] 5.2 Click "Show answer": the check icon with "Correct answer" and "Accepted answers: Brasília, Brasilia", and the explanation. The box stays empty. Close the dialog.
+6. Answer key change:
+   - [ ] 6.1 Change "Brasilia" to "BRASILIA" (case only): no reason field appears.
+   - [ ] 6.2 Click "Add answer" and type "Capital Federal": the field "Reason for the answer key change" appears. Write a reason and Save: the History card lists the new version with "Answer key changed" and your reason; View on version 1 shows only "Brasília, Brasilia".
+7. [ ] Language: in the app bar (barra superior) click the globe and pick Português (Brasil): the type card reads "Resposta curta", the section "Respostas aceitas", the checklist "Pelo menos uma resposta aceita" and the preview line "Digite sua resposta.". Switch back to English.
+8. List, keyboard and transcription:
+   - [ ] 8.1 In Content > Questions the row of your question shows the chip "Short answer".
+   - [ ] 8.2 Without the mouse, on Questions > Add pick the Short answer card with the arrows; Tab through each answer field, its remove action and "Add answer": each takes one Tab stop and the screen reader names "Accepted answer 1".
+   - [ ] 8.3 In the sidebar click Content > Exams, open the exam and then an edition, and on its Questions card click Transcribe: the "Question type" field offers six cards; pick Short answer and the "Accepted answers" card appears (AC19).
+
+### pt-BR
+Necessário para validar: o app host local — o dono; ainda não iniciado, o passo 1 sobe a partir deste worktree no banco próprio.
+
+1. Pare qualquer app host aberto (outros worktrees usam as mesmas portas) e suba o app host deste worktree no banco próprio `simulab_f108` (a migração do item, só de comentários, cai só nele), a partir da pasta do worktree `D:\wt\simulab\f-108-short-answer`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f108 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f108"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Esperado: a linha `Dashboard:` com um link; o site responde em https://localhost:7125. Para repetir, Ctrl+C e o mesmo comando.
+2. [ ] Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento de `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue". O banco `simulab_f108` é novo: se o campo de disciplina do passo 3.2 não achar nada, antes cadastre uma disciplina com um tópico no menu lateral (sidebar, menu lateral esquerdo) em Content > Subjects.
+3. Crie um rascunho de resposta curta:
+   - [ ] 3.1 No menu lateral clique em Content > Questions e depois em Add. Em "Question type" clique no cartão de tipo (cada cartão do campo "Question type") "Short answer": o cartão Options é trocado pelo cartão "Accepted answers" (cartão de respostas aceitas) com um campo vazio e "1 of 5 answers", e a barra do Statement não tem o botão Insert blank.
+   - [ ] 3.2 Escolha disciplina e tópico. Em Statement digite "What is the capital of Brazil? Type [[1]] as shown.". No primeiro campo de resposta digite Brasília, clique em "Add answer" e digite Brasilia ("2 of 5 answers").
+   - [ ] 3.3 Clique em Save: a página vira a de edição, o tipo aparece como "Short answer", sem edição; o texto [[1]] continua no enunciado; a lista "Before publishing" (lista "Before publishing" no painel lateral) mostra "At least one accepted answer" concluído e Publish fica habilitado.
+4. Regras das respostas:
+   - [ ] 4.1 Clique em "Add answer" e digite " brasília " (com espaços, minúscula) e depois Save: sob as respostas aparece "Two answers are the same once case and extra spaces are ignored.". Remova essa resposta com o botão de remover dela.
+   - [ ] 4.2 Remova as duas respostas restantes: a lista mostra "At least one accepted answer" pendente e Publish fica desabilitado. Digite Brasília e Brasilia de novo.
+   - [ ] 4.3 Clique em Save e depois em Publish: o status vira Published.
+5. Pré-visualização:
+   - [ ] 5.1 No cartão Publication clique em "Preview as a student": o enunciado, depois uma caixa vazia e desabilitada "Your answer" (sem resposta e sem pista do tamanho) e a linha "Type your answer.".
+   - [ ] 5.2 Clique em "Show answer": o ícone com "Correct answer" e "Accepted answers: Brasília, Brasilia", e a explicação. A caixa continua vazia. Feche o diálogo.
+6. Troca de gabarito:
+   - [ ] 6.1 Troque "Brasilia" por "BRASILIA" (só maiúsculas): não aparece campo de motivo.
+   - [ ] 6.2 Clique em "Add answer" e digite "Capital Federal": aparece o campo "Reason for the answer key change". Escreva um motivo e clique em Save: o cartão History lista a nova versão com "Answer key changed" e o seu motivo; View na versão 1 mostra só "Brasília, Brasilia".
+7. [ ] Idioma: na barra superior (app bar, a faixa no alto das páginas) clique no globo e escolha Português (Brasil): o cartão de tipo mostra "Resposta curta", a seção "Respostas aceitas", a lista "Pelo menos uma resposta aceita" e a linha da pré-visualização "Digite sua resposta.". Volte para English.
+8. Lista, teclado e transcrição:
+   - [ ] 8.1 Em Content > Questions a linha da sua questão mostra o chip "Short answer".
+   - [ ] 8.2 Sem o mouse, em Questions > Add escolha o cartão Short answer com as setas; com Tab percorra cada campo de resposta, sua ação de remover e "Add answer": cada um é uma parada de Tab e o leitor de tela diz "Accepted answer 1".
+   - [ ] 8.3 No menu lateral clique em Content > Exams, abra o concurso e depois uma edição e, no cartão Questions dela, clique em Transcribe: o campo "Question type" oferece seis cartões; escolha Short answer e aparece o cartão "Accepted answers" (AC19).
 
 ## Events
 
