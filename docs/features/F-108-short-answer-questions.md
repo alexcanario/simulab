@@ -1,7 +1,7 @@
 ---
 feature: F-108
 epic: Question bank
-status: approved
+status: building
 board: 154
 version: 1
 ---
@@ -147,6 +147,31 @@ No mockup (owner, 2026-10-24): the form gains a sixth type card and one key sect
 - AC19 Given the transcription screen of an edition, then it offers the six types and the key section works there. (F-99 BR5)
 - AC20 All new texts appear in pt-BR, pt-PT and en, including the short-answer texts of the reused error codes.
 
+## Criterion → test
+
+| Criterion | Test |
+|---|---|
+| AC1 | ShortAnswerQuestionTests.Create_WithNoBlanks_IsADraftOfThatType_WithOneEmptyBlankNumbered1; ShortAnswerQuestionEndpointTests.Create_WithNoBlanks_IsStoredAsADraftOfThatType_WithOneEmptyBlank_AndListedWithIt |
+| AC2 | ShortAnswerQuestionTests.Create_WithBrasiliaAndBrasilia_StoresBothTrimmedInOrder; ShortAnswerQuestionEndpointTests.Create_WithBrasiliaAndBrasilia_StoresBothTrimmedInOrder |
+| AC3 | ShortAnswerQuestionTests.Create_WithSixAnswers_IsRefusedWithBlankAnswersCount_AtPosition1 and 3 more; ShortAnswerQuestionEndpointTests.Create_BreakingTheLimits_IsRefusedWithPosition1_AndNothingIsStored; ShortAnswerQuestionEndpointTests.Create_WithAnAnswerOf100Characters_IsAccepted |
+| AC4 | ShortAnswerQuestionTests.Create_WithTwoBlanks_IsRefusedWithBlanksCount; ShortAnswerQuestionTests.Create_WithABlankNumbered2_IsRefusedWithBlankMarkerMissing; ShortAnswerQuestionEndpointTests.Create_WithTwoBlanksOrABlankNumbered2_IsRefused_AndNothingIsStored |
+| AC5 | ShortAnswerQuestionTests.Publish_WithNoAnswer_IsRefusedWithBlankAnswersRequired_AndWithOne_BecomesPublished; ShortAnswerQuestionEndpointTests.Publish_WithNoAnswer_IsRefused_AndWithOne_IsPublished |
+| AC6 | ShortAnswerQuestionTests.Update_Published_RemovingEveryAnswer_IsRefused_AndNothingChanges; ShortAnswerQuestionEndpointTests.Update_Published_RemovingEveryAnswer_IsRefused_AndTheStoredQuestionIsUnchanged_AndAnotherValidSetStaysPublished |
+| AC7 | ShortAnswerQuestionTests.Create_WithOptions_IsRefusedWithOptionsNotAllowed and 2 more; ShortAnswerQuestionEndpointTests.Create_WithOptionsAKeyOrMatchItems_IsRefused_AndNothingIsStored; other types with blanks: FillInTheBlanksQuestionEndpointTests.Create_AnotherTypeWithBlanks_IsRefusedWithBlanksNotAllowed (F-107, unchanged) |
+| AC8 | ShortAnswerQuestionTests.Update_WithContentOfAnotherType_IsAConflict; ShortAnswerQuestionEndpointTests.Update_NamingAnotherType_Is409TypeChanged_AndNamingItsOwnIsAccepted |
+| AC9 | ShortAnswerQuestionTests.Create_WithStatementTextThatLooksLikeAMarker_KeepsItAsText_AndStoresOneBlank; ShortAnswerQuestionEndpointTests.Create_WithStatementTextThatLooksLikeAMarker_KeepsItAsTyped_InTheStatementAndTheExcerpt |
+| AC10 | ShortAnswerQuestionTests.NextVersion_AddingAnAcceptedAnswer_NeedsAReason_AndThenRecordsAKeyChangeWithTheBlank; ShortAnswerQuestionEndpointTests.Update_Published_AddingAnAcceptedAnswer_NeedsAReason_AndThenRecordsAKeyChange |
+| AC11 | ShortAnswerQuestionTests.NextVersion_ChangingOnlyTheStatement_IsAVersionWithNoKeyChange and 2 more; ShortAnswerQuestionEndpointTests.Update_Published_ChangingOnlyTheStatement_OrTheOrderAndCaseOfTheAnswers_RecordsAVersionWithNoKeyChange |
+| AC12 | ShortAnswerQuestionEndpointTests: Create_SanitizesTheStatement, Create_WithElevenImagesInTheStatement_IsRefusedWithImagesTooMany, Create_WithADifficultyOutOfRange_IsRefused, Create_WithAPaperNumberAlreadyTaken_IsRefusedWithPaperNumberTaken, Delete_Published_IsRefused_AndADraftIsDeleted, DeleteTopic_WithOnlyAShortAnswerQuestion_IsRefusedWithTopicInUse, AnnulAndReinstate_KeepTheBlankInTheirVersions, Submit_CompleteDraft_GoesToReview_AndAnIncompleteOneIsRefused, UpdateBaseText_LinkedToAPublishedShortAnswer_RecordsAVersionThatKeepsTheBlank; ShortAnswerQuestionTests.AnnulAndReinstate_CopyTheBlankOfTheLatestVersion |
+| AC13 | ShortAnswerQuestionEndpointTests.List_QuestionsOfTheSixTypes_NameTheTypeOfEachRow_AndOnlyFillInAndShortAnswerCarryBlanks |
+| AC14 | pending |
+| AC15 | pending |
+| AC16 | AddShortAnswerQuestionsMigrationTests.Up_NamesTheSixthType_ChangesOnlyComments_AndKeepsEveryRow |
+| AC17 | ShortAnswerQuestionEndpointTests.CreateAndUpdate_WithoutThePermission_AnswerForbidden |
+| AC18 | validation step |
+| AC19 | pending |
+| AC20 | pending |
+
 ## Decisions
 - 2026-10-24 — F-107 (fill-in-the-blanks, done) also compares a typed answer with accepted answers; both items stay: the shapes differ (blanks inside the statement against one answer slot) and F-108 reuses the rule and the storage F-107 built — confirmed: F-107
 - 2026-10-24 — The comparison rule is the F-107 one: case and extra spaces ignored, accents count — confirmed: F-107 (BR6; owner said Yes)
@@ -167,6 +192,8 @@ No mockup (owner, 2026-10-24): the form gains a sixth type card and one key sect
 - 2026-10-24 — Size S, fits one session: one domain unit, one enum value, a comment-only migration, one card, one key section, one preview change — Claude, from the code read
 - 2026-10-24 — Approved by the owner ("aprovo F-108"); every dependency delivered (`deps.js block`: FREE); main session model: sonnet.
 - 2026-10-24 — Reuse: `AnswerKey`, `AcceptedAnswer`, `QuestionBlank`, `NextVersion`, `CopyAs`, the F-107 form row logic and `FillInTheBlanksKeySection` rows (extract what is shared, do not copy), kit `AppSectionCard`, `AppTextField`, `AppRowActions`, `AppRadioCards`, the F-107 endpoint, migration and form test shapes — Claude
+
+- 2026-10-24: plan — 1 `ShortAnswer` enum value, `ShortAnswerKey` (answer checks shared with `FillInTheBlanksKey`), one line in `AnswerKey.From`, comment-only migration → AC1-AC9, AC16 (domain, endpoint and migration tests); 2 key change, versions, shared rules, list and permission over HTTP → AC10-AC13, AC17; 3 form: sixth type card, `ShortAnswerKeySection`, publish checklist, errors, resources in 3 locales → AC14, AC19, AC20; 4 preview text box and reveal, list chip text → AC15; 5 glossary, flow page, manual, validation script → AC18 (on screen), `techdocs.js check`.
 
 ## Out of scope
 - Lenient matching: ignoring punctuation, number formats, typo tolerance (owner, 2026-10-24).

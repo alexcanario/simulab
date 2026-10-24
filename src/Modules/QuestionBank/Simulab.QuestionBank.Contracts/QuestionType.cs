@@ -22,5 +22,10 @@ public enum QuestionType
     /// Numbered markers <c>[[n]]</c> in the statement, each a blank with the answers it accepts, typed by the
     /// student. No options (F-107).
     /// </summary>
-    FillInTheBlanks
+    FillInTheBlanks,
+
+    /// <summary>
+    /// A short typed answer checked against a list of accepted answers. Its key is one blank without a marker (F-108).
+    /// </summary>
+    ShortAnswer
 }
