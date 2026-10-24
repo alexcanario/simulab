@@ -6831,3 +6831,138 @@ Contexto desta sessão: 130k por turno; uma sessão nova abre em ~65k. Para econ
 ```
 
 A execução termina ali com o evento `stop` `fresh context before review`; `/agile:autopilot F-3` numa sessão limpa continua do disco.
+
+### 14.188 O `/agile:order` agrupado por benefício, na sessão do plugin
+
+Você digita `/agile:order` no repositório do plugin, com seis issues abertos. O Claude lê as linhas de `order.js plugin --json` (título e primeira frase do resumo de cada uma), escreve numa pasta temporária um arquivo com os grupos, um motivo e dois modelos sugeridos por item, e roda `order.js grouped` com esse arquivo. O script refaz as linhas a partir dos issues, confere que nenhuma linha fica antes de algo de que depende e imprime as tabelas, que o Claude copia sem mudar:
+
+```
+### Relatórios mais úteis — cerca de 2 sessões (~3 h)
+
+| # | Id | Title | Status | Refine | Build | Waits on | Reason |
+|---|---|---|---|---|---|---|---|
+| 1 | #10 | Export the report as PDF | idea | ~sonnet | ~sonnet | - | exportar é o pedido mais comum |
+| 2 | #12 | Faster report page | refining | ~sonnet | ~sonnet | - | a página de relatório fica rápida |
+| 3 | #11 | Email the report on a schedule | idea | ~sonnet | ~sonnet | #10 | envio automático, depende do PDF |
+
+### Integrações — cerca de 1 sessão (~2 h)
+
+| # | Id | Title | Status | Refine | Build | Waits on | Reason |
+|---|---|---|---|---|---|---|---|
+| 4 | #13 | Webhook for paid invoices | approved | - | opus | - | uma porta nova: o webhook |
+
+### Outros — cerca de 1 sessão (~1 h)
+
+| # | Id | Title | Status | Refine | Build | Waits on | Reason |
+|---|---|---|---|---|---|---|---|
+| 5 | #14 | Dark theme | idea | ~sonnet | ~sonnet | - | aparência, sem urgência |
+| 6 | #15 | Rename the settings menu | idea | ~sonnet | ~sonnet | - | ajuste de texto |
+
+agile order GROUPED: 6 items in 3 groups
+```
+
+O `~` marca o modelo como sugestão do Claude, lida do título e da frase do resumo; a coluna `Refine` vira `-` quando o item já está aprovado, e a coluna `Build` mostra o modelo decidido, sem `~`, quando o item tem a linha `- Model:` (aqui o #13, `opus`). Depois das tabelas o Claude diz, em português, por que a ordem é essa (o #11 espera o #10, então vêm nessa ordem no mesmo grupo), que a estimativa de cada grupo é um palpite e não uma medida, e o próximo passo: `/agile:refine #10`, com o modelo sugerido para ele, `sonnet`.
+
+Se o Claude colocar o #11 num grupo desenhado antes do #10, o script recusa com `agile order REFUSED: #11 waits on #10 but is drawn before it`, sem tabela nenhuma, e o Claude corrige o arquivo uma vez e roda de novo. Um grupo com mais de cinco linhas que não seja o último grupo `Outros`, um id que falta, um id desconhecido ou repetido, e um modelo que não seja `opus` ou `sonnet` são recusados do mesmo jeito, com o nome de cada um.
+
+### 14.189 O widget do `/agile:order` com os grupos por benefício
+
+Você digita `/agile:order` no repositório do plugin, no app do Claude, com três issues abertos. O Claude escreve o arquivo com os grupos, o motivo e os modelos de cada item, como no exemplo 14.188, mas, como a sessão oferece `show_widget`, roda o `grouped` com `--json` e monta o widget a partir da saída, sem redigitar uma linha:
+
+```
+{
+  "groups": [
+    {
+      "name": "Relatórios mais úteis",
+      "estimate": "cerca de 2 sessões (~3 h)",
+      "rest": false,
+      "section": null,
+      "mvp": null,
+      "items": [
+        "#10",
+        "#11"
+      ]
+    },
+    {
+      "name": "Integrações",
+      "estimate": "cerca de 1 sessão (~2 h)",
+      "rest": false,
+      "section": null,
+      "mvp": null,
+      "items": [
+        "#13"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "n": 1,
+      "id": "#10",
+      "title": "Export the report as PDF",
+      "status": "idea",
+      "model": null,
+      "epic": "-",
+      "waitsOn": [],
+      "unlocks": [
+        "#11"
+      ],
+      "cycle": false,
+      "group": null,
+      "mvp": null,
+      "ticked": false,
+      "why": "level 1; feature",
+      "summary": "Export any report as a PDF file.",
+      "reason": "exportar é o pedido mais comum",
+      "refine": "~sonnet",
+      "build": "~sonnet"
+    },
+    {
+      "n": 2,
+      "id": "#11",
+      "title": "Email the report on a schedule",
+      "status": "idea",
+      "model": null,
+      "epic": "-",
+      "waitsOn": [
+        "#10"
+      ],
+      "unlocks": [],
+      "cycle": false,
+      "group": null,
+      "mvp": null,
+      "ticked": false,
+      "why": "level 2: waits on #10; feature",
+      "summary": "Send the PDF by email every week.",
+      "reason": "envio automático, depende do PDF",
+      "refine": "~sonnet",
+      "build": "~sonnet"
+    },
+    {
+      "n": 3,
+      "id": "#13",
+      "title": "Webhook for paid invoices",
+      "status": "approved",
+      "model": "opus",
+      "epic": "-",
+      "waitsOn": [],
+      "unlocks": [],
+      "cycle": false,
+      "group": null,
+      "mvp": null,
+      "ticked": false,
+      "why": "level 1; feature",
+      "summary": "Tell other systems when an invoice is paid.",
+      "reason": "uma porta nova: o webhook",
+      "refine": "-",
+      "build": "opus"
+    }
+  ],
+  "parked": [],
+  "listed": 3,
+  "delivered": 0
+}
+```
+
+O widget desenha um cabeçalho por grupo em `groups` (`Relatórios mais úteis`, `cerca de 2 sessões (~3 h)` e `2 itens`; depois `Integrações`, `cerca de 1 sessão (~2 h)` e `1 itens`) e as linhas de `items`, nesta ordem, três linhas cada. A do #11: a caixa, o 2, o **#11** e o título; o status `idea`, `refinar` com o selo tracejado `~sonnet`, `construir` com o selo tracejado `~sonnet` e `waits on #10`; e, em letra pequena, `envio automático, depende do PDF`. A do #13 mostra `refinar` com o selo neutro `-` (já está aprovado) e `construir` com o selo cheio `opus`, o modelo decidido na linha `- Model:`. Sob a lista, a legenda `tracejado = sugestão do Claude · cheio = decidido no item`. Marcar a caixa do #10 salva a marca na hora (o `/agile:order ticks #10` do exemplo 14.107) e o contador mostra `1 de 3 marcados`. Como o plugin não tem cortes, `section` e `mvp` são `null` e não há cabeçalho de MVP; num projeto com cortes eles viriam antes dos grupos. Depois do widget o Claude escreve, no chat, por que a ordem é essa, a estimativa total (um palpite) e o próximo passo.
+
+Numa sessão sem `show_widget`, ou se o widget não abrir, o Claude roda o `grouped` sem `--json`, copia as tabelas do exemplo 14.188 e escreve logo depois a linha `sem show_widget nesta sessão` (ou `o widget não abriu: <erro>`) e `diga "marque F-3" para marcar`; um arquivo que o script recusa não gera JSON nenhum, só a linha `agile order REFUSED: <motivo>`, igual com ou sem `--json`.

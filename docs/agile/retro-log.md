@@ -1554,3 +1554,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (edited, upstream unchanged); manual build files (no upstream change). Merged: none. Declined: none.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: `Meaning (pt-BR)` column present; per-document term scan not run. Build and tests not run (no build file changed).
 - Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
+## 2026-10-24 - Sync with agile@canary 0.175.0
+- From 0.173.0 to 0.175.0. Copied (owner's OK): `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md`.
+- Left alone: `git.md`, `i18n.md`, `naming.md`, `profile.md` (edited, upstream unchanged); manual build files (no upstream change). Merged: none. Declined: none.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: not scanned. Build and tests not run (no build file changed).
+- Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
