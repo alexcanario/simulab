@@ -234,7 +234,7 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)")
                         .HasColumnName("type")
-                        .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching or FillInTheBlanks.");
+                        .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching, FillInTheBlanks or ShortAnswer.");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -324,17 +324,17 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("integer")
                         .HasColumnName("number")
-                        .HasComment("The number of its marker [[n]] in the statement, 1 to 99; unique for the question among the live rows.");
+                        .HasComment("The number of its marker [[n]] in the statement, 1 to 99 (always 1 for a short-answer question, which has no marker); unique for the question among the live rows.");
 
                     b.Property<int>("Position")
                         .HasColumnType("integer")
                         .HasColumnName("position")
-                        .HasComment("Where its marker sits among the markers of the statement, from 0: the order the blanks are shown in.");
+                        .HasComment("Where its marker sits among the markers of the statement, from 0: the order the blanks are shown in (0 for a short-answer question).");
 
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid")
                         .HasColumnName("question_id")
-                        .HasComment("The fill-in-the-blanks question the blank belongs to.");
+                        .HasComment("The fill-in-the-blanks or short-answer question the blank belongs to.");
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uuid")
@@ -366,7 +366,7 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
 
                     b.ToTable("question_blanks", "question_bank", t =>
                         {
-                            t.HasComment("One blank of a fill-in-the-blanks question: a marker [[n]] of the statement and the answers it accepts.");
+                            t.HasComment("One blank of a question and the answers it accepts: for a fill-in-the-blanks question a marker [[n]] of the statement, for a short-answer question its one blank numbered 1, with no marker.");
 
                             t.HasCheckConstraint("ck_question_blanks_number_range", "number BETWEEN 1 AND 99");
                         });
@@ -807,7 +807,7 @@ namespace Simulab.QuestionBank.Infrastructure.Persistence.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)")
                         .HasColumnName("type")
-                        .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching or FillInTheBlanks.");
+                        .HasComment("How the question is answered: SingleChoice, TrueFalse, MultipleAnswer, Matching, FillInTheBlanks or ShortAnswer.");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

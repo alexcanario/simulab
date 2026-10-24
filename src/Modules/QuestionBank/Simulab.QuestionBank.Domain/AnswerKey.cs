@@ -24,8 +24,8 @@ public abstract record AnswerKey
     public virtual IReadOnlyList<MatchItemDraft> MatchItems => [];
 
     /// <summary>
-    /// The blanks the question stores, one per marker of the statement in statement order (F-107, BR1); empty for every
-    /// type but fill-in-the-blanks.
+    /// The blanks the question stores, one per marker of the statement in statement order (F-107, BR1); for a short
+    /// answer (F-108, BR1) the one blank numbered 1. Empty for every other type.
     /// </summary>
     public virtual IReadOnlyList<BlankDraft> Blanks => [];
 
@@ -71,6 +71,7 @@ public abstract record AnswerKey
             QuestionType.MultipleAnswer => new MultipleAnswerKey(options, trueFalseKey, items, written),
             QuestionType.Matching => new MatchingKey(options, items, trueFalseKey, written),
             QuestionType.FillInTheBlanks => new FillInTheBlanksKey(blankMarkers ?? [], written, options, trueFalseKey, items),
+            QuestionType.ShortAnswer => new ShortAnswerKey(written, options, trueFalseKey, items),
             _ => new SingleChoiceKey(options, trueFalseKey, items, written)
         };
     }

@@ -149,6 +149,9 @@ No mockup (owner, 2026-10-24): the form gains a sixth type card and one key sect
 
 ## Criterion → test
 
+Tests locked: a1a875bde93430590b2f2329c6ba90ab4f1cf073 (3 files); unlocks: 1
+
+
 | Criterion | Test |
 |---|---|
 | AC1 | ShortAnswerQuestionTests.Create_WithNoBlanks_IsADraftOfThatType_WithOneEmptyBlankNumbered1; ShortAnswerQuestionEndpointTests.Create_WithNoBlanks_IsStoredAsADraftOfThatType_WithOneEmptyBlank_AndListedWithIt |
@@ -194,6 +197,7 @@ No mockup (owner, 2026-10-24): the form gains a sixth type card and one key sect
 - 2026-10-24 — Reuse: `AnswerKey`, `AcceptedAnswer`, `QuestionBlank`, `NextVersion`, `CopyAs`, the F-107 form row logic and `FillInTheBlanksKeySection` rows (extract what is shared, do not copy), kit `AppSectionCard`, `AppTextField`, `AppRowActions`, `AppRadioCards`, the F-107 endpoint, migration and form test shapes — Claude
 
 - 2026-10-24: plan — 1 `ShortAnswer` enum value, `ShortAnswerKey` (answer checks shared with `FillInTheBlanksKey`), one line in `AnswerKey.From`, comment-only migration → AC1-AC9, AC16 (domain, endpoint and migration tests); 2 key change, versions, shared rules, list and permission over HTTP → AC10-AC13, AC17; 3 form: sixth type card, `ShortAnswerKeySection`, publish checklist, errors, resources in 3 locales → AC14, AC19, AC20; 4 preview text box and reveal, list chip text → AC15; 5 glossary, flow page, manual, validation script → AC18 (on screen), `techdocs.js check`.
+- 2026-10-24: tests unlocked (owner yes) — three bugs of the test author, no criterion changed: a tuple holding a list compared by reference in two tests, and the seed JSON of `question_versions.blanks` written camelCase where EF's `ToJson` reads PascalCase; fixed and locked again. Two guard theories ("another type with blanks") were dropped before the first lock: they passed without code and F-107 tests already cover them.
 
 ## Out of scope
 - Lenient matching: ignoring punctuation, number formats, typo tolerance (owner, 2026-10-24).
@@ -212,3 +216,4 @@ No mockup (owner, 2026-10-24): the form gains a sixth type card and one key sect
 ## Events
 
 - 2026-10-24 question — asked 2, from context 4
+- 2026-10-24 blocked — test wrong: three test bugs of the test author: tuple-with-list reference equality (2) and the seed JSON property name of question_versions.blanks (1); no criterion changes

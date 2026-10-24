@@ -93,8 +93,9 @@ public sealed record FillInTheBlanksKey(
         return unanswered is null ? null : Fault(QuestionBankErrorCodes.QuestionBlankAnswersRequired, unanswered.Number);
     }
 
-    // The limits of one blank; a refusal names the blank by its number (architect #4).
-    private static OptionFault? CheckAnswers(BlankDraft blank)
+    // The limits of one blank; a refusal names the blank by its number (architect #4). F-108: the short-answer key
+    // checks its one blank with the same limits.
+    internal static OptionFault? CheckAnswers(BlankDraft blank)
     {
         var answers = blank.AcceptedAnswers;
         if (answers.Count > QuestionLimits.BlankAnswersMax)
@@ -117,6 +118,6 @@ public sealed record FillInTheBlanksKey(
             : Fault(QuestionBankErrorCodes.QuestionBlankAnswerRepeated, blank.Number);
     }
 
-    private static OptionFault Fault(string code, int? position) =>
+    internal static OptionFault Fault(string code, int? position) =>
         new(new Error(code, ErrorKind.Validation), position);
 }
