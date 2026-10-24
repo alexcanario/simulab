@@ -1183,6 +1183,22 @@
   <data name="Questions.Preview.BlanksInstruction" xml:space="preserve"><value>Preencha cada lacuna.</value></data>
   <data name="Questions.Preview.BlankKey" xml:space="preserve"><value>Lacuna {0}: {1}</value></data>
   <data name="Questions.Preview.BlankNoKey" xml:space="preserve"><value>Lacuna {0}: ainda sem solução</value></data>
+  <data name="Questions.Type.ShortAnswer" xml:space="preserve"><value>Resposta curta</value></data>
+  <data name="Questions.Type.ShortAnswer.Description" xml:space="preserve"><value>Uma resposta curta escrita, conferida com as respostas aceites.</value></data>
+  <data name="Questions.Section.ShortAnswer" xml:space="preserve"><value>Respostas aceites</value></data>
+  <data name="Questions.Section.ShortAnswer.Subtitle" xml:space="preserve"><value>Escreva as respostas que o aluno pode escrever. Maiúsculas e espaços a mais são ignorados; os acentos contam.</value></data>
+  <data name="Questions.ShortAnswer.Answer.Field" xml:space="preserve"><value>Resposta aceite {0}</value></data>
+  <data name="Questions.ShortAnswer.Answer.Name" xml:space="preserve"><value>resposta {0}</value></data>
+  <data name="Questions.ShortAnswer.Answer.Placeholder" xml:space="preserve"><value>Uma resposta que o aluno pode escrever</value></data>
+  <data name="Questions.ShortAnswer.Answer.Removed" xml:space="preserve"><value>Resposta removida. Restam {0}.</value></data>
+  <data name="Questions.Checklist.ShortAnswer.Answers" xml:space="preserve"><value>Pelo menos uma resposta aceite</value></data>
+  <data name="Questions.Preview.ShortAnswerLabel" xml:space="preserve"><value>A sua resposta</value></data>
+  <data name="Questions.Preview.ShortAnswerInstruction" xml:space="preserve"><value>Escreva a sua resposta.</value></data>
+  <data name="Questions.Preview.ShortAnswerKey" xml:space="preserve"><value>Respostas aceites: {0}</value></data>
+  <data name="Questions.Preview.ShortAnswerNoKey" xml:space="preserve"><value>Respostas aceites: ainda sem solução</value></data>
+  <data name="Questions.ShortAnswer.Error.AnswersRequired" xml:space="preserve"><value>Escreva pelo menos uma resposta aceite.</value></data>
+  <data name="Questions.ShortAnswer.Error.AnswersCount" xml:space="preserve"><value>Uma resposta curta aceita no máximo 5 respostas.</value></data>
+  <data name="Questions.ShortAnswer.Error.AnswerRepeated" xml:space="preserve"><value>Duas respostas são iguais quando se ignoram maiúsculas e espaços a mais.</value></data>
   <data name="question.blanks_count" xml:space="preserve"><value>Uma questão de lacunas tem de 1 a 10 lacunas no enunciado.</value></data>
   <data name="question.blank_repeated" xml:space="preserve"><value>Cada número de lacuna aparece uma única vez no enunciado.</value></data>
   <data name="question.blank_marker_missing" xml:space="preserve"><value>Uma lacuna não tem marcador no enunciado.</value></data>

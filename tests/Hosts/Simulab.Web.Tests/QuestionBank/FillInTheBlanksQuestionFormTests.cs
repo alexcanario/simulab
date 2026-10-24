@@ -75,9 +75,9 @@ public sealed class FillInTheBlanksQuestionFormTests : QuestionPageTestContext
         await TypeAsync(page, "question-statement", statement);
     }
 
-    // AC14, AC19: five cards, single choice still preselected.
+    // AC14, AC19: the fifth card, single choice still preselected (F-108 adds the sixth; its tests count them).
     [Fact]
-    public void Add_OffersTheFiveTypesWithSingleChoicePreselected()
+    public void Add_OffersTheFillInCardWithSingleChoicePreselected()
     {
         var page = RenderAdd();
 
@@ -85,7 +85,7 @@ public sealed class FillInTheBlanksQuestionFormTests : QuestionPageTestContext
         page.Find("#question-type-FillInTheBlanks").GetAttribute("aria-checked").Should().Be("false");
         page.Find("#question-type-FillInTheBlanks").TextContent.Should().Contain("Fill in the blanks")
             .And.Contain("Blanks in the statement; the student types each answer.");
-        page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(5);
+        page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(6);
     }
 
     // AC14, BR12: "Insert blank" sits on the statement toolbar of this type only, named in words.

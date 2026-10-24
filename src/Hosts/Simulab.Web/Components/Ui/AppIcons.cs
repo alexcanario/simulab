@@ -146,6 +146,9 @@ public static class AppIcons
     /// <summary>F-107: a question whose statement has blanks the student types in; its type card and key section.</summary>
     public const string FillInTheBlanks = Icons.Material.Outlined.ShortText;
 
+    /// <summary>F-108: a question the student answers with a short typed text; its type card and key section.</summary>
+    public const string ShortAnswer = Icons.Material.Outlined.QuestionAnswer;
+
     /// <summary>F-107: the toolbar button that inserts a blank marker at the caret.</summary>
     public const string Blank = Icons.Material.Outlined.SpaceBar;
 

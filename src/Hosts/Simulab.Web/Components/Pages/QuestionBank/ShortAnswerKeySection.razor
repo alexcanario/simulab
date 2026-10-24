@@ -1,0 +1,143 @@
+@* F-108: the key section of a short-answer question: up to five accepted answers, plain text, one field each. The
+   question stores them as its one blank (number 1, no marker); the form owns the answers, the errors and Save, and this
+   component only draws the fields and tells the form that something changed. *@
+@using Simulab.QuestionBank.Contracts
+@inject IStringLocalizer<SharedResources> L
+@inject IJSRuntime JS
+
+@* The wrapper carries the section's id: the kit card names only its title. *@
+<div id="question-section-short-answer">
+<AppSectionCard Id="question-section-short-answer"
+                Title="@L["Questions.Section.ShortAnswer"]"
+                Icon="@AppIcons.ShortAnswer"
+                Number="SectionNumber"
+                Subtitle="@L["Questions.Section.ShortAnswer.Subtitle"]">
+    <div role="group" aria-describedby="question-short-answer-description">
+        @for (var index = 0; index < Answers.Count; index++)
+        {
+            var position = index;
+            <div class="app-blank-answer">
+                <AppTextField TValue="string"
+                              Id="@AnswerId(position)"
+                              Label="@L["Questions.ShortAnswer.Answer.Field", position + 1]"
+                              Placeholder="@L["Questions.ShortAnswer.Answer.Placeholder"]"
+                              MaxLength="QuestionLimits.BlankAnswerMaxLength"
+                              Disabled="Frozen"
+                              Value="@Answers[position]"
+                              ValueChanged="@((string? value) => OnAnswerChanged(position, value))" />
+                @if (!Frozen)
+                {
+                    <AppRowActions ItemName="@L["Questions.ShortAnswer.Answer.Name", position + 1]"
+                                   IdPrefix="@($"{AnswerId(position)}-actions")"
+                                   OnDelete="@(() => RemoveAnswer(position))" />
+                }
+            </div>
+        }
+
+        <div class="app-options-footer">
+            @if (!Frozen)
+            {
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@AppIcons.Add"
+                           OnClick="AddAnswer"
+                           Disabled="@(Answers.Count >= QuestionLimits.BlankAnswersMax)"
+                           aria-describedby="question-short-answer-count"
+                           id="@AddId">@L["Questions.Blanks.AddAnswer"]</MudButton>
+            }
+            @* The limit is never told by a disabled button alone: the count says it. *@
+            <span class="app-options-count" id="question-short-answer-count">@L["Questions.Blanks.AnswersCount", Answers.Count]</span>
+        </div>
+    </div>
+
+    @* A refusal about the answers is under the fields and described to the group. *@
+    <span id="question-short-answer-description" class="app-field-description">
+        @if (Error is not null)
+        {
+            <span class="app-field-error-text app-short-answer-error" aria-live="polite">@Error</span>
+        }
+    </span>
+
+    <div class="app-visually-hidden" role="status" aria-live="polite">@_announcement</div>
+
+    @ChildContent
+</AppSectionCard>
+</div>
+
+@code {
+    /// <summary>The "Add answer" button's id; the error summary points at it.</summary>
+    public const string AddId = "question-short-answer-add";
+
+    /// <summary>The answers typed, owned by the form and kept across a change of type.</summary>
+    [Parameter, EditorRequired] public List<string> Answers { get; set; } = [];
+
+    /// <summary>The step number the page gives the section (5), drawn by the section card.</summary>
+    [Parameter] public int? SectionNumber { get; set; }
+
+    /// <summary>F-101, F-105: an annulled question or one in review is read only.</summary>
+    [Parameter] public bool Frozen { get; set; }
+
+    /// <summary>The refusal about the answers, already translated.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    /// <summary>Called after any change, so the form clears the refusal and redraws its checklist.</summary>
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    /// <summary>What follows the fields: the reason of a key change, when the form asks for one.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string? _announcement;
+    private string? _pendingFocus;
+
+    /// <summary>The id of answer <paramref name="index"/> (from 0).</summary>
+    public static string AnswerId(int index) => $"question-short-answer-{index}";
+
+    private Task OnAnswerChanged(int index, string? value)
+    {
+        if (index < Answers.Count)
+        {
+            Answers[index] = value ?? string.Empty;
+        }
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task AddAnswer()
+    {
+        if (Answers.Count >= QuestionLimits.BlankAnswersMax)
+        {
+            return Task.CompletedTask;
+        }
+
+        Answers.Add(string.Empty);
+        _announcement = null;
+        _pendingFocus = AnswerId(Answers.Count - 1);
+
+        return OnChanged.InvokeAsync();
+    }
+
+    private Task RemoveAnswer(int index)
+    {
+        if (index < 0 || index >= Answers.Count)
+        {
+            return Task.CompletedTask;
+        }
+
+        Answers.RemoveAt(index);
+        _announcement = L["Questions.ShortAnswer.Answer.Removed", Answers.Count];
+        _pendingFocus = index < Answers.Count ? $"{AnswerId(index)}-actions-{AppRowActions.DeleteKey}" : AddId;
+
+        return OnChanged.InvokeAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingFocus is not { } target)
+        {
+            return;
+        }
+
+        _pendingFocus = null;
+        await JS.InvokeVoidAsync("simulabShell.focusElement", target);
+    }
+}

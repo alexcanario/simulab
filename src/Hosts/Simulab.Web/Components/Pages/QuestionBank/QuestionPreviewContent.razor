@@ -29,6 +29,15 @@
         @* F-107 BR15: the task, not the answer; the boxes give no hint of the answer's length. *@
         <p class="app-question-select-count" id="question-preview-blanks-instruction">@L["Questions.Preview.BlanksInstruction"]</p>
     }
+    else if (IsShort)
+    {
+        @* F-108 BR14: the task, not the answer. The box is inert and always empty: it gives no hint of the answer's length. *@
+        <AppTextField TValue="string"
+                      Id="question-preview-short-answer"
+                      Label="@L["Questions.Preview.ShortAnswerLabel"]"
+                      Disabled="true" />
+        <p class="app-question-select-count" id="question-preview-short-answer-instruction">@L["Questions.Preview.ShortAnswerInstruction"]</p>
+    }
     else if (IsTrueFalse)
     {
         @* F-97 BR7: the two answers a student judges between, as inert labelled text. *@
@@ -130,6 +139,18 @@
                     }
                 </ul>
             }
+            else if (IsShort)
+            {
+                @* F-108: the accepted answers of the one blank, with icon and text; a draft with none says so. *@
+                var accepted = _blanks.FirstOrDefault()?.AcceptedAnswers ?? [];
+                <span class="app-correct-label">
+                    <MudIcon Icon="@AppIcons.Verified" Size="Size.Small" Color="Color.Success" aria-hidden="true" />
+                    @L["Questions.Preview.CorrectAnswer"]
+                </span>
+                <p class="app-preview-key" id="question-preview-short-answer-key">@(accepted.Count == 0
+                        ? L["Questions.Preview.ShortAnswerNoKey"]
+                        : L["Questions.Preview.ShortAnswerKey", string.Join(", ", accepted)])</p>
+            }
             else if (IsTrueFalse ? Question.TrueFalseKey is null : !_options.Any(IsKey))
             {
                 <p class="app-preview-no-key">@NoKeyText</p>
@@ -176,6 +197,8 @@
     private bool Shown => AlwaysRevealed || Revealed;
 
     private bool IsFillIn => Question.Type == QuestionType.FillInTheBlanks;
+
+    private bool IsShort => Question.Type == QuestionType.ShortAnswer;
 
     // F-107 BR15: each marker of the stored statement is drawn as a numbered empty box named "Blank n"; after "show
     // answer" the box holds the blank's first accepted answer. Only the number and encoded texts go into the markup.

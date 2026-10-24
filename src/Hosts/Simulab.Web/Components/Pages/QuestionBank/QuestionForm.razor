@@ -392,6 +392,20 @@ else
                     }
                 </FillInTheBlanksKeySection>
             }
+            else if (IsShort)
+            {
+                @* F-108: the accepted answers of a short answer; the question stores them as its one blank. *@
+                <ShortAnswerKeySection SectionNumber="5"
+                                       Answers="_shortAnswers"
+                                       Frozen="IsFrozen"
+                                       Error="@ShortAnswerError"
+                                       OnChanged="OnBlanksChanged">
+                    @if (ShowChangeReason)
+                    {
+                        @ChangeReasonField
+                    }
+                </ShortAnswerKeySection>
+            }
             else
             {
             <AppSectionCard Id="question-section-options"
@@ -733,6 +747,10 @@ else
     private string? _blanksError;
     private readonly Dictionary<int, string> _blankRowErrors = [];
 
+    // F-108: the accepted answers of a short answer, one field each (a new question starts with one empty field). They are
+    // the question's one blank, number 1, and are kept apart from the fill-in answers across a change of type.
+    private List<string> _shortAnswers = [string.Empty];
+
     // F-96: the origin. The number and the notice subject only exist with an edition (BR2).
     private AppLookupOption? _edition;
     private int? _paperNumber;
@@ -818,13 +836,44 @@ else
 
     private bool IsFillIn => _type == QuestionType.FillInTheBlanks;
 
+    private bool IsShort => _type == QuestionType.ShortAnswer;
+
     // F-107 BR3: the markers of the statement, read as the Api reads them; the rows follow them in statement order.
     private IReadOnlyList<int> StatementMarkers => StatementBlanks.Markers(_statement);
 
-    private List<int> BlankNumbers => [.. StatementMarkers.Distinct()];
+    // F-108 BR1: a short answer has one blank, number 1, and no marker.
+    private List<int> BlankNumbers => IsShort ? [ShortAnswerBlank] : [.. StatementMarkers.Distinct()];
+
+    private const int ShortAnswerBlank = 1;
 
     // The answers of one blank as they are sent: the typed ones, an empty list when none was typed.
-    private List<string> BlankAnswersOf(int number) => _blankAnswers.TryGetValue(number, out var answers) ? answers : [];
+    private List<string> BlankAnswersOf(int number) =>
+        IsShort ? ShortAnswersSent : _blankAnswers.TryGetValue(number, out var answers) ? answers : [];
+
+    // F-108: a field left empty is nothing typed, so it is not sent; the others are trimmed.
+    private List<string> ShortAnswersSent =>
+        [.. _shortAnswers.Select(answer => answer.Trim()).Where(answer => answer.Length > 0)];
+
+    private bool ShortAnswersDone => ShortAnswersSent.Count > 0;
+
+    // The refusal about the answers of a short answer: the one of its blank, or the section's.
+    private string? ShortAnswerError => _blankRowErrors.GetValueOrDefault(ShortAnswerBlank) ?? _blanksError;
+
+    // F-108: the blank codes say "blank"; for a short answer the screen says "answer" where the words differ.
+    private string BlankErrorText(string? code)
+    {
+        var key = !IsShort
+            ? null
+            : code switch
+            {
+                QuestionBankErrorCodes.QuestionBlankAnswersRequired => "Questions.ShortAnswer.Error.AnswersRequired",
+                QuestionBankErrorCodes.QuestionBlankAnswersCount => "Questions.ShortAnswer.Error.AnswersCount",
+                QuestionBankErrorCodes.QuestionBlankAnswerRepeated => "Questions.ShortAnswer.Error.AnswerRepeated",
+                _ => null
+            };
+
+        return key is null ? Errors.For(code) : L[key];
+    }
 
     private IReadOnlyList<AppRadioCardOption<QuestionType?>> TypeCards =>
     [
@@ -832,7 +881,8 @@ else
         new(QuestionType.TrueFalse, L["Questions.Type.TrueFalse"], L["Questions.Type.TrueFalse.Description"], AppIcons.Verified),
         new(QuestionType.MultipleAnswer, L["Questions.Type.MultipleAnswer"], L["Questions.Type.MultipleAnswer.Description"], AppIcons.MultipleAnswer),
         new(QuestionType.Matching, L["Questions.Type.Matching"], L["Questions.Type.Matching.Description"], AppIcons.Matching),
-        new(QuestionType.FillInTheBlanks, L["Questions.Type.FillInTheBlanks"], L["Questions.Type.FillInTheBlanks.Description"], AppIcons.FillInTheBlanks)
+        new(QuestionType.FillInTheBlanks, L["Questions.Type.FillInTheBlanks"], L["Questions.Type.FillInTheBlanks.Description"], AppIcons.FillInTheBlanks),
+        new(QuestionType.ShortAnswer, L["Questions.Type.ShortAnswer"], L["Questions.Type.ShortAnswer.Description"], AppIcons.ShortAnswer)
     ];
 
     private IReadOnlyList<AppRadioCardOption<bool?>> TrueFalseCards =>
@@ -931,7 +981,9 @@ else
                 ? MatchingItemsCountDone && MatchingMatchesCountDone && MatchingKeyDone
                 : IsFillIn
                     ? BlanksCountDone && BlanksAnswersDone
-                    : OptionsCountDone && OptionsTextDone && KeyDone);
+                    : IsShort
+                        ? ShortAnswersDone
+                        : OptionsCountDone && OptionsTextDone && KeyDone);
 
     private IReadOnlyList<AppChecklistItem> AsideChecklist =>
     [
@@ -953,6 +1005,8 @@ else
                 new(L["Questions.Checklist.Blanks.Count"], BlanksCountDone),
                 new(L["Questions.Checklist.Blanks.Answers"], BlanksAnswersDone)
             }
+            : IsShort
+            ? [new AppChecklistItem(L["Questions.Checklist.ShortAnswer.Answers"], ShortAnswersDone)]
             : new List<AppChecklistItem>
             {
                 new(IsMultiple ? L["Questions.Checklist.OptionsCount.Multiple"] : L["Questions.Checklist.OptionsCount"], OptionsCountDone),
@@ -969,7 +1023,7 @@ else
         new(L["Questions.Field.Difficulty"], _difficulty?.ToString(CultureInfo.CurrentCulture)),
         new(L["Questions.Field.BaseText"], _baseText?.Text),
         new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
-        IsTrueFalse || IsMatching || IsFillIn
+        IsTrueFalse || IsMatching || IsFillIn || IsShort
             ? new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))
             : new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value),
         .. IsMultiple ? [new AppAsideRow(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))] : Array.Empty<AppAsideRow>()
@@ -1026,7 +1080,12 @@ else
             AddIfRefused(items, _blanksError, "question-statement", L["Questions.Section.Blanks"]);
             foreach (var (number, rowError) in _blankRowErrors.OrderBy(pair => pair.Key))
             {
-                AddIfRefused(items, rowError, FillInTheBlanksKeySection.AddId(number), L["Questions.Blanks.Blank", number]);
+                // F-108: a short answer has one list of answers, so its refusal points at that section.
+                AddIfRefused(
+                    items,
+                    rowError,
+                    IsShort ? ShortAnswerKeySection.AddId : FillInTheBlanksKeySection.AddId(number),
+                    IsShort ? L["Questions.Section.ShortAnswer"] : L["Questions.Blanks.Blank", number]);
             }
 
             AddIfRefused(items, _trueFalseKeyError, "question-true-false-key", L["Questions.TrueFalseKey.Label"]);
@@ -1062,7 +1121,7 @@ else
     private bool AnswerChanged() =>
         IsTrueFalse
             ? _saved is null || _trueFalseKey != _saved.TrueFalseKey
-            : IsFillIn
+            : IsFillIn || IsShort
                 ? BlanksChanged()
                 : OptionsChanged() || (IsMatching && MatchItemsChanged());
 
@@ -1075,7 +1134,7 @@ else
             ? _trueFalseKey != _saved.TrueFalseKey
             : IsMatching
                 ? !MatchPositions.SequenceEqual(StoredMatchPositions)
-                : IsFillIn
+                : IsFillIn || IsShort
                     ? BlanksKeyChanged()
                     : !CorrectPositions.SequenceEqual(StoredCorrectPositions));
 
@@ -1087,6 +1146,12 @@ else
 
     private bool BlanksChanged()
     {
+        // F-108: the one blank; a new question with its untouched empty field has nothing to save yet.
+        if (IsShort)
+        {
+            return !(_saved?.Blanks?.FirstOrDefault()?.AcceptedAnswers ?? []).SequenceEqual(ShortAnswersSent, StringComparer.Ordinal);
+        }
+
         var stored = _saved?.Blanks ?? [];
         var current = BlanksAsSent;
 
@@ -1509,7 +1574,18 @@ else
                 })
         ];
         // F-107: the stored answers by blank number.
-        _blankAnswers = (question.Blanks ?? []).ToDictionary(blank => blank.Number, blank => blank.AcceptedAnswers.ToList());
+        // F-108: the one blank of a short answer is its list of answers, not a row of the fill-in section.
+        _blankAnswers = question.Type == QuestionType.ShortAnswer
+            ? []
+            : (question.Blanks ?? []).ToDictionary(blank => blank.Number, blank => blank.AcceptedAnswers.ToList());
+        if (question.Type == QuestionType.ShortAnswer)
+        {
+            _shortAnswers = [.. question.Blanks?.FirstOrDefault()?.AcceptedAnswers ?? []];
+            if (_shortAnswers.Count == 0)
+            {
+                _shortAnswers.Add(string.Empty);
+            }
+        }
         // F-98: what was typed as a reason belonged to the save that just came back.
         _changeReason = string.Empty;
         _changeReasonForced = false;
@@ -2163,7 +2239,7 @@ else
             item.Error = IsMatching ? MatchItemError(item, required: published) : null;
         }
 
-        _optionsError = published && !IsTrueFalse && !IsMatching && !IsFillIn ? PublishedOptionsError() : null;
+        _optionsError = published && !IsTrueFalse && !IsMatching && !IsFillIn && !IsShort ? PublishedOptionsError() : null;
         _matchingError = published && IsMatching ? PublishedMatchingError() : null;
         CheckBlanks(published);
         _trueFalseKeyError = published && IsTrueFalse && !TrueFalseKeyDone
@@ -2192,7 +2268,7 @@ else
             _baseText?.Id,
             QuestionHtml.NullIfBlank(_explanation),
             _difficulty,
-            IsTrueFalse || IsFillIn
+            IsTrueFalse || IsFillIn || IsShort
                 ? []
                 // F-106 BR5: a right item carries no mark, whatever single choice left on it.
                 : [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), !IsMatching && option.IsCorrect))],
@@ -2206,7 +2282,7 @@ else
                 ? [.. _matchItems.Zip(MatchPositions, (item, match) => new SaveMatchItemRequest(QuestionHtml.NullIfBlank(item.Html), match))]
                 : null,
             // F-107: one blank per marker the statement holds now; the answers of a removed marker are not sent.
-            IsFillIn
+            IsFillIn || IsShort
                 ? [.. BlankNumbers.Select(number => new SaveBlankRequest(number, [.. BlankAnswersOf(number)]))]
                 : null);
 
@@ -2256,6 +2332,18 @@ else
     {
         _blanksError = null;
         _blankRowErrors.Clear();
+
+        // F-108 BR5: a short answer needs at least one answer to be published; an empty field is nothing typed.
+        if (IsShort)
+        {
+            if (published && !ShortAnswersDone)
+            {
+                _blankRowErrors[ShortAnswerBlank] = BlankErrorText(QuestionBankErrorCodes.QuestionBlankAnswersRequired);
+            }
+
+            return;
+        }
+
         if (!IsFillIn)
         {
             return;
@@ -2298,7 +2386,7 @@ else
     private async Task ShowRefusalAsync(QuestionBankResult<QuestionResponse> result)
     {
         var code = result.ErrorCode;
-        var text = Errors.For(code);
+        var text = BlankErrorText(code);
         var fieldRefused = true;
 
         switch (code)

@@ -1183,6 +1183,22 @@
   <data name="Questions.Preview.BlanksInstruction" xml:space="preserve"><value>Fill in each blank.</value></data>
   <data name="Questions.Preview.BlankKey" xml:space="preserve"><value>Blank {0}: {1}</value></data>
   <data name="Questions.Preview.BlankNoKey" xml:space="preserve"><value>Blank {0}: no key yet</value></data>
+  <data name="Questions.Type.ShortAnswer" xml:space="preserve"><value>Short answer</value></data>
+  <data name="Questions.Type.ShortAnswer.Description" xml:space="preserve"><value>A short typed answer, checked against accepted answers.</value></data>
+  <data name="Questions.Section.ShortAnswer" xml:space="preserve"><value>Accepted answers</value></data>
+  <data name="Questions.Section.ShortAnswer.Subtitle" xml:space="preserve"><value>Write the answers the student may type. Case and extra spaces are ignored; accents count.</value></data>
+  <data name="Questions.ShortAnswer.Answer.Field" xml:space="preserve"><value>Accepted answer {0}</value></data>
+  <data name="Questions.ShortAnswer.Answer.Name" xml:space="preserve"><value>answer {0}</value></data>
+  <data name="Questions.ShortAnswer.Answer.Placeholder" xml:space="preserve"><value>An answer the student may type</value></data>
+  <data name="Questions.ShortAnswer.Answer.Removed" xml:space="preserve"><value>Answer removed. {0} left.</value></data>
+  <data name="Questions.Checklist.ShortAnswer.Answers" xml:space="preserve"><value>At least one accepted answer</value></data>
+  <data name="Questions.Preview.ShortAnswerLabel" xml:space="preserve"><value>Your answer</value></data>
+  <data name="Questions.Preview.ShortAnswerInstruction" xml:space="preserve"><value>Type your answer.</value></data>
+  <data name="Questions.Preview.ShortAnswerKey" xml:space="preserve"><value>Accepted answers: {0}</value></data>
+  <data name="Questions.Preview.ShortAnswerNoKey" xml:space="preserve"><value>Accepted answers: no key yet</value></data>
+  <data name="Questions.ShortAnswer.Error.AnswersRequired" xml:space="preserve"><value>Write at least one accepted answer.</value></data>
+  <data name="Questions.ShortAnswer.Error.AnswersCount" xml:space="preserve"><value>A short answer accepts at most 5 answers.</value></data>
+  <data name="Questions.ShortAnswer.Error.AnswerRepeated" xml:space="preserve"><value>Two answers are the same once case and extra spaces are ignored.</value></data>
   <data name="question.blanks_count" xml:space="preserve"><value>A fill-in-the-blanks question has 1 to 10 blanks in the statement.</value></data>
   <data name="question.blank_repeated" xml:space="preserve"><value>Each blank number appears only once in the statement.</value></data>
   <data name="question.blank_marker_missing" xml:space="preserve"><value>A blank has no marker in the statement.</value></data>
