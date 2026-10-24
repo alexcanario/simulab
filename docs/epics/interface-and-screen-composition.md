@@ -64,6 +64,14 @@ One visual and composition standard on every screen: the Control Alt Systems ide
 ## First release cut
 F-140, F-133, F-129, F-127, F-128, F-132, F-131, F-159
 
+## First release cut: mockup-stitch-1-formulario
+Rank: 1
+F-149, F-153, F-154, F-137
+
+## First release cut: mockup-stitch-2-navegacao
+Rank: 2
+F-135, F-138, F-155, F-136
+
 ## Out of scope
 - Global search in the app bar (F-156) and in-app notifications (F-157): app features, not composition; they stay in Foundation and identity.
 - Question form features from the reference screen: inline student preview (F-136), publishing readiness meter (F-137), draft autosave (F-155), field polish (F-154), review queue count (F-158); they stay in Question bank.
@@ -75,6 +83,7 @@ F-140, F-133, F-129, F-127, F-128, F-132, F-131, F-159
 - 2026-10-24 — F-124 moves back to Foundation and identity; F-149 (from Question bank) and F-153 (from Foundation and identity) join this epic — F-124 is about the manual; F-149 and F-153 change the kit's look.
 - 2026-10-24 — F-159 is new and F-133 takes `AcceptTerms.razor` — no item covered the review screens or the terms acceptance page.
 - 2026-10-24 — The first release cut is the eight Must items still open — testers should see one coherent app, back office included.
+- 2026-10-24 — milestones of mockup-stitch written by /agile:mvp: 3 milestones (11 items); label: mockup-stitch; goal: "Formulário de questão no visual do mockup do Stitch: F-137, F-153, F-154, F-155, F-156, F-157, F-158, F-135, F-136, F-138, F-149"; gaps left: 0; milestones: mockup-stitch-1-formulario (campos, alternativas e resumo do formulario de questao), mockup-stitch-2-navegacao (indice, previa, atalhos e autosave no formulario), mockup-stitch-3-barra-app (busca global, notificacoes e contador da fila)
 
 ## Retro notes
 

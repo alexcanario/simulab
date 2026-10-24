@@ -72,6 +72,10 @@ Simulae (read-only source, `src/Modules/ContentCatalog`): one `Questions` table 
 ## First release cut: mvp-cadastro-provas
 F-95, F-96, F-97, F-98, F-99
 
+## First release cut: mockup-stitch-3-barra-app
+Rank: 3
+F-158, F-156, F-157
+
 ## Out of scope
 - Hotspot questions (Simulae T5) — not in the brief.
 - Wrong-answer penalty, weight and scoring of annulled questions — epic Exam Simulator (E-6), with the edition's scoring rules (owner, 2026-10-09).
@@ -88,6 +92,7 @@ F-95, F-96, F-97, F-98, F-99
 - 2026-10-09 — First release cut is F-95 to F-99 — single choice and true/false cover most public service exams; versions before any attempt exists avoid a data migration; transcription gives volume (owner, question 4).
 - 2026-10-09 — Do not import Simulae's raw-HTML fields without a sanitizer, nor its unused `EmRevisao`/`Rascunho` paths — known defects of the source (Claude, from the Simulae read).
 - 2026-10-20 — first release cut written by /agile:mvp: 5 items (criterion: the goal, dependency closure); label: mvp-cadastro-provas; goal: "A aplicacao deve ser capaz atraves do usuario responsavel cadastrar os tipos de provas elencados no levantamento de requisitos"; gaps left: 0
+- 2026-10-24 — milestones of mockup-stitch written by /agile:mvp: 3 milestones (11 items); label: mockup-stitch; goal: "Formulário de questão no visual do mockup do Stitch: F-137, F-153, F-154, F-155, F-156, F-157, F-158, F-135, F-136, F-138, F-149"; gaps left: 0; milestones: mockup-stitch-1-formulario (campos, alternativas e resumo do formulario de questao), mockup-stitch-2-navegacao (indice, previa, atalhos e autosave no formulario), mockup-stitch-3-barra-app (busca global, notificacoes e contador da fila)
 
 ## Related
 - Discussions: none
