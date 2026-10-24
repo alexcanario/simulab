@@ -18,9 +18,11 @@ Keep the test suite reliable and fast: test waits that do not fail only because 
 | Id | Feature | Value | Priority | Size | Depends on | Waits on | Screen design | Status |
 |---|---|---|---|---|---|---|---|---|
 | B-32 | Plain WaitForAssertion waits in bUnit page tests time out under heavy load | The plain waits stop failing for the machine's load | Could | S | B-31 | - | no | idea |
+| F-160 | Seed the development admin with the legal documents accepted | A signed-in screen can be checked on the app host without accepting terms | Could | S | - | - | no | idea |
 
 ## Execution plan
 1. B-32 — the plain waits, after B-31 measured the load — path: `/agile:refine` → `/agile:build` — parallel with: none.
+2. F-160 — the seeded admin starts with the documents accepted — path: `/agile:refine` → `/agile:build` — parallel with: B-32.
 
 ## Waiting outside the epic
 | What | For | Who provides it | Who asks |
