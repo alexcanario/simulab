@@ -1,7 +1,7 @@
 ---
 feature: F-109
 epic: Question bank
-status: building
+status: validating
 board: 155
 version: 1
 ---
@@ -186,7 +186,7 @@ Tests locked: b3f16faef0071496cd091cb67356347098cf2c2c (7 files); unlocks: 1
 | AC16 | `RubricQuestionPreviewAndListTests` (`Preview_Essay_*`, `Preview_OpenAnswer_*`, `Preview_EssayDraftWithNoCriterion_SaysNoRubricYet`) |
 | AC17 | `AddOpenAnswerAndEssayQuestionsMigrationTests` (both); `TableDescriptionTests` (JSON exemption) |
 | AC18 | `RubricQuestionEndpointTests.CreateAndUpdate_WithoutThePermission_AnswerForbidden` |
-| AC19 | pending (validation step: keyboard and screen reader on the rubric section; the accessible names are asserted by `RubricQuestionFormTests.Add_ChoosingEssay_ShowsTheRubricWithOneEmptyRow_AndTheLineFields` and the error announcement by `Edit_Essay_WhenTheApiRefusesTheRubricOrTheSize_*`) |
+| AC19 | validation step 8.2 (keyboard and screen reader on the rubric section; the accessible names are asserted by `RubricQuestionFormTests.Add_ChoosingEssay_ShowsTheRubricWithOneEmptyRow_AndTheLineFields` and the error announcement by `Edit_Essay_WhenTheApiRefusesTheRubricOrTheSize_*`) |
 | AC20 | `QuestionTranscriptionTests.Open_OffersEveryTypeTheFormImplements`, `Open_ChoosingTheEssay_ShowsTheRubricSection` |
 | AC21 | `RubricQuestionResourcesTests.EveryNewText_ExistsInTheThreeLanguagesWithTheItemsWords`; `ResourceParityTests`; `ErrorCodeTextTests` |
 
@@ -219,6 +219,11 @@ Tests locked: b3f16faef0071496cd091cb67356347098cf2c2c (7 files); unlocks: 1
 - 2026-10-24 — design trade-off 5 size-column ranges — owner chose as proposed (checks in the database by type, like `ck_questions_difficulty_range`).
 - 2026-10-24 — tests unlocked (owner: two lint warnings in `AddOpenAnswerAndEssayQuestionsMigrationTests`, IDE0062 and CA1305; style only, no assertion changed) and locked again.
 - 2026-10-24 — `InitialQuestionBankMigrationTests` lists the module's tables; it gained `question_rubric_criteria` (a test of the module, not of this item, edited with the migration that adds the table, as F-107 did for `question_blanks`).
+- 2026-10-24 — `tests/Simulab.Testing/PostgresServer.cs` starts the test PostgreSQL with `max_connections=500` (default 100): with the new classes the QuestionBank project (840 tests, a host per class, run in parallel with the other projects by the gate) hit `53300: too many clients` in unrelated tests (34 failures in the first gate run, 4 in a project run alone); the same gate passed after the change — Claude, shared test helper, not locked
+- 2026-10-24 — Screen check in the real app host (own database `simulab_f109`, migration `AddOpenAnswerAndEssayQuestions` applied there; signed in as the seeded development admin, terms accepted with the owner's yes): the Essay card, the Rubric card with one row, "1 of 10 criteria", "Total: 0 points", "Minimum lines" and "Maximum lines", "Model answer" with its hint and the checklist item rendered as the item says. Not exercised on screen: the preview dialog (a screenshot of an open dialog drops a Blazor circuit), save and publish, dark mode, keyboard; they go to the validation script and are covered by bUnit and endpoint tests. The app host and the preview were stopped; the four development containers (`simulab-postgres`, `simulab-redis`, `simulab-azurite`, `simulab-mailpit`) were left running because stopping them was refused by the environment — owner to stop them
+- 2026-10-24 — Security scan `agile scan GREEN` (dotnet 0 advisories, gitleaks, semgrep: 2 medium in `tools/Simulab.DocGen/GeneratedDocs.cs`, older than this item, none from it). Gate `agile gate GREEN`: build with 0 warnings, every test project green (QuestionBank 840, Web 2,633, architecture 301); the QuestionBank project took 9 min 56 s in the gate, over the 2 min integration budget of the profile, which it already was before (4 min 46 s alone): a retro finding, not caused by one change
+- 2026-10-24 — No `/agile:review`: no door, no non-additive schema change, no other module touched; the diff is large (over 400 lines) but follows F-108's pattern; the owner may ask for it
+- 2026-10-24 — Reuse: `AnswerKey.From` and the trailing-parameter refusal pattern of F-106 to F-108, `AcceptedAnswer.Normalize` for names, `QuestionBlank`/`QuestionVersionBlank` as the model of the child row and the version snapshot, `ShortAnswerKeySection` as the model of `RubricKeySection`, `AppTextField`, `AppRowActions`, `AppSectionCard`, `AppFormGrid` and `AppIcons` from the kit, `OriginApiTests` and `QuestionPageTestContext` for the tests. Shortcuts: none. Board body not refreshed (a whole pt-BR rendering of the file; status stays "In progress" for building and validating)
 - 2026-10-24 — plan — 1 glossary rows `Rubric` and `Rubric criterion`, then the six keys take the trailing parameters and refusal helpers → build + F-98, F-104, F-106, F-107, F-108 suites unedited; 2 create and save an `Essay` and an `OpenAnswer` end to end (enum, limits, codes, keys, entity, `question_rubric_criteria`, size columns, migration, contracts, handler, queries) → AC1, AC2, AC3, AC6, AC7, AC8, AC9, AC13, AC17, AC18; 3 publish and edit a published rubric → AC4, AC5; 4 versions (`question_versions` rubric and size, `RubricKeyChanged`, `CopyAs`, base-text fan-out, annul and reinstate) → AC10, AC11, AC12; 5 form: rubric section, size fields, labels, checklist, transcription 6 → 8, three locales → AC14, AC15, AC20, AC21 (AC19 on screen); 6 preview and list → AC16; 7 flow page, pt-BR manual, regenerated docs, validation script → `techdocs.js check F-109`. No `frontend` agent (no mockup).
 
 ## Out of scope
@@ -236,11 +241,79 @@ Tests locked: b3f16faef0071496cd091cb67356347098cf2c2c (7 files); unlocks: 1
 ## Change notes
 
 ## Validation script
-<!-- Written at the end of the build. -->
+
+### English
+Needed to validate: the local app host — the owner; not started yet, step 1 starts it from this worktree on its own database.
+
+1. Stop any app host you have open (other worktrees share its ports), then start this worktree's app host on its own database `simulab_f109` (the item's migration lands only there), from the worktree folder `D:\wt\simulab\f-109-open-answer-essay`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f109 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f109"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Expected: the line `Dashboard:` with a link; the site answers at https://localhost:7125. To repeat, press Ctrl+C and run the same command.
+2. [ ] Open https://localhost:7125 and sign in as `admin@simulab.local` (the development password of `appsettings.Development.json`); if the page "Our documents changed" appears, click "Accept and continue". The database `simulab_f109` is new: if the subject field of step 3.2 finds nothing, first add a subject with one topic in the sidebar (menu lateral esquerdo) at Content > Subjects.
+3. Create an essay draft:
+   - [ ] 3.1 In the sidebar click Content > Questions, then Add. In "Question type" click the type card (cartão de tipo: each card of the "Question type" field) "Essay": the Options card is replaced by the card "Rubric" (cartão da rubrica) with one empty row, "1 of 10 criteria", "Total: 0 points" and the fields "Minimum lines" and "Maximum lines"; the Explanation card is now "Model answer".
+   - [ ] 3.2 Pick a subject and a topic. In Statement type "Write an essay about the city.". In the first row type the name Theme, the description Meets the prompt and 30 points; click "Add criterion" and type Argument and 70 points: the total reads "Total: 100 points". Type 7 in "Minimum lines" and 30 in "Maximum lines".
+   - [ ] 3.3 Click Save: the page becomes the edit page, the type reads "Essay", not editable; the rows and the limit are kept; the checklist "Before publishing" (lista "Before publishing" no painel lateral) shows "At least one rubric criterion" done and Publish is enabled.
+4. Rules of the rubric:
+   - [ ] 4.1 Click "Add criterion", type " theme " (spaces, lower case) and 10 points, then Save: under that criterion the message "Two criteria have the same name." appears. Remove that row with its remove button.
+   - [ ] 4.2 Clear the name and the points of both rows: the checklist shows "At least one rubric criterion" pending and Publish is disabled. Type Theme, 30 and Argument, 70 again.
+   - [ ] 4.3 Click Save, then Publish: the status becomes Published.
+5. Preview:
+   - [ ] 5.1 In the Publication card click "Preview as a student": the statement, then a disabled empty multi-line box "Your essay", the line "Write your essay." and "Between 7 and 30 lines.". The rubric is not shown yet.
+   - [ ] 5.2 Click "Show answer": the check icon with "Grading rubric", a table with Theme 30, Argument 70 and Total 100, then the model answer (empty: nothing). Close the dialog.
+6. Answer key change:
+   - [ ] 6.1 Change the description of Theme and the size limit to 8 and 25 lines: no reason field appears. Save: the History card lists a new version that is not an "Answer key changed".
+   - [ ] 6.2 Change the points of Argument to 60: the field "Reason for the answer key change" appears. Write a reason and Save: the History card lists the new version with "Answer key changed" and your reason; View on version 1 shows the rubric with 70 points.
+7. [ ] Language: in the app bar (barra superior) click the globe and pick Português (Brasil): the type cards read "Resposta aberta" and "Redação", the section "Rubrica", the checklist "Pelo menos um critério da rubrica" and the preview line "Escreva sua redação.". Switch back to English.
+8. Open answer, list, keyboard and transcription:
+   - [ ] 8.1 On Questions > Add pick "Open answer": the size field is only "Maximum characters". Create and save a draft with one criterion and 500 as the limit: the row of the list shows the chip "Open answer", and the one of the essay "Essay".
+   - [ ] 8.2 Without the mouse, on Questions > Add pick the Essay card with the arrows; Tab through each field of a row, its remove action and "Add criterion": each takes one Tab stop and the screen reader names "Criterion 1 name", "Criterion 1 description" and "Criterion 1 points" (AC19).
+   - [ ] 8.3 In the sidebar click Content > Exams, open the exam and then an edition, and on its Questions card click Transcribe: the "Question type" field offers eight cards; pick Essay and the "Rubric" card appears (AC20).
+
+### pt-BR
+Necessário para validar: o app host local — o dono; ainda não iniciado, o passo 1 sobe a partir deste worktree no banco próprio.
+
+1. Pare qualquer app host aberto (outros worktrees usam as mesmas portas) e suba o app host deste worktree no banco próprio `simulab_f109` (a migração do item cai só nele), a partir da pasta do worktree `D:\wt\simulab\f-109-open-answer-essay`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f109 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f109"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Esperado: a linha `Dashboard:` com um link; o site responde em https://localhost:7125. Para repetir, Ctrl+C e o mesmo comando.
+2. [ ] Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento de `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue". O banco `simulab_f109` é novo: se o campo de disciplina do passo 3.2 não achar nada, antes cadastre uma disciplina com um tópico no menu lateral (sidebar, menu lateral esquerdo) em Content > Subjects.
+3. Crie um rascunho de redação:
+   - [ ] 3.1 No menu lateral clique em Content > Questions e depois em Add. Em "Question type" clique no cartão de tipo (cada cartão do campo "Question type") "Essay": o cartão Options é trocado pelo cartão "Rubric" (cartão da rubrica) com uma linha vazia, "1 of 10 criteria", "Total: 0 points" e os campos "Minimum lines" e "Maximum lines"; o cartão Explanation passa a ser "Model answer".
+   - [ ] 3.2 Escolha disciplina e tópico. Em Statement digite "Write an essay about the city.". Na primeira linha digite o nome Theme, a descrição Meets the prompt e 30 pontos; clique em "Add criterion" e digite Argument e 70 pontos: o total mostra "Total: 100 points". Digite 7 em "Minimum lines" e 30 em "Maximum lines".
+   - [ ] 3.3 Clique em Save: a página vira a de edição, o tipo aparece como "Essay", sem edição; as linhas e o limite continuam; a lista "Before publishing" (lista "Before publishing" no painel lateral) mostra "At least one rubric criterion" concluído e Publish fica habilitado.
+4. Regras da rubrica:
+   - [ ] 4.1 Clique em "Add criterion", digite " theme " (com espaços, minúscula) e 10 pontos e depois Save: sob esse critério aparece "Two criteria have the same name.". Remova essa linha com o botão de remover dela.
+   - [ ] 4.2 Apague o nome e os pontos das duas linhas: a lista mostra "At least one rubric criterion" pendente e Publish fica desabilitado. Digite Theme, 30 e Argument, 70 de novo.
+   - [ ] 4.3 Clique em Save e depois em Publish: o status vira Published.
+5. Pré-visualização:
+   - [ ] 5.1 No cartão Publication clique em "Preview as a student": o enunciado, depois uma caixa de várias linhas, vazia e desabilitada, "Your essay", a linha "Write your essay." e "Between 7 and 30 lines.". A rubrica ainda não aparece.
+   - [ ] 5.2 Clique em "Show answer": o ícone com "Grading rubric", uma tabela com Theme 30, Argument 70 e Total 100, e depois a resposta modelo (vazia: nada). Feche o diálogo.
+6. Troca de gabarito:
+   - [ ] 6.1 Mude a descrição de Theme e o limite de tamanho para 8 e 25 linhas: não aparece campo de motivo. Clique em Save: o cartão History lista uma nova versão que não é "Answer key changed".
+   - [ ] 6.2 Mude os pontos de Argument para 60: aparece o campo "Reason for the answer key change". Escreva um motivo e clique em Save: o cartão History lista a nova versão com "Answer key changed" e o seu motivo; View na versão 1 mostra a rubrica com 70 pontos.
+7. [ ] Idioma: na barra superior (app bar, a faixa no alto das páginas) clique no globo e escolha Português (Brasil): os cartões de tipo mostram "Resposta aberta" e "Redação", a seção "Rubrica", a lista "Pelo menos um critério da rubrica" e a linha da pré-visualização "Escreva sua redação.". Volte para English.
+8. Resposta aberta, lista, teclado e transcrição:
+   - [ ] 8.1 Em Questions > Add escolha "Open answer": o campo de tamanho é só "Maximum characters". Crie e salve um rascunho com um critério e 500 como limite: a linha da lista mostra o chip "Open answer", e a da redação "Essay".
+   - [ ] 8.2 Sem o mouse, em Questions > Add escolha o cartão Essay com as setas; com Tab percorra cada campo de uma linha, sua ação de remover e "Add criterion": cada um é uma parada de Tab e o leitor de tela diz "Criterion 1 name", "Criterion 1 description" e "Criterion 1 points" (AC19).
+   - [ ] 8.3 No menu lateral clique em Content > Exams, abra o concurso e depois uma edição e, no cartão Questions dela, clique em Transcribe: o campo "Question type" oferece oito cartões; escolha Essay e aparece o cartão "Rubric" (AC20).
 
 ## Events
 
 - 2026-10-24 question — asked 7, from context 3
 - 2026-10-24 blocked — test wrong: owner: fix two lint warnings (IDE0062, CA1305) in the migration test, no assertion changes
+- 2026-10-24 test-fail — tests failed (Simulab.slnx): Simulab.QuestionBank.Tests.QuestionVersionRaceTests.Publish_WhenAnotherSaveTookTheNextNumbe, 1 red
 
 ## Delivery

@@ -48,7 +48,9 @@ public static class PostgresServer
         {
             if (_container is null)
             {
-                var container = new PostgreSqlBuilder("postgres:18-alpine").Build();
+                // F-109: the default 100 connections run out when the classes of a big project (QuestionBank: about 850
+                // tests, a host per class) run in parallel, which showed as 53300 "too many clients" in unrelated tests.
+                var container = new PostgreSqlBuilder("postgres:18-alpine").WithCommand("-c", "max_connections=500").Build();
                 await container.StartAsync(cancellationToken);
                 _container = container;
             }
