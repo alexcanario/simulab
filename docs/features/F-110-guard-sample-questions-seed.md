@@ -1,7 +1,7 @@
 ---
 feature: F-110
 epic: Question bank
-status: validating
+status: done
 board: 156
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-25)
-- Stopped at: Built and checked on screen; validation script written
-- Next action: Owner follows ## Validation script, then /agile:ship F-110
+- Status: done (2026-10-25)
+- Stopped at: Shipped: merged as 5dcdd56 on main, board #156 closed
+- Next action: nothing
 - Waiting on: nothing
 
 ## Summary
@@ -271,3 +271,30 @@ Proposed at refinement and approved by the owner on 2026-10-25. Answer key: book
 - 2026-10-25 blocked — test wrong: ORDER BY sorts the text cast in Migrate_ADeletedTopic
 - 2026-10-25 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 1 red
 - 2026-10-25 blocked — test wrong: owner: Migrate_ADeletedTopic orders the paper numbers as text; order by the integer column
+
+## Delivery
+
+Gate time: 7 passes, 17 min 3 s — turn 4 (3 min 48 s), ship 1 (7 min), scan 2 (6 min 15 s); 1 red
+Usage: 16993.5k weighted (estimate) — refine 10% · build 2% · ship 12% · other 75% — agents 1% — context per turn 215k → 653k — 2 sessions, 338 turns
+
+- Branch: `feature/F-110` (deleted; never pushed), merged with `--no-ff` as `5dcdd56` on `main`, pushed.
+- Tests: `gate.js ship` GREEN, 5321 tests in 14 projects, 0 failures, 36 s build and 384 s test run (over the 5 min budget by 84 s, reported to the retro); scan GREEN; DocGen `--check` GREEN.
+- App version: 1.20.0 → 1.21.0.
+- Manual: `docs/manual/pt-BR/questions.md` ("Questões que já vêm no banco").
+- Technical page: `docs/flows/images-in-questions.md`. Glossary: 3 rows (`DO` block, `to_regclass`, embedded resource).
+- Validated by the owner in the conversation ("validado", 2026-10-25); no box was ticked on this machine.
+- Validation evidence:
+```text
+1. Pare qualquer app host aberto e suba o app host deste worktree no banco próprio `simulab_f110`.
+2. [ ] not tested Abra https://localhost:7125 e entre como `admin@simulab.local`.
+3.1 [ ] not tested Filtro EDITION "CONSULPLAN · Guarda Municipal · 2026": "1-25 of 60".
+3.2 [ ] not tested Question 47 Annulled; as outras Published.
+4.1 [ ] not tested Question 1: Base text "Calma, gente".
+4.2 [ ] not tested Questions 16 e 17: imagens.
+4.3 [ ] not tested Question 13: planilha como tabela, opção A correta.
+5. [ ] not tested Question 47: versão 2 Annulled com o motivo da banca; versão 1 com chave D.
+6. [ ] not tested Amostra contra a prova: Questions 3, 7, 35 e 58.
+7. [ ] not tested Idioma Português (Brasil).
+8. [ ] not tested Só teclado.
+Evidence: 0 of 10 tested
+```
