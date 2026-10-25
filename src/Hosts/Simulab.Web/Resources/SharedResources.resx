@@ -196,6 +196,7 @@
   <data name="Roles.Delete.InUseTip.One" xml:space="preserve"><value>Held by 1 user: remove it from them first</value></data>
   <data name="Role.System.Student" xml:space="preserve"><value>Student</value></data>
   <data name="Role.System.Curator" xml:space="preserve"><value>Curator</value></data>
+  <data name="Role.System.Grader" xml:space="preserve"><value>Grader</value></data>
   <data name="Role.System.Admin" xml:space="preserve"><value>Admin</value></data>
   <data name="PermissionGroup.identity" xml:space="preserve"><value>Identity and access</value></data>
   <data name="Permission.identity.roles.manage.Name" xml:space="preserve"><value>Manage roles and user roles</value></data>
@@ -210,10 +211,16 @@
   <data name="Permission.questions.manage.Description" xml:space="preserve"><value>Write, edit, publish, preview and delete the questions of the bank.</value></data>
   <data name="Permission.questions.review.Name" xml:space="preserve"><value>Review questions</value></data>
   <data name="Permission.questions.review.Description" xml:space="preserve"><value>Open the review queue, approve a question in review to publish it, or reject it with a reason.</value></data>
+  <data name="Permission.questions.grade.Name" xml:space="preserve"><value>Grade questions</value></data>
+  <data name="Permission.questions.grade.Description" xml:space="preserve"><value>Grade essays and open answers in the correction queue.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>Email</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Name</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Status</value></data>
   <data name="Users.Column.Roles" xml:space="preserve"><value>Roles</value></data>
+  <data name="Users.Column.Tenant" xml:space="preserve"><value>Tenant</value></data>
+  <data name="Users.Field.Tenant" xml:space="preserve"><value>Tenant</value></data>
+  <data name="Users.Field.TenantHelp" xml:space="preserve"><value>Paste the tenant id; leave empty for none.</value></data>
+  <data name="Users.Tenant.Invalid" xml:space="preserve"><value>Paste a tenant id such as 3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f.</value></data>
   <data name="Users.Search.Placeholder" xml:space="preserve"><value>Search by email or name</value></data>
   <data name="Users.Filter.Role" xml:space="preserve"><value>Role</value></data>
   <data name="Users.Filter.AllRoles" xml:space="preserve"><value>All roles</value></data>
@@ -231,6 +238,7 @@
   <data name="RoleHistory.Action.RoleUpdated" xml:space="preserve"><value>Role changed</value></data>
   <data name="RoleHistory.Action.RoleDeleted" xml:space="preserve"><value>Role deleted</value></data>
   <data name="RoleHistory.Action.UserRolesChanged" xml:space="preserve"><value>User's roles changed</value></data>
+  <data name="RoleHistory.Action.UserTenantChanged" xml:space="preserve"><value>User's tenant changed</value></data>
   <data name="RoleHistory.Change.Renamed" xml:space="preserve"><value>Name: {0} → {1}</value></data>
   <data name="RoleHistory.Change.Added" xml:space="preserve"><value>Added: {0}</value></data>
   <data name="RoleHistory.Change.Removed" xml:space="preserve"><value>Removed: {0}</value></data>
@@ -252,9 +260,10 @@
   <data name="RoleHistory.Action.History" xml:space="preserve"><value>History</value></data>
   <data name="Common.RemoveFilter" xml:space="preserve"><value>Remove the filter {0}</value></data>
   <data name="role_change.period_invalid" xml:space="preserve"><value>Choose the last 7, 30 or 90 days, or all time.</value></data>
-  <data name="Users.Dialog.Title" xml:space="preserve"><value>Roles of {0}</value></data>
-  <data name="Users.Dialog.Help" xml:space="preserve"><value>A user can hold several roles; their permissions add up. The user's menu changes on their next page load.</value></data>
-  <data name="Users.Saved" xml:space="preserve"><value>Roles of {0} saved.</value></data>
+  <data name="Users.Dialog.Title" xml:space="preserve"><value>Access of {0}</value></data>
+  <data name="Users.Dialog.Help" xml:space="preserve"><value>A user can hold several roles; their permissions add up. The user's menu changes on their next page load; a new tenant reaches them within 15 minutes.</value></data>
+  <data name="Users.Dialog.RolesSaved" xml:space="preserve"><value>Roles of {0} saved.</value></data>
+  <data name="Users.Saved" xml:space="preserve"><value>Access of {0} saved.</value></data>
   <data name="AccountStatus.Pending" xml:space="preserve"><value>Pending</value></data>
   <data name="AccountStatus.Active" xml:space="preserve"><value>Active</value></data>
   <data name="role.name_invalid" xml:space="preserve"><value>Use 2 to 50 characters.</value></data>
@@ -267,6 +276,7 @@
   <data name="role_assignment.role_unknown" xml:space="preserve"><value>One of the roles no longer exists. Reload the page and try again.</value></data>
   <data name="role_assignment.last_manager" xml:space="preserve"><value>This would leave nobody able to manage roles. Give that permission to another active user first.</value></data>
   <data name="user.not_found" xml:space="preserve"><value>This user no longer exists.</value></data>
+  <data name="user.tenant_invalid" xml:space="preserve"><value>The tenant id is not valid. Paste the id of a tenant, or leave the field empty.</value></data>
   <data name="Gallery.RowActions.DeleteDisabledReason" xml:space="preserve"><value>Cannot be deleted while in use</value></data>
   <data name="registration.age_declaration_required" xml:space="preserve"><value>You must be 18 or older to create an account.</value></data>
   <data name="registration.consent_required" xml:space="preserve"><value>Accept the terms of use and the privacy policy.</value></data>

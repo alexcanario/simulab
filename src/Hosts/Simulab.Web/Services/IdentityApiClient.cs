@@ -322,7 +322,9 @@ public sealed class IdentityApiClient(HttpClient http, VisitorContext visitor, I
 
     /// <summary>F-150, UC2: the user's tenant afterwards; null clears it.</summary>
     public Task<ApiResult<UserSummaryResponse>> SetUserTenantAsync(string accessToken, Guid userId, Guid? tenantId, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        SendAsync<UserSummaryResponse>(
+            () => Authorized(WithJson(HttpMethod.Put, $"{Base}/users/{userId}/tenant", new SetUserTenantRequest(tenantId)), accessToken),
+            cancellationToken);
 
     private static HttpRequestMessage WithJson<T>(HttpMethod method, string route, T body) =>
         new(method, route) { Content = JsonContent.Create(body, options: AppJson.Options) };
