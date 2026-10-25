@@ -116,6 +116,8 @@ Tests locked: 95b415ecc68cb4b9ee901db4474986ee52f63801 (4 files); unlocks: 0
 - 2026-10-25 — Exception to ADR-0005 (a module never touches another module's tables): this seed migration reads `catalog.exam_editions`, `catalog.topics`, `catalog.subjects` and `catalog.notice_subjects` read-only, at migration time only, inside a `DO` block guarded by `to_regclass`, because BR3 and BR4 cannot be met otherwise; the Api migrates the catalog before the question bank, and a database without the catalog schema (the QuestionBank migration tests) skips the seed. Option A of the build stop, owner, change note v2. asked
 - 2026-10-25 — Build: the design passes of step 4b are skipped: no project, API contract, message between modules or schema change (a data migration and a start-up step).
 - 2026-10-25: plan — 1 seed migration skeleton, the 60 questions, base text and Q47 annulment inside one guarded `DO` block → AC1, AC2, AC3, AC4, AC5; 2 guards and lookups (edition holds questions or is deleted, no catalog schema, topic under another id or deleted) → AC6, AC7; 3 `Down` that keeps what a curator changed → AC10; 4 image rows in the migration plus the embedded PNGs written at Api start-up → AC8, AC9; 5 existing suites that count or delete seeded data adjusted → affected tests green, AC11, AC12; 6 flow page `images-in-questions.md` → `techdocs.js check`; 7 gate, coverage, scan, validation script → `agile gate GREEN`
+- 2026-10-25: tests unlocked (owner: `Migrate_ADeletedTopic_SkipsItsQuestionsAndSeedsTheOthers` ordered the paper numbers by their text cast; it now orders by the integer column)
+- 2026-10-25 — Build: the seeded image files are written only when the migrations run at start (inside `Database:ApplyMigrationsOnStart`, which staging sets), behind `QuestionBank:SeedImagesOnStart` (on by default, off in the shared test host so the image tests keep counting only their own files); a storage that cannot be reached is logged and never stops the start. Question 13's spreadsheet, an image in the paper, is a table in the statement HTML. `Down` keeps a question whose row was updated, not only one with a later version (an unpublish makes no version).
 
 ## Out of scope
 - The essay question of the paper — F-163.
@@ -209,3 +211,5 @@ Proposed at refinement and approved by the owner on 2026-10-25. Answer key: book
 - 2026-10-25 blocked — false premise: seed reads catalog tables, ADR-0005
 - 2026-10-25 change — v2: catalog read-only exception to ADR-0005, PNG images
 - 2026-10-25 blocked — test wrong: ORDER BY sorts the text cast in Migrate_ADeletedTopic
+- 2026-10-25 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 1 red
+- 2026-10-25 blocked — test wrong: owner: Migrate_ADeletedTopic orders the paper numbers as text; order by the integer column

@@ -103,7 +103,7 @@ public sealed class SeedManausGuardQuestionsMigrationTests
 
         var skipped = SeedManausGuardQuestionsTests.Expected.Where(row => row.Topic == 6).Select(row => row.Number).ToList();
         skipped.Should().Equal([7]);
-        var seeded = (await database.ValuesAsync($"SELECT paper_number::text FROM question_bank.questions WHERE exam_edition_id = '{Manaus}' ORDER BY paper_number"))
+        var seeded = (await database.ValuesAsync($"SELECT paper_number::text FROM question_bank.questions WHERE exam_edition_id = '{Manaus}' ORDER BY question_bank.questions.paper_number"))
             .Select(int.Parse).ToList();
         seeded.Should().Equal(SeedManausGuardQuestionsTests.Expected.Select(row => row.Number).Except(skipped));
         (await database.CountAsync($"SELECT count(*) FROM question_bank.question_options WHERE question_id = '{SeedManausGuardQuestionsTests.QuestionId(7)}'"))
