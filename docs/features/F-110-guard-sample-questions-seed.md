@@ -3,7 +3,7 @@ feature: F-110
 epic: Question bank
 status: approved
 board: 156
-version: 1
+version: 2
 ---
 # Sample questions of the municipal guard editions
 
@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: approved (2026-10-25)
-- Stopped at: Approved by the owner on 2026-10-25
-- Next action: /agile:build F-110
+- Stopped at: Change note v2 approved (catalog read-only exception, PNG images)
+- Next action: /agile:build F-110 resumes at step 3b
 - Waiting on: nothing
 
 ## Summary
@@ -40,7 +40,7 @@ Verified on 2026-10-25 in this worktree (branch from `main` at `0342c69`, which 
 - `question_options`: `position` (0 = A), `is_correct`, `text_html`. A published single-choice question has 2 to 5 options and exactly one correct (`QuestionRules`, `SingleChoiceKey`).
 - `question_versions`: version 1 is written at publish with the options as JSON; annulment adds a version with `annulled = true` and a reason and sets the status `Annulled`, only from `Published` (`Question.cs:132`).
 - `base_texts`: title, normalized title, `text_html`. The paper has one base text ("Calma, gente", questions 01 to 08); the excerpts of questions 15, 18 and 19 are part of their statements.
-- Images (F-103): row `question_images` (blob name, content type, size, owner kind and id); blob `question-images/<guid>` in the private container `documents` through `IFileStorage`; HTML `<img src="/question-images/<id>" alt="...">`. A row with no owner is swept after 24 hours (`QuestionImageSweep`). The paper holds three content images: two cartograms (question 16) and one climogram (question 17), JPEG, 28 to 43 KB.
+- Images (F-103): row `question_images` (blob name, content type, size, owner kind and id); blob `question-images/<guid>` in the private container `documents` through `IFileStorage`; HTML `<img src="/question-images/<id>" alt="...">`. A row with no owner is swept after 24 hours (`QuestionImageSweep`). The paper holds three content images: two cartograms (question 16) and one climogram (question 17), PNG, 119 to 144 KB: `img/...prova.pdf-6-0.png` (cartogram 1, GDP per capita), `img/...prova.pdf-6-2.png` (cartogram 2, infant mortality) and `questao 17, imagem 1.png` (climogram), checked against the paper pages (change note v2).
 - Sanitizer allow-list (`QuestionHtmlSanitizer`): p, br, strong, b, em, i, u, s, sub, sup, ul, ol, li, blockquote, table parts, a, img.
 - Startup seeding: `SeedAdmin` is called from `Simulab.Api/Program.cs:183` after the migrations; QuestionBank has no seeder. Staging applies migrations at start (`AzureDeployment.cs:158`).
 - `QuestionType` already holds `Essay` (F-109), but the essay of this paper stays out (D-6, decision of 2026-10-25).
@@ -54,12 +54,12 @@ Verified on 2026-10-25 in this worktree (branch from `main` at `0342c69`, which 
 ## Business rules
 - BR1 The seed is one data migration of the `question_bank` schema. It runs once per database, like any migration (F-37 BR1, F-78 BR1), in every environment, staging included.
 - BR2 The seed writes the questions of `## Question classification`, booklet type 1, with `paper_number` = the question number, `content_language` `pt-BR`, the Manaus 2026 edition, the listed notice subject and topic, four options A to D and the listed key as the only correct option. All rows are global (`TenantId` null), with fixed ids and frozen literals, the derived columns included (`statement_text`, `normalized_statement`, the base text's normalized title); a test proves every literal equals what the domain computes today and that the HTML is already what the sanitizer returns.
-- BR3 The whole seed is skipped when the Manaus 2026 edition is missing or deleted, or already holds at least one question, live or deleted (decision of 2026-10-25; like F-78 BR3).
-- BR4 A topic is found by its seeded id, then by normalized name within its subject (F-51 BR6). A question whose topic is not found, or is deleted, is skipped; the others are seeded. A notice subject is found by its seeded id, then by the edition and normalized label; when not found, the question is seeded with no notice subject.
+- BR3 The whole seed is skipped when the Manaus 2026 edition is missing or deleted, or already holds at least one question, live or deleted (decision of 2026-10-25; like F-78 BR3), or when the database has no `catalog` schema (the check reads `catalog.exam_editions` read-only, guarded by `to_regclass`; change note v2).
+- BR4 A topic is found by its seeded id, then by normalized name within its subject (F-51 BR6). A question whose topic is not found, or is deleted, is skipped; the others are seeded. A notice subject is found by its seeded id, then by the edition and normalized label; when not found, the question is seeded with no notice subject. The lookups read `catalog.topics`, `catalog.subjects` and `catalog.notice_subjects` read-only, inside the same guard; this migration is the one exception to ADR-0005's rule, limited to reading (change note v2).
 - BR5 Every seeded question is `Published` with its version 1, as `PublishQuestionHandler` writes it; no review entry is written (decision of 2026-10-25).
 - BR6 Question 47 is published with key D and then annulled: version 2 has `annulled = true`, `answer_key_changed = false` and the reason "Anulada pela banca no gabarito definitivo."; its status is `Annulled` (F-101).
 - BR7 The base text "Calma, gente" (Ivan Ângelo, Veja São Paulo, 10/09/2003) is one `base_texts` row, linked to questions 01 to 08; their versions copy its HTML (F-102 BR4).
-- BR8 The three images are `question_images` rows with fixed ids, owned by their question (`owner_kind` `Question`), so the sweep never removes them, each with its alternative text. Their files are embedded in the Api and written to `IFileStorage` at Api start-up, right after the migrations, when the row exists and is live and the blob is missing; an existing blob is never overwritten. A failed write is logged and tried again at the next start.
+- BR8 The three images are `question_images` rows with fixed ids, owned by their question (`owner_kind` `Question`), so the sweep never removes them, each with its alternative text and content type `image/png`. Their files are embedded in the Api and written to `IFileStorage` at Api start-up, right after the migrations, when the row exists and is live and the blob is missing; an existing blob is never overwritten. A failed write is logged and tried again at the next start.
 - BR9 The seed never updates a row: a curator's later edit, unpublish, annulment or delete stays. `Down` removes the seeded rows by id when no curator has changed them since (no version above the seeded ones); otherwise it leaves that question.
 - BR10 Nothing else is seeded: no essay question, no explanation, no difficulty, no other booklet type, no catalog row.
 
@@ -72,7 +72,7 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 - AC3 Given the seeded database, then every question except 47 is `Published` with exactly one version, number 1, whose options equal the question's; and no review entry exists for them. (BR5)
 - AC4 Given the seeded database, then question 47 is `Annulled`, version 1 holds key D, version 2 has `annulled = true`, `answer_key_changed = false` and the listed reason. (UC3, BR6)
 - AC5 Given the seeded database, then questions 01 to 08 point at one base text "Calma, gente", and their versions hold its HTML. (UC1, BR7)
-- AC6 Given a database where the Manaus edition already holds one question typed by a curator before the seed migration, when it runs, then no seeded question is written and the migration succeeds; the same when the edition is soft-deleted. (BR3)
+- AC6 Given a database where the Manaus edition already holds one question typed by a curator before the seed migration, when it runs, then no seeded question is written and the migration succeeds; the same when the edition is soft-deleted, and when the database has no `catalog` schema. (BR3)
 - AC7 Given a database where a topic of `## Question classification` exists under another id, the questions of that topic point at it; given a soft-deleted topic, its questions are skipped and the others seeded. (BR4)
 - AC8 Given the seeded database, then the three image rows exist with their fixed ids, owned by questions 16 and 17, and the sweep run 25 hours later leaves them. (UC2, BR8)
 - AC9 Given an Api start-up where the image rows exist and the blobs do not, then the three blobs are written with the embedded bytes; on a second start, nothing is written; when an image row is deleted, its blob is not written. (BR8)
@@ -94,6 +94,7 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 - 2026-10-25 — Technical: the image bytes come from the files the owner already extracted from the paper PDF (folder `img/` and `questao 17, imagem 1.png` beside the paper), checked against the paper pages, and are committed as embedded resources of `Simulab.QuestionBank.Infrastructure`; the seeder runs on every start, since three existence checks are cheap and a failed write retries by itself.
 - 2026-10-25 — Technical: fixed ids follow `0198f370-<group>-7000-8000-<number>` with new groups 10 (questions), 11 (options), 12 (versions), 13 (base texts), 14 (images).
 - 2026-10-25 — Technical: a missing topic skips only its question (BR4), the way F-78 BR4 skips a missing mapping target.
+- 2026-10-25 — Exception to ADR-0005 (a module never touches another module's tables): this seed migration reads `catalog.exam_editions`, `catalog.topics`, `catalog.subjects` and `catalog.notice_subjects` read-only, at migration time only, inside a `DO` block guarded by `to_regclass`, because BR3 and BR4 cannot be met otherwise; the Api migrates the catalog before the question bank, and a database without the catalog schema (the QuestionBank migration tests) skips the seed. Option A of the build stop, owner, change note v2. asked
 
 ## Out of scope
 - The essay question of the paper — F-163.
@@ -107,6 +108,13 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 
 ## Open questions
 - (none)
+
+## Change notes
+### v2 — 2026-10-25
+- What: the seed migration reads the catalog schema read-only (edition, subjects, topics, notice subjects) inside a `DO` block guarded by `to_regclass`, and skips the whole seed when the catalog schema is missing; recorded as the one exception to ADR-0005's rule. The images are PNG (119 to 144 KB), content type `image/png`, from the three files named in `## What exists`.
+- Why: the build found that BR3 and BR4 need a read of the catalog tables, which ADR-0005 forbids, and that the QuestionBank migration tests migrate only the `question_bank` schema, so an unguarded read fails with 42P01; the extracted images are PNG, not JPEG.
+- Affected: What exists (images), BR3, BR4, BR8, AC6; other criteria unchanged.
+- Re-approved: 2026-10-25
 
 ## Question classification
 Proposed at refinement and approved by the owner on 2026-10-25. Answer key: booklet type 1 (white), final; question 47 is `#` (annulled) and is seeded with key D before its annulment (BR6). Notice subject = the Manaus 2026 notice subject of F-78 the question falls under. `?` marks a row with no close topic in the F-51 taxonomy.
@@ -177,3 +185,5 @@ Proposed at refinement and approved by the owner on 2026-10-25. Answer key: book
 ## Events
 
 - 2026-10-25 question — asked 8, from context 1
+- 2026-10-25 blocked — false premise: seed reads catalog tables, ADR-0005
+- 2026-10-25 change — v2: catalog read-only exception to ADR-0005, PNG images
