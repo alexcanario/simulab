@@ -1,7 +1,7 @@
 ---
 title: Put images in questions
 summary: How a curator inserts, removes and sees a picture in a statement, an option or a base text, what the Api stores and refuses, and when a picture's file is deleted.
-items: [F-103]
+items: [F-103, F-110]
 ---
 # Put images in questions
 
@@ -18,6 +18,7 @@ A curator holding `questions.manage` writes a statement or an option at `/admin/
 5. A picture the saved text no longer names is released: when no stored version of the owner holds its id (for a base text, no version of any question), the row is soft-deleted in the save and the file is deleted after the commit. A published question's earlier version keeps pointing at it, so the file stays.
 6. `GET /api/v1/question-bank/images/{id}` streams the file to a holder of `questions.manage` or `questions.review` (checked in the endpoint through `IPermissionQueryService`). The browser reaches it through the Web route `GET /question-images/{id}`, which calls the Api with the signed-in user's token. Neither answer carries a storage address.
 7. Every hour a hosted service of the module (`QuestionImageSweepWorker`, switch `QuestionBank:ImageSweepEnabled`) deletes the pending images older than 24 hours: the file first, then the row.
+8. Seeded images (F-110): the data migration `SeedManausGuardQuestions` writes the rows of the three pictures of the Manaus 2026 paper with fixed ids, already owned by questions 16 and 17, so the sweep never sees them. A migration cannot store a file, so the PNG files are embedded in `Simulab.QuestionBank.Infrastructure` (`Images/Seed/<image id>.png`) and `SeedQuestionImageFiles` writes them right after the migrations of the Api start (switch `QuestionBank:SeedImagesOnStart`, on by default, off in the shared test host): only for a live row whose blob is missing, never over an existing blob. A storage that fails is logged and the file waits for the next start.
 
 ```mermaid
 flowchart TD

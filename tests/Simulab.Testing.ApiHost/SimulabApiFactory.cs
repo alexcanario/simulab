@@ -57,6 +57,8 @@ public class SimulabApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Jobs:WorkerEnabled", "false");
         // F-103 BR11: nor does the question image sweep run by the clock; a test calls it itself (AC9).
         builder.UseSetting("QuestionBank:ImageSweepEnabled", "false");
+        // F-110 BR8: nor are the files of the seeded images written at start; a test that is about them turns it on (AC9).
+        builder.UseSetting("QuestionBank:SeedImagesOnStart", "false");
         builder.ConfigureAppConfiguration(configuration =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
