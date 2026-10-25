@@ -1,7 +1,7 @@
 ---
 feature: F-110
 epic: Question bank
-status: building
+status: validating
 board: 156
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-25)
-- Stopped at: Seed built; 16 of 17 locked tests green; a locked test orders paper numbers as text
-- Next action: Owner answers the unlock card, then gate, coverage, scan, validation script
+- Status: validating (2026-10-25)
+- Stopped at: Built and checked on screen; validation script written
+- Next action: Owner follows ## Validation script, then /agile:ship F-110
 - Waiting on: nothing
 
 ## Summary
@@ -99,6 +99,7 @@ Tests locked: 3f3549edf71ed5f51932bfef849b3a33a38ac344 (4 files); unlocks: 1
 | AC10 | `SeedManausGuardQuestionsRollbackTests.ACuratorsEdit_StaysWhenMigratingAgain_AndTheRollbackRemovesOnlyTheUntouchedRows` |
 | AC11 | `SeedManausGuardQuestionsTests.Migrate_ApiHost_ServesTheOpenApiDocument_AndHasNoPendingModelChange`; `Simulab.ArchitectureTests` (whole project) |
 | AC12 | `ResourceParityTests.Every_key_exists_in_every_language` (no resource changed) |
+| On screen only | validation steps 3 to 7 |
 
 ## Decisions
 - 2026-10-24 — The source is the Manaus 2026 paper, booklet type 1, and its final answer key, free to use — D-6. confirmed: D-6
@@ -118,6 +119,9 @@ Tests locked: 3f3549edf71ed5f51932bfef849b3a33a38ac344 (4 files); unlocks: 1
 - 2026-10-25: plan — 1 seed migration skeleton, the 60 questions, base text and Q47 annulment inside one guarded `DO` block → AC1, AC2, AC3, AC4, AC5; 2 guards and lookups (edition holds questions or is deleted, no catalog schema, topic under another id or deleted) → AC6, AC7; 3 `Down` that keeps what a curator changed → AC10; 4 image rows in the migration plus the embedded PNGs written at Api start-up → AC8, AC9; 5 existing suites that count or delete seeded data adjusted → affected tests green, AC11, AC12; 6 flow page `images-in-questions.md` → `techdocs.js check`; 7 gate, coverage, scan, validation script → `agile gate GREEN`
 - 2026-10-25: tests unlocked (owner: `Migrate_ADeletedTopic_SkipsItsQuestionsAndSeedsTheOthers` ordered the paper numbers by their text cast; it now orders by the integer column)
 - 2026-10-25 — Build: the seeded image files are written only when the migrations run at start (inside `Database:ApplyMigrationsOnStart`, which staging sets), behind `QuestionBank:SeedImagesOnStart` (on by default, off in the shared test host so the image tests keep counting only their own files); a storage that cannot be reached is logged and never stops the start. Question 13's spreadsheet, an image in the paper, is a table in the statement HTML. `Down` keeps a question whose row was updated, not only one with a later version (an unpublish makes no version).
+- 2026-10-25 — Screen check: the worktree's app host on its own database `simulab_f110`; the three seeded blobs land in the local Azurite volume shared by the worktrees (new fixed names, never overwritten). Owner's yes, 2026-10-25. asked
+- 2026-10-25 — Reuse: the F-78 seed pattern (`SeedGuardNoticeSubjects`: fixed ids, frozen literals, lookup by id then normalized name), `IQuestionImageFiles` and the `InMemoryQuestionImageFiles` fake of F-103, the `QuestionBank:ImageSweepEnabled` switch pattern for `QuestionBank:SeedImagesOnStart`, and `QuestionHtmlSanitizer`/`ComparableText` as the oracle of the frozen literals.
+- 2026-10-25 — Shortcuts: none.
 
 ## Out of scope
 - The essay question of the paper — F-163.
@@ -138,6 +142,60 @@ Tests locked: 3f3549edf71ed5f51932bfef849b3a33a38ac344 (4 files); unlocks: 1
 - Why: the build found that BR3 and BR4 need a read of the catalog tables, which ADR-0005 forbids, and that the QuestionBank migration tests migrate only the `question_bank` schema, so an unguarded read fails with 42P01; the extracted images are PNG, not JPEG.
 - Affected: What exists (images), BR3, BR4, BR8, AC6; other criteria unchanged.
 - Re-approved: 2026-10-25
+
+## Validation script
+
+### English
+Needed to validate: the local app host — the owner; not started, step 1 starts it from this worktree on its own database. The paper to compare with is in OneDrive `Simulab/Guarda Municipal/Manaus/2026`.
+
+1. Stop any app host you have open (other worktrees use the same ports), then start this worktree's app host on its own database `simulab_f110` (the seed lands only there; the three image files go to the local Azurite shared by the worktrees, under new names), from the worktree folder `D:\wt\simulab\f-110-guard-sample`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f110 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f110"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Expected: the line `Dashboard:` with a link; the site answers at https://localhost:7125. To repeat, press Ctrl+C and run the same command.
+2. [ ] Open https://localhost:7125 and sign in as `admin@simulab.local` (the development password of `appsettings.Development.json`); if the page "Our documents changed" appears, click "Accept and continue".
+3. The questions of the edition:
+   - [ ] 3.1 In the sidebar (menu lateral esquerdo) click Content > Questions. In the filter EDITION type Guarda and pick "CONSULPLAN · Guarda Municipal · 2026" (Técnico Municipal I - Guarda Municipal): the count under the table reads "1-25 of 60", every row's Source reads "CONSULPLAN · Guarda Municipal · 2026" with its "Question n".
+   - [ ] 3.2 The row of Question 47 shows the status Annulled; every other row shows Published.
+4. Base text and images:
+   - [ ] 4.1 Open Question 1 (Edit on its row): the Summary aside (painel lateral) reads Base text "Calma, gente", Topic "Interpretação de textos"; open the text in the Base text card and compare its first paragraph with page 2 of the paper.
+   - [ ] 4.2 Open Question 16: the statement shows the two cartograms (GDP per capita, infant mortality), each with its source line. Open Question 17: the climogram.
+   - [ ] 4.3 Open Question 13: the statement shows the spreadsheet as a table (Viatura, Turno, Ocorrências, Status) and option A reads `=SE(C2>0;"Com atendimento";"Sem atendimento")`, marked correct.
+5. [ ] Annulment: open Question 47: the status is Annulled, and the History card lists version 2 "Annulled" with the reason "Anulada pela banca no gabarito definitivo." and version 1 "First publication"; the eye (View) on version 1 opens it; click "Show answer": option D is the key.
+6. [ ] Sample against the paper: open Questions 3, 7, 35 and 58 and compare each statement and its options with the paper (booklet type 1): the underlined words of 3 and 7, the four "( )" lines of 35 and 58, and the marked key (3 B, 7 A, 35 D, 58 B).
+7. [ ] Language: in the app bar (barra superior) click the globe and pick Português (Brasil): the labels of the list and the form change; the statements and options stay as in the paper. Switch back to English.
+8. [ ] Keyboard only: on Content > Questions press Tab until the Edit action of the first row and press Enter: the question opens.
+
+### pt-BR
+Necessário para validar: o app host local — o dono; não iniciado, o passo 1 sobe a partir deste worktree no banco próprio. A prova para comparar está no OneDrive `Simulab/Guarda Municipal/Manaus/2026`.
+
+1. Pare qualquer app host aberto (outros worktrees usam as mesmas portas) e suba o app host deste worktree no banco próprio `simulab_f110` (o seed cai só nele; os três arquivos de imagem vão para o Azurite local compartilhado pelos worktrees, com nomes novos), a partir da pasta do worktree `D:\wt\simulab\f-110-guard-sample`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f110 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f110"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Esperado: a linha `Dashboard:` com um link; o site responde em https://localhost:7125. Para repetir, Ctrl+C e o mesmo comando.
+2. [ ] Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento do `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue".
+3. As questões da edição:
+   - [ ] 3.1 No menu lateral esquerdo clique em Content > Questions. No filtro EDITION digite Guarda e escolha "CONSULPLAN · Guarda Municipal · 2026" (Técnico Municipal I - Guarda Municipal): a contagem sob a tabela diz "1-25 of 60", e a coluna Source de cada linha diz "CONSULPLAN · Guarda Municipal · 2026" com o seu "Question n".
+   - [ ] 3.2 A linha da Question 47 mostra o status Annulled; todas as outras mostram Published.
+4. Texto-base e imagens:
+   - [ ] 4.1 Abra a Question 1 (Edit na linha): o painel lateral Summary diz Base text "Calma, gente", Topic "Interpretação de textos"; abra o texto no cartão Base text e compare o primeiro parágrafo com a página 2 da prova.
+   - [ ] 4.2 Abra a Question 16: o enunciado mostra os dois cartogramas (PIB per capita, mortalidade infantil), cada um com a linha da fonte. Abra a Question 17: o climograma.
+   - [ ] 4.3 Abra a Question 13: o enunciado mostra a planilha como tabela (Viatura, Turno, Ocorrências, Status) e a opção A diz `=SE(C2>0;"Com atendimento";"Sem atendimento")`, marcada como correta.
+5. [ ] Anulação: abra a Question 47: o status é Annulled, e o cartão History lista a versão 2 "Annulled" com o motivo "Anulada pela banca no gabarito definitivo." e a versão 1 "First publication"; o olho (View) da versão 1 a abre; clique em "Show answer": a opção D é a chave.
+6. [ ] Amostra contra a prova: abra as Questions 3, 7, 35 e 58 e compare cada enunciado e suas opções com a prova (caderno tipo 1): as palavras sublinhadas da 3 e da 7, as quatro linhas "( )" da 35 e da 58, e a chave marcada (3 B, 7 A, 35 D, 58 B).
+7. [ ] Idioma: na barra superior clique no globo e escolha Português (Brasil): os rótulos da lista e do formulário mudam; enunciados e opções ficam como na prova. Volte para English.
+8. [ ] Só teclado: em Content > Questions aperte Tab até a ação Edit da primeira linha e aperte Enter: a questão abre.
 
 ## Question classification
 Proposed at refinement and approved by the owner on 2026-10-25. Answer key: booklet type 1 (white), final; question 47 is `#` (annulled) and is seeded with key D before its annulment (BR6). Notice subject = the Manaus 2026 notice subject of F-78 the question falls under. `?` marks a row with no close topic in the F-51 taxonomy.
