@@ -173,3 +173,7 @@ Proposed at refinement (2026-10-25), for the owner to review. Answer key: bookle
 | 58 | Legislação específica | Direito Administrativo › Legislação administrativa | B | access to information; true/false items inside multiple choice |
 | 59 | Legislação específica | Direito Administrativo › Legislação administrativa | B | administrative procedure |
 | 60 | Legislação específica | Legislação Municipal › Estatuto dos Funcionários Públicos Municipais | B | Lei Municipal 1.118/1971 |
+
+## Events
+
+- 2026-10-25 question — asked 8, from context 1
