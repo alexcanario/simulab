@@ -3,7 +3,7 @@ feature: F-150
 epic: Partner tenants
 status: approved
 board: 208
-version: 1
+version: 2
 ---
 # Grader role and user-to-tenant link
 
@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: approved (2026-10-25)
-- Stopped at: Approved by the owner on 2026-10-25; no code written yet.
-- Next action: Run /agile:build F-150.
+- Stopped at: Change note v2 approved (tenant filter removed from User only, AC23); no code written yet
+- Next action: Run /agile:build F-150 --worktree (F-110 is validating in its own worktree)
 - Waiting on: nothing
 
 ## Summary
@@ -42,7 +42,7 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 - BR1 `IdentityRoles.Grader = "Grader"` joins `IdentityRoles.All`. The startup seed creates it as a system role, like Student, Curator and Admin: it cannot be renamed or deleted, only its permissions change (F-9 BR1, BR2). A custom role already named `Grader` is marked as a system role by the same seed.
 - BR2 The permission `questions.grade` (module `questions`) is declared in `QuestionBankPermissions` (it joins `All`), in the `PermissionCatalog` of `QuestionBankModule` with the initial grant to `Grader`, and in `WebPermissions`. The name and the grant ship in the same commit: the grant is made only in the start that creates the permission row, and a later start never gives it back. Admin holds every permission (F-6 BR3).
 - BR3 Nothing checks `questions.grade` in this item: no route requires it and the `Grader` role has no menu item. A user whose only role is `Grader` sees what a Student sees until F-151 adds the queue.
-- BR4 A user's tenant is the nullable `User.TenantId`. Any account that is not deleted can have one (student, curator, grader, admin). There is no `Tenant` entity: any non-empty GUID is accepted, and none clears it. The mechanism stays dormant: `ICurrentTenant` stays `NoTenant`, no query filter changes and every row stays global (project rule "Data"; F-162).
+- BR4 A user's tenant is the nullable `User.TenantId`. Any account that is not deleted can have one (student, curator, grader, admin). There is no `Tenant` entity: any non-empty GUID is accepted, and none clears it. The mechanism stays dormant: `ICurrentTenant` stays `NoTenant` and no query filter is woken (project rule "Data"; F-162). The `User` entity has no tenant filter: a user's `TenantId` is an attribute of the account, not a partition (v2). Whether a tenant-scoped request hides users is decided in F-162.
 - BR5 Only `PUT /api/v1/identity/users/{id}/tenant` changes it, under the permission `identity.roles.manage`. The request holds `TenantId` and nothing else. Unknown, deleted or erased user: 404 `user.not_found`. The empty GUID: 400 `user.tenant_invalid`. The value already stored: 200, nothing written, no audit entry (F-14 BR3). Roles, status and every other column stay as they were.
 - BR6 A change writes one role-change entry (F-14) with the new action `UserTenantChanged`, in the same transaction as the change: `TargetUserId` is the user; `Removed` holds one item with the former tenant (when there was one) and `Added` one item with the new tenant (when there is one), each item with the GUID as key and name and `IsSystem` false; `RoleIds` is empty. The entry rolls back with the change. No schema column is added: the action is stored as text; the column comment is brought up to date if it lists the values.
 - BR7 The token carries the stored tenant: the claim `tenant_id` is built from `User.TenantId` at every sign-in and refresh (`TokenEndpoints`), empty when none. A change reaches the user with their next token (the access token lives 15 minutes), as a role change does; this item adds no revocation. F-151 must not treat the claim as instant.
@@ -137,6 +137,7 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 - AC20 Given the users list, then it has a Tenant column with the first 8 characters of the id and a dash when there is none.
 - AC21 Given the least-privileged role that uses the screen (a custom role holding only `identity.roles.manage`), when its holder opens `/admin/users` and edits roles and tenant, then every lookup of the dialog answers 200.
 - AC22 All new texts appear in every locale of `UI locales:`.
+- AC23 Given a user with a tenant, when the user signs in and refreshes the token, then both succeed and the user is listed in `/admin/users` (v2).
 
 ## Criterion → test
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
@@ -155,10 +156,12 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 - 2026-10-25 — The audit entry reuses the items of `RoleChange` for the tenant ids and adds no column — the action is stored as text, so only a new enum value and, if the column comment lists them, a comment migration — Claude (technical)
 - 2026-10-25 — An erased account keeps its `TenantId` — the id is the pseudonym of an organization, not of a person (ADR-0001 #9) — Claude (technical)
 - 2026-10-25 — Retention and legal basis of the tenant id (contract) are written in `## Security` for the owner to read: ADR-0001 has no answer for them — Claude (technical)
+- 2026-10-25 — The tenant query filter is removed from the `User` entity only (the soft-delete filter stays), a recorded exception to the project rule "do not remove the tenant filters": with `ICurrentTenant` = `NoTenant` a user with a tenant was hidden from sign-in (`FindByNameAsync`), refresh (`FindByIdAsync`) and the users list. The rule's sentence becomes "Do not remove the tenant filters (exception: the User entity, F-150)" in a rule commit on the main branch at the ship — change note v2, owner
+- 2026-10-25 — The unique email index `(TenantId, NormalizedEmail)` stays as it is: the sign-up check already looks the address up ignoring the tenant; F-162 revisits the index — change note v2, owner
 
 ## Out of scope
 - A `Tenant` entity, a partner registration screen and a tenant picker — the first partner brings them (epic Partner tenants).
-- Wiring `ICurrentTenant` to the claim and filtering any module by tenant, including what a curator with a tenant sees — F-162.
+- Wiring `ICurrentTenant` to the claim and filtering any module by tenant, including what a curator with a tenant sees and whether a tenant-scoped request hides users — F-162.
 - The correction queue and the grader's own visibility rule — F-151.
 - Revoking a user's tokens when the tenant changes — not decided; the 15-minute lag stays.
 - A menu item or page for the `Grader` — F-151.
@@ -168,6 +171,11 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 
 ## Change notes
 <!-- Added by /agile:change during build. Increase `version` in the header. -->
+### v2 — 2026-10-25
+- What: the tenant query filter is removed from the `User` entity only; BR4 rewritten; new AC23 (a user with a tenant signs in, refreshes and is listed); two `## Decisions` lines (the rule exception and the unique email index kept); `## Out of scope` names the open question for F-162.
+- Why: the build's premise check found the filter `user.TenantId == null || user.TenantId == CurrentTenantId` (`IdentityModuleDbContext.cs:91`); with `ICurrentTenant` = `NoTenant` a user whose `TenantId` is set disappears from `UserManager.FindByNameAsync` (`TokenEndpoints.cs:266`), `FindByIdAsync` (`TokenEndpoints.cs:373`) and the users list, so AC4, AC9 and AC20 could not pass.
+- Affected: BR4, AC23 (new), `## Decisions`, `## Out of scope`. Not affected: BR1–BR3, BR5–BR12, AC1–AC22, screens, wireframes, routes.
+- Re-approved by the owner: 2026-10-25.
 
 ## Validation script
 <!-- Written at the end of build. -->
@@ -175,6 +183,7 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 ## Events
 <!-- Written only by events.js. -->
 - 2026-10-25 question — asked 7, from context 2
+- 2026-10-25 change — v2: tenant filter removed from User only; BR4 rewritten; AC23 added
 
 ## Delivery
 <!-- Filled by /agile:ship. -->
