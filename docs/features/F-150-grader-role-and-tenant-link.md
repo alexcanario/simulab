@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-25)
-- Stopped at: Build started: status building, criterion table written
-- Next action: Design passes (system-design, architect), then the plan
+- Stopped at: Code done and committed (797ed10, 17666d6, e6eda84); affected tests green (Identity 580, Web 2646, Api 83, QuestionBank 840, architecture 301); screen checked through the app host
+- Next action: /agile:review F-150 (step 16, a door: permissions and tenant), then the security scan, the validation script and status validating
 - Waiting on: nothing
 
 ## Summary
