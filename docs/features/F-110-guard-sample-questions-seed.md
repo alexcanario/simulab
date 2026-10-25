@@ -83,7 +83,7 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 
 ## Criterion → test
 
-Tests locked: 95b415ecc68cb4b9ee901db4474986ee52f63801 (4 files); unlocks: 0
+Tests locked: 3f3549edf71ed5f51932bfef849b3a33a38ac344 (4 files); unlocks: 1
 
 | Criterion | Test |
 |---|---|
