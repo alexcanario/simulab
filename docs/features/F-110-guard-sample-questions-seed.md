@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-25)
-- Stopped at: Change note v2 approved (catalog read-only exception, PNG images)
-- Next action: /agile:build F-110 resumes at step 3b
+- Status: building (2026-10-25)
+- Stopped at: Seed built; 16 of 17 locked tests green; a locked test orders paper numbers as text
+- Next action: Owner answers the unlock card, then gate, coverage, scan, validation script
 - Waiting on: nothing
 
 ## Summary
@@ -208,3 +208,4 @@ Proposed at refinement and approved by the owner on 2026-10-25. Answer key: book
 - 2026-10-25 question — asked 8, from context 1
 - 2026-10-25 blocked — false premise: seed reads catalog tables, ADR-0005
 - 2026-10-25 change — v2: catalog read-only exception to ADR-0005, PNG images
+- 2026-10-25 blocked — test wrong: ORDER BY sorts the text cast in Migrate_ADeletedTopic
