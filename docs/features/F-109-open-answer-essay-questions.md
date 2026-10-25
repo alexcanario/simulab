@@ -1,13 +1,19 @@
 ---
 feature: F-109
 epic: Question bank
-status: validating
+status: done
 board: 155
 version: 1
 ---
 # Open-answer and essay questions
 
 Technical terms: [glossary](../glossary.md)
+
+## Resume here
+- Status: done (2026-10-25)
+- Stopped at: F-109 is delivered: the open-answer and essay types with their rubric, size limit, versions, form, preview and texts are on main (25ad823, app 1.20.0).
+- Next action: F-150 (the Grader role), F-151 (the correction queue) and F-152 (the suggested grade) can now be refined; they build on the rubric stored here.
+- Waiting on: nothing
 
 ## Summary
 The open-answer and essay question types with their rubric (criteria and maximum points). They are useful to students only once someone grades them. Source: epic Question bank (E-4), brief capability 3 and its open note "Essays and open answers"; Simulae `ConfigurationBase.cs` (T7, T8) as the import source.
@@ -317,3 +323,15 @@ Necessário para validar: o app host local — o dono; ainda não iniciado, o pa
 - 2026-10-24 test-fail — tests failed (Simulab.slnx): Simulab.QuestionBank.Tests.QuestionVersionRaceTests.Publish_WhenAnotherSaveTookTheNextNumbe, 1 red
 
 ## Delivery
+Gate time: 7 passes, 44 min 54 s — turn 1 (50 s), ship 4 (37 min 39 s), scan 2 (6 min 25 s); 1 red
+Usage: 12218.8k weighted (estimate) — refine 10% · build 65% · ship 7% · other 18% — agents 3% — context per turn 205k → 631k — 7 sessions, 425 turns
+
+- Branch: `feature/F-109` (never pushed; removed with its worktree `D:\wt\simulab\f-109-open-answer-essay`).
+- Merge: `25ad823` on `main` (`--no-ff`, board #155); app version 1.20.0 (1.19.0 → feature bump); `main` pushed to `origin` (it also carried 3 local docs commits that were ahead of the remote).
+- Tests: `gate.js ship` GREEN twice on the branch tree, the second after the version bump — 14 projects, 0 failures, 0 warnings (baseline 0 entries): QuestionBank 840 (new: 116 backend tests in 3 files), Web 2,633 (new: 83 across 4 files), Catalog 665, Identity 548, Architecture 301, Api 83. The QuestionBank project took 7 min 25 s in the gate (budget 2 min per integration project; it was 4 min 46 s alone before this item): a retro finding. Scan GREEN (2 medium findings in `tools/Simulab.DocGen`, older than the item); test lock `b3f16fa` unchanged, 1 unlock (owner, two lint warnings in the migration test).
+- Validated by the owner in the conversation ("validao", read as "validado", and `/agile:ship F-109`) on 2026-10-25; no box was ticked in the widget, so the evidence reads "not tested" for every path.
+- App manual: `docs/manual/pt-BR/questions.md` (the only live manual locale; `pt-PT` and `en` are frozen). Technical page: `docs/flows/open-answer-and-essay-questions.md`. Generated docs: `docs/architecture/QuestionBank/` and `docs/api/Simulab.Api.json`.
+- Glossary: 1 technical row added (`check constraint`); the business rows `Rubric` and `Rubric criterion` were added at the build.
+- Validation evidence: 0 of 15 tested (the owner confirmed the whole script in the conversation).
+- Shared test helper changed: `PostgresServer` starts the test PostgreSQL with `max_connections=500` (53300 in unrelated tests otherwise).
+- Left for the owner: four development containers (`simulab-postgres`, `simulab-redis`, `simulab-azurite`, `simulab-mailpit`) were started by the build's app host check and left running; the database `simulab_f109` stays on that server (drop it when convenient: `DROP DATABASE simulab_f109;`).
