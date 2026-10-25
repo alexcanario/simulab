@@ -84,4 +84,8 @@ public static class QuestionBankModule
     /// <summary>Applies this module's migrations. Development does it at start; a release does it from the pipeline.</summary>
     public static Task MigrateQuestionBankModuleAsync(this IServiceProvider services, CancellationToken cancellationToken = default) =>
         services.MigrateModuleAsync<QuestionBankModuleDbContext>(cancellationToken);
+
+    /// <summary>Writes the missing files of the seeded question images (F-110, BR8); the Api calls it after the migrations.</summary>
+    public static Task<int> WriteSeedQuestionImagesAsync(this IServiceProvider services, CancellationToken cancellationToken = default) =>
+        services.GetRequiredService<SeedQuestionImageFiles>().WriteMissingAsync(cancellationToken);
 }

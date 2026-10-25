@@ -82,6 +82,9 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 - On screen only (validation script): the questions list of Manaus 2026 shows 60 questions; question 01 shows the base text; question 16 shows two images; question 47 shows the annulment; a sample of statements matches the paper (UC1 to UC3).
 
 ## Criterion → test
+
+Tests locked: 95b415ecc68cb4b9ee901db4474986ee52f63801 (4 files); unlocks: 0
+
 | Criterion | Test |
 |---|---|
 | AC1 | `SeedManausGuardQuestionsTests.Migrate_EmptyDatabase_TheEditionHoldsExactlyTheClassifiedQuestionsWithTheirKeys` |
