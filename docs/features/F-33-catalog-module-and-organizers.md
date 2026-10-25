@@ -2,7 +2,7 @@
 feature: F-33
 epic: Assessment catalog
 status: done
-board: 752
+board: 223
 version: 2
 ---
 # Catalog module and organizers back office

@@ -2,7 +2,7 @@
 feature: F-37
 epic: Assessment catalog
 status: done
-board: 756
+board: 227
 version: 1
 ---
 # Catalog seed from Simulae

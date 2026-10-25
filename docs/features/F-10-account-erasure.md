@@ -2,7 +2,7 @@
 feature: F-10
 epic: Foundation and identity
 status: done
-board: 714
+board: 221
 version: 1
 ---
 # Account erasure
