@@ -37,7 +37,9 @@ public static class QuestionBankModule
                 // F-105 BR10: the curator is the person who reviews (brief, glossary); a role holding only this
                 // permission can do the whole review. Added in the same commit as the name, or a start that
                 // creates the row without the grant would never be fixed by a later one.
-                [QuestionBankPermissions.Review] = [IdentityRoles.Curator]
+                [QuestionBankPermissions.Review] = [IdentityRoles.Curator],
+                // F-150 BR2: the grader's permission, granted with its name for the same reason.
+                [QuestionBankPermissions.Grade] = [IdentityRoles.Grader]
             }));
 
         services.AddSingleton<QuestionHtmlSanitizer>();

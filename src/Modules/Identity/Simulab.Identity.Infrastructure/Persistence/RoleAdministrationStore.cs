@@ -74,7 +74,7 @@ public sealed class RoleAdministrationStore(IdentityModuleDbContext context, ILo
         context.Users.AnyAsync(user => user.Id == userId, cancellationToken);
 
     public Task<User?> FindUserAsync(Guid userId, CancellationToken cancellationToken = default) =>
-        throw new NotImplementedException();
+        context.Users.SingleOrDefaultAsync(user => user.Id == userId, cancellationToken);
 
     public Task<int> CountHoldersAsync(Guid roleId, CancellationToken cancellationToken = default) =>
         (from userRole in context.UserRoles

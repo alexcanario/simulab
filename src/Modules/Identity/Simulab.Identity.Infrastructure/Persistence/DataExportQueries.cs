@@ -23,7 +23,8 @@ public sealed class DataExportQueries(IdentityModuleDbContext context) : IDataEx
                 user.CreatedAt,
                 user.EmailVerifiedAt,
                 user.IsAdultDeclared,
-                user.Status.ToString()))
+                user.Status.ToString(),
+                user.TenantId))
             .SingleOrDefaultAsync(cancellationToken);
         if (account is null)
         {

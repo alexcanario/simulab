@@ -140,6 +140,9 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 - AC23 Given a user with a tenant, when the user signs in and refreshes the token, then both succeed and the user is listed in `/admin/users` (v2).
 
 ## Criterion → test
+
+Tests locked: 1f8d58fe8481b95e6bae57af129cef37a1f6788c (9 files); unlocks: 0
+
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
 | Criterion | Test |
 |---|---|
@@ -187,6 +190,9 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 - 2026-10-25: architect finding 3 dropped at the test phase — `User.AssignTenant` cannot return a `Result` with `user.tenant_invalid`: `Simulab.Identity.Domain` references only `SharedKernel`, and the code lives in `Contracts`; the handler refuses the empty GUID with the code, and `AssignTenant(Guid?)` guards it and returns whether the value changed
 - 2026-10-25: AC9 "empty when there is none" is a token with no `tenant_id` claim: OpenIddict drops a claim whose value is empty (seen at the test phase, `TenantClaimAsync` read null), so the test accepts null or empty and a standalone "empty claim" test was dropped (it tested nothing new)
 - 2026-10-25: two resource keys beyond the item's list — `Users.Saved` now says "Access of {0} saved." (the dialog saves roles and tenant) and the new `Users.Dialog.RolesSaved` ("Roles of {0} saved.") shows inside the dialog when the roles were saved and the tenant failed (BR11, AC19)
+- 2026-10-25: AC12 — a body whose `TenantId` is not a GUID answered 500 in the test host: in Development a minimal API throws `BadHttpRequestException` and `UseExceptionHandler` turned it into 500 (production answers 400 without throwing). The Api now sets `ExceptionHandlerOptions.StatusCodeSelector` to keep that exception's status, for every route — Claude (technical)
+- 2026-10-25: `FixEnumColumnDescriptionsMigrationTests` now migrates to its own migration, not to the latest: the F-150 migration rewrites the same `role_changes.action` comment — Claude (technical)
+- 2026-10-25: the pt-BR manual page (`users.md`, `role-history.md`) is written by `/agile:ship`, as the definition of done sets — plan step 7 keeps the flow page, the privacy register and the OpenAPI document
 - 2026-10-25: privacy — the tenant id is added to the Data fields of the `Account` and `Role changes` rows of `docs/privacy/data-processing-register.md`; the privacy policy gets no new version (a field of an existing category, no partner yet; a version comes with the first partner, F-162) — owner (architect 4)
 - 2026-10-25: Design coverage — scope (item v2, BR1–BR12, AC1–AC23), contracts (route group, error codes, `UserSummaryResponse` and `AccountDataResponse` callers, token claim, export), simplicity (lock, `RoleChange` reuse, dialog reuse), layout, rules, data; not checked: none
 - 2026-10-25: traps — T1 `TenantId` inside `SetUserRolesRequest`: breaks BR5 and ties the tenant to the last-manager refusal; T2 renewing the security stamp to push the tenant: ends every session (revocation is out of scope); T3 stamping the audit entry's own `TenantId`: hides it from global admins once F-162 wakes the filter

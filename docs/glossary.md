@@ -89,6 +89,8 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Estudante | Estudante | `Student` | Role: practices and follows progress | Papel: pratica e acompanha o progresso |
 | Curador | Curador | `Curator` | Role: imports, reviews, writes and publishes content | Papel: importa, revisa, escreve e publica conteúdo |
 | Administrador | Administrador | `Admin` | Role: manages catalog, users, roles, plans | Papel: gerencia catálogo, usuários, papéis e planos |
+| Corretor | Corretor | `Grader` | Role: signs in and grades essays and open answers; permission `questions.grade` (F-150) | Papel: entra e corrige redações e respostas abertas; permissão `questions.grade` (F-150) |
+| Tenant do usuário (organização parceira) | Tenant do utilizador (organização parceira) (?) | `User.TenantId` | The partner organization an account belongs to, by id; null for none. Not the Azure tenant (F-150) | A organização parceira a que uma conta pertence, pelo id; vazio quando não há. Não é o tenant do Azure (F-150) |
 | Papel / Permissão | Perfil / Permissão (?) | `Role` / `Permission` | RBAC | Controle de acesso por papéis (RBAC) |
 | Papel de sistema | Perfil de sistema (?) | `Role.IsSystem` | A seed role (Student, Curator, Admin): cannot be renamed or deleted, only its permissions change (F-9) | Um papel da carga inicial (Estudante, Curador, Administrador): não pode ser renomeado nem apagado, só suas permissões mudam (F-9) |
 | Atribuição de papel | Atribuição de perfil (?) | `UserRole` | A role given to a user; a user may hold several and gets the union of their permissions (F-9) | Um papel dado a um usuário; ele pode ter vários e recebe a união das permissões (F-9) |

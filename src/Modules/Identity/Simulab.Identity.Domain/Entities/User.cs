@@ -11,8 +11,11 @@ namespace Simulab.Identity.Domain.Entities;
 /// </summary>
 public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
 {
-    /// <summary>Null for global and B2C accounts. Dormant in v1 (ADR-0001, decision 7).</summary>
-    public Guid? TenantId { get; set; }
+    /// <summary>
+    /// The partner organization the account belongs to; null for global and B2C accounts. Set only through
+    /// <see cref="AssignTenant"/> (F-150). Nothing is filtered by it yet (ADR-0001, decision 7; F-162).
+    /// </summary>
+    public Guid? TenantId { get; private set; }
 
     public DateTimeOffset CreatedAt { get; set; }
     public Guid? CreatedBy { get; set; }
@@ -57,7 +60,21 @@ public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
     /// F-150 BR4: attaches the account to a tenant, or detaches it with null. Returns false when the value
     /// is already the stored one (BR5: nothing to write).
     /// </summary>
-    public bool AssignTenant(Guid? tenantId) => throw new NotImplementedException();
+    public bool AssignTenant(Guid? tenantId)
+    {
+        if (tenantId == Guid.Empty)
+        {
+            throw new ArgumentException("A tenant id is a non-empty GUID, or null for none.", nameof(tenantId));
+        }
+
+        if (tenantId == TenantId)
+        {
+            return false;
+        }
+
+        TenantId = tenantId;
+        return true;
+    }
 
     /// <summary>F-53 BR2: marks the account; the seed does it only when it creates the account.</summary>
     public void RequirePasswordChange() => MustChangePassword = true;

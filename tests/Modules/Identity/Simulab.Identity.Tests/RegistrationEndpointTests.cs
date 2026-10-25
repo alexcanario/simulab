@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.Identity.Infrastructure.Persistence;
-using Simulab.Persistence;
 
 namespace Simulab.Identity.Tests;
 
@@ -129,25 +128,23 @@ public sealed class RegistrationEndpointTests : IdentityApiTests
         var request = SignUpForm.Valid("b2b@exemplo.com");
         await PostAsync(client, Route, request, HttpStatusCode.Accepted);
 
-        // The row is moved to a tenant, which the tenant filter hides from the current (null) tenant.
+        // The row is moved to a tenant. Since F-150 the user entity has no tenant filter, so the row stays
+        // visible from the current (null) tenant - which is what keeps the address taken.
         await using (var scope = Factory.Services.CreateAsyncScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<IdentityModuleDbContext>();
             var user = await context.Users.SingleAsync(u => u.Email == request.Email);
-            user.TenantId = Guid.CreateVersion7();
+            user.AssignTenant(Guid.CreateVersion7()).Should().BeTrue();
             await context.SaveChangesAsync();
 
-            (await context.Users.CountAsync(u => u.Email == request.Email)).Should().Be(0, "the filter hides it");
-            (await context.Users.IgnoreQueryFilters([ModuleDbContext.TenantFilter])
-                .CountAsync(u => u.Email == request.Email)).Should().Be(1);
+            (await context.Users.CountAsync(u => u.Email == request.Email && u.TenantId != null)).Should().Be(1);
         }
 
         await RunJobsAsync();
         Emails.Clear();
         await PostAsync(client, Route, request, HttpStatusCode.Accepted);
 
-        var all = await QueryAsync(context => context.Users.IgnoreQueryFilters([ModuleDbContext.TenantFilter])
-            .CountAsync(u => u.Email == request.Email));
+        var all = await QueryAsync(context => context.Users.CountAsync(u => u.Email == request.Email));
         all.Should().Be(1, "no second account was created for an address that is already taken");
         await RunJobsAsync();
         Emails.Count.Should().Be(0);

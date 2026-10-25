@@ -173,12 +173,12 @@ public sealed class RoleAdministrationQueries(IdentityModuleDbContext context, T
         var rows = await users
             .Skip(page * pageSize)
             .Take(pageSize)
-            .Select(user => new { user.Id, Email = user.Email!, user.FullName, user.Status })
+            .Select(user => new { user.Id, Email = user.Email!, user.FullName, user.Status, user.TenantId })
             .ToListAsync(cancellationToken);
 
         var roles = await RolesOfAsync([.. rows.Select(row => row.Id)], cancellationToken);
         var items = rows
-            .Select(row => new UserSummaryResponse(row.Id, row.Email, row.FullName, row.Status.ToString(), roles.GetValueOrDefault(row.Id, [])))
+            .Select(row => new UserSummaryResponse(row.Id, row.Email, row.FullName, row.Status.ToString(), roles.GetValueOrDefault(row.Id, []), row.TenantId))
             .ToList();
 
         return new UserPageResponse(items, total);
@@ -188,7 +188,7 @@ public sealed class RoleAdministrationQueries(IdentityModuleDbContext context, T
     {
         var row = await context.Users.AsNoTracking()
             .Where(user => user.Id == userId)
-            .Select(user => new { user.Id, Email = user.Email!, user.FullName, user.Status })
+            .Select(user => new { user.Id, Email = user.Email!, user.FullName, user.Status, user.TenantId })
             .SingleOrDefaultAsync(cancellationToken);
         if (row is null)
         {
@@ -196,7 +196,7 @@ public sealed class RoleAdministrationQueries(IdentityModuleDbContext context, T
         }
 
         var roles = await RolesOfAsync([userId], cancellationToken);
-        return new UserSummaryResponse(row.Id, row.Email, row.FullName, row.Status.ToString(), roles.GetValueOrDefault(userId, []));
+        return new UserSummaryResponse(row.Id, row.Email, row.FullName, row.Status.ToString(), roles.GetValueOrDefault(userId, []), row.TenantId);
     }
 
     private async Task<List<RoleResponse>> RolesAsync(Guid? roleId, CancellationToken cancellationToken)

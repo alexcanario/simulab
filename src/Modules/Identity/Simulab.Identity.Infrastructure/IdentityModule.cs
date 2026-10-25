@@ -142,6 +142,7 @@ public static class IdentityModule
         services.AddScoped<SaveRoleHandler>();
         services.AddScoped<DeleteRoleHandler>();
         services.AddScoped<SetUserRolesHandler>();
+        services.AddScoped<SetUserTenantHandler>();
 
         // F-10: erasing the own account reuses the role-administration transaction (BR11).
         services.AddScoped<IAccountErasureStore, AccountErasureStore>();

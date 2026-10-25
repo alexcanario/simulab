@@ -18,5 +18,5 @@ public static class QuestionBankPermissions
     /// <summary>The module name Identity seeds this catalog under.</summary>
     public const string ModuleName = "questions";
 
-    public static readonly IReadOnlyList<string> All = [Manage, Review];
+    public static readonly IReadOnlyList<string> All = [Manage, Review, Grade];
 }

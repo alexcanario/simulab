@@ -67,6 +67,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.TotpSecretEncrypted).HasMaxLength(AccountLimits.TotpSecretEncryptedMaxLength)
             .HasComment("The two-factor secret, encrypted with the app's key. Losing that key makes every enrolment unusable.");
 
+        // F-150: truer than the standard comment - an administrator sets it, and nothing is filtered by it yet.
+        builder.Property(user => user.TenantId)
+            .HasComment("The partner organization the account belongs to, set by an administrator. Null for none. Carried in the token; nothing is filtered by it yet.");
+
         // BR3: the address identifies the account across every tenant, so the index includes TenantId and
         // treats two nulls as equal — without that, two global accounts could share one address.
         builder.HasIndex(user => new { user.TenantId, user.NormalizedEmail })
