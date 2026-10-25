@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: refining (2026-10-25)
-- Stopped at: Round answered; file filled; waiting on Q47 preliminary key and classification review
-- Next action: Owner answers Q1 and Q2 of Open questions, then approve F-110
+- Stopped at: File complete, open questions answered
+- Next action: Owner types: aprovo F-110
 - Waiting on: nothing
 
 ## Summary
@@ -22,9 +22,9 @@ Added 2026-10-24: the source is the Manaus 2026 paper (Instituto Consulplan, Té
 
 ## Start
 - Depends on: F-96, F-97, F-101, F-102, F-103 (all done).
-- Waits on (to start): the preliminary answer key of question 47 — owner (`## Open questions`). The source paper and final answer key are with the owner (OneDrive `Simulab/Guarda Municipal/Manaus/2026`), free to use (D-6).
+- Waits on (to start): nothing. The source paper, the final answer key and the extracted images are with the owner (OneDrive `Simulab/Guarda Municipal/Manaus/2026`), free to use (D-6).
 - Needed to validate: the local app host — owner.
-- Model: unknown — settled at approval
+- Model: opus (doubt: three projects touched — QuestionBank infrastructure, the Api host start-up and the tests — and 60 transcribed questions near size L)
 - Suggested path: `/agile:refine` → `/agile:build`.
 - Parallel with: F-161 (catalog seed clean-up; another module, it keeps the Manaus edition).
 
@@ -57,7 +57,7 @@ Verified on 2026-10-25 in this worktree (branch from `main` at `0342c69`, which 
 - BR3 The whole seed is skipped when the Manaus 2026 edition is missing or deleted, or already holds at least one question, live or deleted (decision of 2026-10-25; like F-78 BR3).
 - BR4 A topic is found by its seeded id, then by normalized name within its subject (F-51 BR6). A question whose topic is not found, or is deleted, is skipped; the others are seeded. A notice subject is found by its seeded id, then by the edition and normalized label; when not found, the question is seeded with no notice subject.
 - BR5 Every seeded question is `Published` with its version 1, as `PublishQuestionHandler` writes it; no review entry is written (decision of 2026-10-25).
-- BR6 Question 47 is published with the preliminary key and then annulled: version 2 has `annulled = true`, `answer_key_changed = false` and the reason "Anulada pela banca no gabarito definitivo."; its status is `Annulled` (F-101).
+- BR6 Question 47 is published with key D and then annulled: version 2 has `annulled = true`, `answer_key_changed = false` and the reason "Anulada pela banca no gabarito definitivo."; its status is `Annulled` (F-101).
 - BR7 The base text "Calma, gente" (Ivan Ângelo, Veja São Paulo, 10/09/2003) is one `base_texts` row, linked to questions 01 to 08; their versions copy its HTML (F-102 BR4).
 - BR8 The three images are `question_images` rows with fixed ids, owned by their question (`owner_kind` `Question`), so the sweep never removes them, each with its alternative text. Their files are embedded in the Api and written to `IFileStorage` at Api start-up, right after the migrations, when the row exists and is live and the blob is missing; an existing blob is never overwritten. A failed write is logged and tried again at the next start.
 - BR9 The seed never updates a row: a curator's later edit, unpublish, annulment or delete stays. `Down` removes the seeded rows by id when no curator has changed them since (no version above the seeded ones); otherwise it leaves that question.
@@ -70,7 +70,7 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 - AC1 Given an empty database, when the migrations are applied, then the Manaus 2026 edition holds exactly the questions of `## Question classification`, each with that paper number, topic, notice subject, four options A to D and that key as the only correct option, all with a null `TenantId`. (UC1, BR1, BR2)
 - AC2 Given the seed literals, then every question rebuilt through the domain is valid for publishing, its stored HTML equals what `QuestionHtmlSanitizer` returns, and its `statement_text` and `normalized_statement` equal what the domain computes; the base text's normalized title too. (BR2)
 - AC3 Given the seeded database, then every question except 47 is `Published` with exactly one version, number 1, whose options equal the question's; and no review entry exists for them. (BR5)
-- AC4 Given the seeded database, then question 47 is `Annulled`, version 1 holds the preliminary key, version 2 has `annulled = true`, `answer_key_changed = false` and the listed reason. (UC3, BR6)
+- AC4 Given the seeded database, then question 47 is `Annulled`, version 1 holds key D, version 2 has `annulled = true`, `answer_key_changed = false` and the listed reason. (UC3, BR6)
 - AC5 Given the seeded database, then questions 01 to 08 point at one base text "Calma, gente", and their versions hold its HTML. (UC1, BR7)
 - AC6 Given a database where the Manaus edition already holds one question typed by a curator before the seed migration, when it runs, then no seeded question is written and the migration succeeds; the same when the edition is soft-deleted. (BR3)
 - AC7 Given a database where a topic of `## Question classification` exists under another id, the questions of that topic point at it; given a soft-deleted topic, its questions are skipped and the others seeded. (BR4)
@@ -84,13 +84,14 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 ## Decisions
 - 2026-10-24 — The source is the Manaus 2026 paper, booklet type 1, and its final answer key, free to use — D-6. confirmed: D-6
 - 2026-10-25 — The seed is a data migration with frozen literals, run once per database, skipped whole when the edition is deleted — same pattern as F-37, F-51 and F-78. confirmed: D-6, F-78
-- 2026-10-25 — Question 47 is published with the preliminary key from Instituto Consulplan, sent by the owner, then annulled — faithful to the paper, and annulment needs a published question with one correct option. asked
+- 2026-10-25 — Question 47 is published with key D, then annulled. D is inferred, not the board's preliminary key: the owner's folder holds only the final key, where the question is `#` in every booklet type; D is the option closest to Lei 13.675/2018 art. 9 § 2 VII, which lists municipal guards as operational members of SUSP, while D says "strategic". Annulment needs a published question with one correct option, and the annulled key counts for no student. asked
 - 2026-10-25 — The essay question stays out and becomes its own item — the board deducts 0.25 per error, while F-109's rubric only adds maximum points per criterion; the aspect points were lost in the PDF extraction. asked
 - 2026-10-25 — The questions are seeded `Published`, version 1, no review entry — the owner checks them in the validation script. asked
 - 2026-10-25 — An edition that already holds any question skips the whole seed — it neither mixes with a curator's text nor collides with the paper-number index. asked
 - 2026-10-25 — Images: rows in the migration, files written by a start-up step in the Api beside `SeedAdmin` — a migration cannot store a blob. asked
 - 2026-10-25 — Out of scope: booklet types 2 to 4, explanations and difficulty — the same questions in another order; an AI-written explanation needs a person to review it (brief); no answer data to calibrate difficulty. asked
-- 2026-10-25 — Technical: the image bytes are extracted once from the paper PDF and committed as embedded resources of `Simulab.QuestionBank.Infrastructure`; the seeder runs on every start, since three existence checks are cheap and a failed write retries by itself.
+- 2026-10-25 — `## Question classification` approved as proposed, the five `?` rows on the closest topic. asked
+- 2026-10-25 — Technical: the image bytes come from the files the owner already extracted from the paper PDF (folder `img/` and `questao 17, imagem 1.png` beside the paper), checked against the paper pages, and are committed as embedded resources of `Simulab.QuestionBank.Infrastructure`; the seeder runs on every start, since three existence checks are cheap and a failed write retries by itself.
 - 2026-10-25 — Technical: fixed ids follow `0198f370-<group>-7000-8000-<number>` with new groups 10 (questions), 11 (options), 12 (versions), 13 (base texts), 14 (images).
 - 2026-10-25 — Technical: a missing topic skips only its question (BR4), the way F-78 BR4 skips a missing mapping target.
 
@@ -105,11 +106,10 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 - flow: update docs/flows/images-in-questions.md — seeded images are written at Api start-up.
 
 ## Open questions
-- Q1 The preliminary answer key of question 47 (owner).
-- Q2 The owner's review of `## Question classification`: `ok` or corrections to rows.
+- (none)
 
 ## Question classification
-Proposed at refinement (2026-10-25), for the owner to review. Answer key: booklet type 1 (white), final. Notice subject = the Manaus 2026 notice subject of F-78 the question falls under. `?` marks a row with no close topic in the F-51 taxonomy.
+Proposed at refinement and approved by the owner on 2026-10-25. Answer key: booklet type 1 (white), final; question 47 is `#` (annulled) and is seeded with key D before its annulment (BR6). Notice subject = the Manaus 2026 notice subject of F-78 the question falls under. `?` marks a row with no close topic in the F-51 taxonomy.
 
 | # | Notice subject | Subject › Topic | Key | Note |
 |---|---|---|---|---|
