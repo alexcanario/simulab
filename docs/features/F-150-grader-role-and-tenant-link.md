@@ -1,7 +1,7 @@
 ---
 feature: F-150
 epic: Partner tenants
-status: refining
+status: approved
 board: 208
 version: 1
 ---
@@ -10,10 +10,10 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: refining (2026-10-25)
-- Stopped at: The file is filled from the owner's answers; waiting for the owner to read it and approve.
-- Next action: Read this file and answer "aprovo F-150".
-- Waiting on: the owner's approval
+- Status: approved (2026-10-25)
+- Stopped at: Approved by the owner on 2026-10-25; no code written yet.
+- Next action: Run /agile:build F-150.
+- Waiting on: nothing
 
 ## Summary
 A `Grader` system role (a person who signs in and grades essays and open answers) and an assignable tenant on the user, for the curator and the grader. A grader with no tenant sees every essay to grade; with a tenant, only that tenant's essays, not the global ones. Until the first partner tenant exists, the one grader sees every essay. Source: discussion D-5 (owner's model, 2026-10-24); it reverts ADR-0001 row 18 ("Teacher / grader roles: Not in v1"), whose text says RBAC lets roles be added as data.
