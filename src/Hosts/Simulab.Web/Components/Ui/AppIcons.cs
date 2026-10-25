@@ -149,6 +149,12 @@ public static class AppIcons
     /// <summary>F-108: a question the student answers with a short typed text; its type card and key section.</summary>
     public const string ShortAnswer = Icons.Material.Outlined.QuestionAnswer;
 
+    /// <summary>F-109: a question the student answers with a written text graded against a rubric; its type card and the rubric section.</summary>
+    public const string OpenAnswer = Icons.Material.Outlined.Edit;
+
+    /// <summary>F-109: an essay, a long written text graded against a rubric; its type card.</summary>
+    public const string Essay = Icons.Material.Outlined.Article;
+
     /// <summary>F-107: the toolbar button that inserts a blank marker at the caret.</summary>
     public const string Blank = Icons.Material.Outlined.SpaceBar;
 

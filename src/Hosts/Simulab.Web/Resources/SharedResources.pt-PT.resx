@@ -1208,6 +1208,48 @@
   <data name="question.blank_answer_too_long" xml:space="preserve"><value>Uma resposta excede 100 caracteres.</value></data>
   <data name="question.blank_answer_repeated" xml:space="preserve"><value>Duas respostas desta lacuna são iguais quando se ignoram maiúsculas e espaços a mais.</value></data>
   <data name="question.blanks_not_allowed" xml:space="preserve"><value>Só uma questão de lacunas tem lacunas.</value></data>
+  <data name="question.rubric_criteria_count" xml:space="preserve"><value>Uma rubrica tem no máximo 10 critérios.</value></data>
+  <data name="question.rubric_criteria_required" xml:space="preserve"><value>Escreva pelo menos um critério para publicar.</value></data>
+  <data name="question.criterion_name_required" xml:space="preserve"><value>Escreva um nome para o critério.</value></data>
+  <data name="question.criterion_name_too_long" xml:space="preserve"><value>O nome de um critério tem no máximo 100 caracteres.</value></data>
+  <data name="question.criterion_description_too_long" xml:space="preserve"><value>A descrição de um critério tem no máximo 500 caracteres.</value></data>
+  <data name="question.criterion_points_out_of_range" xml:space="preserve"><value>Os pontos de um critério são um número inteiro de 1 a 100.</value></data>
+  <data name="question.criterion_name_repeated" xml:space="preserve"><value>Dois critérios têm o mesmo nome.</value></data>
+  <data name="question.rubric_not_allowed" xml:space="preserve"><value>Só uma questão de resposta aberta ou uma redação tem rubrica.</value></data>
+  <data name="question.answer_size_invalid" xml:space="preserve"><value>O limite de tamanho está fora do intervalo, ou o mínimo é superior ao máximo.</value></data>
+  <data name="question.answer_size_not_allowed" xml:space="preserve"><value>Só uma questão de resposta aberta ou uma redação tem limite de tamanho.</value></data>
+  <data name="Questions.Type.OpenAnswer" xml:space="preserve"><value>Resposta aberta</value></data>
+  <data name="Questions.Type.OpenAnswer.Description" xml:space="preserve"><value>Uma resposta escrita, classificada por uma pessoa com base numa rubrica.</value></data>
+  <data name="Questions.Type.Essay" xml:space="preserve"><value>Redação</value></data>
+  <data name="Questions.Type.Essay.Description" xml:space="preserve"><value>Um texto longo, classificado por uma pessoa com base numa rubrica.</value></data>
+  <data name="Questions.Section.Rubric" xml:space="preserve"><value>Rubrica</value></data>
+  <data name="Questions.Section.Rubric.Subtitle" xml:space="preserve"><value>Escreva os critérios que o avaliador classifica. A nota da questão é a soma dos pontos atribuídos a dividir pelo total.</value></data>
+  <data name="Questions.Rubric.Criterion.Name" xml:space="preserve"><value>Nome do critério {0}</value></data>
+  <data name="Questions.Rubric.Criterion.Description" xml:space="preserve"><value>Descrição do critério {0}</value></data>
+  <data name="Questions.Rubric.Criterion.Points" xml:space="preserve"><value>Pontos do critério {0}</value></data>
+  <data name="Questions.Rubric.Criterion.ItemName" xml:space="preserve"><value>critério {0}</value></data>
+  <data name="Questions.Rubric.Criterion.Removed" xml:space="preserve"><value>Critério removido. Restam {0}.</value></data>
+  <data name="Questions.Rubric.Add" xml:space="preserve"><value>Adicionar critério</value></data>
+  <data name="Questions.Rubric.Count" xml:space="preserve"><value>{0} de 10 critérios</value></data>
+  <data name="Questions.Rubric.Total" xml:space="preserve"><value>Total: {0} pontos</value></data>
+  <data name="Questions.Section.AnswerSize" xml:space="preserve"><value>Tamanho da resposta (opcional)</value></data>
+  <data name="Questions.AnswerSize.MinLines" xml:space="preserve"><value>Mínimo de linhas</value></data>
+  <data name="Questions.AnswerSize.MaxLines" xml:space="preserve"><value>Máximo de linhas</value></data>
+  <data name="Questions.AnswerSize.MaxCharacters" xml:space="preserve"><value>Máximo de caracteres</value></data>
+  <data name="Questions.Explanation.ModelAnswer" xml:space="preserve"><value>Resposta modelo</value></data>
+  <data name="Questions.Explanation.ModelAnswer.Hint" xml:space="preserve"><value>O avaliador vê-a sempre; o aluno vê-a depois de responder.</value></data>
+  <data name="Questions.Checklist.Rubric.Criteria" xml:space="preserve"><value>Pelo menos um critério da rubrica</value></data>
+  <data name="Questions.Preview.OpenAnswerLabel" xml:space="preserve"><value>A sua resposta</value></data>
+  <data name="Questions.Preview.EssayLabel" xml:space="preserve"><value>A sua redação</value></data>
+  <data name="Questions.Preview.OpenAnswerInstruction" xml:space="preserve"><value>Escreva a sua resposta.</value></data>
+  <data name="Questions.Preview.EssayInstruction" xml:space="preserve"><value>Escreva a sua redação.</value></data>
+  <data name="Questions.Preview.LimitCharacters" xml:space="preserve"><value>Até {0} caracteres.</value></data>
+  <data name="Questions.Preview.LimitLinesBetween" xml:space="preserve"><value>Entre {0} e {1} linhas.</value></data>
+  <data name="Questions.Preview.LimitLinesAtLeast" xml:space="preserve"><value>Pelo menos {0} linhas.</value></data>
+  <data name="Questions.Preview.LimitLinesUpTo" xml:space="preserve"><value>Até {0} linhas.</value></data>
+  <data name="Questions.Preview.RubricTitle" xml:space="preserve"><value>Rubrica de classificação</value></data>
+  <data name="Questions.Preview.RubricTotal" xml:space="preserve"><value>Total</value></data>
+  <data name="Questions.Preview.RubricNone" xml:space="preserve"><value>ainda sem rubrica</value></data>
   <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>O tipo não pode ser alterado depois de a questão ser criada.</value></data>
   <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Gabarito</value></data>
   <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Marque o enunciado como certo ou errado. Só é exigido para publicar.</value></data>

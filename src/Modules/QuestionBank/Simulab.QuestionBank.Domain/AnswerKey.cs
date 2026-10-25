@@ -29,6 +29,15 @@ public abstract record AnswerKey
     /// </summary>
     public virtual IReadOnlyList<BlankDraft> Blanks => [];
 
+    /// <summary>The criteria of the rubric, trimmed and in order (F-109, BR1, BR3); empty for every other type.</summary>
+    public virtual IReadOnlyList<CriterionDraft> Rubric => [];
+
+    /// <summary>An essay's minimum lines (F-109, BR7); null when not set and for every other type.</summary>
+    public virtual int? AnswerSizeMin => null;
+
+    /// <summary>An essay's maximum lines or an open answer's maximum characters (F-109, BR7); null when not set and for every other type.</summary>
+    public virtual int? AnswerSizeMax => null;
+
     /// <summary>
     /// The first thing wrong with this key, or null (BR3, BR4). A draft may be incomplete; a published question
     /// must be complete. A key given to a type that has none, and options given to a type that has none, are
@@ -49,9 +58,26 @@ public abstract record AnswerKey
             : null;
 
     /// <summary>
+    /// F-109 BR8: a rubric or a size limit written to a type that has none; null when there are none. A rubric is refused
+    /// when it is a non-empty list, a size limit when either edge is set.
+    /// </summary>
+    protected static OptionFault? RubricAndSizeRefused(IReadOnlyList<CriterionDraft>? rubric, bool sizeWritten)
+    {
+        if (rubric is { Count: > 0 })
+        {
+            return new OptionFault(new Error(QuestionBankErrorCodes.QuestionRubricNotAllowed, ErrorKind.Validation), null);
+        }
+
+        return sizeWritten
+            ? new OptionFault(new Error(QuestionBankErrorCodes.QuestionAnswerSizeNotAllowed, ErrorKind.Validation), null)
+            : null;
+    }
+
+    /// <summary>
     /// The key of a question of <paramref name="type"/> from what was written: the options, the true/false key, the
-    /// left items and the blanks as they came, so that the key itself can refuse what its type does not have.
-    /// <paramref name="blankMarkers"/> are the marker numbers of the statement, which only a fill-in-the-blanks key reads.
+    /// left items, the blanks, the rubric and the size limit as they came, so that the key itself can refuse what its
+    /// type does not have. <paramref name="blankMarkers"/> are the marker numbers of the statement, which only a
+    /// fill-in-the-blanks key reads.
     /// </summary>
     public static AnswerKey From(
         QuestionType type,
@@ -59,20 +85,27 @@ public abstract record AnswerKey
         bool? trueFalseKey,
         IReadOnlyList<MatchItemDraft>? matchItems = null,
         IReadOnlyList<BlankDraft>? blanks = null,
-        IReadOnlyList<int>? blankMarkers = null)
+        IReadOnlyList<int>? blankMarkers = null,
+        IReadOnlyList<CriterionDraft>? rubric = null,
+        int? answerSizeMin = null,
+        int? answerSizeMax = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         var items = matchItems ?? [];
         var written = blanks ?? [];
+        var criteria = rubric ?? [];
+        var sizeWritten = answerSizeMin is not null || answerSizeMax is not null;
 
         return type switch
         {
-            QuestionType.TrueFalse => new TrueFalseKey(options, trueFalseKey, items, written),
-            QuestionType.MultipleAnswer => new MultipleAnswerKey(options, trueFalseKey, items, written),
-            QuestionType.Matching => new MatchingKey(options, items, trueFalseKey, written),
-            QuestionType.FillInTheBlanks => new FillInTheBlanksKey(blankMarkers ?? [], written, options, trueFalseKey, items),
-            QuestionType.ShortAnswer => new ShortAnswerKey(written, options, trueFalseKey, items),
-            _ => new SingleChoiceKey(options, trueFalseKey, items, written)
+            QuestionType.TrueFalse => new TrueFalseKey(options, trueFalseKey, items, written, criteria, sizeWritten),
+            QuestionType.MultipleAnswer => new MultipleAnswerKey(options, trueFalseKey, items, written, criteria, sizeWritten),
+            QuestionType.Matching => new MatchingKey(options, items, trueFalseKey, written, criteria, sizeWritten),
+            QuestionType.FillInTheBlanks => new FillInTheBlanksKey(blankMarkers ?? [], written, options, trueFalseKey, items, criteria, sizeWritten),
+            QuestionType.ShortAnswer => new ShortAnswerKey(written, options, trueFalseKey, items, criteria, sizeWritten),
+            QuestionType.OpenAnswer => new OpenAnswerKey(criteria, answerSizeMin, answerSizeMax, options, trueFalseKey, items, written),
+            QuestionType.Essay => new EssayKey(criteria, answerSizeMin, answerSizeMax, options, trueFalseKey, items, written),
+            _ => new SingleChoiceKey(options, trueFalseKey, items, written, criteria, sizeWritten)
         };
     }
 }

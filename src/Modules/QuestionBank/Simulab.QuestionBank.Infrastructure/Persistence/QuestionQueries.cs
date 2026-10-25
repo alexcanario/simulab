@@ -143,6 +143,7 @@ public sealed class QuestionQueries(
             .Include(row => row.Options)
             .Include(row => row.MatchItems)
             .Include(row => row.Blanks)
+            .Include(row => row.Rubric)
             .AsSplitQuery()
             .FirstOrDefaultAsync(row => row.Id == id, cancellationToken);
         if (question is null)
@@ -212,7 +213,15 @@ public sealed class QuestionQueries(
                 .. question.Blanks
                     .OrderBy(blank => blank.Position)
                     .Select(blank => new BlankResponse(blank.Number, [.. blank.AcceptedAnswers]))
-            ]);
+            ],
+            // F-109: the criteria in rubric order, from position 1.
+            [
+                .. question.Rubric
+                    .OrderBy(criterion => criterion.Position)
+                    .Select(criterion => new CriterionResponse(criterion.Position, criterion.Name, criterion.Description, criterion.MaxPoints))
+            ],
+            question.AnswerSizeMin,
+            question.AnswerSizeMax);
     }
 
     private Task<DateTimeOffset?> LatestSubmittedAtAsync(Guid questionId, CancellationToken cancellationToken) =>
@@ -382,7 +391,15 @@ public sealed class QuestionQueries(
                     .Select(item => new MatchItemResponse(item.Position, item.TextHtml, item.MatchPosition))
             ],
             // F-107: the JSON array keeps the statement order.
-            [.. version.Blanks.Select(blank => new BlankResponse(blank.Number, [.. blank.AcceptedAnswers]))]));
+            [.. version.Blanks.Select(blank => new BlankResponse(blank.Number, [.. blank.AcceptedAnswers]))],
+            // F-109: the JSON array keeps the rubric order; a version recorded before it reads as none.
+            [
+                .. version.Rubric
+                    .OrderBy(criterion => criterion.Position)
+                    .Select(criterion => new CriterionResponse(criterion.Position, criterion.Name, criterion.Description, criterion.MaxPoints))
+            ],
+            version.AnswerSizeMin,
+            version.AnswerSizeMax));
     }
 
     public async Task<IReadOnlyList<QuestionTaxonomySubjectResponse>> GetTaxonomyAsync(CancellationToken cancellationToken) =>

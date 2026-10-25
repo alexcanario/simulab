@@ -147,7 +147,7 @@ public sealed class QuestionTranscriptionTests : QuestionPageTestContext
     }
 
     // AC6, BR5: the types the form implements (F-104 added the third; owner, 2026-10-15; F-106 AC18 the fourth;
-    // F-107 AC19 the fifth; F-108 AC19 the sixth).
+    // F-107 AC19 the fifth; F-108 AC19 the sixth; F-109 AC20 the seventh and the eighth).
     [Fact]
     public void Open_OffersEveryTypeTheFormImplements()
     {
@@ -163,7 +163,27 @@ public sealed class QuestionTranscriptionTests : QuestionPageTestContext
             page.FindAll("#question-type-Matching").Should().ContainSingle();
             page.FindAll("#question-type-FillInTheBlanks").Should().ContainSingle();
             page.FindAll("#question-type-ShortAnswer").Should().ContainSingle();
-            page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(6);
+            page.FindAll("#question-type-OpenAnswer").Should().ContainSingle();
+            page.FindAll("#question-type-Essay").Should().ContainSingle();
+            page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(8);
+        });
+    }
+
+    // F-109 AC20: picking the essay here shows the same rubric section, with its one empty row.
+    [Fact]
+    public void Open_ChoosingTheEssay_ShowsTheRubricSection()
+    {
+        SeedGuard();
+        var page = RenderTranscribe(GuardEdition.Id);
+        page.WaitForAssertion(() => page.FindAll("#question-type-Essay").Should().ContainSingle());
+
+        page.Find("#question-type-Essay").Click();
+
+        page.WaitForAssertion(() =>
+        {
+            page.FindAll("#question-section-rubric-title").Should().ContainSingle();
+            page.FindAll("#question-section-options-title").Should().BeEmpty();
+            page.FindComponents<AppTextField<string>>().Count(field => field.Instance.Id == "question-criterion-0-name").Should().Be(1);
         });
     }
 

@@ -32,6 +32,12 @@ namespace Simulab.QuestionBank.Contracts;
 /// The blanks of a fill-in-the-blanks question, each naming a marker of the statement and its accepted answers
 /// (F-107, BR1); null counts as none. Refused on any other type when not empty (BR7).
 /// </param>
+/// <param name="Rubric">
+/// The criteria of an open-answer or essay question in order (F-109, BR3); null counts as none and, on an update, the
+/// list sent replaces the stored one. Refused on any other type when not empty (BR8).
+/// </param>
+/// <param name="AnswerSizeMin">An essay's minimum lines (F-109, BR7); null when not set. Refused on any other type.</param>
+/// <param name="AnswerSizeMax">An essay's maximum lines or an open answer's maximum characters (F-109, BR7); null when not set. Refused on any other type.</param>
 public sealed record SaveQuestionRequest(
     Guid? TopicId = null,
     string? ContentLanguage = null,
@@ -47,4 +53,7 @@ public sealed record SaveQuestionRequest(
     bool? TrueFalseKey = null,
     string? ChangeReason = null,
     IReadOnlyList<SaveMatchItemRequest>? MatchItems = null,
-    IReadOnlyList<SaveBlankRequest>? Blanks = null);
+    IReadOnlyList<SaveBlankRequest>? Blanks = null,
+    IReadOnlyList<SaveCriterionRequest>? Rubric = null,
+    int? AnswerSizeMin = null,
+    int? AnswerSizeMax = null);

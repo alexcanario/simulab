@@ -27,5 +27,17 @@ public enum QuestionType
     /// <summary>
     /// A short typed answer checked against a list of accepted answers. Its key is one blank without a marker (F-108).
     /// </summary>
-    ShortAnswer
+    ShortAnswer,
+
+    /// <summary>
+    /// A written answer graded by a person against a rubric of criteria with maximum points. Its key is the rubric
+    /// (F-109); the size limit is in characters.
+    /// </summary>
+    OpenAnswer,
+
+    /// <summary>
+    /// A long written text graded by a person against a rubric. The statement is the theme; the size limit is in
+    /// lines (F-109).
+    /// </summary>
+    Essay
 }

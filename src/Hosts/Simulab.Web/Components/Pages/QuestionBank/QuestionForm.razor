@@ -406,6 +406,23 @@ else
                     }
                 </ShortAnswerKeySection>
             }
+            else if (IsRubric)
+            {
+                @* F-109: the criteria of an open answer or an essay and its size limit; the rows are the form's own. *@
+                <RubricKeySection SectionNumber="5"
+                                  Criteria="_criteria"
+                                  IsEssay="IsEssay"
+                                  @bind-SizeMin="_answerSizeMin"
+                                  @bind-SizeMax="_answerSizeMax"
+                                  Frozen="IsFrozen"
+                                  Error="@_rubricError"
+                                  OnChanged="OnRubricChanged">
+                    @if (ShowChangeReason)
+                    {
+                        @ChangeReasonField
+                    }
+                </RubricKeySection>
+            }
             else
             {
             <AppSectionCard Id="question-section-options"
@@ -547,10 +564,11 @@ else
                             Icon="@AppIcons.Explanation"
                             Number="6"
                             Subtitle="@L["Questions.Section.Explanation.Subtitle"]">
+                @* F-109 BR9: for an open answer and an essay the explanation is the model answer. *@
                 <AppRichTextField Id="question-explanation"
-                                  Label="@L["Questions.Field.Explanation"]"
+                                  Label="@(IsRubric ? L["Questions.Explanation.ModelAnswer"] : L["Questions.Field.Explanation"])"
                                   Placeholder="@L["Questions.Field.Explanation.Placeholder"]"
-                                  Hint="@L["Questions.Field.Explanation.Hint"]"
+                                  Hint="@(IsRubric ? L["Questions.Explanation.ModelAnswer.Hint"] : L["Questions.Field.Explanation.Hint"])"
                                   Disabled="IsFrozen"
                                   Lang="@_contentLanguage"
                                   Value="@_explanation"
@@ -751,6 +769,13 @@ else
     // the question's one blank, number 1, and are kept apart from the fill-in answers across a change of type.
     private List<string> _shortAnswers = [string.Empty];
 
+    // F-109: the criteria of an open answer or an essay (a new question starts with one empty row) and its size limit,
+    // kept across a change of type. The section's own refusal (count, no criterion, size) is _rubricError.
+    private List<CriterionDraft> _criteria = [new()];
+    private int? _answerSizeMin;
+    private int? _answerSizeMax;
+    private string? _rubricError;
+
     // F-96: the origin. The number and the notice subject only exist with an edition (BR2).
     private AppLookupOption? _edition;
     private int? _paperNumber;
@@ -838,6 +863,18 @@ else
 
     private bool IsShort => _type == QuestionType.ShortAnswer;
 
+    // F-109: an open answer and an essay share one key section, the rubric; the essay is limited in lines.
+    private bool IsRubric => _type is QuestionType.OpenAnswer or QuestionType.Essay;
+
+    private bool IsEssay => _type == QuestionType.Essay;
+
+    // The rows that are sent: an untouched empty row is nothing typed. Errors from the Api name the position in this list.
+    private List<CriterionDraft> SentCriteria => [.. _criteria.Where(criterion => !criterion.IsEmpty)];
+
+    // F-109 BR6 (comfort; the Api decides): a criterion counts once it has a name and its points.
+    private bool RubricDone =>
+        _criteria.Any(criterion => !string.IsNullOrWhiteSpace(criterion.Name) && criterion.Points is not null);
+
     // F-107 BR3: the markers of the statement, read as the Api reads them; the rows follow them in statement order.
     private IReadOnlyList<int> StatementMarkers => StatementBlanks.Markers(_statement);
 
@@ -882,7 +919,9 @@ else
         new(QuestionType.MultipleAnswer, L["Questions.Type.MultipleAnswer"], L["Questions.Type.MultipleAnswer.Description"], AppIcons.MultipleAnswer),
         new(QuestionType.Matching, L["Questions.Type.Matching"], L["Questions.Type.Matching.Description"], AppIcons.Matching),
         new(QuestionType.FillInTheBlanks, L["Questions.Type.FillInTheBlanks"], L["Questions.Type.FillInTheBlanks.Description"], AppIcons.FillInTheBlanks),
-        new(QuestionType.ShortAnswer, L["Questions.Type.ShortAnswer"], L["Questions.Type.ShortAnswer.Description"], AppIcons.ShortAnswer)
+        new(QuestionType.ShortAnswer, L["Questions.Type.ShortAnswer"], L["Questions.Type.ShortAnswer.Description"], AppIcons.ShortAnswer),
+        new(QuestionType.OpenAnswer, L["Questions.Type.OpenAnswer"], L["Questions.Type.OpenAnswer.Description"], AppIcons.OpenAnswer),
+        new(QuestionType.Essay, L["Questions.Type.Essay"], L["Questions.Type.Essay.Description"], AppIcons.Essay)
     ];
 
     private IReadOnlyList<AppRadioCardOption<bool?>> TrueFalseCards =>
@@ -983,7 +1022,9 @@ else
                     ? BlanksCountDone && BlanksAnswersDone
                     : IsShort
                         ? ShortAnswersDone
-                        : OptionsCountDone && OptionsTextDone && KeyDone);
+                        : IsRubric
+                            ? RubricDone
+                            : OptionsCountDone && OptionsTextDone && KeyDone);
 
     private IReadOnlyList<AppChecklistItem> AsideChecklist =>
     [
@@ -1007,6 +1048,8 @@ else
             }
             : IsShort
             ? [new AppChecklistItem(L["Questions.Checklist.ShortAnswer.Answers"], ShortAnswersDone)]
+            : IsRubric
+            ? [new AppChecklistItem(L["Questions.Checklist.Rubric.Criteria"], RubricDone)]
             : new List<AppChecklistItem>
             {
                 new(IsMultiple ? L["Questions.Checklist.OptionsCount.Multiple"] : L["Questions.Checklist.OptionsCount"], OptionsCountDone),
@@ -1023,7 +1066,7 @@ else
         new(L["Questions.Field.Difficulty"], _difficulty?.ToString(CultureInfo.CurrentCulture)),
         new(L["Questions.Field.BaseText"], _baseText?.Text),
         new(L["Questions.Form.Aside.Source"], _edition is null ? L["Questions.Source.Authored"].Value : _edition.Text),
-        IsTrueFalse || IsMatching || IsFillIn || IsShort
+        IsTrueFalse || IsMatching || IsFillIn || IsShort || IsRubric
             ? new(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))
             : new(L["Questions.Form.Aside.Options"], L["Questions.Options.Count", _options.Count].Value),
         .. IsMultiple ? [new AppAsideRow(L["Questions.Form.Aside.Type"], QuestionText.TypeName(L, _type))] : Array.Empty<AppAsideRow>()
@@ -1088,6 +1131,16 @@ else
                     IsShort ? L["Questions.Section.ShortAnswer"] : L["Questions.Blanks.Blank", number]);
             }
 
+            // F-109: a row refusal points at its own field; the section's at the "Add criterion" button.
+            for (var index = 0; index < _criteria.Count; index++)
+            {
+                var number = (index + 1).ToString(CultureInfo.CurrentCulture);
+                AddIfRefused(items, _criteria[index].NameError, RubricKeySection.FieldId(index, "name"), L["Questions.Rubric.Criterion.Name", number]);
+                AddIfRefused(items, _criteria[index].DescriptionError, RubricKeySection.FieldId(index, "description"), L["Questions.Rubric.Criterion.Description", number]);
+                AddIfRefused(items, _criteria[index].PointsError, RubricKeySection.FieldId(index, "points"), L["Questions.Rubric.Criterion.Points", number]);
+            }
+
+            AddIfRefused(items, _rubricError, RubricKeySection.AddId, L["Questions.Section.Rubric"]);
             AddIfRefused(items, _trueFalseKeyError, "question-true-false-key", L["Questions.TrueFalseKey.Label"]);
             AddIfRefused(items, _changeReasonError, ChangeReasonId, L["Questions.ChangeReason.Label"]);
             AddIfRefused(items, _explanationError, "question-explanation", L["Questions.Field.Explanation"]);
@@ -1123,7 +1176,36 @@ else
             ? _saved is null || _trueFalseKey != _saved.TrueFalseKey
             : IsFillIn || IsShort
                 ? BlanksChanged()
-                : OptionsChanged() || (IsMatching && MatchItemsChanged());
+                : IsRubric
+                    ? RubricChanged()
+                    : OptionsChanged() || (IsMatching && MatchItemsChanged());
+
+    // F-109: the rows and the size limit against what is stored. A new question with its untouched empty row has nothing
+    // to save yet; the rows are compared as they would be sent, trimmed.
+    private bool RubricChanged()
+    {
+        var stored = (_saved?.Rubric ?? []).OrderBy(criterion => criterion.Position).ToList();
+        var current = SentCriteria;
+
+        return stored.Count != current.Count
+            || stored.Zip(current).Any(pair => pair.First.Name != pair.Second.Name.Trim()
+                || (pair.First.Description ?? string.Empty) != pair.Second.Description.Trim()
+                || pair.First.MaxPoints != pair.Second.Points)
+            || _answerSizeMin != _saved?.AnswerSizeMin
+            || _answerSizeMax != _saved?.AnswerSizeMax;
+    }
+
+    // F-109 BR10 (comfort; the Api decides): the key of a rubric is the set of (name, points) pairs, the name compared as the
+    // domain compares it (trimmed, white space collapsed, case ignored, accents kept).
+    private bool RubricKeyChanged()
+    {
+        static string Normalize(string name) => string.Join(' ', name.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).ToUpperInvariant();
+
+        var stored = (_saved?.Rubric ?? []).Select(criterion => (Normalize(criterion.Name), (int?)criterion.MaxPoints)).ToHashSet();
+        var current = SentCriteria.Select(criterion => (Normalize(criterion.Name), criterion.Points)).ToHashSet();
+
+        return !stored.SetEquals(current);
+    }
 
     // F-98 BR4: the key of a published question differs from the stored one when the correct option moved (a
     // reorder counts) or the true/false value did. Version 1 and drafts never need a reason.
@@ -1136,7 +1218,9 @@ else
                 ? !MatchPositions.SequenceEqual(StoredMatchPositions)
                 : IsFillIn || IsShort
                     ? BlanksKeyChanged()
-                    : !CorrectPositions.SequenceEqual(StoredCorrectPositions));
+                    : IsRubric
+                        ? RubricKeyChanged()
+                        : !CorrectPositions.SequenceEqual(StoredCorrectPositions));
 
     // F-107: the blanks as they would be sent, one per marker in statement order, answers trimmed and non-empty.
     private List<(int Number, List<string> Answers)> BlanksAsSent =>
@@ -1586,6 +1670,29 @@ else
                 _shortAnswers.Add(string.Empty);
             }
         }
+
+        // F-109: the stored criteria fill the rows in rubric order, and the size limit its fields.
+        if (question.Type is QuestionType.OpenAnswer or QuestionType.Essay)
+        {
+            _criteria =
+            [
+                .. (question.Rubric ?? []).OrderBy(criterion => criterion.Position)
+                    .Select(criterion => new CriterionDraft
+                    {
+                        Name = criterion.Name,
+                        Description = criterion.Description ?? string.Empty,
+                        Points = criterion.MaxPoints
+                    })
+            ];
+            if (_criteria.Count == 0)
+            {
+                _criteria.Add(new CriterionDraft());
+            }
+
+            _answerSizeMin = question.AnswerSizeMin;
+            _answerSizeMax = question.AnswerSizeMax;
+        }
+
         // F-98: what was typed as a reason belonged to the save that just came back.
         _changeReason = string.Empty;
         _changeReasonForced = false;
@@ -1598,6 +1705,12 @@ else
         _topicError = _languageError = _difficultyError = _statementError = null;
         _baseTextError = _explanationError = _optionsError = _error = _trueFalseKeyError = _matchingError = _blanksError = null;
         _blankRowErrors.Clear();
+        _rubricError = null;
+        foreach (var criterion in _criteria)
+        {
+            criterion.NameError = criterion.DescriptionError = criterion.PointsError = null;
+        }
+
         _baseTextCleared = null;
         _editionError = _paperNumberError = _noticeSubjectError = null;
         _showErrorSummary = false;
@@ -1614,6 +1727,9 @@ else
 
     // F-106: any change in the two columns drops the section refusal; the redraw updates the checklist.
     private void OnMatchingChanged() => _matchingError = null;
+
+    // F-109: any change in the rubric drops the refusal of the section; the redraw updates the checklist and the total.
+    private void OnRubricChanged() => _rubricError = null;
 
     // F-107: any change of an answer drops the refusals of the section; the redraw updates the checklist.
     private void OnBlanksChanged()
@@ -2239,9 +2355,11 @@ else
             item.Error = IsMatching ? MatchItemError(item, required: published) : null;
         }
 
-        _optionsError = published && !IsTrueFalse && !IsMatching && !IsFillIn && !IsShort ? PublishedOptionsError() : null;
+        _optionsError = published && !IsTrueFalse && !IsMatching && !IsFillIn && !IsShort && !IsRubric ? PublishedOptionsError() : null;
         _matchingError = published && IsMatching ? PublishedMatchingError() : null;
         CheckBlanks(published);
+        // F-109 BR6 (comfort; the Api decides): a published question keeps at least one criterion.
+        _rubricError = published && IsRubric && !RubricDone ? Errors.For(QuestionBankErrorCodes.QuestionRubricCriteriaRequired) : null;
         _trueFalseKeyError = published && IsTrueFalse && !TrueFalseKeyDone
             ? Errors.For(QuestionBankErrorCodes.QuestionTrueFalseKeyRequired)
             : null;
@@ -2268,7 +2386,7 @@ else
             _baseText?.Id,
             QuestionHtml.NullIfBlank(_explanation),
             _difficulty,
-            IsTrueFalse || IsFillIn || IsShort
+            IsTrueFalse || IsFillIn || IsShort || IsRubric
                 ? []
                 // F-106 BR5: a right item carries no mark, whatever single choice left on it.
                 : [.. _options.Select(option => new SaveQuestionOptionRequest(QuestionHtml.NullIfBlank(option.Html), !IsMatching && option.IsCorrect))],
@@ -2284,7 +2402,16 @@ else
             // F-107: one blank per marker the statement holds now; the answers of a removed marker are not sent.
             IsFillIn || IsShort
                 ? [.. BlankNumbers.Select(number => new SaveBlankRequest(number, [.. BlankAnswersOf(number)]))]
-                : null);
+                : null,
+            // F-109: the rows with something typed, in order; an untouched empty row is not sent. The size limit follows the type.
+            IsRubric
+                ? [.. SentCriteria.Select(criterion => new SaveCriterionRequest(
+                    criterion.Name.Trim(),
+                    string.IsNullOrWhiteSpace(criterion.Description) ? null : criterion.Description.Trim(),
+                    criterion.Points))]
+                : null,
+            IsEssay ? _answerSizeMin : null,
+            IsRubric ? _answerSizeMax : null);
 
         var result = token is null
             ? QuestionBankResult.Failed<QuestionResponse>(ErrorText.UnexpectedCode)
@@ -2378,7 +2505,7 @@ else
         _topicError is not null || _languageError is not null || _statementError is not null
         || _paperNumberError is not null || _explanationError is not null || _optionsError is not null
         || _trueFalseKeyError is not null || _changeReasonError is not null || _matchingError is not null
-        || _blanksError is not null || _blankRowErrors.Count > 0
+        || _blanksError is not null || _blankRowErrors.Count > 0 || _rubricError is not null
         || _options.Any(option => option.Error is not null)
         || _matchItems.Any(item => item.Error is not null);
 
@@ -2463,6 +2590,39 @@ else
                     _blanksError = text;
                 }
 
+                break;
+            case QuestionBankErrorCodes.QuestionCriterionNameRequired:
+            case QuestionBankErrorCodes.QuestionCriterionNameTooLong:
+            case QuestionBankErrorCodes.QuestionCriterionNameRepeated:
+            case QuestionBankErrorCodes.QuestionCriterionDescriptionTooLong:
+            case QuestionBankErrorCodes.QuestionCriterionPointsOutOfRange:
+                // F-109: the position is the criterion's among the rows sent, from 1; the field it is about is marked.
+                if (result.OptionPosition is { } rowPosition && rowPosition >= 1 && rowPosition <= SentCriteria.Count)
+                {
+                    var row = SentCriteria[rowPosition - 1];
+                    switch (code)
+                    {
+                        case QuestionBankErrorCodes.QuestionCriterionDescriptionTooLong:
+                            row.DescriptionError = text;
+                            break;
+                        case QuestionBankErrorCodes.QuestionCriterionPointsOutOfRange:
+                            row.PointsError = text;
+                            break;
+                        default:
+                            row.NameError = text;
+                            break;
+                    }
+                }
+                else
+                {
+                    _rubricError = text;
+                }
+
+                break;
+            case QuestionBankErrorCodes.QuestionRubricCriteriaCount:
+            case QuestionBankErrorCodes.QuestionRubricCriteriaRequired:
+            case QuestionBankErrorCodes.QuestionAnswerSizeInvalid:
+                _rubricError = text;
                 break;
             case QuestionBankErrorCodes.QuestionOptionsCount:
             case QuestionBankErrorCodes.QuestionKeyInvalid:

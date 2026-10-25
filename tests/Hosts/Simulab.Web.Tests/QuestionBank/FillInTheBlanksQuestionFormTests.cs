@@ -85,7 +85,7 @@ public sealed class FillInTheBlanksQuestionFormTests : QuestionPageTestContext
         page.Find("#question-type-FillInTheBlanks").GetAttribute("aria-checked").Should().Be("false");
         page.Find("#question-type-FillInTheBlanks").TextContent.Should().Contain("Fill in the blanks")
             .And.Contain("Blanks in the statement; the student types each answer.");
-        page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(6);
+        page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(8, "F-109 added the open answer and the essay");
     }
 
     // AC14, BR12: "Insert blank" sits on the statement toolbar of this type only, named in words.

@@ -121,6 +121,36 @@ public static class QuestionBankErrorCodes
     /// <summary>F-107 BR7: a question of another type was sent blanks (a non-empty list); nothing is ignored.</summary>
     public const string QuestionBlanksNotAllowed = "question.blanks_not_allowed";
 
+    /// <summary>F-109 BR5: a rubric has more than 10 criteria.</summary>
+    public const string QuestionRubricCriteriaCount = "question.rubric_criteria_count";
+
+    /// <summary>F-109 BR6: a question of the open-answer or essay type is published with no criterion.</summary>
+    public const string QuestionRubricCriteriaRequired = "question.rubric_criteria_required";
+
+    /// <summary>F-109 BR5: a criterion has an empty name. The problem's <c>position</c> is the criterion's, from 1.</summary>
+    public const string QuestionCriterionNameRequired = "question.criterion_name_required";
+
+    /// <summary>F-109 BR5: a criterion name has more than 100 characters. The problem's <c>position</c> is the criterion's.</summary>
+    public const string QuestionCriterionNameTooLong = "question.criterion_name_too_long";
+
+    /// <summary>F-109 BR5: a criterion description has more than 500 characters. The problem's <c>position</c> is the criterion's.</summary>
+    public const string QuestionCriterionDescriptionTooLong = "question.criterion_description_too_long";
+
+    /// <summary>F-109 BR5: a criterion has no points or points outside 1 to 100. The problem's <c>position</c> is the criterion's.</summary>
+    public const string QuestionCriterionPointsOutOfRange = "question.criterion_points_out_of_range";
+
+    /// <summary>F-109 BR5: two criterion names are equal once case and extra white space are ignored. The problem's <c>position</c> is the later criterion's.</summary>
+    public const string QuestionCriterionNameRepeated = "question.criterion_name_repeated";
+
+    /// <summary>F-109 BR8: a question of another type was sent a rubric (a non-empty list); nothing is ignored.</summary>
+    public const string QuestionRubricNotAllowed = "question.rubric_not_allowed";
+
+    /// <summary>F-109 BR7: the size limit of an open answer or an essay is out of range, a minimum is above the maximum, or an open answer has a minimum.</summary>
+    public const string QuestionAnswerSizeInvalid = "question.answer_size_invalid";
+
+    /// <summary>F-109 BR8: a question of another type was sent a size limit.</summary>
+    public const string QuestionAnswerSizeNotAllowed = "question.answer_size_not_allowed";
+
     /// <summary>F-98 BR5: a save or a publish would create a version whose answer key changed and gave no reason.</summary>
     public const string QuestionKeyChangeReasonRequired = "question.key_change_reason_required";
 

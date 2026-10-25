@@ -2644,6 +2644,54 @@ code, kbd, pre, samp {
     padding-left: var(--app-space-4);
 }
 
+/* F-109: the rubric of an open-answer or essay question, one row per criterion; the points are numbers, right aligned. */
+.app-preview-rubric {
+    width: 100%;
+    margin: var(--app-space-2) 0 var(--app-space-3);
+    border-collapse: collapse;
+}
+
+.app-preview-rubric th,
+.app-preview-rubric td {
+    padding: var(--app-space-2);
+    border-bottom: 1px solid var(--mud-palette-lines-default);
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.app-preview-rubric th:last-child,
+.app-preview-rubric td:last-child {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.app-preview-rubric-total td {
+    font-weight: 700;
+}
+
+/* F-109: a criterion row of the rubric section: the name and the description share the row with the points and the remove action. */
+.app-criterion-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--app-space-2);
+    margin-bottom: var(--app-space-3);
+}
+
+.app-criterion-row > .app-criterion-name,
+.app-criterion-row > .app-criterion-description {
+    flex: 1 1 14rem;
+}
+
+.app-criterion-row > .app-criterion-points {
+    flex: 0 0 7rem;
+}
+
+.app-answer-size {
+    margin-top: var(--app-space-4);
+}
+
 .app-option-radio {
     flex: none;
     display: inline-flex;

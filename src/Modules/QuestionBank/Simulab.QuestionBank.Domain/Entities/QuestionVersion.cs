@@ -14,6 +14,7 @@ public sealed class QuestionVersion : TenantEntity
     private readonly List<QuestionVersionOption> _options = [];
     private readonly List<QuestionVersionMatchItem>? _matchItems = [];
     private readonly List<QuestionVersionBlank>? _blanks = [];
+    private readonly List<QuestionVersionCriterion>? _rubric = [];
 
     // For EF.
     private QuestionVersion()
@@ -34,7 +35,10 @@ public sealed class QuestionVersion : TenantEntity
         string? reason,
         bool annulled = false,
         IEnumerable<QuestionVersionMatchItem>? matchItems = null,
-        IEnumerable<QuestionVersionBlank>? blanks = null)
+        IEnumerable<QuestionVersionBlank>? blanks = null,
+        IEnumerable<QuestionVersionCriterion>? rubric = null,
+        int? answerSizeMin = null,
+        int? answerSizeMax = null)
     {
         QuestionId = questionId;
         Number = number;
@@ -50,6 +54,9 @@ public sealed class QuestionVersion : TenantEntity
         Annulled = annulled;
         _matchItems = [.. matchItems ?? []];
         _blanks = [.. blanks ?? []];
+        _rubric = [.. rubric ?? []];
+        AnswerSizeMin = answerSizeMin;
+        AnswerSizeMax = answerSizeMax;
     }
 
     /// <summary>
@@ -82,7 +89,16 @@ public sealed class QuestionVersion : TenantEntity
                 TextHtml = item.TextHtml,
                 MatchPosition = item.MatchPosition
             }),
-            Blanks.Select(blank => new QuestionVersionBlank { Number = blank.Number, AcceptedAnswers = [.. blank.AcceptedAnswers] }));
+            Blanks.Select(blank => new QuestionVersionBlank { Number = blank.Number, AcceptedAnswers = [.. blank.AcceptedAnswers] }),
+            Rubric.Select(criterion => new QuestionVersionCriterion
+            {
+                Position = criterion.Position,
+                Name = criterion.Name,
+                Description = criterion.Description,
+                MaxPoints = criterion.MaxPoints
+            }),
+            AnswerSizeMin,
+            AnswerSizeMax);
 
     /// <summary>The question the version belongs to, held by id with no navigation back.</summary>
     public Guid QuestionId { get; private set; }
@@ -117,6 +133,18 @@ public sealed class QuestionVersion : TenantEntity
     /// version recorded before F-107, whose JSON column is null.
     /// </summary>
     public IReadOnlyList<QuestionVersionBlank> Blanks => _blanks ?? [];
+
+    /// <summary>
+    /// The criteria of an open-answer or essay question in rubric order (F-109, BR10); empty for any other type and for a
+    /// version recorded before F-109, whose JSON column is null.
+    /// </summary>
+    public IReadOnlyList<QuestionVersionCriterion> Rubric => _rubric ?? [];
+
+    /// <summary>The size limit the question had (F-109, BR10): minimum lines of an essay; null when not set.</summary>
+    public int? AnswerSizeMin { get; private set; }
+
+    /// <summary>The size limit the question had (F-109, BR10): maximum lines of an essay or characters of an open answer; null when not set.</summary>
+    public int? AnswerSizeMax { get; private set; }
 
     /// <summary>True when the answer key differs from the previous version's (BR4); never true for version 1.</summary>
     public bool AnswerKeyChanged { get; private set; }

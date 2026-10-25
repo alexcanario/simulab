@@ -1208,6 +1208,48 @@
   <data name="question.blank_answer_too_long" xml:space="preserve"><value>An answer has more than 100 characters.</value></data>
   <data name="question.blank_answer_repeated" xml:space="preserve"><value>Two answers of this blank are the same once case and extra spaces are ignored.</value></data>
   <data name="question.blanks_not_allowed" xml:space="preserve"><value>Only a fill-in-the-blanks question has blanks.</value></data>
+  <data name="question.rubric_criteria_count" xml:space="preserve"><value>A rubric has at most 10 criteria.</value></data>
+  <data name="question.rubric_criteria_required" xml:space="preserve"><value>Write at least one criterion to publish.</value></data>
+  <data name="question.criterion_name_required" xml:space="preserve"><value>Write a name for the criterion.</value></data>
+  <data name="question.criterion_name_too_long" xml:space="preserve"><value>A criterion name has at most 100 characters.</value></data>
+  <data name="question.criterion_description_too_long" xml:space="preserve"><value>A criterion description has at most 500 characters.</value></data>
+  <data name="question.criterion_points_out_of_range" xml:space="preserve"><value>The points of a criterion are a whole number from 1 to 100.</value></data>
+  <data name="question.criterion_name_repeated" xml:space="preserve"><value>Two criteria have the same name.</value></data>
+  <data name="question.rubric_not_allowed" xml:space="preserve"><value>Only an open-answer or essay question has a rubric.</value></data>
+  <data name="question.answer_size_invalid" xml:space="preserve"><value>The size limit is out of range, or the minimum is above the maximum.</value></data>
+  <data name="question.answer_size_not_allowed" xml:space="preserve"><value>Only an open-answer or essay question has a size limit.</value></data>
+  <data name="Questions.Type.OpenAnswer" xml:space="preserve"><value>Open answer</value></data>
+  <data name="Questions.Type.OpenAnswer.Description" xml:space="preserve"><value>A written answer graded by a person against a rubric.</value></data>
+  <data name="Questions.Type.Essay" xml:space="preserve"><value>Essay</value></data>
+  <data name="Questions.Type.Essay.Description" xml:space="preserve"><value>A long written text graded by a person against a rubric.</value></data>
+  <data name="Questions.Section.Rubric" xml:space="preserve"><value>Rubric</value></data>
+  <data name="Questions.Section.Rubric.Subtitle" xml:space="preserve"><value>Write the criteria a grader scores. The question's grade is the points given divided by the total.</value></data>
+  <data name="Questions.Rubric.Criterion.Name" xml:space="preserve"><value>Criterion {0} name</value></data>
+  <data name="Questions.Rubric.Criterion.Description" xml:space="preserve"><value>Criterion {0} description</value></data>
+  <data name="Questions.Rubric.Criterion.Points" xml:space="preserve"><value>Criterion {0} points</value></data>
+  <data name="Questions.Rubric.Criterion.ItemName" xml:space="preserve"><value>criterion {0}</value></data>
+  <data name="Questions.Rubric.Criterion.Removed" xml:space="preserve"><value>Criterion removed. {0} left.</value></data>
+  <data name="Questions.Rubric.Add" xml:space="preserve"><value>Add criterion</value></data>
+  <data name="Questions.Rubric.Count" xml:space="preserve"><value>{0} of 10 criteria</value></data>
+  <data name="Questions.Rubric.Total" xml:space="preserve"><value>Total: {0} points</value></data>
+  <data name="Questions.Section.AnswerSize" xml:space="preserve"><value>Answer size (optional)</value></data>
+  <data name="Questions.AnswerSize.MinLines" xml:space="preserve"><value>Minimum lines</value></data>
+  <data name="Questions.AnswerSize.MaxLines" xml:space="preserve"><value>Maximum lines</value></data>
+  <data name="Questions.AnswerSize.MaxCharacters" xml:space="preserve"><value>Maximum characters</value></data>
+  <data name="Questions.Explanation.ModelAnswer" xml:space="preserve"><value>Model answer</value></data>
+  <data name="Questions.Explanation.ModelAnswer.Hint" xml:space="preserve"><value>The grader always sees it; a student sees it after answering.</value></data>
+  <data name="Questions.Checklist.Rubric.Criteria" xml:space="preserve"><value>At least one rubric criterion</value></data>
+  <data name="Questions.Preview.OpenAnswerLabel" xml:space="preserve"><value>Your answer</value></data>
+  <data name="Questions.Preview.EssayLabel" xml:space="preserve"><value>Your essay</value></data>
+  <data name="Questions.Preview.OpenAnswerInstruction" xml:space="preserve"><value>Write your answer.</value></data>
+  <data name="Questions.Preview.EssayInstruction" xml:space="preserve"><value>Write your essay.</value></data>
+  <data name="Questions.Preview.LimitCharacters" xml:space="preserve"><value>Up to {0} characters.</value></data>
+  <data name="Questions.Preview.LimitLinesBetween" xml:space="preserve"><value>Between {0} and {1} lines.</value></data>
+  <data name="Questions.Preview.LimitLinesAtLeast" xml:space="preserve"><value>At least {0} lines.</value></data>
+  <data name="Questions.Preview.LimitLinesUpTo" xml:space="preserve"><value>Up to {0} lines.</value></data>
+  <data name="Questions.Preview.RubricTitle" xml:space="preserve"><value>Grading rubric</value></data>
+  <data name="Questions.Preview.RubricTotal" xml:space="preserve"><value>Total</value></data>
+  <data name="Questions.Preview.RubricNone" xml:space="preserve"><value>no rubric yet</value></data>
   <data name="Questions.Type.ReadOnlyHint" xml:space="preserve"><value>The type cannot be changed after the question is created.</value></data>
   <data name="Questions.Section.TrueFalseKey" xml:space="preserve"><value>Answer key</value></data>
   <data name="Questions.Section.TrueFalseKey.Subtitle" xml:space="preserve"><value>Mark the statement as true or false. Needed only to publish.</value></data>

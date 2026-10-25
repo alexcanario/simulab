@@ -83,7 +83,7 @@ public sealed class ShortAnswerQuestionFormTests : QuestionPageTestContext
         page.Find("#question-type-ShortAnswer").GetAttribute("aria-checked").Should().Be("false");
         page.Find("#question-type-ShortAnswer").TextContent.Should().Contain("Short answer")
             .And.Contain("A short typed answer, checked against accepted answers.");
-        page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(6);
+        page.Find("#question-type").QuerySelectorAll("[role='radio']").Should().HaveCount(8, "F-109 added the open answer and the essay");
     }
 
     // AC14, BR11: the key section replaces the options, starts with one empty field and the statement has no "Insert blank".

@@ -32,6 +32,8 @@ public sealed class BaseTextStore(QuestionBankModuleDbContext context) : IBaseTe
             .Include(question => question.MatchItems)
             // F-107: and so are the blanks.
             .Include(question => question.Blanks)
+            // F-109: and the rubric, or the version a passage edit records would lose it.
+            .Include(question => question.Rubric)
             .AsSplitQuery()
             .Where(question => question.BaseTextId == baseTextId && question.Status == QuestionStatus.Published)
             .ToListAsync(cancellationToken);

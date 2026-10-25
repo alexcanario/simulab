@@ -31,6 +31,9 @@ public sealed class QuestionBankModuleDbContext(
     /// <summary>F-107: the blanks of the fill-in-the-blanks questions, one per marker.</summary>
     public DbSet<QuestionBlank> QuestionBlanks => Set<QuestionBlank>();
 
+    /// <summary>F-109: the criteria of the rubric of the open-answer and essay questions, in position order.</summary>
+    public DbSet<QuestionRubricCriterion> QuestionRubricCriteria => Set<QuestionRubricCriterion>();
+
     /// <summary>F-103: the pictures of the statements, options and base texts; the files are in the storage.</summary>
     public DbSet<QuestionImage> QuestionImages => Set<QuestionImage>();
 
@@ -55,6 +58,7 @@ public sealed class QuestionBankModuleDbContext(
         modelBuilder.ApplyConfiguration(new QuestionMatchItemConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionOptionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionReviewEntryConfiguration());
+        modelBuilder.ApplyConfiguration(new QuestionRubricCriterionConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionVersionConfiguration());
     }
 }

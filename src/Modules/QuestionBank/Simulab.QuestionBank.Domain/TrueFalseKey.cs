@@ -11,11 +11,15 @@ namespace Simulab.QuestionBank.Domain;
 /// <param name="Value">The key; null when it is not set.</param>
 /// <param name="MatchItemsWritten">Left items that came with them; any of them is a refusal (F-106, BR6).</param>
 /// <param name="BlanksWritten">Blanks that came with them; any of them is a refusal (F-107, BR7).</param>
+/// <param name="RubricWritten">A rubric that came with them; any criterion is a refusal (F-109, BR8).</param>
+/// <param name="SizeWritten">True when a size limit came with them; always a refusal (F-109, BR8).</param>
 public sealed record TrueFalseKey(
     IReadOnlyList<OptionDraft> Written,
     bool? Value,
     IReadOnlyList<MatchItemDraft>? MatchItemsWritten = null,
-    IReadOnlyList<BlankDraft>? BlanksWritten = null) : AnswerKey
+    IReadOnlyList<BlankDraft>? BlanksWritten = null,
+    IReadOnlyList<CriterionDraft>? RubricWritten = null,
+    bool SizeWritten = false) : AnswerKey
 {
     public override QuestionType Type => QuestionType.TrueFalse;
 
@@ -30,7 +34,7 @@ public sealed record TrueFalseKey(
             return new OptionFault(new Error(QuestionBankErrorCodes.QuestionOptionsNotAllowed, ErrorKind.Validation), null);
         }
 
-        if ((MatchItemsRefused(MatchItemsWritten) ?? BlanksRefused(BlanksWritten)) is { } refused)
+        if ((MatchItemsRefused(MatchItemsWritten) ?? BlanksRefused(BlanksWritten) ?? RubricAndSizeRefused(RubricWritten, SizeWritten)) is { } refused)
         {
             return refused;
         }

@@ -38,6 +38,20 @@
                       Disabled="true" />
         <p class="app-question-select-count" id="question-preview-short-answer-instruction">@L["Questions.Preview.ShortAnswerInstruction"]</p>
     }
+    else if (IsRubric)
+    {
+        @* F-109 BR14: the task, not the answer. The box is inert and always empty; the limit is told, never enforced. *@
+        <AppTextField TValue="string"
+                      Id="question-preview-written-answer"
+                      Label="@(IsEssay ? L["Questions.Preview.EssayLabel"] : L["Questions.Preview.OpenAnswerLabel"])"
+                      Lines="@(IsEssay ? 8 : 4)"
+                      Disabled="true" />
+        <p class="app-question-select-count" id="question-preview-written-instruction">@(IsEssay ? L["Questions.Preview.EssayInstruction"] : L["Questions.Preview.OpenAnswerInstruction"])</p>
+        @if (LimitText is { } limit)
+        {
+            <p class="app-question-select-count" id="question-preview-written-limit">@limit</p>
+        }
+    }
     else if (IsTrueFalse)
     {
         @* F-97 BR7: the two answers a student judges between, as inert labelled text. *@
@@ -151,6 +165,38 @@
                         ? L["Questions.Preview.ShortAnswerNoKey"]
                         : L["Questions.Preview.ShortAnswerKey", string.Join(", ", accepted)])</p>
             }
+            else if (IsRubric)
+            {
+                @* F-109: the rubric as a table with its total, with icon and text; a draft with no criterion says so. *@
+                <span class="app-correct-label">
+                    <MudIcon Icon="@AppIcons.Verified" Size="Size.Small" Color="Color.Success" aria-hidden="true" />
+                    @L["Questions.Preview.RubricTitle"]
+                </span>
+                @if (_rubric.Count == 0)
+                {
+                    <p class="app-preview-no-key">@L["Questions.Preview.RubricNone"]</p>
+                }
+                else
+                {
+                    <table class="app-preview-rubric" id="question-preview-rubric" aria-label="@L["Questions.Preview.RubricTitle"]">
+                        <tbody>
+                            @foreach (var criterion in _rubric)
+                            {
+                                <tr>
+                                    <td>@criterion.Name</td>
+                                    <td>@criterion.Description</td>
+                                    <td>@criterion.MaxPoints</td>
+                                </tr>
+                            }
+                            <tr class="app-preview-rubric-total">
+                                <td>@L["Questions.Preview.RubricTotal"]</td>
+                                <td></td>
+                                <td>@_rubric.Sum(criterion => criterion.MaxPoints)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+            }
             else if (IsTrueFalse ? Question.TrueFalseKey is null : !_options.Any(IsKey))
             {
                 <p class="app-preview-no-key">@NoKeyText</p>
@@ -193,12 +239,30 @@
     private IReadOnlyList<QuestionOptionResponse> _options = [];
     private IReadOnlyList<MatchItemResponse> _matchItems = [];
     private IReadOnlyList<BlankResponse> _blanks = [];
+    private IReadOnlyList<CriterionResponse> _rubric = [];
 
     private bool Shown => AlwaysRevealed || Revealed;
 
     private bool IsFillIn => Question.Type == QuestionType.FillInTheBlanks;
 
     private bool IsShort => Question.Type == QuestionType.ShortAnswer;
+
+    // F-109: an open answer and an essay are written, graded by a person against the rubric.
+    private bool IsEssay => Question.Type == QuestionType.Essay;
+
+    private bool IsRubric => Question.Type is QuestionType.OpenAnswer or QuestionType.Essay;
+
+    // F-109 BR7: the limit as the student will read it; none when no limit is set.
+    private string? LimitText =>
+        !IsEssay
+            ? Question.AnswerSizeMax is { } characters ? L["Questions.Preview.LimitCharacters", characters].Value : null
+            : (Question.AnswerSizeMin, Question.AnswerSizeMax) switch
+            {
+                ({ } min, { } max) => L["Questions.Preview.LimitLinesBetween", min, max].Value,
+                ({ } min, null) => L["Questions.Preview.LimitLinesAtLeast", min].Value,
+                (null, { } max) => L["Questions.Preview.LimitLinesUpTo", max].Value,
+                _ => null
+            };
 
     // F-107 BR15: each marker of the stored statement is drawn as a numbered empty box named "Blank n"; after "show
     // answer" the box holds the blank's first accepted answer. Only the number and encoded texts go into the markup.
@@ -248,5 +312,6 @@
         _options = [.. Question.Options.OrderBy(option => option.Position)];
         _matchItems = [.. (Question.MatchItems ?? []).OrderBy(item => item.Position)];
         _blanks = Question.Blanks ?? [];
+        _rubric = [.. (Question.Rubric ?? []).OrderBy(criterion => criterion.Position)];
     }
 }
