@@ -104,6 +104,9 @@ public abstract class AdminPageTestContext : KitTestContext
         /// <summary>When set, every write answers this problem.</summary>
         public (HttpStatusCode Status, string Code)? WriteFailure { get; set; }
 
+        /// <summary>F-150: when set, only the tenant write answers this problem (the roles write still succeeds).</summary>
+        public (HttpStatusCode Status, string Code)? TenantWriteFailure { get; set; }
+
         public List<(HttpMethod Method, string Path, string? Query, string? Body)> Received { get; } = [];
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -111,6 +114,18 @@ public abstract class AdminPageTestContext : KitTestContext
             var path = request.RequestUri!.AbsolutePath;
             var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
             Received.Add((request.Method, path, request.RequestUri.Query, body));
+
+            // F-150: the tenant of one user, answered with that user as the list holds it.
+            if (path.EndsWith("/tenant", StringComparison.Ordinal) && request.Method == HttpMethod.Put)
+            {
+                if ((TenantWriteFailure ?? WriteFailure) is { } tenantFailure)
+                {
+                    return Problem(tenantFailure);
+                }
+
+                var user = Users.Single(row => path.Contains(row.Id.ToString(), StringComparison.Ordinal));
+                return Json(user with { TenantId = Read<SetUserTenantRequest>(body).TenantId });
+            }
 
             if (request.Method != HttpMethod.Get && WriteFailure is { } failure)
             {

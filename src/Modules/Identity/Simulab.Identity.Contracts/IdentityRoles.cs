@@ -6,6 +6,7 @@ public static class IdentityRoles
     public const string Student = "Student";
     public const string Curator = "Curator";
     public const string Admin = "Admin";
+    public const string Grader = "Grader";
 
     public static readonly IReadOnlyList<string> All = [Student, Curator, Admin];
 }

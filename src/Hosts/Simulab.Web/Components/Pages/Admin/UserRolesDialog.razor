@@ -50,6 +50,9 @@
     /// <summary>Sends the new set to the Api; the dialog stays open and shows the error when it fails.</summary>
     [Parameter, EditorRequired] public Func<IReadOnlyList<Guid>, Task<ApiResult<UserSummaryResponse>>> Save { get; set; } = default!;
 
+    /// <summary>F-150, BR11: sends the new tenant to the Api, after the roles and only when it changed.</summary>
+    [Parameter, EditorRequired] public Func<Guid?, Task<ApiResult<UserSummaryResponse>>> SaveTenant { get; set; } = default!;
+
     private HashSet<Guid> _selected = [];
     private string? _error;
     private bool _saving;

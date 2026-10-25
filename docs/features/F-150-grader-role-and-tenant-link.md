@@ -143,29 +143,29 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
 | Criterion | Test |
 |---|---|
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | pending |
-| AC19 | pending |
-| AC20 | pending |
-| AC21 | pending |
-| AC22 | pending |
-| AC23 | pending |
+| AC1 | `GraderRoleSeedTests.Seed_OnAFreshDatabase_CreatesGraderAsASystemRoleAndGradeHeldByGraderAndAdminOnly`, `GraderRoleSeedTests.Seed_ASecondStart_ChangesNothing_AndDoesNotGiveGradeBackToGrader` |
+| AC2 | `GraderRoleTests.Grader_RenameOrDelete_IsRefusedButItsPermissionsChange` |
+| AC3 | `GraderRoleTests.GiveGrader_TheUserHoldsIt_TheListShowsIt_AndTheRolesScreenListsItWithGrade` |
+| AC4 | `UserTenantTests.SetTenant_OnAUserWithNone_Answers200WithIt_AndTheListReturnsIt` |
+| AC5 | `UserTenantTests.SetTenant_ToNull_ClearsIt` |
+| AC6 | `UserTenantTests.SetTenant_TheValueAlreadyStored_Answers200AndWritesNoEntry` |
+| AC7 | `UserTenantTests.SetTenant_TheEmptyGuid_Is400TenantInvalid_AndChangesNothing` |
+| AC8 | `UserTenantTests.SetTenant_UnknownDeletedOrErasedUser_Is404UserNotFound` |
+| AC9 | `UserTenantTokenTests.SignInAndRefresh_CarryTheTenantStoredAtThatMoment` |
+| AC10 | `UserTenantDataTests.Erasure_KeepsTheTenant` |
+| AC11 | `UserTenantTests.SetTenant_WithoutRolesManage_Is403AndChangesNothing_OnAnotherAccountAndOnItsOwn`, `UserTenantTests.SetTenant_WithoutAToken_Is401` |
+| AC12 | `UserTenantTests.SetTenant_BodyWithOtherFields_AppliesOnlyTheTenant`, `UserTenantTests.SetTenant_ATenantThatIsNotAGuid_Is400AndChangesNothing` |
+| AC13 | `UserTenantTransactionTests.EntryCannotBeSaved_TheTenantIsNotChangedEither` |
+| AC14 | `UserTenantTests.ListUsers_WithoutRolesManage_Is403WithNoTenantInTheBody` |
+| AC15 | `GraderRoleTests.OnlyGrader_AdministrationAuthoringAndReviewRoutes_AreForbidden` |
+| AC16 | `UserTenantTokenTests.TokenRequestsThatSendATenantOfTheirOwn_StillCarryTheStoredOne` |
+| AC17 | `UserTenantTests.TenantChange_IsInTheRoleHistory_WithTheUserAndTheTenantsBeforeAndAfter`, `UserTenantTests.TenantChange_StoresTheUserTenantChangedAction`, `UserTenantHistoryAndTextTests.RoleHistory_TenantChange_ShowsTheTranslatedActionTheUserAndBothTenantIds` |
+| AC18 | `UserTenantDataTests.Export_HoldsTheCurrentTenantAndTheTenantChange` |
+| AC19 | `UserTenantPageTests.Dialog_RolesAndTenantChanged_SavesRolesThenTenant`, `Dialog_OnlyTenantChanged_SendsOnlyTheTenant`, `Dialog_TenantCleared_SendsNull`, `Dialog_TenantRequestFails_StaysOpenWithTheError_AndTheRolesShowAsSaved`, `Dialog_TenantThatIsNotAGuid_ShowsTheFieldErrorAndSendsNothing` |
+| AC20 | `UserTenantPageTests.List_HasATenantColumn_WithTheFirstEightCharactersOrADash` |
+| AC21 | `UserTenantTests.LeastPrivilegedRole_HoldingOnlyRolesManage_GetsEveryCallOfTheScreen`; validation step (the screen with that role) |
+| AC22 | `UserTenantHistoryAndTextTests.EveryNewTextOfTheItem_ExistsInEachLanguage`, `UserTenantHistoryAndTextTests.DialogTitle_NamesTheAccessOfTheUser`, `RoleResourcesTests.EveryPermissionSystemRoleAndActionName_HasAText` |
+| AC23 | `UserTenantTokenTests.SignInAndRefresh_CarryTheTenantStoredAtThatMoment`, `UserTenantTokenTests.TokenRequestsThatSendATenantOfTheirOwn_StillCarryTheStoredOne`, `UserTenantTests.UserWithATenant_IsListed` |
 
 ## Decisions
 - 2026-10-25 — F-150 delivers the `Grader` system role, an assignable `TenantId` on the user and the permission to grade; the visibility rule of the grader lives in the queue (F-151) — D-7 (option A); no filter is woken here — asked
@@ -184,6 +184,9 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 - 2026-10-25 — The tenant query filter is removed from the `User` entity only (the soft-delete filter stays), a recorded exception to the project rule "do not remove the tenant filters": with `ICurrentTenant` = `NoTenant` a user with a tenant was hidden from sign-in (`FindByNameAsync`), refresh (`FindByIdAsync`) and the users list. The rule's sentence becomes "Do not remove the tenant filters (exception: the User entity, F-150)" in a rule commit on the main branch at the ship — change note v2, owner
 - 2026-10-25 — The unique email index `(TenantId, NormalizedEmail)` stays as it is: the sign-up check already looks the address up ignoring the tenant; F-162 revisits the index — change note v2, owner
 - 2026-10-25: design passes (system-design, architect; opus: a door) — accepted: the 7-step slice; tracked `User` + `SaveChanges` inside `RunExclusiveAsync`, never `UserManager.UpdateAsync` or `ExecuteUpdate` (stamp and audit); `RoleChange.UserTenantChanged` null when equal, `RoleIds` empty, no `TenantId` stamped on the entry; comment-only migration for `role_changes.action` (required by `EnumColumnCommentTests`), plus the table comment and an explicit `users.TenantId` comment (the standard one says "every row while dormant"); `User.AssignTenant(Guid?)` returns `Result` and refuses the empty GUID (architect 3: a rule of one entity lives in it), private setter; the whole `.IgnoreQueryFilters(...)` call is deleted on `Users` (architect 1: dropping only the argument would also lift soft delete); `Register_EmailOfAnotherTenant_IsStillSeenAsTaken` rewritten (architect 2); AC1 "never given back" tested on `Grader` (Admin is re-granted at every start); a non-GUID body keeps the framework binding 400 (AC12 asserts 400 and nothing changed); the role filter of the history never lists tenant changes (said in the flow page); docs step checked by `DocGen --check` and `techdocs.js check` (architect 5). Dropped: nothing.
+- 2026-10-25: architect finding 3 dropped at the test phase — `User.AssignTenant` cannot return a `Result` with `user.tenant_invalid`: `Simulab.Identity.Domain` references only `SharedKernel`, and the code lives in `Contracts`; the handler refuses the empty GUID with the code, and `AssignTenant(Guid?)` guards it and returns whether the value changed
+- 2026-10-25: AC9 "empty when there is none" is a token with no `tenant_id` claim: OpenIddict drops a claim whose value is empty (seen at the test phase, `TenantClaimAsync` read null), so the test accepts null or empty and a standalone "empty claim" test was dropped (it tested nothing new)
+- 2026-10-25: two resource keys beyond the item's list — `Users.Saved` now says "Access of {0} saved." (the dialog saves roles and tenant) and the new `Users.Dialog.RolesSaved` ("Roles of {0} saved.") shows inside the dialog when the roles were saved and the tenant failed (BR11, AC19)
 - 2026-10-25: privacy — the tenant id is added to the Data fields of the `Account` and `Role changes` rows of `docs/privacy/data-processing-register.md`; the privacy policy gets no new version (a field of an existing category, no partner yet; a version comes with the first partner, F-162) — owner (architect 4)
 - 2026-10-25: Design coverage — scope (item v2, BR1–BR12, AC1–AC23), contracts (route group, error codes, `UserSummaryResponse` and `AccountDataResponse` callers, token claim, export), simplicity (lock, `RoleChange` reuse, dialog reuse), layout, rules, data; not checked: none
 - 2026-10-25: traps — T1 `TenantId` inside `SetUserRolesRequest`: breaks BR5 and ties the tenant to the last-manager refusal; T2 renewing the security stamp to push the tenant: ends every session (revocation is out of scope); T3 stamping the audit entry's own `TenantId`: hides it from global admins once F-162 wakes the filter

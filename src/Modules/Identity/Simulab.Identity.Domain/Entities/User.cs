@@ -53,6 +53,12 @@ public class User : IdentityUser<Guid>, IAuditableEntity, ISoftDeletableEntity
     /// <summary>F-53 BR1: the account must pick a new password before it gets tokens. False by default.</summary>
     public bool MustChangePassword { get; private set; }
 
+    /// <summary>
+    /// F-150 BR4: attaches the account to a tenant, or detaches it with null. Returns false when the value
+    /// is already the stored one (BR5: nothing to write).
+    /// </summary>
+    public bool AssignTenant(Guid? tenantId) => throw new NotImplementedException();
+
     /// <summary>F-53 BR2: marks the account; the seed does it only when it creates the account.</summary>
     public void RequirePasswordChange() => MustChangePassword = true;
 

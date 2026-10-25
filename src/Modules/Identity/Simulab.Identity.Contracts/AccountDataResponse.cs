@@ -1,6 +1,6 @@
 namespace Simulab.Identity.Contracts;
 
-/// <summary>The account itself in the data export (F-16 BR4).</summary>
+/// <summary>The account itself in the data export (F-16 BR4); <paramref name="TenantId"/> since F-150 (BR8).</summary>
 public sealed record AccountDataResponse(
     Guid Id,
     string Email,
@@ -10,4 +10,5 @@ public sealed record AccountDataResponse(
     DateTimeOffset CreatedAt,
     DateTimeOffset? EmailVerifiedAt,
     bool IsAdultDeclared,
-    string Status);
+    string Status,
+    Guid? TenantId = null);

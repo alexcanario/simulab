@@ -12,6 +12,9 @@ public static class QuestionBankPermissions
     /// <summary>Gates the review queue and the decision on a question in review (F-105, BR10); a holder needs no <see cref="Manage"/>.</summary>
     public const string Review = "questions.review";
 
+    /// <summary>Grades essays and open answers (F-150, BR2); nothing requires it until the correction queue (F-151).</summary>
+    public const string Grade = "questions.grade";
+
     /// <summary>The module name Identity seeds this catalog under.</summary>
     public const string ModuleName = "questions";
 

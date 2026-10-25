@@ -28,6 +28,9 @@ public interface IRoleAdministrationStore
     /// <summary>A non-deleted account of any status (BR7).</summary>
     Task<bool> UserExistsAsync(Guid userId, CancellationToken cancellationToken = default);
 
+    /// <summary>F-150: a non-deleted account of any status, tracked for changes; null when there is none.</summary>
+    Task<User?> FindUserAsync(Guid userId, CancellationToken cancellationToken = default);
+
     Task<int> CountHoldersAsync(Guid roleId, CancellationToken cancellationToken = default);
 
     /// <summary>BR8b: Active, non-deleted accounts that hold <c>identity.roles.manage</c> through a non-deleted role.</summary>
