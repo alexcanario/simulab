@@ -51,6 +51,9 @@ public static class QuestionBankModule
         services.AddSingleton<QuestionImageSweep>();
         services.AddHostedService<QuestionImageSweepWorker>();
 
+        // F-110 BR8: the files of the seeded images, written by the Api right after the migrations.
+        services.AddSingleton<SeedQuestionImageFiles>();
+
         services.AddScoped<IQuestionStore, QuestionStore>();
         services.AddScoped<IQuestionQueries, QuestionQueries>();
         services.AddScoped<IBaseTextStore, BaseTextStore>();

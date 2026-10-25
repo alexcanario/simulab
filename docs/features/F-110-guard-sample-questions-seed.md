@@ -1,7 +1,7 @@
 ---
 feature: F-110
 epic: Question bank
-status: approved
+status: building
 board: 156
 version: 2
 ---
@@ -81,6 +81,22 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 - AC12 The seed adds no UI text; the three UI locales and the missing-key test are unchanged and green.
 - On screen only (validation script): the questions list of Manaus 2026 shows 60 questions; question 01 shows the base text; question 16 shows two images; question 47 shows the annulment; a sample of statements matches the paper (UC1 to UC3).
 
+## Criterion → test
+| Criterion | Test |
+|---|---|
+| AC1 | `SeedManausGuardQuestionsTests.Migrate_EmptyDatabase_TheEditionHoldsExactlyTheClassifiedQuestionsWithTheirKeys` |
+| AC2 | `SeedManausGuardQuestionsTests.Migrate_EmptyDatabase_EverySeededQuestionIsWhatTheDomainAndTheSanitizerMake` |
+| AC3 | `SeedManausGuardQuestionsTests.Migrate_EmptyDatabase_EveryQuestionBut47IsPublishedWithOneVersionThatHoldsItsOptions_AndNoReviewEntry` |
+| AC4 | `SeedManausGuardQuestionsTests.Migrate_EmptyDatabase_Question47IsAnnulledWithKeyDThenTheBoardsReason` |
+| AC5 | `SeedManausGuardQuestionsTests.Migrate_EmptyDatabase_Questions01To08ShareTheBaseTextAndTheirVersionsHoldItsHtml` |
+| AC6 | `SeedManausGuardQuestionsMigrationTests.Migrate_TheEditionAlreadyHoldsAQuestion_SeedsNothingAndSucceeds` (live, deleted), `Migrate_TheEditionIsDeleted_SeedsNothingAndSucceeds`, `Migrate_NoCatalogSchema_SeedsNothingAndSucceeds` |
+| AC7 | `SeedManausGuardQuestionsMigrationTests.Migrate_ATopicUnderAnotherId_TheQuestionsOfThatTopicPointAtIt`, `Migrate_ADeletedTopic_SkipsItsQuestionsAndSeedsTheOthers` |
+| AC8 | `SeedManausGuardQuestionsTests.Migrate_EmptyDatabase_TheThreeImagesAreOwnedByQuestions16And17_AndTheSweepKeepsThem` |
+| AC9 | `SeedQuestionImageFilesTests.Start_WritesTheThreeSeededImagesWithTheEmbeddedBytes`, `ASecondStart_WritesNothing`, `AMissingBlob_IsWrittenAgain_ButNotTheBlobOfADeletedRow` |
+| AC10 | `SeedManausGuardQuestionsRollbackTests.ACuratorsEdit_StaysWhenMigratingAgain_AndTheRollbackRemovesOnlyTheUntouchedRows` |
+| AC11 | `SeedManausGuardQuestionsTests.Migrate_ApiHost_ServesTheOpenApiDocument_AndHasNoPendingModelChange`; `Simulab.ArchitectureTests` (whole project) |
+| AC12 | `ResourceParityTests.Every_key_exists_in_every_language` (no resource changed) |
+
 ## Decisions
 - 2026-10-24 — The source is the Manaus 2026 paper, booklet type 1, and its final answer key, free to use — D-6. confirmed: D-6
 - 2026-10-25 — The seed is a data migration with frozen literals, run once per database, skipped whole when the edition is deleted — same pattern as F-37, F-51 and F-78. confirmed: D-6, F-78
@@ -95,6 +111,8 @@ No new route, screen or endpoint. The seeded questions appear in the questions b
 - 2026-10-25 — Technical: fixed ids follow `0198f370-<group>-7000-8000-<number>` with new groups 10 (questions), 11 (options), 12 (versions), 13 (base texts), 14 (images).
 - 2026-10-25 — Technical: a missing topic skips only its question (BR4), the way F-78 BR4 skips a missing mapping target.
 - 2026-10-25 — Exception to ADR-0005 (a module never touches another module's tables): this seed migration reads `catalog.exam_editions`, `catalog.topics`, `catalog.subjects` and `catalog.notice_subjects` read-only, at migration time only, inside a `DO` block guarded by `to_regclass`, because BR3 and BR4 cannot be met otherwise; the Api migrates the catalog before the question bank, and a database without the catalog schema (the QuestionBank migration tests) skips the seed. Option A of the build stop, owner, change note v2. asked
+- 2026-10-25 — Build: the design passes of step 4b are skipped: no project, API contract, message between modules or schema change (a data migration and a start-up step).
+- 2026-10-25: plan — 1 seed migration skeleton, the 60 questions, base text and Q47 annulment inside one guarded `DO` block → AC1, AC2, AC3, AC4, AC5; 2 guards and lookups (edition holds questions or is deleted, no catalog schema, topic under another id or deleted) → AC6, AC7; 3 `Down` that keeps what a curator changed → AC10; 4 image rows in the migration plus the embedded PNGs written at Api start-up → AC8, AC9; 5 existing suites that count or delete seeded data adjusted → affected tests green, AC11, AC12; 6 flow page `images-in-questions.md` → `techdocs.js check`; 7 gate, coverage, scan, validation script → `agile gate GREEN`
 
 ## Out of scope
 - The essay question of the paper — F-163.
