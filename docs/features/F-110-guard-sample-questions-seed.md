@@ -1,13 +1,19 @@
 ---
 feature: F-110
 epic: Question bank
-status: idea
+status: refining
 board: 156
 version: 1
 ---
 # Sample questions of the municipal guard editions
 
 Technical terms: [glossary](../glossary.md)
+
+## Resume here
+- Status: refining (2026-10-25)
+- Stopped at: Refinement started: worktree created, premises being checked
+- Next action: Question round, then approval
+- Waiting on: nothing
 
 ## Summary
 Seeded questions for the municipal guard editions of F-37, so local work and testers start with real questions without typing them. Simulae has no question seed (its `GuardaMunicipalContentSeed` holds only the taxonomy). Source: epic Question bank (E-4).
