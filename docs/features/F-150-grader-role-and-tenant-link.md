@@ -1,13 +1,19 @@
 ---
 feature: F-150
 epic: Partner tenants
-status: idea
+status: refining
 board: 208
 version: 1
 ---
 # Grader role and user-to-tenant link
 
 Technical terms: [glossary](../glossary.md)
+
+## Resume here
+- Status: refining (2026-10-25)
+- Stopped at: Refinement started; reading the Identity code before the question round.
+- Next action: Answer the question cards.
+- Waiting on: nothing
 
 ## Summary
 A `Grader` system role (a person who signs in and grades essays and open answers) and an assignable tenant on the user, for the curator and the grader. A grader with no tenant sees every essay to grade; with a tenant, only that tenant's essays, not the global ones. Until the first partner tenant exists, the one grader sees every essay. Source: discussion D-5 (owner's model, 2026-10-24); it reverts ADR-0001 row 18 ("Teacher / grader roles: Not in v1"), whose text says RBAC lets roles be added as data.
