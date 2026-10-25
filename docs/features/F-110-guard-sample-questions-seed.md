@@ -1,7 +1,7 @@
 ---
 feature: F-110
 epic: Question bank
-status: refining
+status: approved
 board: 156
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: refining (2026-10-25)
-- Stopped at: File complete, open questions answered
-- Next action: Owner types: aprovo F-110
+- Status: approved (2026-10-25)
+- Stopped at: Approved by the owner on 2026-10-25
+- Next action: /agile:build F-110
 - Waiting on: nothing
 
 ## Summary
