@@ -1,7 +1,7 @@
 ---
 feature: F-150
 epic: Partner tenants
-status: approved
+status: building
 board: 208
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-25)
-- Stopped at: Change note v2 approved (tenant filter removed from User only, AC23); no code written yet
-- Next action: Run /agile:build F-150 --worktree (F-110 is validating in its own worktree)
+- Status: building (2026-10-25)
+- Stopped at: Build started: status building, criterion table written
+- Next action: Design passes (system-design, architect), then the plan
 - Waiting on: nothing
 
 ## Summary
@@ -141,6 +141,31 @@ Let an administrator give someone the `Grader` role and attach any account to a 
 
 ## Criterion → test
 <!-- Written by /agile:build at its start, one row per criterion above, in the same order. -->
+| Criterion | Test |
+|---|---|
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
+| AC15 | pending |
+| AC16 | pending |
+| AC17 | pending |
+| AC18 | pending |
+| AC19 | pending |
+| AC20 | pending |
+| AC21 | pending |
+| AC22 | pending |
+| AC23 | pending |
 
 ## Decisions
 - 2026-10-25 — F-150 delivers the `Grader` system role, an assignable `TenantId` on the user and the permission to grade; the visibility rule of the grader lives in the queue (F-151) — D-7 (option A); no filter is woken here — asked
