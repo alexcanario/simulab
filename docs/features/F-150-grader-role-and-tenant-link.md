@@ -197,6 +197,11 @@ Tests locked: 1f8d58fe8481b95e6bae57af129cef37a1f6788c (9 files); unlocks: 0
 - 2026-10-25: Design coverage — scope (item v2, BR1–BR12, AC1–AC23), contracts (route group, error codes, `UserSummaryResponse` and `AccountDataResponse` callers, token claim, export), simplicity (lock, `RoleChange` reuse, dialog reuse), layout, rules, data; not checked: none
 - 2026-10-25: traps — T1 `TenantId` inside `SetUserRolesRequest`: breaks BR5 and ties the tenant to the last-manager refusal; T2 renewing the security stamp to push the tenant: ends every session (revocation is out of scope); T3 stamping the audit entry's own `TenantId`: hides it from global admins once F-162 wakes the filter
 - 2026-10-25: plan — 1 Grader role and `questions.grade` (glossary, contracts, grant, resx) → AC1, AC2, AC3, AC15; 2 tenant filter removed from `User` only, `IgnoreQueryFilters` calls deleted, registration test rewritten → AC23, AC9, AC16; 3 `PUT .../users/{id}/tenant` with `User.AssignTenant`, handler, store, audit entry, list projection and the comment migration → AC4–AC8, AC11–AC14; 4 export `TenantId` and erasure kept → AC18, AC10; 5 role history shows `UserTenantChanged` → AC17; 6 users screen: Tenant column and dialog field with two saves (typed client, resx, bUnit) → AC19, AC20, AC21, AC22; 7 flow page, pt-BR manual, privacy register, regenerated docs → `DocGen --check`, `techdocs.js check F-150`
+- 2026-10-26: review finding 1 (minor) — a body whose `TenantId` is not a GUID gets the framework's 400 without a stable `code` (api-contracts asks for one); every route already behaves this way and the dialog never sends such a body — owner: new idea for every route, not fixed here
+- 2026-10-26: review finding 2 (minor) — `RoleChange.UserTenantChanged` repeated the "unchanged" check of `User.AssignTenant`; now returns a non-null entry and the handler drops the `!` — owner: fixed
+- 2026-10-26: Review coverage — correctness (BR1–BR12, AC1–AC23 against handler, store, queries, export, erasure, token issue, seed, `WebPermissions`, dialog save and retry), security (route group policy, one-field body, T1–T6 mapped to AC11–AC16), data (comment-only migration and its Down, audit entry in the same save, entry stays global), locks (`git diff 1f8d58f` on the 9 locked paths empty, 0 unlocks, post-lock edits of other tests read), localization (16 key lines in the three resx, no hardcoded text, glossary rows), tests (every AC can fail), rules (naming, api-contracts, ui-project, project.md; the `User` filter exception goes to the rule text at the ship); not checked: none
+- 2026-10-26: traps — T1 unique email index per tenant: a path that skips the sign-up check (an import, the partner registration of F-162) can write one address twice, and the lookups by email then throw; T2 the audit stores only the tenant id: once a `Tenant` entity has a name, history and export need a lookup by action to show it
+- 2026-10-26: security scan — `agile scan GREEN` (gitleaks: 8 findings, all triaged before; semgrep: 2 medium open in `tools/Simulab.DocGen/GeneratedDocs.cs`, outside this item)
 
 ## Out of scope
 - A `Tenant` entity, a partner registration screen and a tenant picker — the first partner brings them (epic Partner tenants).
@@ -224,6 +229,9 @@ Tests locked: 1f8d58fe8481b95e6bae57af129cef37a1f6788c (9 files); unlocks: 0
 - 2026-10-25 question — asked 7, from context 2
 - 2026-10-25 change — v2: tenant filter removed from User only; BR4 rewritten; AC23 added
 - 2026-10-25 question — asked 1, from context 0
+- 2026-10-25 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.402/Microsoft.Common.CurrentVersion.targets, 2 reds
+- 2026-10-26 rework — review 2: RoleChange.UserTenantChanged no longer repeats the unchanged check (non-null, no !)
+- 2026-10-26 question — asked 1, from context 0
 
 ## Delivery
 <!-- Filled by /agile:ship. -->

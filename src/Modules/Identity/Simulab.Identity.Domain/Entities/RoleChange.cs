@@ -116,16 +116,11 @@ public sealed class RoleChange : TenantEntity
 
     /// <summary>
     /// F-150 BR6: a user moved to another tenant, or out of one. The tenant ids are the items: the former one
-    /// in <see cref="Removed"/>, the new one in <see cref="Added"/>; no role is involved.
+    /// in <see cref="Removed"/>, the new one in <see cref="Added"/>; no role is involved. The caller records it
+    /// only when <see cref="User.AssignTenant"/> reported a change.
     /// </summary>
-    public static RoleChange? UserTenantChanged(Guid userId, Guid? before, Guid? after)
-    {
-        if (before == after)
-        {
-            return null;
-        }
-
-        return new RoleChange
+    public static RoleChange UserTenantChanged(Guid userId, Guid? before, Guid? after) =>
+        new()
         {
             Action = RoleChangeAction.UserTenantChanged,
             TargetUserId = userId,
@@ -133,7 +128,6 @@ public sealed class RoleChange : TenantEntity
             Removed = Tenant(before),
             RoleIds = []
         };
-    }
 
     private static List<RoleChangeItem> Tenant(Guid? tenantId) =>
         tenantId is { } id ? [new RoleChangeItem { Key = id.ToString(), Name = id.ToString() }] : [];

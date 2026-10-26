@@ -36,7 +36,7 @@ public sealed class SetUserTenantHandler(IRoleAdministrationStore store, IRoleAd
             }
 
             // BR6: written by the same save as the change, so it rolls back with it.
-            store.AddRoleChange(RoleChange.UserTenantChanged(userId, before, user.TenantId)!);
+            store.AddRoleChange(RoleChange.UserTenantChanged(userId, before, user.TenantId));
             await store.SaveChangesAsync(cancellationToken);
             return Result.Success(true);
         }, cancellationToken);
