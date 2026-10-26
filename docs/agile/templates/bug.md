@@ -14,6 +14,12 @@ Same status flow as a feature, including `cancelled` (a duplicate, from idea or 
 
 Technical terms: [glossary](../glossary.md)
 
+## Resume here
+- Status: idea (<YYYY-MM-DD>)
+- Stopped at: <where the work stopped, one line>
+- Next action: <one concrete action, and who acts>
+- Waiting on: <an owner decision, an item, or nothing>
+
 ## What happens
 <!-- Observed behavior, with the steps to reproduce. -->
 1. <Step>

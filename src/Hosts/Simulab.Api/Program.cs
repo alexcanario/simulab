@@ -179,6 +179,13 @@ if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environmen
     await app.Services.MigrateIdentityModuleAsync();
     await app.Services.MigrateCatalogModuleAsync();
     await app.Services.MigrateQuestionBankModuleAsync();
+
+    // F-110 BR8: the files of the seeded question images, right after the migration that seeds their rows.
+    if (app.Configuration.GetValue("QuestionBank:SeedImagesOnStart", true))
+    {
+        await app.Services.WriteSeedQuestionImagesAsync();
+    }
+
     await app.Services.EnsureIdentityClientAsync(app.Configuration);
     await app.Services.EnsureRolesAndPermissionsAsync();
 }

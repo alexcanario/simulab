@@ -17,4 +17,9 @@
     <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Storage\Simulab.Storage.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- F-110 BR8: the files of the seeded images, named by their image id, written to the storage at Api start-up. -->
+    <EmbeddedResource Include="Images\Seed\*.png" LogicalName="SeedImages.%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

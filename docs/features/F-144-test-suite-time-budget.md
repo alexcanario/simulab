@@ -32,6 +32,8 @@ Added 2026-10-21 (retro of F-103): at the ship of F-103 the full run (`gate.js s
 
 Added 2026-10-25 (retro of F-109): at the ship of F-109 the full run (`gate.js ship`, 14 projects) gave QuestionBank 840 tests in 7 m 25 s (8 m 13 s in the first run), Identity 548 in 7 m 33 s and Catalog 665 in 7 m 22 s; QuestionBank alone took 4 m 46 s. One more cause seen: the shared test PostgreSQL ran out of connections (`53300`) with 840 tests and a host per class, fixed with `max_connections=500` in `tests/Simulab.Testing/PostgresServer.cs`; the breakdown of this item should check whether the host per class is the cost. It is the first run over 7 min for three projects at once. Evidence: the `Passed! ... Duration` lines of the F-109 ship gate.
 
+Added 2026-10-25 (retro of F-110): at the ship of F-110 the full run (`gate.js ship`, 14 projects, 5321 tests, build 36 s, `tested Simulab.slnx (384 s)`) gave Identity 548 tests in 6 m 11 s, Catalog 665 in 6 m 12 s and QuestionBank 857 in 6 m 15 s, over the budget by 84 s. F-110 also seeds 60 questions, their versions and a base text in every database a host test migrates, which the breakdown should measure as one more per-class cost. Evidence: the per-project `Passed! ... Duration` lines of that run.
+
 Done means a measured breakdown of where the time goes (database container start, migrations, per-test setup) and a change that brings the full suite back under the budget with margin, with the numbers recorded in `docs/infra.md`.
 
 ## Start

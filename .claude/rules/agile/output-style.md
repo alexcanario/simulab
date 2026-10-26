@@ -17,4 +17,5 @@
 - Say "I don't know" or "not verified" in those words. Never fill a gap with a plausible guess.
 - Bad news goes first and plain: what failed, what it blocks, what you propose.
 - Tables only for data with two or more dimensions; otherwise a short list. No headers in answers under 10 lines.
+- Documents follow `references/document-style.md`.
 - A subagent returns only: verdict, findings (file:line, one line each), and what it did not check. No narrative.

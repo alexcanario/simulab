@@ -49,34 +49,36 @@
 | 21 | F-120 | Architecture test for section id selectors | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size S |
 | 22 | F-143 | Align the external ingestion lab with E-9 | idea | - | AI-assisted exam import | - | - | level 1; feature; Should; size S |
 | 23 | F-130 | Admin screens in the new composition | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size M |
-| 24 | F-110 | Sample questions of the municipal guard editions | idea | - | Question bank | - | - | level 1; feature; Could; size S |
-| 25 | F-160 | Seed the development admin with the legal documents accepted | idea | - | test-infrastructure | - | - | level 1; feature; Could; size S |
-| 26 | F-142 | Question similarity search | idea | - | Question bank | - | - | level 1; feature; Could; size M |
-| 27 | F-40 | Eval suite for model calls | idea | - | Foundation and identity | - | - | level 1; feature |
-| 28 | F-72 | EU representative before selling in Portugal | idea | - | Foundation and identity | - | - | level 1; feature |
-| 29 | F-82 | Update the CI workflow actions to current majors | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 30 | F-87 | Production emails leave from our own domain | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 31 | F-88 | Handle bounced and spam-flagged emails | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 32 | F-91 | Glossary sweep of technical terms | idea | - | Foundation and identity | - | - | level 1; feature |
-| 33 | F-92 | An admin requires a user to change their password | idea | - | Foundation and identity | - | - | level 1; feature |
-| 34 | F-111 | A release migrates the production database | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 35 | F-113 | Table button in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
-| 36 | F-115 | One test helper for every module's permissions | idea | - | Foundation and identity | - | - | level 1; feature |
-| 37 | F-116 | A GitHub Actions workflow publishes a release | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 38 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | - | Cloud hosting and operations | - | F-147 | level 1; feature |
-| 39 | F-118 | Sort and extra filters of the question list | idea | - | Question bank | - | - | level 1; feature |
-| 40 | F-121 | Email the author of a review decision | idea | - | Question bank | - | - | level 1; feature |
-| 41 | F-122 | Assign a reviewer to a question | idea | - | Question bank | - | - | level 1; feature |
-| 42 | F-123 | Review edits of a published question | idea | - | Question bank | - | - | level 1; feature |
-| 43 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - | level 1; feature |
-| 44 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
-| 45 | F-145 | E-mail notice of a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
-| 46 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
-| 47 | F-150 | Grader role and user-to-tenant link | idea | - | Partner tenants | - | F-151 | level 1; feature |
-| 48 | F-161 | Keep only the Manaus 2026 edition in the guard catalog seed | idea | - | assessment-catalog | - | - | level 1; feature |
-| 49 | F-151 | Essay and open-answer correction queue | idea | - | Question bank | F-150 | F-152 | level 2: waits on F-150; feature; Could; size M |
-| 50 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
-| 51 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 3: waits on F-151; feature; Could; size M |
+| 24 | F-160 | Seed the development admin with the legal documents accepted | idea | - | test-infrastructure | - | - | level 1; feature; Could; size S |
+| 25 | F-142 | Question similarity search | idea | - | Question bank | - | - | level 1; feature; Could; size M |
+| 26 | F-40 | Eval suite for model calls | idea | - | Foundation and identity | - | - | level 1; feature |
+| 27 | F-72 | EU representative before selling in Portugal | idea | - | Foundation and identity | - | - | level 1; feature |
+| 28 | F-82 | Update the CI workflow actions to current majors | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 29 | F-87 | Production emails leave from our own domain | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 30 | F-88 | Handle bounced and spam-flagged emails | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 31 | F-91 | Glossary sweep of technical terms | idea | - | Foundation and identity | - | - | level 1; feature |
+| 32 | F-92 | An admin requires a user to change their password | idea | - | Foundation and identity | - | - | level 1; feature |
+| 33 | F-111 | A release migrates the production database | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 34 | F-113 | Table button in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
+| 35 | F-115 | One test helper for every module's permissions | idea | - | Foundation and identity | - | - | level 1; feature |
+| 36 | F-116 | A GitHub Actions workflow publishes a release | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 37 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | - | Cloud hosting and operations | - | F-147 | level 1; feature |
+| 38 | F-118 | Sort and extra filters of the question list | idea | - | Question bank | - | - | level 1; feature |
+| 39 | F-121 | Email the author of a review decision | idea | - | Question bank | - | - | level 1; feature |
+| 40 | F-122 | Assign a reviewer to a question | idea | - | Question bank | - | - | level 1; feature |
+| 41 | F-123 | Review edits of a published question | idea | - | Question bank | - | - | level 1; feature |
+| 42 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - | level 1; feature |
+| 43 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
+| 44 | F-145 | E-mail notice of a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
+| 45 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
+| 46 | F-150 | Grader role and user-to-tenant link | approved | opus | Partner tenants | - | F-151, F-162 | level 1; feature |
+| 47 | F-161 | Keep only the Manaus 2026 edition in the guard catalog seed | idea | - | assessment-catalog | - | - | level 1; feature |
+| 48 | F-163 | Seed the essay question of the Manaus 2026 paper | idea | - | Question bank | - | - | level 1; feature |
+| 49 | F-164 | Text alignment in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
+| 50 | F-151 | Essay and open-answer correction queue | idea | - | Question bank | F-150 | F-152 | level 2: waits on F-150; feature; Could; size M |
+| 51 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
+| 52 | F-162 | Tenant-scoped visibility for curators and graders | idea | - | Partner tenants | F-150 | - | level 2: waits on F-150; feature |
+| 53 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 3: waits on F-151; feature; Could; size M |
 
 ## Checklist
 
@@ -117,38 +119,40 @@
 - [ ] 21. F-120 — Architecture test for section id selectors [idea] — why level 1; feature; Should; size S
 - [ ] 22. F-143 — Align the external ingestion lab with E-9 [idea] — why level 1; feature; Should; size S
 - [ ] 23. F-130 — Admin screens in the new composition [idea] — why level 1; feature; Should; size M
-- [ ] 24. F-110 — Sample questions of the municipal guard editions [idea] — why level 1; feature; Could; size S
-- [ ] 25. F-160 — Seed the development admin with the legal documents accepted [idea] — why level 1; feature; Could; size S
-- [ ] 26. F-142 — Question similarity search [idea] — why level 1; feature; Could; size M
-- [ ] 27. F-40 — Eval suite for model calls [idea] — why level 1; feature
-- [ ] 28. F-72 — EU representative before selling in Portugal [idea] — why level 1; feature
-- [ ] 29. F-82 — Update the CI workflow actions to current majors [idea] — why level 1; feature
-- [ ] 30. F-87 — Production emails leave from our own domain [idea] — why level 1; feature
-- [ ] 31. F-88 — Handle bounced and spam-flagged emails [idea] — why level 1; feature
-- [ ] 32. F-91 — Glossary sweep of technical terms [idea] — why level 1; feature
-- [ ] 33. F-92 — An admin requires a user to change their password [idea] — why level 1; feature
-- [ ] 34. F-111 — A release migrates the production database [idea] — why level 1; feature
-- [ ] 35. F-113 — Table button in the rich text editor [idea] — why level 1; feature
-- [ ] 36. F-115 — One test helper for every module's permissions [idea] — why level 1; feature
-- [ ] 37. F-116 — A GitHub Actions workflow publishes a release [idea] — why level 1; feature
-- [ ] 38. F-117 — The deploy pipeline checks the cloud account before it signs in [idea] — unlocks F-147 — why level 1; feature
-- [ ] 39. F-118 — Sort and extra filters of the question list [idea] — why level 1; feature
-- [ ] 40. F-121 — Email the author of a review decision [idea] — why level 1; feature
-- [ ] 41. F-122 — Assign a reviewer to a question [idea] — why level 1; feature
-- [ ] 42. F-123 — Review edits of a published question [idea] — why level 1; feature
-- [ ] 43. F-139 — Partner brand in place of Control Alt Systems [idea] — why level 1; feature
-- [ ] 44. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
-- [ ] 45. F-145 — E-mail notice of a new legal document version [idea] — why level 1; feature
-- [ ] 46. F-146 — Acceptance history on the account page [idea] — why level 1; feature
-- [ ] 47. F-150 — Grader role and user-to-tenant link [idea] — unlocks F-151 — why level 1; feature
-- [ ] 48. F-161 — Keep only the Manaus 2026 edition in the guard catalog seed [idea] — why level 1; feature
-- [ ] 49. F-151 — Essay and open-answer correction queue [idea] — waits on F-150 — unlocks F-152 — why level 2: waits on F-150; feature; Could; size M
-- [ ] 50. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
-- [ ] 51. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 3: waits on F-151; feature; Could; size M
+- [ ] 24. F-160 — Seed the development admin with the legal documents accepted [idea] — why level 1; feature; Could; size S
+- [ ] 25. F-142 — Question similarity search [idea] — why level 1; feature; Could; size M
+- [ ] 26. F-40 — Eval suite for model calls [idea] — why level 1; feature
+- [ ] 27. F-72 — EU representative before selling in Portugal [idea] — why level 1; feature
+- [ ] 28. F-82 — Update the CI workflow actions to current majors [idea] — why level 1; feature
+- [ ] 29. F-87 — Production emails leave from our own domain [idea] — why level 1; feature
+- [ ] 30. F-88 — Handle bounced and spam-flagged emails [idea] — why level 1; feature
+- [ ] 31. F-91 — Glossary sweep of technical terms [idea] — why level 1; feature
+- [ ] 32. F-92 — An admin requires a user to change their password [idea] — why level 1; feature
+- [ ] 33. F-111 — A release migrates the production database [idea] — why level 1; feature
+- [ ] 34. F-113 — Table button in the rich text editor [idea] — why level 1; feature
+- [ ] 35. F-115 — One test helper for every module's permissions [idea] — why level 1; feature
+- [ ] 36. F-116 — A GitHub Actions workflow publishes a release [idea] — why level 1; feature
+- [ ] 37. F-117 — The deploy pipeline checks the cloud account before it signs in [idea] — unlocks F-147 — why level 1; feature
+- [ ] 38. F-118 — Sort and extra filters of the question list [idea] — why level 1; feature
+- [ ] 39. F-121 — Email the author of a review decision [idea] — why level 1; feature
+- [ ] 40. F-122 — Assign a reviewer to a question [idea] — why level 1; feature
+- [ ] 41. F-123 — Review edits of a published question [idea] — why level 1; feature
+- [ ] 42. F-139 — Partner brand in place of Control Alt Systems [idea] — why level 1; feature
+- [ ] 43. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
+- [ ] 44. F-145 — E-mail notice of a new legal document version [idea] — why level 1; feature
+- [ ] 45. F-146 — Acceptance history on the account page [idea] — why level 1; feature
+- [ ] 46. F-150 — Grader role and user-to-tenant link [approved] — model opus — unlocks F-151, F-162 — why level 1; feature
+- [ ] 47. F-161 — Keep only the Manaus 2026 edition in the guard catalog seed [idea] — why level 1; feature
+- [ ] 48. F-163 — Seed the essay question of the Manaus 2026 paper [idea] — why level 1; feature
+- [ ] 49. F-164 — Text alignment in the rich text editor [idea] — why level 1; feature
+- [ ] 50. F-151 — Essay and open-answer correction queue [idea] — waits on F-150 — unlocks F-152 — why level 2: waits on F-150; feature; Could; size M
+- [ ] 51. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
+- [ ] 52. F-162 — Tenant-scoped visibility for curators and graders [idea] — waits on F-150 — why level 2: waits on F-150; feature
+- [ ] 53. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 3: waits on F-151; feature; Could; size M
 
 ## Summary
 
-- Delivered: 138
+- Delivered: 139
 - MVP mockup-stitch-1-formulario: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-2-navegacao: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-3-barra-app: 3 open (3 in the cuts, 0 their dependencies)

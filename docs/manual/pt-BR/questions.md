@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105, F-106, F-107, F-108, F-109]
-updated: 2026-10-24
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105, F-106, F-107, F-108, F-109, F-110]
+updated: 2026-10-25
 ---
 # Questões
 
@@ -45,6 +45,14 @@ revisão também são de quem gerencia o banco. Aprovar ou rejeitar é de quem t
 6. Dá para escolher até 100 disciplinas, tópicos e bancas ao todo.
 7. Os filtros ficam no endereço da página: abra uma questão, salve ou cancele, e você volta para a mesma lista
    filtrada, e pode mandar o link para outra pessoa.
+
+### Questões que já vêm no banco
+Um banco novo já traz as 60 questões de múltipla escolha da prova de 2026 da Guarda Municipal de Manaus
+(Instituto Consulplan, caderno tipo 1, gabarito definitivo), na edição **CONSULPLAN · Guarda Municipal · 2026**,
+numeradas como na prova e com tópico, disciplina do edital e gabarito. As questões 01 a 08 usam o texto-base
+"Calma, gente", as questões 16 e 17 trazem as imagens da prova, e a questão 47 vem anulada, como a banca fez.
+A redação da prova não vem junto. Essas questões são como as outras: dá para alterar, despublicar, anular ou
+excluir, e a mudança fica. Quando a edição já tinha alguma questão, ou foi excluída, nada é trazido.
 
 ### Escrever uma questão
 1. Escolha **Adicionar**. O primeiro campo, **Tipo de questão**, oferece **Múltipla escolha** (o padrão),
