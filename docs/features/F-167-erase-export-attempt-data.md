@@ -1,7 +1,7 @@
 ---
 feature: F-167
 epic: Exam Simulator
-status: approved
+status: building
 board: 233
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-26)
-- Stopped at: Approved by the owner (2026-10-26).
-- Next action: /agile:build F-167 (owner).
+- Status: building (2026-10-26)
+- Stopped at: Building started (status building, Criterion to test table written); stopped before the design passes (4b).
+- Next action: /agile:build F-167 (resumes at 4b: system-design then architect, opus).
 - Waiting on: nothing
 
 ## Summary
@@ -101,6 +101,24 @@ Struck threat: a student with very many attempts makes the file large (S1, D). F
 - AC12 (BR6) Given the migration, when it runs on an empty database and again, then `exam_engine.attempts` has the index on `student_id`, the migration is additive and the down removes only it.
 - AC13 Given the architecture tests, when they run, then `ExamEngine` still references other modules only through their `Contracts` projects and `Identity.Contracts` references only `SharedKernel`.
 - AC14 (BR11) Given the `/account` page, when the "Your data" card is read, then its explanation names the attempts and answers in pt-BR, pt-PT and en, and the missing-key test stays green.
+
+## Criterion → test
+| Criterion | Test |
+| --- | --- |
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
 
 ## Decisions
 - 2026-10-26 — The erasure keeps the user id as the pseudonym and keeps attempts without a person attached, as decided in ADR-0001 #9 and F-10. Still true here? Yes — confirmed: docs/decisions/ADR-0001-foundation.md
