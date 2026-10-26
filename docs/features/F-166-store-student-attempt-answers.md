@@ -1,7 +1,7 @@
 ---
 feature: F-166
 epic: Exam Simulator
-status: validating
+status: done
 board: 232
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-26)
-- Stopped at: Review fixes applied and validation script written; both scripts ran green against the real app host (2026-10-26).
-- Next action: Owner follows the validation script (steps 1-5) and says validado; then /agile:ship F-166.
+- Status: done (2026-10-26)
+- Stopped at: Shipped: merged to main as 1e83f94, app version 1.23.0 (2026-10-26).
+- Next action: Build F-167 (erase and export of attempt data); do not deploy F-166 without it.
 - Waiting on: nothing
 
 ## Summary
@@ -375,3 +375,13 @@ Necessário para validar: o app host rodando a partir deste worktree (você o in
 - 2026-10-26 rework — review finding 5 RowLockTransactions moved to Persistence
 - 2026-10-26 rework — review finding 6 one LockAndLoadAsync for both lock reads
 - 2026-10-26 rework — review finding 7 comment in English
+
+## Delivery
+
+Gate time: 7 passes, 40 min 46 s — turn 3 (1 min 25 s), ship 3 (35 min 6 s), scan 1 (4 min 15 s), sealed 1 (6 min 13 s saved); 1 red
+Usage: 10014.2k weighted (estimate) — refine 8% · build 31% · review 10% · ship 1% · other 51% — agents 18% — context per turn 218k → 188k — 5 sessions, 379 turns
+- Branch: feature/F-166 (local only, never pushed; deleted after the merge)
+- Merge: 1e83f94 (2026-10-26), app version 1.23.0
+- Validation evidence: the owner followed the script and said "validado" in the conversation (2026-10-26); the evidence tool recorded `0 of 9 tested` because the owner's boxes were kept outside Git and only 3 of them (step 1, 2.1, 2.2) reached the file; the rest is not recorded as tested.
+- Full suite at ship: 5442 tests in 15 projects, 0 failures, 33 s build and 474 s test run (over the 5 min budget by 174 s, reported to the retro); `agile scan GREEN`; `agile docs GREEN`; `agile techdocs GREEN: 1 page(s)`.
+- Not released: F-166 is not to be deployed without F-167 (erase and export of attempt data), see `## Decisions`.
