@@ -11,7 +11,7 @@ Rules implied by ADR-0001. Core rules in this folder still apply.
 
 ## Data
 - Entities inherit `TenantEntity` (nullable `TenantId`, audit, soft delete). `User` is the only exception: it inherits `IdentityUser<Guid>` and repeats the fields.
-- `TenantId` is dormant in v1: every row is global or B2C (`TenantId` null). Do not build institution features, and do not remove the tenant filters.
+- `TenantId` is dormant in v1: every row is global or B2C (`TenantId` null). Do not build institution features, and do not remove the tenant filters (exception: the User entity, F-150).
 - Every unique index that includes `TenantId` is `NULLS NOT DISTINCT` (`.AreNullsDistinct(false)`), with a test that inserts two global duplicates and expects a conflict.
 - Soft delete only. Erasure of a person anonymizes personal data and keeps unidentified attempts.
 - Published question content is versioned. An attempt stores the question version and answer key version that graded it. An annulment or a changed answer key creates a version; it never rewrites history.
