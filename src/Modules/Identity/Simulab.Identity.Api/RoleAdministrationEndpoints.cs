@@ -34,6 +34,9 @@ public static class RoleAdministrationEndpoints
         users.MapGet(string.Empty, ListUsersAsync).WithName("ListUsers");
         users.MapPut("/{id:guid}/roles", SetUserRolesAsync).WithName("SetUserRoles");
 
+        // F-150, BR5: the user's tenant, with the same permission as their roles.
+        users.MapPut("/{id:guid}/tenant", SetUserTenantAsync).WithName("SetUserTenant");
+
         // F-14, BR7: the role history is read with the same permission.
         var roleChanges = group.MapGroup("/role-changes").RequireAuthorization(policy);
         roleChanges.MapGet(string.Empty, ListRoleChangesAsync).WithName("ListRoleChanges");
@@ -140,6 +143,12 @@ public static class RoleAdministrationEndpoints
         Results.Ok(await queries.ListUsersAsync(new UserListQuery(page, pageSize, search, roleId, sortBy, descending), cancellationToken));
 
     private static async Task<IResult> SetUserRolesAsync(Guid id, SetUserRolesRequest request, SetUserRolesHandler handler, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Answer(await handler.HandleAsync(id, request, cancellationToken));
+    }
+
+    private static async Task<IResult> SetUserTenantAsync(Guid id, SetUserTenantRequest request, SetUserTenantHandler handler, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         return Answer(await handler.HandleAsync(id, request, cancellationToken));

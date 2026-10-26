@@ -1,4 +1,5 @@
-@* F-9, UC6: the whole set of roles a user holds; several are allowed and their permissions add up (BR6). *@
+@* F-9, UC6: the whole set of roles a user holds; several are allowed and their permissions add up (BR6).
+   F-150, UC2: the same dialog edits the user's tenant (one way to edit an item, rule ui-project). *@
 @using Simulab.Identity.Contracts
 @using Simulab.Web.Services
 @inject IStringLocalizer<SharedResources> L
@@ -11,6 +12,10 @@
             @if (_error is not null)
             {
                 <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
+            }
+            @if (_rolesSaved is not null)
+            {
+                <AppAlert Severity="Severity.Success" Text="@_rolesSaved" Class="mb-4" />
             }
             <AppAlert Severity="Severity.Info" Text="@L["Users.Dialog.Help"]" Class="mb-4" />
 
@@ -32,6 +37,15 @@
                     </AppCheckbox>
                 }
             </fieldset>
+
+            <AppTextField TValue="string"
+                          Id="user-tenant"
+                          Label="@L["Users.Field.Tenant"]"
+                          Value="@_tenantText"
+                          ValueChanged="@((string? value) => OnTenantChanged(value))"
+                          Disabled="_saving"
+                          Hint="@L["Users.Field.TenantHelp"]"
+                          Error="@_tenantError" />
         </div>
     </DialogContent>
     <DialogActions>
@@ -50,13 +64,32 @@
     /// <summary>Sends the new set to the Api; the dialog stays open and shows the error when it fails.</summary>
     [Parameter, EditorRequired] public Func<IReadOnlyList<Guid>, Task<ApiResult<UserSummaryResponse>>> Save { get; set; } = default!;
 
+    /// <summary>F-150, BR11: sends the new tenant to the Api, after the roles and only when it changed.</summary>
+    [Parameter, EditorRequired] public Func<Guid?, Task<ApiResult<UserSummaryResponse>>> SaveTenant { get; set; } = default!;
+
     private HashSet<Guid> _selected = [];
+    private HashSet<Guid> _savedRoles = [];
+    private Guid? _savedTenant;
+    private string? _tenantText;
+    private string? _tenantError;
     private string? _error;
+    private string? _rolesSaved;
+    private UserSummaryResponse? _lastSaved;
     private bool _saving;
 
-    private bool HasChanges => !_selected.SetEquals(User.Roles.Select(role => role.Id));
+    private bool RolesChanged => !_selected.SetEquals(_savedRoles);
 
-    protected override void OnInitialized() => _selected = [.. User.Roles.Select(role => role.Id)];
+    private bool TenantChanged => !TryReadTenant(out var tenant) || tenant != _savedTenant;
+
+    private bool HasChanges => RolesChanged || TenantChanged;
+
+    protected override void OnInitialized()
+    {
+        _selected = [.. User.Roles.Select(role => role.Id)];
+        _savedRoles = [.. _selected];
+        _savedTenant = User.TenantId;
+        _tenantText = User.TenantId?.ToString();
+    }
 
     private void Toggle(Guid roleId, bool on)
     {
@@ -70,20 +103,75 @@
         }
     }
 
+    private void OnTenantChanged(string? value)
+    {
+        _tenantText = value;
+        _tenantError = null;
+    }
+
+    /// <summary>Empty is none; otherwise a GUID that is not the empty one. The Api checks it again (BR5).</summary>
+    private bool TryReadTenant(out Guid? tenant)
+    {
+        tenant = null;
+        var text = _tenantText?.Trim();
+        if (string.IsNullOrEmpty(text))
+        {
+            return true;
+        }
+
+        if (Guid.TryParse(text, out var id) && id != Guid.Empty)
+        {
+            tenant = id;
+            return true;
+        }
+
+        return false;
+    }
+
+    // BR11: the roles first and only when they changed, then the tenant only when it changed. What was
+    // saved stays saved: a failure of the second request keeps the dialog open with the first one shown.
     private async Task SaveAsync()
     {
-        _saving = true;
-        _error = null;
-        var result = await Save([.. _selected]);
-        _saving = false;
-
-        if (result.IsSuccess)
+        if (!TryReadTenant(out var tenant))
         {
-            Dialog.Close(DialogResult.Ok(result.Value));
+            _tenantError = L["Users.Tenant.Invalid"];
             return;
         }
 
-        _error = Errors.For(result.ErrorCode);
+        _saving = true;
+        _error = null;
+
+        if (RolesChanged)
+        {
+            var roles = await Save([.. _selected]);
+            if (!roles.IsSuccess)
+            {
+                _saving = false;
+                _error = Errors.For(roles.ErrorCode);
+                return;
+            }
+
+            _savedRoles = [.. _selected];
+            _lastSaved = roles.Value;
+        }
+
+        if (tenant != _savedTenant)
+        {
+            var saved = await SaveTenant(tenant);
+            if (!saved.IsSuccess)
+            {
+                _saving = false;
+                _error = Errors.For(saved.ErrorCode);
+                _rolesSaved = _lastSaved is null ? null : L["Users.Dialog.RolesSaved", User.Email].Value;
+                return;
+            }
+
+            _savedTenant = tenant;
+            _lastSaved = saved.Value;
+        }
+
+        _saving = false;
+        Dialog.Close(DialogResult.Ok(_lastSaved ?? User));
     }
 
     private async Task CancelAsync()

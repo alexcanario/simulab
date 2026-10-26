@@ -148,7 +148,7 @@ public sealed class RoleChangeTrailTests : IdentityApiTests
         (await ListAsync(admin, $"?userId={signedUp.Id}")).Total.Should().Be(0);
         (await ListAsync(admin, $"?userId={erased.Id}")).Total.Should().Be(0);
         var seedRoles = (await RolesAsync(admin)).Where(role => IdentityRoles.All.Contains(role.Key)).Select(role => role.Value).ToList();
-        seedRoles.Should().HaveCount(3);
+        seedRoles.Should().HaveCount(IdentityRoles.All.Count);
         (await QueryAsync(context => context.RoleChanges.CountAsync(change =>
             change.Action == RoleChangeAction.RoleCreated && change.RoleId != null && seedRoles.Contains(change.RoleId.Value))))
             .Should().Be(0);

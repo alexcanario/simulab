@@ -73,6 +73,9 @@ public sealed class RoleAdministrationStore(IdentityModuleDbContext context, ILo
     public Task<bool> UserExistsAsync(Guid userId, CancellationToken cancellationToken = default) =>
         context.Users.AnyAsync(user => user.Id == userId, cancellationToken);
 
+    public Task<User?> FindUserAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        context.Users.SingleOrDefaultAsync(user => user.Id == userId, cancellationToken);
+
     public Task<int> CountHoldersAsync(Guid roleId, CancellationToken cancellationToken = default) =>
         (from userRole in context.UserRoles
          join user in context.Users on userRole.UserId equals user.Id

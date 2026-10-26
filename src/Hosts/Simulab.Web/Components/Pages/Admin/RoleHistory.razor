@@ -215,10 +215,14 @@
         }
     }
 
+    // F-150: a tenant change carries the tenant ids themselves; there is no name to translate.
     private string ItemsText(RoleChangeResponse change, IReadOnlyList<RoleChangeItemResponse> items) =>
-        string.Join(", ", items.Select(item => change.Action == RoleChangeActions.UserRolesChanged
-            ? RoleText.NameOf(L, item.Name, item.IsSystem)
-            : RoleText.PermissionName(L, item.Key)));
+        string.Join(", ", items.Select(item => change.Action switch
+        {
+            RoleChangeActions.UserRolesChanged => RoleText.NameOf(L, item.Name, item.IsSystem),
+            RoleChangeActions.UserTenantChanged => item.Key,
+            _ => RoleText.PermissionName(L, item.Key)
+        }));
 
     // B-3, BR6: through the accessor, which refreshes the token; never from the cookie.
     private async Task<string?> TokenAsync()

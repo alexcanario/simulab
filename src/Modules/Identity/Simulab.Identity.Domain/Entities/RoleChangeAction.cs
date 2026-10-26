@@ -6,5 +6,6 @@ public enum RoleChangeAction
     RoleCreated,
     RoleUpdated,
     RoleDeleted,
-    UserRolesChanged
+    UserRolesChanged,
+    UserTenantChanged
 }

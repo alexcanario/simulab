@@ -7,6 +7,7 @@ public static class RoleChangeActions
     public const string RoleUpdated = "RoleUpdated";
     public const string RoleDeleted = "RoleDeleted";
     public const string UserRolesChanged = "UserRolesChanged";
+    public const string UserTenantChanged = "UserTenantChanged";
 
-    public static readonly IReadOnlyList<string> All = [RoleCreated, RoleUpdated, RoleDeleted, UserRolesChanged];
+    public static readonly IReadOnlyList<string> All = [RoleCreated, RoleUpdated, RoleDeleted, UserRolesChanged, UserTenantChanged];
 }

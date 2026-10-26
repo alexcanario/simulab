@@ -37,3 +37,4 @@ Generated from `docs/api/Simulab.Api.json`. Do not edit.
 | `PUT` | `/api/v1/identity/profile` | UpdateProfile | 200 |
 | `PUT` | `/api/v1/identity/roles/{id}` | UpdateRole | 200 |
 | `PUT` | `/api/v1/identity/users/{id}/roles` | SetUserRoles | 200 |
+| `PUT` | `/api/v1/identity/users/{id}/tenant` | SetUserTenant | 200 |

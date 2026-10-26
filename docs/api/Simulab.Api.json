@@ -613,6 +613,40 @@
         }
       }
     },
+    "/api/v1/identity/users/{id}/tenant": {
+      "put": {
+        "tags": [
+          "Identity"
+        ],
+        "operationId": "SetUserTenant",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserTenantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/identity/role-changes": {
       "get": {
         "tags": [
@@ -4587,6 +4621,19 @@
           }
         },
         "description": "The whole set of roles a user holds after the call (F-9, BR6); an empty set is allowed."
+      },
+      "SetUserTenantRequest": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        },
+        "description": "The tenant a user belongs to after the call (F-150, BR5); null clears it."
       },
       "SystemInfoResponse": {
         "required": [

@@ -911,7 +911,7 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)")
                         .HasColumnName("action")
-                        .HasComment("What was done: RoleCreated, RoleUpdated, RoleDeleted or UserRolesChanged.");
+                        .HasComment("What was done: RoleCreated, RoleUpdated, RoleDeleted, UserRolesChanged or UserTenantChanged.");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1006,7 +1006,7 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
 
                     b.ToTable("role_changes", "identity", t =>
                         {
-                            t.HasComment("The trail of what was done to roles and to who holds them: created, renamed, deleted, granted, revoked. Read by an admin auditing access.");
+                            t.HasComment("The trail of what was done to roles and to who holds them: created, renamed, deleted, granted, revoked, and a person's tenant changed. Read by an admin auditing access.");
                         });
                 });
 
@@ -1171,7 +1171,7 @@ namespace Simulab.Identity.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uuid")
                         .HasColumnName("tenant_id")
-                        .HasComment("The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant.");
+                        .HasComment("The partner organization the account belongs to, set by an administrator. Null for none. Carried in the token; nothing is filtered by it yet.");
 
                     b.Property<DateTimeOffset?>("TotpEnabledAt")
                         .HasColumnType("timestamp with time zone")

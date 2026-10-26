@@ -126,7 +126,8 @@ public sealed class UsersPageTests : AdminPageTestContext
         dialogs.WaitForAssertion(() => Api.Received.Should().Contain(call => call.Method == HttpMethod.Put));
         FakeAdminApi.Read<SetUserRolesRequest>(Api.Received.Single(call => call.Method == HttpMethod.Put).Body).RoleIds
             .Should().BeEquivalentTo([Curator.Id, Reviewer.Id, Support.Id]);
-        snackbars.WaitForAssertion(() => snackbars.Markup.Should().Contain("Roles of bruno.lima@exemplo.com.br saved."));
+        // F-150: the dialog saves the user's access (roles and tenant), and the message says so.
+        snackbars.WaitForAssertion(() => snackbars.Markup.Should().Contain("Access of bruno.lima@exemplo.com.br saved."));
     }
 
     [Fact]

@@ -1,8 +1,8 @@
 ---
 page: roles
 locale: pt-BR
-features: [F-6, F-9, F-14, F-33]
-updated: 2026-09-24
+features: [F-6, F-9, F-14, F-33, F-150]
+updated: 2026-10-26
 ---
 # Papéis e permissões
 
@@ -14,12 +14,12 @@ Toda conta tem um papel. Só uma conta com a permissão "Gerenciar papéis e atr
 ## Como fazer
 ### Saber qual é o seu papel
 1. Toda conta nova começa como **Estudante**: você pratica e acompanha seu progresso.
-2. **Curadores** importam e publicam conteúdo; **Administradores** cuidam do catálogo, das contas, dos papéis e dos planos.
+2. **Curadores** importam e publicam conteúdo; **Corretores** corrigem redações e respostas abertas (a fila de correção ainda não existe: por enquanto um Corretor vê o mesmo que um Estudante); **Administradores** cuidam do catálogo, das contas, dos papéis e dos planos.
 3. Um Administrador dá outro papel a você na página [Usuários](users.md).
 
 ### Ver os papéis (Administradores)
 1. Escolha **Papéis**, na seção **Administração** do menu lateral.
-2. Estudante, Curador e Administrador têm o selo **Sistema**: o nome deles nunca muda e não podem ser excluídos.
+2. Estudante, Curador, Corretor e Administrador têm o selo **Sistema**: o nome deles nunca muda e não podem ser excluídos. O Corretor começa com a permissão "Corrigir questões".
 3. Cada linha mostra quantas permissões o papel carrega e quantas contas o possuem. Clique no número de contas para vê-las na página Usuários.
 
 ### Adicionar ou alterar um papel
@@ -44,7 +44,7 @@ Toda conta tem um papel. Só uma conta com a permissão "Gerenciar papéis e atr
 |---|---|---|
 | Já existe um papel com este nome (incluindo papéis excluídos). | Outro papel, às vezes um excluído, já usa esse nome. | Escolha outro nome. |
 | Use de 2 a 50 caracteres. | O nome é curto ou longo demais. | Ajuste o tamanho. |
-| Papéis de sistema não podem ser renomeados nem excluídos. | Estudante, Curador e Administrador são fixos. | Altere as permissões deles ou crie um papel seu. |
+| Papéis de sistema não podem ser renomeados nem excluídos. | Estudante, Curador, Corretor e Administrador são fixos. | Altere as permissões deles ou crie um papel seu. |
 | O papel Administrador precisa manter "Gerenciar papéis e atribuições". | Sem ela ninguém mais conseguiria gerenciar papéis. | Deixe essa permissão marcada. |
 | Tire este papel de todos os usuários antes de excluí-lo. | Alguém recebeu o papel enquanto a página estava aberta. | Recarregue a página e tire o papel primeiro. |
 | Assim ninguém mais poderia gerenciar papéis. | A mudança tiraria a última conta que gerencia papéis. | Dê essa permissão a outra conta ativa antes. |

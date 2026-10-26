@@ -48,6 +48,11 @@ builder.AddServiceDefaults();
 builder.AddAppDataProtection("simulab-api");
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+
+// F-150 AC12: in Development a body the route cannot read throws BadHttpRequestException (production answers
+// 400 without throwing); the handler keeps its status instead of turning a bad request into a 500.
+builder.Services.Configure<ExceptionHandlerOptions>(options =>
+    options.StatusCodeSelector = exception => exception is BadHttpRequestException bad ? bad.StatusCode : StatusCodes.Status500InternalServerError);
 builder.Services.ConfigureHttpJsonOptions(options => AppJson.Configure(options.SerializerOptions));
 
 // Foundation (F-3): database and its health check, module persistence services, email and in-process events.

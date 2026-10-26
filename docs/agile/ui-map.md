@@ -30,10 +30,16 @@
 | image dialog | diálogo de imagem: a janelinha "Insert image" aberta pelo botão de imagem da barra do editor, com arquivo, prévia e texto alternativo |
 | row actions | ações da linha: os botões de ícone no fim de cada linha de uma lista (Editar, Excluir e, quando há, outros) |
 | Where used dialog | diálogo "Onde é usado": a janelinha que lista as disciplinas do edital que usam uma disciplina ou um tópico e, para um tópico, quantas questões o usam |
+| access dialog | diálogo de acesso: a janelinha "Acesso de …" aberta pelo lápis (Editar papéis) na linha de um usuário, com os papéis marcáveis e o campo Tenant |
+| tenant | tenant: a organização parceira a que uma conta pertence, identificada por um id longo (GUID) |
 
 ## Screens
 | Screen | Path | Control | Source | Verified |
 |---|---|---|---|---|
+| Users list | sidebar > Administration > Users (/admin/users) | the table (Email, Name, Status, Roles, Tenant); row actions at the end of each row: Edit roles (the pencil, opens the access dialog), History, Security events | src/Hosts/Simulab.Web/Components/Pages/Admin/Users.razor | fa1e21c |
+| Access dialog | the Edit roles row action on the Users list | title "Access of <email>"; one checkbox per role with its permissions; the Tenant field under the roles; Cancel and Save at the bottom right | src/Hosts/Simulab.Web/Components/Pages/Admin/UserRolesDialog.razor | fa1e21c |
+| Roles list | sidebar > Administration > Roles (/admin/roles) | the table of roles with the "System" chip; Edit in each row | src/Hosts/Simulab.Web/Components/Pages/Admin/Roles.razor | fa1e21c |
+| Role history | sidebar > Administration > Role history (/admin/role-history), or the History row action on the Users list | the filters above the table (role, changed by, period, search by user); one row per change with When, Changed by, Action, Role or user, Changes | src/Hosts/Simulab.Web/Components/Pages/Admin/RoleHistory.razor | fa1e21c |
 | Subject list | sidebar > Content > Subjects (/admin/subjects) | the table of subjects; row actions at the end of each row: Edit, Delete and, on a subject in use, "Where used" (the third icon) | src/Hosts/Simulab.Web/Components/Pages/Catalog/Subjects.razor | be2e866 |
 | Subject page, topics | Subject list > the subject's name (/admin/subjects/{id}) > the "Topics" section | one row per topic with Edit, Delete and, on a topic in use, "Where used"; "Add topic" below the rows | src/Hosts/Simulab.Web/Components/Pages/Catalog/TopicsSection.razor | be2e866 |
 | Where used dialog | the "Where used" row action on the Subject list or the Subject page, topics | title `Where "<name>" is used`; "Notice subjects" with one link per edition (exam · year · position, the notice subject's name under it); for a topic "Questions" with "Used by n questions"; Close at the bottom right | src/Hosts/Simulab.Web/Components/Pages/Catalog/WhereUsedDialog.razor | be2e866 |

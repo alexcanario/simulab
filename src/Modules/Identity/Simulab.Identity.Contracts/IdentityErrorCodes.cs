@@ -67,6 +67,9 @@ public static class IdentityErrorCodes
 
     public const string UserNotFound = "user.not_found";
 
+    /// <summary>F-150, BR5: a tenant id is a non-empty GUID, or null for none.</summary>
+    public const string UserTenantInvalid = "user.tenant_invalid";
+
     /// <summary>F-14, BR6: the history's period is 7, 30 or 90 days, or absent for all time.</summary>
     public const string RoleChangePeriodInvalid = "role_change.period_invalid";
 

@@ -85,10 +85,11 @@ public sealed class IdentityModuleDbContext(DbContextOptions<IdentityModuleDbCon
         modelBuilder.Entity<OpenIddictEntityFrameworkCoreToken>().ToTable("openiddict_tokens");
 
         // User cannot inherit TenantEntity (declared exception of the profile), so the base context does
-        // not reach it. Its filters are declared here, with the same names, and capture the context and
-        // not the tenant value — a captured value would leak rows between requests (Simulae TK #184).
+        // not reach it. Its soft-delete filter is declared here, with the same name. F-150 (change note v2):
+        // no tenant filter - a user's TenantId is an attribute of the account, not a partition, and with
+        // ICurrentTenant at NoTenant the filter hid every account with a tenant from sign-in, refresh and the
+        // users list. Whether a tenant-scoped request hides users is F-162's decision.
         modelBuilder.Entity<User>()
-            .HasQueryFilter(TenantFilter, user => user.TenantId == null || user.TenantId == CurrentTenantId)
             .HasQueryFilter(SoftDeleteFilter, user => !user.IsDeleted);
 
         // F-9, BR5: roles are global (no tenant filter) and soft deleted; a deleted role disappears everywhere.

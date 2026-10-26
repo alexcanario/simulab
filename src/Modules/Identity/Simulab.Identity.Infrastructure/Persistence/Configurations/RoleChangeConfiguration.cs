@@ -12,11 +12,11 @@ public sealed class RoleChangeConfiguration : IEntityTypeConfiguration<RoleChang
         ArgumentNullException.ThrowIfNull(builder);
 
         builder.ToTable("role_changes", table => table.HasComment(
-            "The trail of what was done to roles and to who holds them: created, renamed, deleted, granted, revoked. Read by an admin auditing access."));
+            "The trail of what was done to roles and to who holds them: created, renamed, deleted, granted, revoked, and a person's tenant changed. Read by an admin auditing access."));
         builder.HasKey(change => change.Id);
 
         builder.Property(change => change.Action).HasConversion<string>().HasMaxLength(40).IsRequired()
-            .HasComment("What was done: RoleCreated, RoleUpdated, RoleDeleted or UserRolesChanged.");
+            .HasComment("What was done: RoleCreated, RoleUpdated, RoleDeleted, UserRolesChanged or UserTenantChanged.");
         builder.Property(change => change.RoleId)
             .HasComment("The role that changed. Null when the change was about a person's roles rather than one role.");
         builder.Property(change => change.RoleName).HasMaxLength(256)

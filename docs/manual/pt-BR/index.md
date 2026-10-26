@@ -43,8 +43,8 @@ O Simulab está disponível em português (Brasil), português (Portugal) e ingl
 - [Atividade recente](account-activity.md): seus próprios logins, falhas ao entrar e mudanças de conta, em **Minha conta → Segurança**
 - [Entrar com o Google](google-sign-in.md): criar uma conta ou entrar com sua conta Google
 - [Conectar e desconectar o Google](security-google.md): usar o Google além da senha, em **Minha conta → Segurança**
-- [Papéis e permissões](roles.md): o que Estudante, Curador e Administrador podem fazer, e como um Administrador altera um papel
-- [Usuários](users.md): achar uma conta e mudar os papéis dela (Administradores)
+- [Papéis e permissões](roles.md): o que Estudante, Curador, Corretor e Administrador podem fazer, e como um Administrador altera um papel
+- [Usuários](users.md): achar uma conta e mudar os papéis e o tenant dela (Administradores)
 - [Histórico de papéis](role-history.md): quem mudou qual papel ou os papéis de quem, e quando (Administradores)
 - [Eventos de conta](account-events.md): entradas, falhas ao entrar, bloqueios e mudanças de conta (Administradores)
 - [Órgãos contratantes](issuing-authorities.md): quem publica o edital de cada exame (Administradores)

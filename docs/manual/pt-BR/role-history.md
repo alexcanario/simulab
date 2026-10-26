@@ -1,8 +1,8 @@
 ---
 page: role-history
 locale: pt-BR
-features: [F-14]
-updated: 2026-09-21
+features: [F-14, F-150]
+updated: 2026-10-26
 ---
 # Histórico de papéis
 
@@ -14,6 +14,7 @@ Só uma conta com a permissão "Gerenciar papéis e atribuições" — o papel A
 ## O que é registrado
 - Um papel criado, alterado (renomeado ou com as permissões trocadas) ou excluído na página [Papéis](roles.md).
 - Os papéis de uma conta alterados na página [Usuários](users.md).
+- O tenant de uma conta trocado, posto ou tirado na página [Usuários](users.md), com o id antigo e o novo.
 
 As mudanças que o próprio Simulab faz não são registradas: o papel Estudante dado no cadastro e os papéis retirados quando alguém exclui a própria conta. Uma mudança recusada (por exemplo, uma que deixaria ninguém capaz de gerenciar papéis) ou um salvamento que não mudou nada não deixa registro. Os registros são guardados e nunca alterados.
 
@@ -27,7 +28,7 @@ As mudanças que o próprio Simulab faz não são registradas: o papel Estudante
 2. A página Histórico de papéis abre já filtrada. Para uma conta, uma etiqueta "Usuário: …" mostra o filtro; escolha o × dela para ver tudo de novo.
 
 ### Filtrar a lista
-- **Papel**: mudanças nesse papel e mudanças que o deram a uma conta ou o tiraram dela. Papéis excluídos aparecem como "(excluído)".
+- **Papel**: mudanças nesse papel e mudanças que o deram a uma conta ou o tiraram dela. Papéis excluídos aparecem como "(excluído)". Uma troca de tenant não envolve papel, então não aparece neste filtro: use o histórico da conta.
 - **Alterado por**: mudanças feitas por essa conta.
 - **Período**: últimos 7, 30 ou 90 dias, ou todo o período.
 - O campo de busca acha a conta cujos papéis mudaram, pelo e-mail ou pelo nome.
@@ -39,9 +40,9 @@ Os filtros ficam no endereço da página, então recarregar ou compartilhar o li
 |---|---|---|
 | Quando | Data e hora da mudança | Mostrada no seu fuso horário |
 | Alterado por | A conta que fez a mudança | "Conta excluída" se essa conta foi excluída depois |
-| Ação | Papel criado, Papel alterado, Papel excluído ou Papéis do usuário alterados | |
-| Papel ou usuário | O papel (com o nome que tinha na época) ou a conta cujos papéis mudaram | |
-| Alterações | O nome antigo e o novo, o que foi adicionado e o que foi removido | Listas longas são cortadas; aponte para ler tudo |
+| Ação | Papel criado, Papel alterado, Papel excluído, Papéis do usuário alterados ou Tenant do usuário alterado | |
+| Papel ou usuário | O papel (com o nome que tinha na época) ou a conta cujos papéis ou tenant mudaram | |
+| Alterações | O nome antigo e o novo, o que foi adicionado e o que foi removido; numa troca de tenant, o id inteiro do tenant | Listas longas são cortadas; aponte para ler tudo |
 
 ## Mensagens
 | Mensagem | O que significa | O que fazer |

@@ -16,6 +16,9 @@ namespace Simulab.Identity.Tests;
 public sealed class FixEnumColumnDescriptionsMigrationTests
 {
     private const string PreviousMigration = "20260925171652_AddColumnDescriptions";
+
+    // The migration under test: a later one (F-150) rewrites the role_changes.action comment again.
+    private const string ThisMigration = "20260929095402_FixEnumColumnDescriptions";
     private const string Schema = IdentityModuleDbContext.SchemaName;
 
     public static TheoryData<string, string, string> Columns => new()
@@ -44,7 +47,7 @@ public sealed class FixEnumColumnDescriptionsMigrationTests
         var shapeBefore = await ScalarAsync(connection, Shape, table, column);
         var commentBefore = await ScalarAsync(connection, Comment, table, column);
 
-        await migrator.MigrateAsync();
+        await migrator.MigrateAsync(ThisMigration);
 
         (await ScalarAsync(connection, Comment, table, column)).Should().Be(expected).And.NotBe(commentBefore);
         (await ScalarAsync(connection, Shape, table, column)).Should().Be(shapeBefore);

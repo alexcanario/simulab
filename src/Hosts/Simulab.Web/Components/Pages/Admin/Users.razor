@@ -70,6 +70,19 @@
                 }
             </CellTemplate>
         </TemplateColumn>
+        @* F-150, UC3: the first 8 characters say which tenant at a glance; the whole id is in the dialog. *@
+        <TemplateColumn T="UserSummaryResponse" Title="@L["Users.Column.Tenant"]" Sortable="false" CellClass="app-user-tenant">
+            <CellTemplate>
+                @if (context.Item.TenantId is { } tenant)
+                {
+                    <span class="app-cell-nowrap">@tenant.ToString()[..8]</span>
+                }
+                else
+                {
+                    <span class="app-muted" aria-hidden="true">—</span>
+                }
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
     <RowActions>
         <AppRowActions ItemName="@context.Email"
@@ -177,15 +190,23 @@
             return;
         }
 
+        // F-150, BR11: the roles may be saved and the tenant not; a dialog then cancelled still changed the user.
+        var changed = false;
         var parameters = new DialogParameters<UserRolesDialog>
         {
             { dialog => dialog.User, user },
             { dialog => dialog.Roles, _roles },
             {
                 dialog => dialog.Save,
-                async roleIds => await TokenAsync() is { } token
+                async roleIds => Track(await TokenAsync() is { } token
                     ? await Api.SetUserRolesAsync(token, user.Id, roleIds)
-                    : ApiResult.Failed<UserSummaryResponse>(ErrorText.UnexpectedCode)
+                    : ApiResult.Failed<UserSummaryResponse>(ErrorText.UnexpectedCode))
+            },
+            {
+                dialog => dialog.SaveTenant,
+                async tenantId => Track(await TokenAsync() is { } token
+                    ? await Api.SetUserTenantAsync(token, user.Id, tenantId)
+                    : ApiResult.Failed<UserSummaryResponse>(ErrorText.UnexpectedCode))
             }
         };
 
@@ -194,7 +215,17 @@
         if (result is { Canceled: false })
         {
             Snackbar.Add(L["Users.Saved", user.Email], Severity.Success);
+        }
+
+        if (changed)
+        {
             await _table.ReloadAsync();
+        }
+
+        ApiResult<UserSummaryResponse> Track(ApiResult<UserSummaryResponse> saved)
+        {
+            changed |= saved.IsSuccess;
+            return saved;
         }
     }
 

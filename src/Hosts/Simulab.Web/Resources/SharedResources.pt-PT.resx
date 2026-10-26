@@ -196,6 +196,7 @@
   <data name="Roles.Delete.InUseTip.One" xml:space="preserve"><value>1 utilizador tem este perfil: retire-o primeiro</value></data>
   <data name="Role.System.Student" xml:space="preserve"><value>Estudante</value></data>
   <data name="Role.System.Curator" xml:space="preserve"><value>Curador</value></data>
+  <data name="Role.System.Grader" xml:space="preserve"><value>Corretor</value></data>
   <data name="Role.System.Admin" xml:space="preserve"><value>Administrador</value></data>
   <data name="PermissionGroup.identity" xml:space="preserve"><value>Identidade e acesso</value></data>
   <data name="Permission.identity.roles.manage.Name" xml:space="preserve"><value>Gerir perfis e atribuições</value></data>
@@ -210,10 +211,16 @@
   <data name="Permission.questions.manage.Description" xml:space="preserve"><value>Escrever, editar, publicar, pré-visualizar e eliminar as questões do banco.</value></data>
   <data name="Permission.questions.review.Name" xml:space="preserve"><value>Rever questões</value></data>
   <data name="Permission.questions.review.Description" xml:space="preserve"><value>Abrir a fila de revisão, aprovar uma questão em revisão para a publicar ou rejeitá-la com um motivo.</value></data>
+  <data name="Permission.questions.grade.Name" xml:space="preserve"><value>Corrigir questões</value></data>
+  <data name="Permission.questions.grade.Description" xml:space="preserve"><value>Corrigir redações e respostas abertas na fila de correção.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>E-mail</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Estado</value></data>
   <data name="Users.Column.Roles" xml:space="preserve"><value>Perfis</value></data>
+  <data name="Users.Column.Tenant" xml:space="preserve"><value>Tenant</value></data>
+  <data name="Users.Field.Tenant" xml:space="preserve"><value>Tenant</value></data>
+  <data name="Users.Field.TenantHelp" xml:space="preserve"><value>Cole o id do tenant; deixe vazio para nenhum.</value></data>
+  <data name="Users.Tenant.Invalid" xml:space="preserve"><value>Cole um id de tenant como 3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f.</value></data>
   <data name="Users.Search.Placeholder" xml:space="preserve"><value>Pesquisar por e-mail ou nome</value></data>
   <data name="Users.Filter.Role" xml:space="preserve"><value>Perfil</value></data>
   <data name="Users.Filter.AllRoles" xml:space="preserve"><value>Todos os perfis</value></data>
@@ -231,6 +238,7 @@
   <data name="RoleHistory.Action.RoleUpdated" xml:space="preserve"><value>Perfil alterado</value></data>
   <data name="RoleHistory.Action.RoleDeleted" xml:space="preserve"><value>Perfil eliminado</value></data>
   <data name="RoleHistory.Action.UserRolesChanged" xml:space="preserve"><value>Perfis do utilizador alterados</value></data>
+  <data name="RoleHistory.Action.UserTenantChanged" xml:space="preserve"><value>Tenant do utilizador alterado</value></data>
   <data name="RoleHistory.Change.Renamed" xml:space="preserve"><value>Nome: {0} → {1}</value></data>
   <data name="RoleHistory.Change.Added" xml:space="preserve"><value>Adicionado: {0}</value></data>
   <data name="RoleHistory.Change.Removed" xml:space="preserve"><value>Retirado: {0}</value></data>
@@ -252,9 +260,10 @@
   <data name="RoleHistory.Action.History" xml:space="preserve"><value>Histórico</value></data>
   <data name="Common.RemoveFilter" xml:space="preserve"><value>Retirar o filtro {0}</value></data>
   <data name="role_change.period_invalid" xml:space="preserve"><value>Escolha os últimos 7, 30 ou 90 dias, ou todo o período.</value></data>
-  <data name="Users.Dialog.Title" xml:space="preserve"><value>Perfis de {0}</value></data>
-  <data name="Users.Dialog.Help" xml:space="preserve"><value>Um utilizador pode ter vários perfis; as permissões somam-se. O menu do utilizador muda no próximo carregamento de página.</value></data>
-  <data name="Users.Saved" xml:space="preserve"><value>Perfis de {0} guardados.</value></data>
+  <data name="Users.Dialog.Title" xml:space="preserve"><value>Acesso de {0}</value></data>
+  <data name="Users.Dialog.Help" xml:space="preserve"><value>Um utilizador pode ter vários perfis; as permissões somam-se. O menu do utilizador muda no próximo carregamento de página; um novo tenant chega-lhe em até 15 minutos.</value></data>
+  <data name="Users.Dialog.RolesSaved" xml:space="preserve"><value>Perfis de {0} guardados.</value></data>
+  <data name="Users.Saved" xml:space="preserve"><value>Acesso de {0} guardado.</value></data>
   <data name="AccountStatus.Pending" xml:space="preserve"><value>Pendente</value></data>
   <data name="AccountStatus.Active" xml:space="preserve"><value>Ativa</value></data>
   <data name="role.name_invalid" xml:space="preserve"><value>Use entre 2 e 50 caracteres.</value></data>
@@ -267,6 +276,7 @@
   <data name="role_assignment.role_unknown" xml:space="preserve"><value>Um dos perfis já não existe. Recarregue a página e tente novamente.</value></data>
   <data name="role_assignment.last_manager" xml:space="preserve"><value>Assim ninguém mais poderia gerir perfis. Dê essa permissão a outro utilizador ativo primeiro.</value></data>
   <data name="user.not_found" xml:space="preserve"><value>Este utilizador já não existe.</value></data>
+  <data name="user.tenant_invalid" xml:space="preserve"><value>O id do tenant não é válido. Cole o id de um tenant ou deixe o campo vazio.</value></data>
   <data name="Gallery.RowActions.DeleteDisabledReason" xml:space="preserve"><value>Não pode ser eliminado enquanto estiver em uso</value></data>
   <data name="registration.age_declaration_required" xml:space="preserve"><value>É preciso ter 18 anos ou mais para criar uma conta.</value></data>
   <data name="registration.consent_required" xml:space="preserve"><value>Aceite os Termos de Utilização e a Política de Privacidade.</value></data>
