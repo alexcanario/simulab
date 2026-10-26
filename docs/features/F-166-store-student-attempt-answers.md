@@ -1,7 +1,7 @@
 ---
 feature: F-166
 epic: Exam Simulator
-status: idea
+status: refining
 board: 232
 version: 1
 ---
@@ -10,7 +10,7 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: idea (2026-10-26)
+- Status: refining (2026-10-26)
 - Stopped at: Refinement started; reading the code and the profile.
 - Next action: Answer the question round (owner).
 - Waiting on: nothing
