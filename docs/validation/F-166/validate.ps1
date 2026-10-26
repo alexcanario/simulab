@@ -8,8 +8,8 @@ $Base = "$Api/api/v1/exam-engine/attempts"
 $script:Failed = $false
 
 function Get-Token($user, $password) {
-    $form = @{ grant_type = 'password'; username = $user; password = $password; client_id = 'simulab-web'
-               client_secret = 'dev-only-simulab-web-secret-do-not-use-outside-local-dev' }
+    $form = @{ grant_type = 'password'; username = $user; password = $password; client_id = 'simulab-web' # agile:allow-secret
+               client_secret = 'dev-only-simulab-web-secret-do-not-use-outside-local-dev' } # agile:allow-secret (local development client)
     (Invoke-RestMethod -SkipCertificateCheck -Method Post -Uri "$Api/connect/token" -Body $form).access_token
 }
 
