@@ -1,7 +1,7 @@
 ---
 feature: F-166
 epic: Exam Simulator
-status: approved
+status: building
 board: 232
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-26)
-- Stopped at: Approved by the owner on 2026-10-26.
-- Next action: Build it with /agile:build F-166 (owner types it).
+- Status: building (2026-10-26)
+- Stopped at: Building started; fresh-context stop before the design passes (system-design, architect).
+- Next action: Run /agile:build F-166 in a clean session (resumes at 4b), or answer segue.
 - Waiting on: nothing
 
 ## Summary
@@ -129,6 +129,32 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - AC20 Given the migration, when it runs on an empty database and again, then it creates the schema `exam_engine` with `attempts` and `attempt_answers` (column comments for every column and enum, a unique index that allows one in-progress attempt per student and edition, with `NULLS NOT DISTINCT` where `TenantId` is in a unique index, and a test that inserts two global duplicates and expects a conflict).
 - AC21 Given the architecture tests, when they run, then `ExamEngine` references other modules only through their `Contracts` projects, and the `/openapi/v1.json` document answers 200 and lists the five routes.
 - AC22 This item adds no UI text, so there is no locale file to complete; the error codes are constants with no message text that a client branches on.
+
+## Criterion → test
+| Criterion | Test |
+| --- | --- |
+| AC1 | pending |
+| AC2 | pending |
+| AC3 | pending |
+| AC4 | pending |
+| AC5 | pending |
+| AC6 | pending |
+| AC7 | pending |
+| AC8 | pending |
+| AC9 | pending |
+| AC10 | pending |
+| AC11 | pending |
+| AC12 | pending |
+| AC13 | pending |
+| AC14 | pending |
+| AC15 | pending |
+| AC16 | pending |
+| AC17 | pending |
+| AC18 | pending |
+| AC19 | pending |
+| AC20 | pending |
+| AC21 | pending |
+| AC22 | pending |
 
 ## Decisions
 - 2026-10-26 — The new module is `ExamEngine`, five projects (Clean Architecture), schema `exam_engine` — as decided in `docs/decisions/ADR-0001-foundation.md` #2b and `docs/agile/profile.md`. Still true here? Yes — confirmed: docs/decisions/ADR-0001-foundation.md
