@@ -33,15 +33,91 @@ public sealed class Attempt : TenantEntity
     /// <summary>One row per question of the attempt, in paper-number order.</summary>
     public IReadOnlyList<AttemptAnswer> Answers => _answers;
 
-    /// <summary>Starts an attempt on the questions given, in the order given (BR2, BR10, BR11).</summary>
+    /// <summary>Starts an attempt on the questions given: one blank answer row for each, in paper-number order (BR2, BR10, BR11).</summary>
     public static Attempt Start(
         Guid studentId,
         Guid examEditionId,
         Guid? tenantId,
         DateTimeOffset now,
-        IReadOnlyList<(Guid QuestionId, int PaperNumber, int VersionNumber, AttemptQuestionType Type)> questions) =>
-        throw new NotImplementedException();
+        IReadOnlyList<AttemptQuestion> questions)
+    {
+        ArgumentNullException.ThrowIfNull(questions);
 
-    /// <summary>Submits the attempt with the server's time; a second submit changes nothing (BR6).</summary>
-    public Result Submit(DateTimeOffset now) => throw new NotImplementedException();
+        var attempt = new Attempt
+        {
+            StudentId = studentId,
+            ExamEditionId = examEditionId,
+            Status = AttemptStatus.InProgress,
+            StartedAt = now
+        };
+        attempt.TenantId = tenantId;
+        attempt._answers.AddRange(questions
+            .OrderBy(question => question.PaperNumber)
+            .Select(question => AttemptAnswer.Blank(attempt.Id, tenantId, question)));
+
+        return attempt;
+    }
+
+    /// <summary>The row of a question of the attempt, or null when the question is not one of them.</summary>
+    public AttemptAnswer? AnswerOf(Guid questionId) => _answers.Find(answer => answer.QuestionId == questionId);
+
+    /// <summary>Saves or replaces the answer to one question; only an attempt in progress takes it (BR4, BR6).</summary>
+    public Result Save(Guid questionId, AnswerPayload answer)
+    {
+        ArgumentNullException.ThrowIfNull(answer);
+
+        var row = AnswerOf(questionId);
+        if (row is null)
+        {
+            return Result.Failure(new Error(ExamAttemptErrorCodes.QuestionNotInAttempt, ErrorKind.NotFound));
+        }
+
+        if (Status == AttemptStatus.Submitted)
+        {
+            return Result.Failure(new Error(ExamAttemptErrorCodes.AlreadySubmitted, ErrorKind.Conflict));
+        }
+
+        row.Set(answer);
+
+        return Result.Success();
+    }
+
+    /// <summary>Clears the answer to one question; clearing a blank one is no failure (BR4).</summary>
+    public Result Clear(Guid questionId)
+    {
+        var row = AnswerOf(questionId);
+        if (row is null)
+        {
+            return Result.Failure(new Error(ExamAttemptErrorCodes.QuestionNotInAttempt, ErrorKind.NotFound));
+        }
+
+        if (Status == AttemptStatus.Submitted)
+        {
+            return Result.Failure(new Error(ExamAttemptErrorCodes.AlreadySubmitted, ErrorKind.Conflict));
+        }
+
+        row.Set(null);
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Submits the attempt with the server's time. A second submit changes nothing and succeeds, so a retry of a lost
+    /// response is safe (BR6).
+    /// </summary>
+    public Result Submit(DateTimeOffset now)
+    {
+        if (Status == AttemptStatus.Submitted)
+        {
+            return Result.Success();
+        }
+
+        Status = AttemptStatus.Submitted;
+        SubmittedAt = now;
+
+        return Result.Success();
+    }
 }
+
+/// <summary>One question an attempt fixes at its start: the question, its number in the paper, its version and its type.</summary>
+public sealed record AttemptQuestion(Guid QuestionId, int PaperNumber, int VersionNumber, AttemptQuestionType Type);

@@ -26,4 +26,21 @@ public sealed class AttemptAnswer : TenantEntity
 
     /// <summary>The answer saved, or null while the question is blank.</summary>
     public AnswerPayload? Answer { get; private set; }
+
+    internal static AttemptAnswer Blank(Guid attemptId, Guid? tenantId, AttemptQuestion question)
+    {
+        var row = new AttemptAnswer
+        {
+            AttemptId = attemptId,
+            QuestionId = question.QuestionId,
+            PaperNumber = question.PaperNumber,
+            VersionNumber = question.VersionNumber,
+            QuestionType = question.Type
+        };
+        row.TenantId = tenantId;
+
+        return row;
+    }
+
+    internal void Set(AnswerPayload? answer) => Answer = answer;
 }

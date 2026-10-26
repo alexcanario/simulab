@@ -1,7 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Simulab.ExamEngine.Application.Attempts;
+using Simulab.ExamEngine.Contracts;
 using Simulab.ExamEngine.Infrastructure.Persistence;
+using Simulab.Identity.Contracts;
 using Simulab.Persistence;
+using Simulab.SharedKernel.Security;
 
 namespace Simulab.ExamEngine.Infrastructure;
 
@@ -16,6 +20,25 @@ public static class ExamEngineModule
             ((DbContextOptionsBuilder<ExamEngineModuleDbContext>)options)
                 .UseNpgsql(connectionString, npgsql => npgsql.UseModuleHistoryTable(ExamEngineModuleDbContext.SchemaName))
                 .UseModuleConventions(provider));
+
+        // The names this module defines. Identity owns the table and seeds the union it finds here; a student takes
+        // attempts from the start, and only Admin (which gets everything) reads another student's.
+        services.AddSingleton(new PermissionCatalog(
+            ExamEnginePermissions.ModuleName,
+            ExamEnginePermissions.All,
+            new Dictionary<string, IReadOnlyList<string>>
+            {
+                [ExamEnginePermissions.Take] = [IdentityRoles.Student]
+            }));
+
+        services.AddScoped<IAttemptStore, AttemptStore>();
+        services.AddScoped<IAttemptSource, AttemptSource>();
+        services.AddScoped<IAttemptAccess, AttemptAccess>();
+        services.AddScoped<StartAttemptHandler>();
+        services.AddScoped<GetAttemptHandler>();
+        services.AddScoped<SaveAnswerHandler>();
+        services.AddScoped<ClearAnswerHandler>();
+        services.AddScoped<SubmitAttemptHandler>();
 
         return services;
     }

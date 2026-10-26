@@ -42,4 +42,7 @@ public static class ExamAttemptErrorCodes
 
     /// <summary>Field code: a required part of the answer is missing (no option chosen, no value, no text).</summary>
     public const string AnswerEmpty = "exam_attempt.answer_empty";
+
+    /// <summary>Field code: a matching item or a blank number named twice; each has at most one answer.</summary>
+    public const string EntryRepeated = "exam_attempt.entry_repeated";
 }
