@@ -11,7 +11,7 @@ Created on the board at bootstrap (2026-09-17). Each epic gets its own file `doc
 | 3 | Subject taxonomy | `subject-taxonomy` | 692 (GitHub #3) | agreed (F-51, F-74 to F-79) |
 | 4 | Question bank | `question-bank` | 693 (GitHub #4) | agreed (F-95 to F-110; first cut F-95 to F-99) |
 | 5 | Question Bank Simulator | `question-bank-simulator` | 694 | idea |
-| 6 | Exam Simulator | `exam-simulator` | 695 | idea |
+| 6 | Exam Simulator | `exam-simulator` | 695 (GitHub #6) | agreed (F-166 to F-176; first cut F-166 to F-171) |
 | 7 | Plans and entitlements | `plans-and-entitlements` | 696 | idea |
 | 8 | Entitlements and promo codes | `entitlements-and-promo-codes` | 697 | idea |
 | 9 | AI-assisted exam import | `ai-assisted-exam-import` | 698 (GitHub #9) | draft (no features yet; candidate approach recorded) |
@@ -40,10 +40,10 @@ Agreed with the owner on 2026-10-09. Each item is scored 0 to 10 for its importa
 | 2 | F-71 Privacy policy names where data lives and who processes it | 8 | no | The privacy policy must name the region and the processors before real users |
 | 3 | F-85 Existing users accept a new legal document version | 8 | no | F-71 changes the policy version; users already signed up must see it |
 | 4 | E-4 Question bank (`/agile:epic`) | 10 | yes | Without questions there is nothing to practice |
-| 5 | E-5 Question Bank Simulator | 10 | yes | The first practice loop a tester can run |
+| 5 | E-6 Exam Simulator | 10 | yes | The brief's success measure: "felt like the real exam"; the Manaus 2026 paper is seeded (owner, 2026-10-26: before E-5) |
 | 6 | F-76 Syllabus for students | 7 | no | First student-visible value of the taxonomy; F-75 is done |
 | 7 | F-78 Notice subjects of the municipal guard editions | 6 | no | Real syllabus for the editions testers see |
-| 8 | E-6 Exam Simulator | 9 | yes | The brief's success measure: "felt like the real exam" |
+| 8 | E-5 Question Bank Simulator | 9 | yes | The first custom practice loop; reuses the `ExamEngine` attempt of E-6 |
 | 9 | F-94 Every setting a host requires has a source in the publish | 6 | no | The next missing setting fails the build, not the staging (F-64 retro) |
 | 10 | F-65 A GitHub Actions workflow deploys a release | 6 | no | Automates the manual deploy |
 | 11 | F-73 Shared OpenIddict keys across Api replicas | 5 | no | One replica works; a park already signs testers out (`docs/infra.md`) |
