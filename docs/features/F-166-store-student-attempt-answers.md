@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-26)
-- Stopped at: Module built, 65 ExamEngine tests green; the full gate was RED only on 5 Identity tests, fixed and green alone (580), not yet rerun in the gate.
-- Next action: Run gate.js (turn mode) until GREEN, then /agile:review, scan.js, the validation script in en and pt-BR, then validating.
+- Stopped at: Gate GREEN (full suite, 2026-10-26); next is the independent review.
+- Next action: Run /agile:review F-166 (reviewer agent, opus), then scan.js, the validation script in en and pt-BR, then validating.
 - Waiting on: nothing
 
 ## Summary
