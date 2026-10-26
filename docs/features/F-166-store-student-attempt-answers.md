@@ -193,6 +193,15 @@ Tests locked: 4a2b362e03905ab8947e18631276b1eb3e8d16b8 (10 files); unlocks: 1
 - 2026-10-26: the answer column is `json`, not `jsonb`: `jsonb` reorders the members of an object ("text" sorts before "type" at four letters) and the polymorphic read needs the discriminator first; the design said `jsonb`, the code proved it wrong — Claude (technical)
 - 2026-10-26: the answer is kept as the contract's own `AnswerPayload` records (no second set of domain value objects), the 400 field codes gained `exam_attempt.entry_repeated` for a matching item or blank number named twice (BR5 says one answer for each), and the body of the save is read in the endpoint up to `AttemptLimits.SaveBodyMaxBytes` instead of route metadata — Claude (technical)
 - 2026-10-26: the `architecture:` line of `## Docs` was dropped: `techdocs.js check` only accepts pages inside the folder of their kind, and `docs/architecture-overview.md` lives outside `docs/architecture/` (F-23 BR1); the overview was updated by hand all the same (the module, its schema, its contracts) and `ArchitectureOverviewTests` checks it — Claude (technical)
+- 2026-10-26: review finding 1 (major) — fixed: `AppJson.Configure` sets `AllowOutOfOrderMetadataProperties`, so a save body with `type` after the other members is read; new test file `SaveAnswerMemberOrderTests` (the locked files stay untouched). Not seen failing before the fix.
+- 2026-10-26: review finding 2 (minor) — start without `examEditionId` answers 400 with the code that means 404 in AC4 — new idea, not built here.
+- 2026-10-26: review finding 3 (minor) — an oversized save body answers a bare 413 with no problem details and no code — new idea, not built here.
+- 2026-10-26: review finding 4 (minor) — fixed: the `FOR SHARE` and `FOR UPDATE` reads take `studentId` and lock only the student's own row (`AND student_id = ...`); no test added, the existing cross-student tests (AC15, AC19) stay green.
+- 2026-10-26: review finding 5 (minor) — fixed: `RowLockTransactions` lives once in `Simulab.Persistence`, both module copies deleted, the three QuestionBank stores gained `using Simulab.Persistence`.
+- 2026-10-26: review finding 6 (minor) — fixed: one private `LockAndLoadAsync` in `AttemptStore` serves both lock reads.
+- 2026-10-26: review finding 7 (minor) — fixed: the Portuguese words in a comment of `AnswerPayload` removed.
+- 2026-10-26: review coverage — read the diff of 84 files against base 5fe733b, the five handlers, the `Attempt` and `AttemptAnswer` entities, `AnswerChecker`, the migration, the 10 locked test files, profile.md and the rules; checked and fine: correctness (BR1-BR11, AC1-AC13, start race, idempotent submit, save against submit), data (additive migration, unique indexes, constraints, column comments), localization (13 error codes and 2 permissions in 3 locales), locks (diff against the lock commit empty besides the recorded unlock), tests (every AC has a test that can fail), rules (module boundaries, profile). Not checked: none.
+- 2026-10-26: traps — T1 `QuestionVersion` loaded whole on every save, two connections per save: cost under load; T2 `json` column depends on byte order: breaks if a writer rewrites through `jsonb` (F-167 anonymization, F-151 queue); T3 save body buffered up to 1.5 MB before the ownership check: GC pressure on frequent essay autosaves.
 
 ## Change notes
 ### v2 — 2026-10-26
@@ -222,3 +231,8 @@ Tests locked: 4a2b362e03905ab8947e18631276b1eb3e8d16b8 (10 files); unlocks: 1
 - 2026-10-26 change — v2: tenant from ICurrentTenant (BR10, AC19); UI texts and WebPermissions in AC22
 - 2026-10-26 blocked — test wrong: AC10, AC11 and AC18 tests were wrong: the clock moved past the 15 min access token, and an anonymous type had two members of one JSON name
 - 2026-10-26 test-fail — tests failed (Simulab.slnx): Simulab.Identity.Tests.SystemRoleSeedTests.Seed_RoleCreatedBeforeF9_IsMarkedAsSystemAndKeep, 1 red
+- 2026-10-26 rework — review finding 1 AppJson reads type member out of order
+- 2026-10-26 rework — review finding 4 lock reads only the students own row
+- 2026-10-26 rework — review finding 5 RowLockTransactions moved to Persistence
+- 2026-10-26 rework — review finding 6 one LockAndLoadAsync for both lock reads
+- 2026-10-26 rework — review finding 7 comment in English

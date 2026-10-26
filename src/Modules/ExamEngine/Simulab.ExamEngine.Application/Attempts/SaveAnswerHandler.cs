@@ -37,7 +37,7 @@ public sealed class SaveAnswerHandler(IAttemptStore store, IAttemptSource source
         AnswerPayload? answer,
         CancellationToken cancellationToken)
     {
-        var attempt = await store.FindForAnswerAsync(attemptId, cancellationToken);
+        var attempt = await store.FindForAnswerAsync(studentId, attemptId, cancellationToken);
         if (attempt is null || attempt.StudentId != studentId)
         {
             return SaveAnswerOutcome.Failed(new Error(ExamAttemptErrorCodes.NotFound, ErrorKind.NotFound));
@@ -88,7 +88,7 @@ public sealed class ClearAnswerHandler(IAttemptStore store)
 {
     public async Task<Result> HandleAsync(Guid studentId, Guid attemptId, Guid questionId, CancellationToken cancellationToken)
     {
-        var attempt = await store.FindForAnswerAsync(attemptId, cancellationToken);
+        var attempt = await store.FindForAnswerAsync(studentId, attemptId, cancellationToken);
         if (attempt is null || attempt.StudentId != studentId)
         {
             return Result.Failure(new Error(ExamAttemptErrorCodes.NotFound, ErrorKind.NotFound));

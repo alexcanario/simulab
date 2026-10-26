@@ -20,12 +20,16 @@ public interface IAttemptStore
     /// <summary>
     /// An attempt with its answers, to save or clear one of them (BR9): its row is locked in a shared way until
     /// <see cref="SaveChangesAsync"/>, so a submit waits for the saves in flight and a save that arrives after it sees the
-    /// attempt submitted (BR6). Null as <see cref="FindAsync"/>.
+    /// attempt submitted (BR6). Only the student's own row is locked: another student's attempt is never touched. Null
+    /// as <see cref="FindAsync"/>, and also when the attempt is not the student's.
     /// </summary>
-    Task<Attempt?> FindForAnswerAsync(Guid attemptId, CancellationToken cancellationToken);
+    Task<Attempt?> FindForAnswerAsync(Guid studentId, Guid attemptId, CancellationToken cancellationToken);
 
-    /// <summary>An attempt with its answers, to submit: its row is locked until <see cref="SaveChangesAsync"/>. Null as <see cref="FindAsync"/>.</summary>
-    Task<Attempt?> FindForSubmitAsync(Guid attemptId, CancellationToken cancellationToken);
+    /// <summary>
+    /// An attempt with its answers, to submit: its row is locked until <see cref="SaveChangesAsync"/>. Only the
+    /// student's own row is locked. Null as <see cref="FindForAnswerAsync"/>.
+    /// </summary>
+    Task<Attempt?> FindForSubmitAsync(Guid studentId, Guid attemptId, CancellationToken cancellationToken);
 
     /// <summary>Saves what the rules changed and ends the transaction the lock opened.</summary>
     Task SaveChangesAsync(CancellationToken cancellationToken);

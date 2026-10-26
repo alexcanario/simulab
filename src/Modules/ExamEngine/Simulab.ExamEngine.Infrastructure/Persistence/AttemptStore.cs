@@ -4,6 +4,7 @@ using Simulab.ExamEngine.Application.Attempts;
 using Simulab.ExamEngine.Contracts;
 using Simulab.ExamEngine.Domain.Entities;
 using Simulab.ExamEngine.Infrastructure.Persistence.Configurations;
+using Simulab.Persistence;
 
 namespace Simulab.ExamEngine.Infrastructure.Persistence;
 
@@ -53,22 +54,23 @@ public sealed class AttemptStore(ExamEngineModuleDbContext context) : IAttemptSt
         }
     }
 
-    public async Task<Attempt?> FindForAnswerAsync(Guid attemptId, CancellationToken cancellationToken)
+    public Task<Attempt?> FindForAnswerAsync(Guid studentId, Guid attemptId, CancellationToken cancellationToken) =>
+        LockAndLoadAsync(
+            attemptId,
+            $"SELECT id AS \"Value\" FROM exam_engine.attempts WHERE id = {attemptId} AND student_id = {studentId} AND is_deleted = false FOR SHARE",
+            cancellationToken);
+
+    public Task<Attempt?> FindForSubmitAsync(Guid studentId, Guid attemptId, CancellationToken cancellationToken) =>
+        LockAndLoadAsync(
+            attemptId,
+            $"SELECT id AS \"Value\" FROM exam_engine.attempts WHERE id = {attemptId} AND student_id = {studentId} AND is_deleted = false FOR UPDATE",
+            cancellationToken);
+
+    // The lock is taken only on the student's own row, so ownership is decided before any side effect on another row.
+    private async Task<Attempt?> LockAndLoadAsync(Guid attemptId, FormattableString lockSql, CancellationToken cancellationToken)
     {
         await context.Database.BeginTransactionIfNoneAsync(cancellationToken);
-        var locked = await context.Database
-            .SqlQuery<Guid>($"SELECT id AS \"Value\" FROM exam_engine.attempts WHERE id = {attemptId} AND is_deleted = false FOR SHARE")
-            .ToListAsync(cancellationToken);
-
-        return locked.Count == 0 ? null : await LoadAsync(attemptId, cancellationToken);
-    }
-
-    public async Task<Attempt?> FindForSubmitAsync(Guid attemptId, CancellationToken cancellationToken)
-    {
-        await context.Database.BeginTransactionIfNoneAsync(cancellationToken);
-        var locked = await context.Database
-            .SqlQuery<Guid>($"SELECT id AS \"Value\" FROM exam_engine.attempts WHERE id = {attemptId} AND is_deleted = false FOR UPDATE")
-            .ToListAsync(cancellationToken);
+        var locked = await context.Database.SqlQuery<Guid>(lockSql).ToListAsync(cancellationToken);
 
         return locked.Count == 0 ? null : await LoadAsync(attemptId, cancellationToken);
     }

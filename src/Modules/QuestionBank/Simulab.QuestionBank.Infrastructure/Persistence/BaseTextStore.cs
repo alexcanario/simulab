@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Simulab.Persistence;
 using Simulab.QuestionBank.Application.BaseTexts;
 using Simulab.QuestionBank.Contracts;
 using Simulab.QuestionBank.Domain.Entities;

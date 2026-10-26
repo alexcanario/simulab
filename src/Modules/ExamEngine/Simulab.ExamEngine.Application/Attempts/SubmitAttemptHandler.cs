@@ -11,7 +11,7 @@ public sealed class SubmitAttemptHandler(IAttemptStore store, TimeProvider clock
 {
     public async Task<Result<AttemptResponse>> HandleAsync(Guid studentId, Guid attemptId, CancellationToken cancellationToken)
     {
-        var attempt = await store.FindForSubmitAsync(attemptId, cancellationToken);
+        var attempt = await store.FindForSubmitAsync(studentId, attemptId, cancellationToken);
         if (attempt is null || attempt.StudentId != studentId)
         {
             return Result.Failure<AttemptResponse>(new Error(ExamAttemptErrorCodes.NotFound, ErrorKind.NotFound));

@@ -17,6 +17,9 @@ public static class AppJson
     public static JsonSerializerOptions Configure(JsonSerializerOptions options)
     {
         options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+
+        // JSON objects are unordered: a polymorphic body whose "type" member is not the first one is still read.
+        options.AllowOutOfOrderMetadataProperties = true;
         if (!options.Converters.OfType<JsonStringEnumConverter>().Any())
         {
             options.Converters.Add(new JsonStringEnumConverter());

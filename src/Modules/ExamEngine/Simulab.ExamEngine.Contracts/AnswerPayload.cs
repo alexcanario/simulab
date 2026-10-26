@@ -20,7 +20,7 @@ public abstract record AnswerPayload;
 /// <summary>One option of the version.</summary>
 public sealed record SingleChoicePayload(int? OptionPosition = null) : AnswerPayload;
 
-/// <summary>True ("certo") or false ("errado").</summary>
+/// <summary>True or false.</summary>
 public sealed record TrueFalsePayload(bool? Value = null) : AnswerPayload;
 
 /// <summary>One or more options of the version.</summary>
