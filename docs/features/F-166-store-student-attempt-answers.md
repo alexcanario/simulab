@@ -133,28 +133,28 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | pending |
-| AC19 | pending |
-| AC20 | pending |
-| AC21 | pending |
-| AC22 | pending |
+| AC1 | `StartAttemptEndpointTests.Start_PublishedEdition_Answers201WithThePublishedQuestionsInPaperNumberOrder` |
+| AC2 | `StartAttemptEndpointTests.Start_WhileOneIsInProgress_Answers200WithTheSameAttempt_AndCreatesNoSecondRow`, `StartAttemptEndpointTests.Start_ManyAtTheSameTime_CreatesOneAttemptAndAnswersTheOthersWithIt` |
+| AC3 | `StartAttemptEndpointTests.Start_AfterTheFirstWasSubmitted_CreatesANewAttempt_AndLeavesTheSubmittedOneAlone` |
+| AC4 | `StartAttemptEndpointTests.Start_OnADraftEditionOrAnUnknownOne_Answers404_AndCreatesNothing` |
+| AC5 | `StartAttemptEndpointTests.Start_OnAPublishedEditionWithNoPublishedQuestion_Answers422` |
+| AC6 | `AttemptReadEndpointTests.Read_AfterTheQuestionsWereEditedAnnulledOrUnpublished_StillListsTheSameQuestionsAndVersions` |
+| AC7 | `SaveAnswerEndpointTests.Save_AValidAnswerOfEachOfTheEightTypes_IsReadBackAsSaved`, `SaveAnswerEndpointTests.Save_Answers200WithTheQuestionAndItsAnswer`, `SaveAnswerEndpointTests.Save_AnEssayWithWindowsLineBreaks_IsKeptWithOneKindOfLineBreakAndNothingElseChanged` |
+| AC8 | `SaveAnswerEndpointTests.Save_AnAnswerThatDoesNotFitTheQuestion_Answers400WithOneEntryPerField_AndStoresNothing`, `SaveAnswerEndpointTests.Save_ABodyWithAMissingOrUnknownType_Answers400AnswerInvalid_AndStoresNothing`, `SaveAnswerEndpointTests.Save_AQuestionThatIsNotInTheAttempt_Answers404_AndStoresNothing` |
+| AC9 | `SaveAnswerEndpointTests.Save_AnotherAnswerToTheSameQuestion_ReplacesTheFirst_AndTheLastOfTwoInARowIsWhatIsRead`, `SaveAnswerEndpointTests.Clear_MakesTheQuestionBlankAgain_AndClearingABlankOneAnswers204Too`, `SaveAnswerEndpointTests.Save_TwoAtTheSameTime_LeavesOneOfThemAndOneRow` |
+| AC10 | `SubmitAttemptEndpointTests.Submit_AnAttemptWithBlanks_IsSubmittedWithTheServersTime_AndTheBlanksStayBlank` |
+| AC11 | `SubmitAttemptEndpointTests.Save_OrClear_OnASubmittedAttempt_Answers409_AndNothingChanges`, `SubmitAttemptEndpointTests.Submit_AgainAnAttemptAlreadySubmitted_Answers200WithTheOriginalTime`, `SubmitAttemptEndpointTests.Save_RacingASubmit_IsEitherStoredBeforeItOrRefusedAfterIt_NeverStoredAfterIt` |
+| AC12 | `AttemptReadEndpointTests.Read_TheOwnerSeesStateQuestionsAndAnswers_AndAnAdminHoldingReadSeesTheSame` |
+| AC13 | `SubmitAttemptEndpointTests.AnAdmin_ReadsButNeverSavesClearsOrSubmits_AnAttemptOfAStudent` |
+| AC14 | `StartAttemptEndpointTests.Start_AnAnonymousCallerIs401_ACuratorIs403_AndAStudentIs201`, `StartAttemptEndpointTests.TheSeededRoles_StudentHoldsTakeAndNotRead_AndAdminHoldsBoth`, `StartAttemptEndpointTests.Start_WithNoEdition_Answers400`, `AttemptReadEndpointTests.Read_Anonymous_Answers401`, `SubmitAttemptEndpointTests.TheWriteRoutes_AnAnonymousCallerIs401_AndACuratorIs403` |
+| AC15 | `AttemptReadEndpointTests.Read_AnotherStudentsAttempt_AnswersLikeAnIdThatDoesNotExist`, `SubmitAttemptEndpointTests.AnotherStudent_CannotSaveClearOrSubmit_AndGetsTheAnswerOfAnIdThatDoesNotExist` |
+| AC16 | `AttemptReadEndpointTests.Read_NeverCarriesAnAnswerKeyAnExplanationAModelAnswerOrAStatement` |
+| AC17 | `SaveAnswerEndpointTests.Save_ABodyAboveTheLimitOfTheRoute_Answers4xx_AndStoresNothing`, `SaveAnswerEndpointTests.Save_ATextOfTheLargestSizeWithAccents_IsAccepted` |
+| AC18 | `SubmitAttemptEndpointTests.Submit_WithATimeInTheBodyOrTheHeaders_StoresTheServersClock` |
+| AC19 | `AttemptTenantTests.EveryRowOfAnAttempt_CarriesTheTenantOfTheHost_AndTheStudentStillReadsAndChangesIt`, `AttemptTenantTests.AnAttemptOfAnotherTenant_Answers404ToEveryRoute_AndNothingChanges`, `StartAttemptEndpointTests.Start_InV1_TheRowsOfTheAttemptAreGlobal` |
+| AC20 | `InitialExamEngineMigrationTests` (up and down and a second run, two in-progress duplicates, the state and time check, two answer rows, column comments) |
+| AC21 | `ExamEngineContractTests.TheOpenApiDocument_Answers200_AndListsTheFiveAttemptRoutes`, `ModuleBoundaryTests` (the `ExamEngine` module is in its lists) |
+| AC22 | `RoleResourcesTests.EveryPermissionSystemRoleAndActionName_HasAText`, `ErrorCodeTextTests.EveryErrorCode_HasATextInEveryLanguage_AndEveryCodeShapedTextAnswersToACode` (existing tests that read the module's permissions and error codes) |
 
 ## Decisions
 - 2026-10-26 — The new module is `ExamEngine`, five projects (Clean Architecture), schema `exam_engine` — as decided in `docs/decisions/ADR-0001-foundation.md` #2b and `docs/agile/profile.md`. Still true here? Yes — confirmed: docs/decisions/ADR-0001-foundation.md

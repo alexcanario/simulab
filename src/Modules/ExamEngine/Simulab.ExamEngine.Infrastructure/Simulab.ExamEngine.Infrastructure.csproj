@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- Design-time only: the migrations of this module are created from this project. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.ExamEngine.Application\Simulab.ExamEngine.Application.csproj" />
+    <!-- Contracts only: the edition directory (Catalog) and the published questions (QuestionBank) the adapter asks. -->
+    <ProjectReference Include="..\..\Catalog\Simulab.Catalog.Contracts\Simulab.Catalog.Contracts.csproj" />
+    <ProjectReference Include="..\..\QuestionBank\Simulab.QuestionBank.Contracts\Simulab.QuestionBank.Contracts.csproj" />
+    <ProjectReference Include="..\..\Identity\Simulab.Identity.Contracts\Simulab.Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.Persistence\Simulab.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

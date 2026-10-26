@@ -47,7 +47,7 @@ public class EntityModelsTests
 
     [Fact]
     public void Load_NamesEveryRealModule() =>
-        RealModels().Select(m => m.Module).Should().Equal("Ai", "Catalog", "Identity", "Jobs", "QuestionBank");
+        RealModels().Select(m => m.Module).Should().Equal("Ai", "Catalog", "ExamEngine", "Identity", "Jobs", "QuestionBank");
 
     [Fact]
     public void RenderDictionary_ListsEveryIdentityTableInSnakeCase()

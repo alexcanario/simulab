@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- The entities answer with the module's own error codes and keep an answer as the contract's payload. -->
+    <ProjectReference Include="..\Simulab.ExamEngine.Contracts\Simulab.ExamEngine.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.SharedKernel\Simulab.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

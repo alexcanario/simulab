@@ -40,9 +40,17 @@ public class ModuleBoundaryTests
         typeof(Simulab.QuestionBank.Infrastructure.QuestionBankModule).Assembly,
         typeof(Simulab.QuestionBank.Api.QuestionBankEndpoints).Assembly);
 
-    public static TheoryData<Module> Modules => [Identity, Catalog, QuestionBank];
+    private static readonly Module ExamEngine = new(
+        "ExamEngine",
+        typeof(Simulab.ExamEngine.Domain.Entities.Attempt).Assembly,
+        typeof(Simulab.ExamEngine.Application.Attempts.StartAttemptHandler).Assembly,
+        typeof(Simulab.ExamEngine.Contracts.ExamAttemptErrorCodes).Assembly,
+        typeof(Simulab.ExamEngine.Infrastructure.ExamEngineModule).Assembly,
+        typeof(Simulab.ExamEngine.Api.ExamEngineEndpoints).Assembly);
 
-    private static IReadOnlyList<Module> AllModules => [Identity, Catalog, QuestionBank];
+    public static TheoryData<Module> Modules => [Identity, Catalog, QuestionBank, ExamEngine];
+
+    private static IReadOnlyList<Module> AllModules => [Identity, Catalog, QuestionBank, ExamEngine];
 
     private static Assembly Web => typeof(Simulab.Web.Resources.SharedResources).Assembly;
 

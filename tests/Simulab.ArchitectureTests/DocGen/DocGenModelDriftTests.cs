@@ -21,11 +21,12 @@ public class DocGenModelDriftTests
         EntityModelsTests.DocGenProjects().Should().Contain("Simulab.Ai")
             .And.Contain("Simulab.Jobs")
             .And.Contain("Simulab.Catalog.Infrastructure")
+            .And.Contain("Simulab.ExamEngine.Infrastructure")
             .And.Contain("Simulab.Identity.Infrastructure")
             .And.Contain("Simulab.QuestionBank.Infrastructure")
             .And.Contain("Simulab.Persistence", "the closure follows a reference through another project");
 
-        EntityModelsTests.RealModels().Select(m => m.Module).Should().Equal("Ai", "Catalog", "Identity", "Jobs", "QuestionBank");
+        EntityModelsTests.RealModels().Select(m => m.Module).Should().Equal("Ai", "Catalog", "ExamEngine", "Identity", "Jobs", "QuestionBank");
     }
 
     // AC1: nothing that only the test project sees comes in with it.
@@ -56,7 +57,7 @@ public class DocGenModelDriftTests
     public void TheModulesOnDisk_AreTheFoldersWithASchemaOrADictionary()
     {
         DocumentedModules.In(ArchitectureDirectory(), All)
-            .Should().Equal("Ai", "Catalog", "Identity", "Jobs", "QuestionBank")
+            .Should().Equal("Ai", "Catalog", "ExamEngine", "Identity", "Jobs", "QuestionBank")
             .And.NotContain("System");
     }
 
@@ -132,7 +133,7 @@ public class DocGenModelDriftTests
     [InlineData(false, true)]
     public void WithEitherDocumentOn_TheModulesAreRead(bool entities, bool dataDictionary) =>
         DocumentedModules.In(ArchitectureDirectory(), new DocGenOptions(entities, dataDictionary, Routes: true, Modules: true, Tools: true))
-            .Should().Equal("Ai", "Catalog", "Identity", "Jobs", "QuestionBank");
+            .Should().Equal("Ai", "Catalog", "ExamEngine", "Identity", "Jobs", "QuestionBank");
 
     // AC5: the options the tool really runs with keep the comparison on.
     [Fact]

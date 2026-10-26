@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Simulab.ApiResults\Simulab.ApiResults.csproj" />
+    <ProjectReference Include="..\Simulab.ExamEngine.Application\Simulab.ExamEngine.Application.csproj" />
+    <!-- Infrastructure is referenced for composition only (AddExamEngineModule), per the profile. -->
+    <ProjectReference Include="..\Simulab.ExamEngine.Infrastructure\Simulab.ExamEngine.Infrastructure.csproj" />
+    <!-- Contracts only, for the "Permission:" policy name every module's endpoints are guarded by. -->
+    <ProjectReference Include="..\..\Identity\Simulab.Identity.Contracts\Simulab.Identity.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
