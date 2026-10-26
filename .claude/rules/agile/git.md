@@ -1,7 +1,7 @@
 # Git
 
 - The main branch is the one named in `CLAUDE.md` (default `main`). Never edit it directly: every item has its branch, `feature/<id>` or `bug/<id>` (`F-<n>`, `B-<n>` or a ticket id).
-- Never push, merge or rebase onto the main branch without the owner's authorization in the current conversation; typing `/agile:ship <id>` is that authorization for that item, and with `- Merge: pr` in `CLAUDE.md` only for the push and the pull request.
+- Never push, merge or rebase onto the main branch without the owner's authorization in the current conversation; typing `/agile:ship <id>` is that authorization for that item, and with `- Merge: pr` in `CLAUDE.md` only for the push and the pull request (`- Merge: pr-auto`: also its merge once checks pass).
 - Never force-push, reset a shared branch, delete a branch or skip hooks (`--no-verify`) without asking.
 - Commits are Conventional Commits in English with the item id: `feat(F-3): add exam board list`.
 - Commit in small steps on the item branch. Nothing stays only on disk: before a pause, commit with `wip(F-<n>): ...`.
@@ -9,7 +9,7 @@
 - A commit message says what the diff really does. Check `git diff --staged` and `git branch --show-current` before every commit: an IDE can switch the branch. A guard hook refuses a commit on the main branch while an item branch is open.
 - Start of session: `git status` and `git log` on the main checkout and on **every** worktree (`git worktree list`). Report uncommitted work first.
 - If git and the board or the files disagree, stop and ask.
-- Every item has its own worktree, created by `/agile:refine` and reused by the build. No checkout is ever switched; one writer per worktree (the index races).
+- Every item has its own worktree, created by `/agile:refine` and reused by the build. No checkout is ever switched; one writer per worktree.
 - Worktrees live in a short folder named `f-<n>-<desc>` / `b-<n>-<desc>` (`<desc>`: the slug, ≤ 20 characters, cut at a hyphen; Windows paths break at 260) under the `Worktrees:` root of `CLAUDE.md`, never inside the repository.
 - Remove a worktree only with `scripts/worktree.js remove <path>` (worktrees.md "Ship from a worktree"), never by composing git commands; ask only when the folder is held or is an orphan.
 - Bring the item branch up to date with the main branch before the full suite, not after.

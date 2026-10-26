@@ -14,7 +14,7 @@ Plugins line: short names, comma-separated; another plugin's adoption appends it
 - Conversation with the product owner in Portuguese (pt-BR); everything in the repository in English.
 - Ask before: pushing or merging to `<main branch>` outside a ship, touching shared databases, deleting data, anything outside this repository.
 - Worktrees: `<root from quiz 28c, e.g. D:\wt\<repo>>` — one folder per item (`f-<n>-<desc>`, `b-<n>-<desc>`), created by `/agile:refine`.
-- Merge: `<direct | pr from quiz 28d>` — `pr`: `/agile:ship` opens a pull request and the owner merges it; a second `/agile:ship` closes the item.
+- Merge: `<direct | pr | pr-auto from quiz 28d>` — `pr`: `/agile:ship` opens a pull request and the owner merges it; a second `/agile:ship` closes the item. `pr-auto`: `/agile:ship` waits on the PR's checks and merges it.
 
 ## Architecture
 - Profile: `<profile>` — see `docs/agile/profile.md`.

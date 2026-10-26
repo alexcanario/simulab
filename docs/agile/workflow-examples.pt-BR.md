@@ -7431,3 +7431,294 @@ agile run-guard STATUS: run 60 on main, active, authorized; branches: epic/frete
 ```
 
 Daí o ship do épico: uma subida de versão, o merge em `main`, as quatro issues fechadas em Done, a retro com você e a limpeza das branches.
+
+### 14.200 O `/agile:resolve --driver` num repositório legado: a etapa do lens leva a issue até a parada 2, e uma decisão que precisa de você para o run
+
+A acme-shop é um sistema legado que o lens mapeia. O `CLAUDE.md` dela tem a linha `- Lens workspace: ../acme-shop-lens`, e o lens está instalado (`claude plugin install`). A issue 52 diz: "Um pedido de exatamente 100 não recebe o desconto de 10%." Numa sessão do projeto você digita `/agile:resolve acme/acme-shop#52 --driver` e roda num terminal, na pasta da acme-shop, o comando que ele mostra. Antes do guarda do run, o driver roda o lens:
+
+```text
+resolve acme/acme-shop#52 session 1: lens adopt -> lens adopt: DONE, ok, run not begun, US$ 0.0500
+resolve acme/acme-shop#52 session 2: lens map -> lens map: OPEN 1, ok, run not begun, US$ 0.0900
+resolve acme/acme-shop#52 session 3: idea -> idea, ok, run not begun, US$ 0.0500
+resolve acme/acme-shop#52 session 4: lens decide -> Arquivo: `necropsies/resolve-52/decision.json`, ok, run not begun, US$ 0.2300
+resolve acme/acme-shop#52 session 5: idea -> stop 2, ok, run not begun, US$ 1.1200
+agile resolve VALIDATION: B-12 está em validação; o roteiro está em C:\dev\acme-shop-f-12\docs\bugs\B-12-discount-at-100.md (## Validation script), com os passos não conferidos sem tela. Valide, rode o mesmo comando e digite a frase de autorização
+```
+
+O workspace ainda não existia, então o `lens adopt` o criou ao lado do projeto. O `lens map` terminou em `OPEN 1`: o mapa está completo, e o item aberto vai para a parada 2.
+
+A sessão 3 é do agile: ela capturou o B-12, escolheu no inventário a semente que o seu texto alcança (o endpoint `OrdersController.Price`), gravou-a com `resolve-lens.js seeds`, registrou a escolha como `assumed by resolve` e terminou em `lens decide`. O lens então escreveu o `decision.json`. O refinamento usou a decisão pelo `resolve-lens.js feed`:
+
+```text
+approach: - 2026-10-25: approach — In Discount.Apply change total > 100m to total >= 100m. — assumed by resolve — lens decision resolve-52: The comment at line 7 says 100 or more. (src/OrdersController.cs:7, src/OrdersController.cs:8)
+exists: src/OrdersController.cs (src/OrdersController.cs:8, deterministic)
+criterion: the contract OrdersController stays as it is (src/OrdersController.cs:16)
+risk: - 2026-10-25: risk — The endpoint result changes from 100 to 90 (src/OrdersController.cs:8) — assumed by resolve
+agile resolve-lens FEED: decided resolve-52, 1 files, 1 contracts, 0 tests, 1 risks
+```
+
+O comentário de validação na issue traz a parte do lens:
+
+```text
+**Etapa do lens**
+- Workspace: `C:\dev\acme-shop-lens`
+- Sementes: `http-endpoint:src/App.csproj:OrdersController.Price@src/OrdersController.cs:16`
+- Abordagem: In Discount.Apply change total > 100m to total >= 100m.
+- Descartadas:
+  - Change the comment to say more than 100 (It would document the bug.)
+- Riscos:
+  - The endpoint result changes from 100 to 90 (src/OrdersController.cs:8)
+- Itens abertos do map:
+  - permission-checks-not-declared
+- Sessões do lens: lens adopt US$ 0.0500; lens map US$ 0.0900; lens decide US$ 0.2300
+```
+
+Na mesma situação, se o lens não decide sozinho, o run para antes de começar:
+
+```text
+resolve acme/acme-shop#52 session 4: lens decide -> NEEDS-OWNER resolve-52: 1 questions, ok, run not begun, US$ 0.2300
+agile resolve STOPPED: lens needs the owner: 1 question; answer in lens: /lens:decide --name resolve-52 --request .git/agile/issues/acme-acme-shop-52/text.md --seed http-endpoint:src/App.csproj:OrdersController.Price@src/OrdersController.cs:16 C:\dev\acme-shop-lens; o driver postou o comentário de parada; remova a causa e rode o mesmo comando
+```
+
+O comentário de parada traz a pergunta do lens com a recomendação e o motivo, e a linha que você roda:
+
+```text
+- Perguntas do lens (responda no lens, não na issue):
+  - Should an order of exactly 100 get the discount? Recomendação: Yes, as the comment at line 7 says. Motivo: The comment and the code disagree.
+- Para responder: numa sessão interativa do Claude Code na pasta do projeto, rode `/lens:decide --name resolve-52 --request .git/agile/issues/acme-acme-shop-52/text.md --seed http-endpoint:src/App.csproj:OrdersController.Price@src/OrdersController.cs:16 C:\dev\acme-shop-lens`; depois rode de novo o comando do driver.
+```
+
+Você responde no lens, que reescreve o `decision.json` como `decided`. Quando você roda o comando do driver de novo, ele lê o arquivo, não roda o lens outra vez e segue para o refinamento. Uma resposta escrita na issue não chega ao run: é texto depois do snapshot. Essa parada acontece antes do run, então não há `run-guard.js end` para rodar.
+
+### 14.201 Um item da acme-shop entregue com `Merge: pr-auto`: o merge sozinho, um check vermelho e o auto-merge depois de 30 minutos
+
+A acme-shop está no `github.com`, roda o CI em todo pull request e o `CLAUDE.md` diz `- Merge: pr-auto`. Você valida a F-9 e digita:
+
+```text
+> /agile:ship F-9
+```
+
+O ship faz as mesmas verificações do `pr`, abre o PR 41 e espera os checks dele. As saídas abaixo são do script num repositório de teste com um `gh` falso:
+
+```text
+$ node scripts/pr-wait.js watch 41
+PASSED
+```
+
+O ship faz o merge com um merge commit, lê o PR de volta como `MERGED` e fecha o item na mesma execução: worktree, branches, board e retro. Você não abriu o GitHub.
+
+Na F-10 um teste falha no CI:
+
+```text
+$ node scripts/pr-wait.js watch 42
+test: https://github.com/acme/shop/actions/runs/88/job/test
+FAILED: test
+```
+
+O ship para com `PR #42 open: test failed` e o link. Nada foi mesclado e o auto-merge não foi ligado. Você pede a correção na branch e digita `/agile:ship F-10` de novo: o gate roda, a branch sobe e a espera recomeça.
+
+Na F-11 o CI demora mais que o limite. Depois de 30 minutos:
+
+```text
+$ node scripts/pr-wait.js watch 44
+TIMEOUT: test
+$ node scripts/pr-wait.js auto 44
+ARMED
+```
+
+O repositório permite auto-merge e a `main` exige o check `test`, então o ship para com `PR #44 open, auto-merge on: GitHub merges it when the required checks pass; /agile:ship F-11 closes the item`. O início da sessão seguinte mostra `Waiting on PR: F-11 #44 open — auto-merge on`. Sem um check exigido na `main`, o auto-merge não seria ligado:
+
+```text
+$ node scripts/pr-wait.js auto 44
+NOT ARMED: no required check on the main branch, and --auto would merge at once with checks pending
+```
+
+e o ship pararia com `PR #44 open: checks still running after 30 minutes (test); /agile:ship F-11 waits again`. Um PR sem nenhum check, depois de 2 minutos, dá `NO CHECKS`, e o ship pede `Merge: pr` ou `direct`.
+
+### 14.202 O `/agile:resolve --driver` leva um épico até o ship: uma sessão por feature, uma sessão morta no meio e a autorização pelo slug
+
+Na acme-shop, a issue 60 tem o rótulo `epic`, e o run do guarda está aberto. Você roda no terminal o comando do `--driver` (como em 14.198). A primeira sessão faz a quebra em F-1, F-2 e F-3; cada outra leva uma feature até o merge em `epic/shop`, e todas terminam com `agile resolve headless: fresh epic`. A terceira passa do tempo com a F-2 pela metade (a saída do script no repositório de teste, a issue renomeada):
+
+```text
+resolve acme/acme-shop#60 session 1: agreed -> F-1 approved, ok, run 0.0M of 10M, 0 of 400 turns, US$ 0.0123
+resolve acme/acme-shop#60 session 2: F-1 approved -> F-2 approved, ok, run 0.0M of 10M, 0 of 400 turns, US$ 0.0123
+resolve acme/acme-shop#60 session 3: F-2 approved -> F-2 approved, timeout, run 0.0M of 10M, 0 of 400 turns, US$ 0.0000
+resolve acme/acme-shop#60 session 4: F-2 approved -> F-3 approved, ok, run 0.0M of 10M, 0 of 400 turns, US$ 0.0123
+resolve acme/acme-shop#60 session 5: F-3 approved -> shop stop 2, ok, run 0.0M of 10M, 0 of 400 turns, US$ 0.0123
+agile resolve VALIDATION: o épico shop está em validação; o roteiro está no corpo da issue acme/acme-shop#60 (## Validation script), com os passos não conferidos sem tela. Valide, rode o mesmo comando e digite a frase de autorização; para um defeito, digite /agile:resolve acme/acme-shop#60 numa sessão do Claude Code
+```
+
+O passo de cada linha é a linha `Autopilot:` do épico. Antes da sessão 4, o driver gravou `wip(F-2): interrupted at F-2 approved` na branch `feature/F-2`, e a sessão 4 retomou dali. O `VALIDATION` só saiu porque as três features estão `done` nos próprios arquivos em `epic/shop`; com a F-2 ainda `approved`, o driver rodaria mais uma sessão em vez de pedir a frase.
+
+Você valida pelo roteiro no corpo da issue 60, roda o mesmo comando e digita a frase do épico:
+
+```text
+Digite a frase de autorização do épico shop (validado e autorizo o merge de shop, ou validado e autorizo o merge de 60):
+> validado e autorizo o merge de shop
+resolve acme/acme-shop#60 session 6: shop stop 2 -> shop stop 2, ok, run 0.0M of 10M, 0 of 400 turns, US$ 0.0123
+resolve acme/acme-shop#60 session 7: shop stop 2 -> shop stop 2, ok, run 0.0M of 10M, 0 of 400 turns, US$ 0.0123
+agile resolve SHIPPED: epic shop entregue; o driver postou o comentário de entrega e encerrou o run; a worktree C:\dev\acme-shop-e-shop ficou: feche o que a prende e remova com worktree.js remove; a retro do épico é sua: digite /agile:retro epic shop numa sessão do Claude Code
+```
+
+A sessão 6 só recebe a frase, que o hook do guarda registra; a 7 faz o ship do épico. Ela não roda a retro, que precisa de você: as lições ficam em `## Retro notes`, e o `SHIPPED` pede o `/agile:retro epic shop`. A frase com `F-2` terminaria em `REFUSED`, sem nada registrado: uma feature nunca abre a `main` para o épico inteiro.
+
+### 14.203 Uma extensão do VS Code publicada pelo `/agile:publish`: sem o token, o envio que falha depois da tag e o reenvio seguro
+
+O acme-tools é uma extensão do VS Code (exemplo 14.194), na versão 0.1.0. Você digita `/agile:publish` sem o token: o plano passa e avisa que o Marketplace fica de fora (a saída do script no repositório de teste, sem `project`, `remote` e `notes`):
+
+```text
+{
+  "ok": true,
+  "mode": "plan",
+  "profile": "vscode-extension",
+  "projects": [],
+  "version": "0.1.0",
+  "extension": {
+    "name": "acme-tools",
+    "publisher": "acme-co",
+    "vsix": "acme-tools-0.1.0.vsix",
+    "marketplace": "vscode"
+  },
+  "leftOut": [
+    "acme-tools: not sent to the VS Code Marketplace, VSCE_PAT is not set"
+  ],
+  "branch": "main",
+  "tag": "v0.1.0",
+  "notesFile": "docs/releases/v0.1.0.md",
+  "previousTag": null,
+  "mergeCount": 0,
+  "warnings": [
+    "acme-tools: not sent to the VS Code Marketplace, VSCE_PAT is not set"
+  ]
+}
+```
+
+Claude: `VSCE_PAT` não está definido. O release (tag, notas e GitHub Release com o `.vsix`) sai e o envio ao VS Code Marketplace fica de fora. Para enviar, defina a variável no seu terminal e digite o comando de novo; eu não leio o valor.
+
+Você define `VSCE_PAT` e digita o comando outra vez. O plano traz `planLine` e nenhum `leftOut`; o pacote lê o `.vsix` de volta:
+
+```text
+{
+  "ok": true,
+  "mode": "package",
+  "profile": "vscode-extension",
+  "projects": [],
+  "version": "0.1.0",
+  "extension": {
+    "name": "acme-tools",
+    "publisher": "acme-co",
+    "vsix": "acme-tools-0.1.0.vsix",
+    "marketplace": "vscode"
+  },
+  "planLine": "acme-tools 0.1.0 (vscode marketplace)",
+  "branch": "main",
+  "tag": "v0.1.0",
+  "notesFile": "docs/releases/v0.1.0.md",
+  "previousTag": null,
+  "mergeCount": 0,
+  "warnings": [],
+  "notesWritten": "docs/releases/v0.1.0.md",
+  "vsix": "acme-tools-0.1.0.vsix",
+  "vsixBytes": 587
+}
+```
+
+O Marketplace recusa o token (vencido). O envio é o último passo, então o release fica de pé:
+
+```text
+{
+  "ok": false,
+  "mode": "release",
+  "tag": "v0.1.0",
+  "steps": [
+    "committed docs/releases/v0.1.0.md",
+    "tagged v0.1.0 (annotated, with the notes)",
+    "pushed main and v0.1.0",
+    "GitHub Release v0.1.0 created: https://github.com/acme/acme-tools/releases/tag/v0.1.0"
+  ],
+  "stop": [
+    "the release of v0.1.0 stands, but the upload to the VS Code Marketplace failed: ERROR  Failed request: (401) Unauthorized (token ***)"
+  ],
+  "rerun": [
+    "npm exec -- vsce publish --packagePath acme-tools-0.1.0.vsix --skip-duplicate"
+  ],
+  "note": "the commit and the tag stay; nothing was deleted"
+}
+```
+
+Claude: a tag e o GitHub Release existem; só o envio falhou (401), e o token aparece como `***`. Gere outro, defina `VSCE_PAT` e rode o comando de `rerun`, sem o token na linha; não apago a tag.
+
+Você roda o reenvio. A segunda vez, com a mesma versão, não envia nada (a saída do `vsce` de teste):
+
+```text
+INFO  Publishing 'acme-tools-0.1.0.vsix'...
+DONE  Published 0.1.0.
+INFO  Version 0.1.0 is already published. Skipping publish.
+```
+
+Num release sem falha o relatório termina com o endereço do item (a saída do script num repositório de teste):
+
+```text
+{
+  "ok": true,
+  "mode": "release",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "steps": [
+    "committed docs/releases/v0.1.0.md",
+    "tagged v0.1.0 (annotated, with the notes)",
+    "pushed main and v0.1.0",
+    "GitHub Release v0.1.0 created: https://github.com/acme/acme-tools/releases/tag/v0.1.0",
+    "acme-tools 0.1.0 uploaded to the VS Code Marketplace: https://marketplace.visualstudio.com/items?itemName=acme-co.acme-tools"
+  ],
+  "warnings": [],
+  "releaseAssets": [
+    "acme-tools-0.1.0.vsix"
+  ],
+  "marketplace": "published",
+  "marketplaceUrl": "https://marketplace.visualstudio.com/items?itemName=acme-co.acme-tools"
+}
+```
+
+O `/agile:publish` não despublica: use o `vsce unpublish` por conta própria.
+
+### 14.204 O kit AdminLTE importa um tema: a página conta o que ficou de fora e o arquivo passa pelo circuito
+
+O app web Cais usa o kit AdminLTE e já tem a página `/appearance`; o segundo item, "Import and generate themes in the AdminLTE kit", está entregue. Uma pessoa recebeu o `night-owl.json`, feito à mão, com uma cor escrita como `red`, uma chave `Mystery` desconhecida e o foco (`Focus`, travado) em preto. Ela toca em "Importar tema..." e escolhe o arquivo.
+
+Como a página é Blazor Server, o circuito lê o texto, na memória do servidor, e aplica as regras do oráculo de importação do plugin, que dá:
+
+```
+themes.js import report.json
+{
+  "formatVersion": 1,
+  "id": "night-owl",
+  "name": "Night Owl",
+  "type": "light",
+  "colors": {
+    "Accent": "#0B57D0",
+    "Surface": "#FFFFFF",
+    "Text.Muted": "#555F6D"
+  }
+}
+ignored bad color: Text "red"
+ignored unknown key: Mystery
+ignored locked key: Focus
+ACCEPTED night-owl
+```
+
+e a área de resultado mostra, em pt-BR:
+
+```
+Seus temas (1 de 20)
+  Night Owl   night-owl   claro   [Baixar] [Remover]
+[Escolher arquivo (.json)]   Nome [Cais Light (custom)]   [Gerar a partir das minhas personalizações]
+
+Resultado
+  Importado "Night Owl" como night-owl
+  ignoradas: 1 chave desconhecida, 1 chave travada, 1 cor inválida
+```
+
+O texto do arquivo não é gravado nem vai para o log: só o tema guardado, com as cores que passaram, vai para o `localStorage`, na chave `appearance.themes`. "Night Owl" entra na lista de temas claros sem recarregar. Importado de novo, vira `night-owl-2`, "Night Owl (2)". Escolhido como preferido, pinta desde a primeira pintura, até numa página estática, pela cópia `appearance.css` e pelo `appearance.js`, que não mudou.
+
+Duas abas não perdem a mudança uma da outra, porque cada gravação relê a chave. Se alguém editar `appearance.themes` pelas ferramentas do navegador e puser uma cor `red`, a próxima carga descarta o que a importação recusaria e mostra um aviso com o número descartado.

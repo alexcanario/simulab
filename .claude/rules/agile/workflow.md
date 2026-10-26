@@ -8,7 +8,7 @@
 - An unanswered item in `## Open questions` blocks approval. Answer it or mark it `deferred (owner, YYYY-MM-DD)`.
 - WIP limit: one item in `building` or `validating` per checkout (`blocked` holds no slot: `/agile:build` runs `deps.js block` first, and an undelivered `Depends on` blocks the item). A new request during a build becomes an `idea`; a second item in parallel needs the owner's `/agile:build <id> --worktree`.
 - Confirm the item at session start; other items are only registered, never executed.
-- Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>`); an approval never carries to the next gate. `/agile:autopilot` may take gates 2 and 3 in one message only when it names the merge; "validado" alone stops at `validating`. With `Merge: pr` the third gate is the owner's merge on the PR; the ship stops at "PR open".
+- Three human gates: approved → validated on screen → merge authorized (typing `/agile:ship <id>`); an approval never carries to the next gate. `/agile:autopilot` may take gates 2 and 3 in one message only when it names the merge; "validado" alone stops at `validating`. With `Merge: pr` the third gate is the owner's merge on the PR.
 - Verify premises in the code before asking; a decision a rule, an ADR or an earlier item answers is asked as a confirmation naming its source.
 - Questions go in one numbered round, each with a recommendation and a one-line reason. At most one follow-up round.
 - A false premise or an impossible criterion stops the build: give options A/B with a recommendation; the answer becomes a change note.

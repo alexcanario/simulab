@@ -1597,3 +1597,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - 2 (score 5/6, language rule `project-dotnet.md`): a migration test should migrate to its own migration, not the latest (`FixEnumColumnDescriptionsMigrationTests` turned red when F-150 rewrote the same comment). Not applied (owner).
 - 3 (score 6/3, plugin note `[stack: ASP.NET Core minimal APIs]`): in Development a body the route cannot read became a 500 through `UseExceptionHandler`; fixed in F-150 with `StatusCodeSelector`, the code is F-165. Not applied (owner).
 - Decisions: D1 `User` has no tenant filter, project rule applied at the ship (`5cd6d5f`); D2 Domain cannot see the Contracts error codes, not recommended (2/2); D3 the owner ticked the boxes in the file pane, plugin gap 4/2, not applied (owner). Item decisions: 9, they stay in the item. Suite over budget (428 s, 351 s): already tracked in F-144.
+
+## 2026-10-26 - Sync with agile@canary 0.190.0
+- From 0.185.0 to 0.190.0. Copied: `workflow.md`, template `project-claude.md`, `workflow.pt-BR.md`, `workflow-examples.pt-BR.md`. Merged: `git.md` (no conflict; `pr-auto` mention, dropped "(the index races)").
+- Left alone: `i18n.md`, `naming.md`, `profile.md` (edited, upstream unchanged); manual build files (no upstream change). Declined: none.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: column present; new technical terms not scanned. Build and tests not run (no build file changed).
+- Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
