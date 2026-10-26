@@ -1,7 +1,7 @@
 ---
 feature: F-166
 epic: Exam Simulator
-status: building
+status: validating
 board: 232
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-26)
-- Stopped at: Gate GREEN (full suite, 2026-10-26); next is the independent review.
-- Next action: Run /agile:review F-166 (reviewer agent, opus), then scan.js, the validation script in en and pt-BR, then validating.
+- Status: validating (2026-10-26)
+- Stopped at: Review fixes applied and validation script written; both scripts ran green against the real app host (2026-10-26).
+- Next action: Owner follows the validation script (steps 1-5) and says validado; then /agile:ship F-166.
 - Waiting on: nothing
 
 ## Summary
@@ -201,6 +201,8 @@ Tests locked: 4a2b362e03905ab8947e18631276b1eb3e8d16b8 (10 files); unlocks: 1
 - 2026-10-26: review finding 6 (minor) — fixed: one private `LockAndLoadAsync` in `AttemptStore` serves both lock reads.
 - 2026-10-26: review finding 7 (minor) — fixed: the Portuguese words in a comment of `AnswerPayload` removed.
 - 2026-10-26: review coverage — read the diff of 84 files against base 5fe733b, the five handlers, the `Attempt` and `AttemptAnswer` entities, `AnswerChecker`, the migration, the 10 locked test files, profile.md and the rules; checked and fine: correctness (BR1-BR11, AC1-AC13, start race, idempotent submit, save against submit), data (additive migration, unique indexes, constraints, column comments), localization (13 error codes and 2 permissions in 3 locales), locks (diff against the lock commit empty besides the recorded unlock), tests (every AC has a test that can fail), rules (module boundaries, profile). Not checked: none.
+- 2026-10-26: validation scripts — the owner follows two scripts that call the API (`docs/validation/F-166/validate.sh` for Git Bash, `validate.ps1` for PowerShell 7); both were run against the real app host from this worktree and ended in `ALL OK`. The student account of that run (`aluno.f166@simulab.local`) stays in the local database; the owner uses an account of their own — Claude (technical)
+- 2026-10-26: found while running the script — the first submit answered `submittedAt` with 7 fractional digits and every later read with 6 (PostgreSQL keeps microseconds), so the "same time" of AC11 differed as text. Fixed: `Attempt.Start` and `Attempt.Submit` keep microseconds; new test file `AttemptTimeTests` (not seen failing before the fix) — Claude (technical)
 - 2026-10-26: traps — T1 `QuestionVersion` loaded whole on every save, two connections per save: cost under load; T2 `json` column depends on byte order: breaks if a writer rewrites through `jsonb` (F-167 anonymization, F-151 queue); T3 save body buffered up to 1.5 MB before the ownership check: GC pressure on frequent essay autosaves.
 
 ## Change notes
@@ -222,6 +224,143 @@ Tests locked: 4a2b362e03905ab8947e18631276b1eb3e8d16b8 (10 files); unlocks: 1
 
 ## Open questions
 - (none)
+
+## Validation script
+There is no screen in this item: every check is a call to the API, made by two scripts that print one line per check (`docs/validation/F-166/validate.sh` for Git Bash, `validate.ps1` for PowerShell 7). Both were run before this text was written and ended in `ALL OK`.
+
+### English
+Needed to validate: the app host running from this worktree (you start it in step 1), one `Student` account with a verified email (step 2 creates one; the owner provides the password), the seeded `admin@simulab.local` (its development password is in `src/Hosts/Simulab.Api/appsettings.Development.json`) and a published edition with published questions (the edition `0198f370-0004-7000-8000-000000000003` is in the local database now). All in place.
+
+1. [ ] In a terminal, at the root of this worktree (`D:\wt\simulab\f-166-store-student`), start the app host and leave it open; wait until `https://localhost:7287/api/v1/system/info` answers 200 → the Aspire dashboard (the page that lists the app's parts and their logs) address is printed.
+   ```bash
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```powershell
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Skip this step if you already have a verified `Student` account on this machine.
+   - [ ] 2.1 Open `https://localhost:7125/sign-up`, fill in an email, a password and the name, tick "I am 18 or older", the terms and the privacy policy, and submit → the page says the account was created and a confirmation email was sent.
+   - [ ] 2.2 Open Mailpit (the local mailbox; its address is the `mailpit` entry in the Aspire dashboard resources list), open the message to that email and click the link inside → the page `verify-email` says the email is confirmed.
+3. In a second terminal at the same folder, set the three variables (use your own `Student` email and password) and run the script → the last line is `ALL OK`.
+   ```bash
+   export ADMIN_PASSWORD='<admin password>' STUDENT_EMAIL='<student email>' STUDENT_PASSWORD='<student password>'
+   bash docs/validation/F-166/validate.sh
+   ```
+   ```powershell
+   $env:ADMIN_PASSWORD='<admin password>'; $env:STUDENT_EMAIL='<student email>'; $env:STUDENT_PASSWORD='<student password>'
+   pwsh -NoProfile -File docs/validation/F-166/validate.ps1
+   ```
+   Expected output (the ids and times differ on each run):
+   ```text
+   == Step 2: start
+   OK   anonymous start -> 401
+   OK   student start -> 201
+        attempt <id>, questions: 1:TrueFalse 2:MultipleAnswer 17:SingleChoice
+   OK   start again returns the same attempt -> 200
+   OK   same attempt id
+   OK   unknown edition -> 404
+   == Step 3: save and read back
+   OK   save TrueFalse -> 200
+   OK   save MultipleAnswer -> 200
+   OK   save SingleChoice -> 200
+   OK   read the attempt -> 200
+        answers read back: [{"type":"TrueFalse","value":true},{"type":"MultipleAnswer","optionPositions":[0,1]},{"type":"SingleChoice","optionPosition":1}]
+   == Step 4: invalid, other order, replace, clear
+   OK   answer of another type -> 400
+        code: exam_attempt.answer_invalid
+   OK   type member after the others (true/false) -> 200
+   OK   question not in the attempt -> 404
+   OK   clear the answer -> 204
+   == Step 5: who may read and change
+   OK   admin reads the student's attempt -> 200
+   OK   admin saves in it -> 404
+   OK   admin submits it -> 404
+   OK   anonymous reads -> 401
+   OK   no key, explanation or model answer in the response
+   == Step 6: submit
+   OK   submit -> 200
+        status Submitted, submittedAt <time>
+   OK   submit again -> 200
+   OK   same submission time
+   OK   save after submit -> 409
+        code: exam_attempt.already_submitted
+   OK   clear after submit -> 409
+   ALL OK
+   ```
+4. Read the output of step 3 against the rules:
+   - [ ] 4.1 Start: the anonymous caller gets 401, the student gets 201 (200 when an earlier run left an attempt in progress), starting again gives the same attempt id, an unknown edition gives 404 → AC1, AC2, AC4, AC14.
+   - [ ] 4.2 Answers: each of the three types is saved and the attempt reads them back as saved → AC7.
+   - [ ] 4.3 Invalid and clear: an answer of another type is 400 `exam_attempt.answer_invalid`, an answer written with `type` after the other members is accepted, a question that is not in the attempt is 404, a cleared answer gives 204 → AC8, AC9.
+   - [ ] 4.4 Access: the `Admin` reads the student's attempt (200) but cannot save or submit in it (404), an anonymous caller gets 401, and the response holds no key, explanation or model answer → AC12, AC13, AC14, AC16.
+   - [ ] 4.5 Submit: the attempt becomes `Submitted`, submitting again gives the same time, saving or clearing after it gives 409 `exam_attempt.already_submitted` → AC10, AC11.
+5. [ ] Run step 3 again → `ALL OK` again, and the line `student start` says 201 with a new attempt id (the earlier attempt is submitted, so a new one starts; AC3).
+
+### pt-BR
+Necessário para validar: o app host rodando a partir deste worktree (você o inicia no passo 1), uma conta `Student` com e-mail verificado (o passo 2 cria uma; a senha é sua), o `admin@simulab.local` do seed (a senha de desenvolvimento está em `src/Hosts/Simulab.Api/appsettings.Development.json`) e uma edição publicada com questões publicadas (a edição `0198f370-0004-7000-8000-000000000003` está no banco local agora). Tudo no lugar.
+
+1. [ ] Em um terminal, na raiz deste worktree (`D:\wt\simulab\f-166-store-student`), inicie o app host e deixe aberto; espere `https://localhost:7287/api/v1/system/info` responder 200 → o endereço do dashboard do Aspire (a página que lista as partes do app e seus logs) aparece impresso.
+   ```bash
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```powershell
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Pule este passo se você já tem uma conta `Student` verificada nesta máquina.
+   - [ ] 2.1 Abra `https://localhost:7125/sign-up`, preencha e-mail, senha e nome, marque "tenho 18 anos ou mais", os termos e a política de privacidade, e envie → a página diz que a conta foi criada e que um e-mail de confirmação foi enviado.
+   - [ ] 2.2 Abra o Mailpit (a caixa de e-mail local; o endereço é a entrada `mailpit` na lista de recursos do dashboard do Aspire), abra a mensagem desse e-mail e clique no link dentro dela → a página `verify-email` diz que o e-mail foi confirmado.
+3. Em um segundo terminal, na mesma pasta, defina as três variáveis (use o e-mail e a senha do seu `Student`) e rode o script → a última linha é `ALL OK`.
+   ```bash
+   export ADMIN_PASSWORD='<admin password>' STUDENT_EMAIL='<student email>' STUDENT_PASSWORD='<student password>'
+   bash docs/validation/F-166/validate.sh
+   ```
+   ```powershell
+   $env:ADMIN_PASSWORD='<admin password>'; $env:STUDENT_EMAIL='<student email>'; $env:STUDENT_PASSWORD='<student password>'
+   pwsh -NoProfile -File docs/validation/F-166/validate.ps1
+   ```
+   Saída esperada (os ids e os horários mudam a cada execução):
+   ```text
+   == Step 2: start
+   OK   anonymous start -> 401
+   OK   student start -> 201
+        attempt <id>, questions: 1:TrueFalse 2:MultipleAnswer 17:SingleChoice
+   OK   start again returns the same attempt -> 200
+   OK   same attempt id
+   OK   unknown edition -> 404
+   == Step 3: save and read back
+   OK   save TrueFalse -> 200
+   OK   save MultipleAnswer -> 200
+   OK   save SingleChoice -> 200
+   OK   read the attempt -> 200
+        answers read back: [{"type":"TrueFalse","value":true},{"type":"MultipleAnswer","optionPositions":[0,1]},{"type":"SingleChoice","optionPosition":1}]
+   == Step 4: invalid, other order, replace, clear
+   OK   answer of another type -> 400
+        code: exam_attempt.answer_invalid
+   OK   type member after the others (true/false) -> 200
+   OK   question not in the attempt -> 404
+   OK   clear the answer -> 204
+   == Step 5: who may read and change
+   OK   admin reads the student's attempt -> 200
+   OK   admin saves in it -> 404
+   OK   admin submits it -> 404
+   OK   anonymous reads -> 401
+   OK   no key, explanation or model answer in the response
+   == Step 6: submit
+   OK   submit -> 200
+        status Submitted, submittedAt <time>
+   OK   submit again -> 200
+   OK   same submission time
+   OK   save after submit -> 409
+        code: exam_attempt.already_submitted
+   OK   clear after submit -> 409
+   ALL OK
+   ```
+4. Leia a saída do passo 3 contra as regras:
+   - [ ] 4.1 Início: o chamador anônimo recebe 401, o aluno recebe 201 (200 quando uma execução anterior deixou uma tentativa em andamento), iniciar de novo devolve o mesmo id de tentativa, uma edição desconhecida dá 404 → AC1, AC2, AC4, AC14.
+   - [ ] 4.2 Respostas: cada um dos três tipos é salvo e a tentativa devolve as respostas como salvas → AC7.
+   - [ ] 4.3 Inválida e apagar: uma resposta de outro tipo dá 400 `exam_attempt.answer_invalid`, uma resposta escrita com `type` depois dos outros membros é aceita, uma questão que não é da tentativa dá 404, uma resposta apagada dá 204 → AC8, AC9.
+   - [ ] 4.4 Acesso: o `Admin` lê a tentativa do aluno (200) mas não consegue salvar nem enviar nela (404), um chamador anônimo recebe 401, e a resposta não traz gabarito, explicação nem resposta-modelo → AC12, AC13, AC14, AC16.
+   - [ ] 4.5 Envio: a tentativa vira `Submitted`, enviar de novo devolve o mesmo horário, salvar ou apagar depois dá 409 `exam_attempt.already_submitted` → AC10, AC11.
+5. [ ] Rode o passo 3 de novo → `ALL OK` outra vez, e a linha `student start` diz 201 com um id de tentativa novo (a tentativa anterior foi enviada, então começa uma nova; AC3).
 
 ## Events
 

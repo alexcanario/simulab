@@ -48,7 +48,7 @@ public sealed class Attempt : TenantEntity
             StudentId = studentId,
             ExamEditionId = examEditionId,
             Status = AttemptStatus.InProgress,
-            StartedAt = now
+            StartedAt = ToMicroseconds(now)
         };
         attempt.TenantId = tenantId;
         attempt._answers.AddRange(questions
@@ -113,10 +113,14 @@ public sealed class Attempt : TenantEntity
         }
 
         Status = AttemptStatus.Submitted;
-        SubmittedAt = now;
+        SubmittedAt = ToMicroseconds(now);
 
         return Result.Success();
     }
+
+    // PostgreSQL keeps microseconds; a time with more digits would read back different from the one the first response showed.
+    private static DateTimeOffset ToMicroseconds(DateTimeOffset value) =>
+        new(value.Ticks - (value.Ticks % (TimeSpan.TicksPerMillisecond / 1000)), value.Offset);
 }
 
 /// <summary>One question an attempt fixes at its start: the question, its number in the paper, its version and its type.</summary>
