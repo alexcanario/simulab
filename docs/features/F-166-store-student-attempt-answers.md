@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-26)
-- Stopped at: Building started; fresh-context stop before the design passes (system-design, architect).
-- Next action: Run /agile:build F-166 in a clean session (resumes at 4b), or answer segue.
+- Stopped at: Design passes done; two premises (tenant BR10/AC19, UI texts AC22) and two trade-offs wait for the owner.
+- Next action: Owner answers the card; then /agile:change F-166 for the premises, then plan (step 5).
 - Waiting on: nothing
 
 ## Summary
@@ -179,6 +179,10 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - 2026-10-26 — No Redis, no background job and no SignalR in this item; no new package (EF Core, Npgsql and the test fixtures exist) — Claude (technical)
 - 2026-10-26 — The build adds the glossary rows `AttemptAnswer` and `AttemptStatus` and the `ExamEngine` row of `docs/agile/profile.md` is already there — Claude (technical)
 - 2026-10-26 — `CLAUDE.md` names the Simulae folder as `D:\dev\_icontrol\simulae`; it is `D:\dev\_control-alt-systems\simulae\repo` now. The line is left for the owner to correct, since it is outside this item — Claude (technical)
+- 2026-10-26: design passes (system-design, architect, both opus) — accepted: five projects, module copy `AttemptQuestionType`, one `attempt_answers` row per question written at start (clear sets `answer` to null), partial unique index with `NULLS NOT DISTINCT` (also on `attempt_answers`), catch the unique violation and re-read on a double start, conditional submit with the server clock, write routes also need `attempts.take`, option and item positions from 0 (versions hold no ids), field codes `exam_attempt.answer_type_mismatch|option_unknown|item_unknown|blank_unknown|text_too_long|answer_empty` as `errors: [{ field, code }]`, an essay line is a line break after CRLF/CR become LF, matching may repeat a right option, line breaks normalized and no trim, a port in Application with its adapter in Infrastructure (the module boundary test), the answer body bound as `JsonElement` and read in the endpoint so a bad `type` answers `exam_attempt.answer_invalid`, the PUT body limit derived from the constants as route metadata (AC17 proves it), a published question with no version fails the start. Dropped: `IgnoreQueryFilters` with an own tenant rule (breaks profile.md:76 and builds F-162 inside this item); the index on `attempts.student_id` (no query here uses it; F-167 adds it if needed); skipping a question with no version. Moved to step 1: the architecture-test module lists, project references and DocGen entries (the tests cannot load the solution otherwise).
+- 2026-10-26: design coverage — scope, rules, layout, contracts, data, simplicity checked by the architect; read: profile.md, project.md, api-contracts.md, ModuleBoundaryTests, SolutionAssemblies, ErrorCodeTextTests, WebPermissions, ModuleDbContext, F-162.
+- 2026-10-26: traps — T1 reuse `QuestionType` in the Contracts: a Contracts-to-Contracts reference breaks the profile; T2 clear by soft delete: rows pile up and the unique index turns partial; T3 reading BR9 as covering save against submit: an answer could land after the submission (a row lock prevents it).
+- 2026-10-26: premise stopped, waiting for the owner — (1) BR10/AC19: `ICurrentTenant` is always `NoTenant` and the filter hides a row stamped with a tenant from its own student; (2) AC22: the new permissions and error codes need texts in three locales (`RoleResourcesTests`, `ErrorCodeTextTests`) and a `WebPermissions` entry once the module joins the architecture lists.
 
 ## Out of scope
 - Timer, time limit, pause, abandon, admin close and automatic submit (arrive with the simulator's timer, epic E-06).
