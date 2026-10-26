@@ -1,7 +1,7 @@
 ---
 feature: F-150
 epic: Partner tenants
-status: validating
+status: done
 board: 208
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-26)
-- Stopped at: Build done: review (2 minors: 1 fixed, 1 became F-165), scan GREEN, validation script written
-- Next action: Owner follows the validation script; then /agile:ship F-150
+- Status: done (2026-10-26)
+- Stopped at: Shipped: merged b4be6d0, version 1.22.0, board closed
+- Next action: nothing — F-151 and F-162 build on it
 - Waiting on: nothing
 
 ## Summary
@@ -311,3 +311,37 @@ Necessário para validar: o app host local com um administrador e uma segunda co
 ## Delivery
 <!-- Filled by /agile:ship. -->
 - Branch: feature/F-150
+- Merge: `b4be6d0` (Merge F-150: Grader role and user-to-tenant link (#208)), pushed; app version 1.22.0
+- Tests: full suite `agile gate GREEN`, 5366 tests in 14 projects, 0 failures (24 s build, 351 s test run, the third run of the ship after bringing main in twice; over the 5 min budget, reported to the retro)
+- Manual pages (pt-BR): `users.md`, `roles.md`, `role-history.md`, `index.md`
+- Rule: `.claude/rules/agile/project.md` "do not remove the tenant filters (exception: the User entity, F-150)" (`5cd6d5f`)
+- Validation evidence:
+```text
+1. Suba o app no banco próprio do item (`simulab_f150`; a conferência de tela do Claude já o usou: o admin tem Corretor e o tenant `3f2a9c10…`). Feche antes o Visual Studio ou qualquer app host rodando desta pasta. Esperado: o endereço do painel do Aspire aparece; o Web responde em https://localhost:7125.
+2. O papel Corretor:
+   [x] 2.1 (2026-10-26) Entre em https://localhost:7125/sign-in como `admin@simulab.local`; no sidebar (menu lateral esquerdo) abra Administração > Papéis → a lista mostra Corretor com o selo "Sistema" e 1 permissão.
+   [x] 2.2 (2026-10-26) Clique em Editar no Corretor → a permissão é "Corrigir questões"; o campo do nome não muda. Cancele.
+3. [x] (2026-10-26) Uma segunda conta: abra https://localhost:7125/sign-up numa janela anônima, crie `ana.f150@exemplo.com`, abra o Mailpit pelo painel do Aspire e clique no link de verificação.
+4. Dar acesso, como admin:
+   [x] 4.1 (2026-10-26) Administração > Usuários → a tabela tem a coluna Tenant; a conta nova mostra "—".
+   [x] 4.2 (2026-10-26) Na linha da conta nova clique no lápis (Editar papéis) → abre o diálogo de acesso (a janelinha "Acesso de …", com os papéis e o campo Tenant).
+   [x] 4.3 (2026-10-26) Marque Corretor, digite `partner-a` em Tenant e clique em Salvar → o campo diz "Cole um id de tenant como 3f2a9c10-…"; nada é salvo.
+   [x] 4.4 (2026-10-26) Troque por `3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f` e Salve → "Acesso de ana.f150@exemplo.com salvo."; a linha mostra os chips Estudante e Corretor e `3f2a9c10`.
+5. A trilha de auditoria:
+   [x] 5.1 (2026-10-26) Na mesma linha clique em Histórico → o histórico de papéis (Administração > Histórico de papéis, filtrado por esse usuário) mostra "Tenant do usuário alterado" com "Adicionado: 3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f" e "Papéis do usuário alterados" com "Adicionado: Corretor".
+   [x] 5.2 (2026-10-26) De volta em Usuários, abra o diálogo de novo, apague o Tenant e Salve → a linha mostra "—"; o histórico ganha um "Tenant do usuário alterado" com "Removido: 3f2a9c10-…".
+6. A segunda conta, com tenant:
+   [x] 6.1 (2026-10-26) Como admin, volte o tenant de `ana.f150@exemplo.com` para `3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f`.
+   [x] 6.2 (2026-10-26) Na janela anônima entre como `ana.f150@exemplo.com` → a entrada funciona e o menu é o do Estudante (sem a seção Administração).
+   [x] 6.3 (2026-10-26) Abra https://localhost:7125/admin/users nessa janela → o acesso é recusado (a página de não autorizado).
+7. O papel de menor privilégio (AC21), como admin:
+   [x] 7.1 (2026-10-26) Administração > Papéis > Adicionar: nome `Access desk`, só "Gerenciar papéis e atribuições"; Salvar.
+   [x] 7.2 (2026-10-26) Usuários: dê a `ana.f150@exemplo.com` só `Access desk` (desmarque Estudante e Corretor) e Salve.
+   [x] 7.3 (2026-10-26) Na janela anônima saia e entre de novo como `ana.f150@exemplo.com`; Administração > Usuários abre; edite o tenant do admin (cole `8d1e0b77-2c3a-4f19-a6b5-112233445566`) e Salve → salvo, sem erro.
+8. Idioma e teclado, como admin:
+   [x] 8.1 (2026-10-26) Troque o idioma para English na barra de cima → a coluna diz "Tenant", o título do diálogo "Access of …" e a ajuda "Paste the tenant id; leave empty for none."
+   [x] 8.2 (2026-10-26) Só teclado: Tab até o lápis de uma linha, Enter abre o diálogo, Tab até Tenant, digite um GUID, Tab até Save, Enter → salvo; Esc num diálogo com alteração pergunta antes de descartar.
+Evidence: 17 of 17 tested
+```
+Gate time: 9 passes, 35 min 21 s — turn 4 (9 min 32 s), ship 3 (20 min 10 s), scan 2 (5 min 39 s); 2 red
+Usage: 18213.4k weighted (estimate) — build 49% · review 11% · ship 19% · other 22% — agents 8% — context per turn 304k → 594k — 2 sessions, 334 turns

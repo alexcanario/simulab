@@ -71,14 +71,15 @@
 | 43 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
 | 44 | F-145 | E-mail notice of a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
 | 45 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
-| 46 | F-150 | Grader role and user-to-tenant link | approved | opus | Partner tenants | - | F-151, F-162 | level 1; feature |
-| 47 | F-161 | Keep only the Manaus 2026 edition in the guard catalog seed | idea | - | assessment-catalog | - | - | level 1; feature |
+| 46 | F-161 | Keep only the Manaus 2026 edition in the guard catalog seed | idea | - | assessment-catalog | - | - | level 1; feature |
+| 47 | F-162 | Tenant-scoped visibility for curators and graders | idea | - | Partner tenants | - | - | level 1; feature |
 | 48 | F-163 | Seed the essay question of the Manaus 2026 paper | idea | - | Question bank | - | - | level 1; feature |
 | 49 | F-164 | Text alignment in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
-| 50 | F-151 | Essay and open-answer correction queue | idea | - | Question bank | F-150 | F-152 | level 2: waits on F-150; feature; Could; size M |
-| 51 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
-| 52 | F-162 | Tenant-scoped visibility for curators and graders | idea | - | Partner tenants | F-150 | - | level 2: waits on F-150; feature |
-| 53 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 3: waits on F-151; feature; Could; size M |
+| 50 | F-165 | Stable error code for an unreadable request body | idea | - | Foundation and identity | - | - | level 1; feature |
+| 51 | F-166 | Store a student's answers for an attempt | idea | - | Exam Simulator | - | F-151 | level 1; feature |
+| 52 | F-151 | Essay and open-answer correction queue | idea | - | Question bank | F-166 | F-152 | level 2: waits on F-166; feature; Could; size M |
+| 53 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
+| 54 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 3: waits on F-151; feature; Could; size M |
 
 ## Checklist
 
@@ -141,18 +142,19 @@
 - [ ] 43. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
 - [ ] 44. F-145 — E-mail notice of a new legal document version [idea] — why level 1; feature
 - [ ] 45. F-146 — Acceptance history on the account page [idea] — why level 1; feature
-- [ ] 46. F-150 — Grader role and user-to-tenant link [approved] — model opus — unlocks F-151, F-162 — why level 1; feature
-- [ ] 47. F-161 — Keep only the Manaus 2026 edition in the guard catalog seed [idea] — why level 1; feature
+- [ ] 46. F-161 — Keep only the Manaus 2026 edition in the guard catalog seed [idea] — why level 1; feature
+- [ ] 47. F-162 — Tenant-scoped visibility for curators and graders [idea] — why level 1; feature
 - [ ] 48. F-163 — Seed the essay question of the Manaus 2026 paper [idea] — why level 1; feature
 - [ ] 49. F-164 — Text alignment in the rich text editor [idea] — why level 1; feature
-- [ ] 50. F-151 — Essay and open-answer correction queue [idea] — waits on F-150 — unlocks F-152 — why level 2: waits on F-150; feature; Could; size M
-- [ ] 51. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
-- [ ] 52. F-162 — Tenant-scoped visibility for curators and graders [idea] — waits on F-150 — why level 2: waits on F-150; feature
-- [ ] 53. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 3: waits on F-151; feature; Could; size M
+- [ ] 50. F-165 — Stable error code for an unreadable request body [idea] — why level 1; feature
+- [ ] 51. F-166 — Store a student's answers for an attempt [idea] — unlocks F-151 — why level 1; feature
+- [ ] 52. F-151 — Essay and open-answer correction queue [idea] — waits on F-166 — unlocks F-152 — why level 2: waits on F-166; feature; Could; size M
+- [ ] 53. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
+- [ ] 54. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 3: waits on F-151; feature; Could; size M
 
 ## Summary
 
-- Delivered: 139
+- Delivered: 140
 - MVP mockup-stitch-1-formulario: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-2-navegacao: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-3-barra-app: 3 open (3 in the cuts, 0 their dependencies)
