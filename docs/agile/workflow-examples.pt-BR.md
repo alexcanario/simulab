@@ -2628,26 +2628,26 @@ Com a vaga livre (ou com `--worktree`), o `--unblock` põe `status: building`, r
 
 ### 14.68 A conversa foi compactada no meio do build
 
-O F-13 está em `building`. Ontem você parou com `/agile:pause`, então o arquivo do item tem a seção `## Paused`. Hoje a sessão está longa e o Claude Code compacta a conversa:
+O F-13 está em `building`. Ontem você parou com `/agile:pause`, então o arquivo do item tem o bloco `## Resume here` com o ponto em que paramos e a próxima ação. Hoje a sessão está longa e o Claude Code compacta a conversa:
 
 ```
 > /compact
 (o Claude Code compacta; o hook acrescenta ao que o resumo mantém:)
 Keep in the summary (agile@canary), word for word: the item in progress and its next step.
 Resume F-13 Exam board registration — building [feature/F-13] D:\wt\examprep\f-13-exam-board
-  Paused: 2026-10-07: stopped at the endpoint tests, wip commit 4e1c2aa
+  Paused: the endpoint tests, wip commit 4e1c2aa
   Next: write the 409 test for a duplicate acronym
 (a sessão continua, e o início dela acrescenta:)
 After a compact, resume here:
 Resume F-13 Exam board registration — building [feature/F-13] D:\wt\examprep\f-13-exam-board
-  Paused: 2026-10-07: stopped at the endpoint tests, wip commit 4e1c2aa
+  Paused: the endpoint tests, wip commit 4e1c2aa
   Next: write the 409 test for a duplicate acronym
 > continua
 Claude: F-13 — Exam board registration [building]
         Escrevendo o teste do 409 para sigla duplicada, em D:\wt\examprep\f-13-exam-board.
 ```
 
-Sem a nota `## Paused`, o próximo passo vem do status: `continue /agile:build F-13 from the last commit on feature/F-13` em `building`, ou `the owner runs the validation script of F-13, then /agile:ship F-13` em `validating`. Um início de sessão comum (não depois de uma compactação ou de um resume) mostra só as linhas de status de sempre.
+Sem o bloco `## Resume here` (um item antigo ainda mostra a nota `## Paused`, se tiver uma), o próximo passo vem do status: `continue /agile:build F-13 from the last commit on feature/F-13` em `building`, ou `the owner runs the validation script of F-13, then /agile:ship F-13` em `validating`. Um início de sessão comum (não depois de uma compactação ou de um resume) mostra só as linhas de status de sempre.
 
 ### 14.69 O backup do staging restaura de verdade?
 
@@ -4466,10 +4466,10 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (35)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (41)
 ok   AC5: the report states the files that use AskUserQuestion (1)
-ok   AC5: the report states the hook events (7)
-ok   AC5: the report states the skills (25) and the agents (8)
+ok   AC5: the report states the hook events (8)
+ok   AC5: the report states the skills (26) and the agents (8)
 ```
 
 Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
@@ -6966,3 +6966,468 @@ Você digita `/agile:order` no repositório do plugin, no app do Claude, com tr�
 O widget desenha um cabeçalho por grupo em `groups` (`Relatórios mais úteis`, `cerca de 2 sessões (~3 h)` e `2 itens`; depois `Integrações`, `cerca de 1 sessão (~2 h)` e `1 itens`) e as linhas de `items`, nesta ordem, três linhas cada. A do #11: a caixa, o 2, o **#11** e o título; o status `idea`, `refinar` com o selo tracejado `~sonnet`, `construir` com o selo tracejado `~sonnet` e `waits on #10`; e, em letra pequena, `envio automático, depende do PDF`. A do #13 mostra `refinar` com o selo neutro `-` (já está aprovado) e `construir` com o selo cheio `opus`, o modelo decidido na linha `- Model:`. Sob a lista, a legenda `tracejado = sugestão do Claude · cheio = decidido no item`. Marcar a caixa do #10 salva a marca na hora (o `/agile:order ticks #10` do exemplo 14.107) e o contador mostra `1 de 3 marcados`. Como o plugin não tem cortes, `section` e `mvp` são `null` e não há cabeçalho de MVP; num projeto com cortes eles viriam antes dos grupos. Depois do widget o Claude escreve, no chat, por que a ordem é essa, a estimativa total (um palpite) e o próximo passo.
 
 Numa sessão sem `show_widget`, ou se o widget não abrir, o Claude roda o `grouped` sem `--json`, copia as tabelas do exemplo 14.188 e escreve logo depois a linha `sem show_widget nesta sessão` (ou `o widget não abriu: <erro>`) e `diga "marque F-3" para marcar`; um arquivo que o script recusa não gera JSON nenhum, só a linha `agile order REFUSED: <motivo>`, igual com ou sem `--json`.
+
+### 14.190 Um run do resolve com o guarda ligado: o autoteste, uma recusa, a sua autorização e a parada
+
+Na acme-shop, o `/agile:resolve` leva a issue 41 (o item F-12) até a validação sem você acompanhar cada passo. Antes de qualquer trabalho ele liga o guarda do run, junta a branch do item e faz as duas escritas proibidas de propósito; cada entrada de hook recusa a sua e a anota no arquivo do run. Só então o `check` ativa o run. A saída abaixo é a do script num repositório de teste da acme-shop (os caminhos encurtados):
+
+```text
+agile run-guard BEGUN: run 41 on main, armed; next the two self-test probes, then check 41
+agile run-guard ADDED: feature/F-12 to run 41
+[agile run-guard] Write refused: the run is armed: every write waits for the self-test. Resolve run 41 is on (C:\dev\acme-shop\.git\agile\resolve\41.json).
+[agile run-guard] Bash refused: git push with a force, a +refspec, --mirror, --all or --prune rewrites history, refused for the whole run. Resolve run 41 is on (C:\dev\acme-shop\.git\agile\resolve\41.json).
+agile run-guard ACTIVE: run 41 on main; both hook entries refused their probe
+```
+
+Durante o run o guarda falha fechado também no texto que não consegue ler. Um push forçado escondido numa variável, ou escrito com um prefixo da opção que o git aceita, é recusado do mesmo jeito:
+
+```text
+[agile run-guard] Bash refused: the word $F of git push cannot be read. Resolve run 41 is on (C:\dev\acme-shop\.git\agile\resolve\41.json).
+[agile run-guard] Bash refused: git push with a force, a +refspec, --mirror, --all or --prune rewrites history, refused for the whole run. Resolve run 41 is on (C:\dev\acme-shop\.git\agile\resolve\41.json).
+```
+
+Os dois comandos recusados, nessa ordem:
+
+```powershell
+$F = '--force'; git push $F origin feature/F-12
+git push --force-w origin feature/F-12
+```
+
+```bash
+F=--force; git push $F origin feature/F-12
+git push --force-w origin feature/F-12
+```
+
+A mensagem de commit lida de um heredoc entre aspas, dentro de uma substituição que só tem o heredoc, continua passando.
+
+Se uma das duas entradas não estivesse carregada (o plugin sem atualizar, um hook desligado), a escrita dela não seria recusada nem anotada, e o `check` pararia em `agile run-guard REFUSED: self-test shell not blocked`: o run não começa sem guarda. A sonda do shell leva `--dry-run`, então nem nesse caso a `main` seria sobrescrita.
+
+No meio do trabalho, o modelo tenta o merge do item na `main` antes de você validar. O hook recusa, com código 2, e diz qual é o desvio:
+
+```text
+[agile run-guard] Bash refused: a merge into main waits for the owner's authorization (validado e autorizo o merge de 41). Resolve run 41 is on (C:\dev\acme-shop\.git\agile\resolve\41.json).
+Bypass, only by the owner: node "<plugin>\scripts\run-guard.js" end 41 in a terminal, or restart Claude Code with AGILE_HOOKS=off.
+```
+
+Você valida o F-12 pelo roteiro e digita, sozinha no prompt:
+
+> validado e autorizo o merge de F-12
+
+O hook de prompt anota a autorização e não escreve nada no chat; o merge, o push na `main` e as escritas do ship no checkout principal passam a valer. Se a mesma frase chegasse de outro jeito (com mais texto, citada, dentro do relatório de um subagente ou de uma mensagem de outra sessão), nada seria anotado; e uma ferramenta que tentasse levar a frase, como uma sessão do Claude aberta por um comando ou um prompt de agente, seria recusada. O reescrever do histórico continua recusado até o fim do run.
+
+Em outro run, algo parece errado e você quer parar tudo. Você digita `pare o resolve` (num run sem ninguém digitando, o mesmo é o `stop` do script num terminal). Daí em diante só leituras passam:
+
+```text
+[agile run-guard] Bash refused: the run is stopped. Resolve run 41 is on (C:\dev\acme-shop\.git\agile\resolve\41.json).
+agile run-guard STOPPED: run 41; every write and shell call is refused until run-guard.js end 41
+```
+
+Quando terminar de olhar, você encerra o run num terminal, na pasta da acme-shop:
+
+```powershell
+node "<plugin>/scripts/run-guard.js" end 41
+```
+
+```bash
+node "<plugin>/scripts/run-guard.js" end 41
+```
+
+```text
+agile run-guard ENDED: run 41; every hook is back to its normal behavior
+```
+
+Sem o arquivo do run, todos os hooks voltam ao normal na hora: as ferramentas MCP, as escritas no checkout principal e o resto do trabalho do dia a dia funcionam como antes.
+
+### 14.191 O plano de um ambiente `aca` numa região que a assinatura não pode usar
+
+Na acme-shop, a linha do `staging` em `## Cloud accounts` diz Region `eastus`, e a assinatura do cliente é nova. Antes de qualquer tag ou comando, o plano de `/agile:publish staging` lê o que a Region aguenta (duas consultas de leitura ao Azure, nada é escrito). Aqui o PostgreSQL Flexible está bloqueado nessa região, e o plano para, com o motivo que o próprio Azure dá e as duas saídas:
+
+```text
+staging: Azure cannot host this environment in eastus: PostgreSQL Flexible (Provisioning is restricted in this region. Please choose a different region. For exceptions to this rule please open a support request with Issue type of 'Service and subscription limits'.). Change Region in docs/infra.md, or ask Azure for the quota (a support request of issue type "Service and subscription limits") — nothing ran
+```
+
+Você troca a Region para `eastus2` na linha do `staging` e pede o plano de novo. Agora a região aguenta, e o plano mostra a linha logo depois do `Budget:` e do `Spend:`:
+
+```text
+Capacity: ok in eastus2 (Container Apps environments 0 of 2; PostgreSQL Flexible Standard_B1ms offered)
+```
+
+Se o login não puder ler as cotas (ou o Azure responder algo que o plugin não entende), o plano não para por isso: a linha diz `Capacity: not read (<motivo>)` e o deploy segue. Num deploy seguinte, quando o resource group já tem o ambiente do Container Apps e o servidor PostgreSQL, a linha diz `Capacity: ok in eastus2 (already in rg-acme)` e nenhuma cota é consultada. O deploy local e o pipeline fazem a mesma leitura antes do comando, e uma falta provada os para do mesmo jeito.
+
+### 14.192 A pausa grava o bloco `Resume here` e o início da sessão seguinte o lê
+
+O F-13 está em `building` e você precisa parar. Você digita `/agile:pause` (dizer que vai parar, com quaisquer palavras, dá no mesmo). O Claude imprime a linha do item, grava o bloco `## Resume here` no arquivo do item, na worktree (o script lê o status e a data do próprio arquivo), faz o commit `wip` e escreve a nota curta do chat, que ainda diz o que fechar:
+
+```text
+> /agile:pause
+Claude: F-13 — Exam board registration [building]
+        agile resume SET: docs/features/F-13-exam-board.md (building)
+        wip(F-13): endpoint tests half done (feature/F-13, 4e1c2aa)
+        Paramos nos testes do endpoint. Próximo: escrever o teste do 409 para sigla duplicada.
+        Pendente com você: nada. Rodando: o app host; feche antes de voltar.
+```
+
+O arquivo do item agora abre assim, logo depois do título e da linha `Technical terms:`, antes de `## Summary`:
+
+```text
+## Resume here
+- Status: building (2026-10-07)
+- Stopped at: the endpoint tests, wip commit 4e1c2aa
+- Next action: write the 409 test for a duplicate acronym
+- Waiting on: nothing
+```
+
+No dia seguinte você abre uma sessão nova no mesmo repositório e a conversa foi compactada. O início da sessão mostra o ponto em que paramos e a próxima ação, lidos do bloco:
+
+```text
+After a compact, resume here:
+Resume F-13 Exam board registration — building [feature/F-13] D:\wt\examprep\f-13-exam-board
+  Paused: the endpoint tests, wip commit 4e1c2aa
+  Next: write the 409 test for a duplicate acronym
+  Criteria with no test: no section
+```
+
+O `/agile:status` mostra a mesma coisa em `Next step:`, lida do bloco. O mesmo bloco serve a quem abre o arquivo: as quatro linhas dizem em que estado o item está e o que fazer, sem ler o resto. Um item feito antes do bloco existir não é erro; a verificação diz isso e o primeiro passo que mexe no item grava o bloco:
+
+```text
+legacy: no block
+```
+
+### 14.193 Uma issue sua até a validação com o `/agile:resolve`: o seu texto, uma parada grave e a retomada
+
+Na acme-shop você abriu a issue 52, "Exportar pedidos em CSV", com o rótulo `feature`, e comentou o separador. O Bruno, que também tem acesso ao repositório, comentou pedindo outra coisa. Você digita:
+
+> /agile:resolve acme/acme-shop#52
+
+O Claude lê a issue pelo script. A saída abaixo é a do script num repositório de teste da acme-shop (os caminhos encurtados):
+
+```text
+issue: https://github.com/acme/acme-shop/issues/52
+owner: ana
+kind: feature (label)
+capture: board #52 (the issue is the item's board issue; no second issue)
+snapshot: C:\dev\acme-shop\.git\agile\issues\acme-acme-shop-52\text.md sha256 3a7ee4facf1b65b235c4139c961a60ce9c6650d0eb2aefada0c83c3ed4c1deab (new)
+not followed: bruno https://github.com/acme/acme-shop/issues/52#issuecomment-901 (another author)
+agile resolve-issue READ: acme/acme-shop#52 by ana, kind feature, snapshot 3a7ee4facf1b
+agile resolve-issue NONE: no item has board #52: a new run captures it
+```
+
+O snapshot guarda o corpo e o seu comentário; o do Bruno fica só como autor e link, e o texto dele não entra em nada que o Claude lê. Nenhum item parecido existe: o Claude registra o F-14 com a própria issue 52 como issue do board e refina com todas as respostas assumidas. Assim que a worktree do F-14 existe, o guarda do run começa, faz o autoteste e recebe a branch do item:
+
+```text
+agile run-guard BEGUN: run 52 on main, armed; next the two self-test probes, then check 52
+[agile run-guard] Write refused: the run is armed: every write waits for the self-test. Resolve run 52 is on (C:\dev\acme-shop\.git\agile\resolve\52.json).
+[agile run-guard] Bash refused: git push with a force, a +refspec, --mirror, --all or --prune rewrites history, refused for the whole run. Resolve run 52 is on (C:\dev\acme-shop\.git\agile\resolve\52.json).
+agile run-guard ACTIVE: run 52 on main; both hook entries refused their probe
+agile run-guard ADDED: feature/F-14 to run 52
+agile resolve-check conflict: OK: HEAD merges into main and origin/main with no conflict
+```
+
+O build segue sem perguntas. Antes de ir para `validating`, a conferência do contrato acha uma operação do OpenAPI que o item tirou, e isso é uma parada grave:
+
+```text
+agile resolve-check contract: STOP: another module's contract changes: GET /api/v1/orders/{id} removed from docs/api/openapi.json
+agile resolve-issue POSTED: stop comment on acme/acme-shop#52 (https://github.com/acme/acme-shop/issues/52#issuecomment-955)
+agile run-guard STOPPED: run 52; every write and shell call is refused until run-guard.js end 52
+```
+
+O comentário que aparece na issue:
+
+```text
+**/agile:resolve — Parado numa parada grave** (F-14, branch `feature/F-14`)
+
+Parou em: o contrato de outro módulo.
+Motivo: GET /api/v1/orders/{id} removed from docs/api/openapi.json
+
+Para retomar: remova a causa, rode `run-guard.js end 52` num terminal na pasta do projeto e digite `/agile:resolve acme/acme-shop#52`.
+
+**Assumido pelo resolve**
+- formato da data: ISO 8601 (recomendado)
+
+**Comentários não seguidos** (outro autor: o texto não foi lido)
+- bruno: https://github.com/acme/acme-shop/issues/52#issuecomment-901
+
+**Anexos não lidos**
+- nenhum
+```
+
+A sessão não consegue encerrar o run sozinha antes da sua autorização. Você devolve a operação ao OpenAPI na branch do item e encerra o run num terminal, na pasta da acme-shop:
+
+```powershell
+node "<plugin>/scripts/run-guard.js" end 52
+```
+
+```bash
+node "<plugin>/scripts/run-guard.js" end 52
+```
+
+```text
+agile run-guard ENDED: run 52; every hook is back to its normal behavior
+```
+
+Você digita o mesmo comando de novo. O snapshot é reaproveitado, o item é achado pela issue do board, e um run novo começa com um autoteste novo, a partir da linha `Autopilot:`:
+
+```text
+agile resolve-issue FOUND: F-14 building at C:\dev\acme-shop-f-14\docs\features\F-14-export-orders-csv.md; Autopilot: approved
+agile run-guard ACTIVE: run 52 on main; both hook entries refused their probe
+agile resolve-check migration: OK: no migration deletes data
+agile resolve-check contract: OK: no contract removed or changed (no Contracts: line in the profile)
+agile resolve-check package: OK: no package added
+agile resolve-issue POSTED: validation comment on acme/acme-shop#52 (https://github.com/acme/acme-shop/issues/52#issuecomment-955)
+```
+
+A parada 2 mostra o roteiro de validação com tudo o que foi assumido (o formato da data e o nome do arquivo), e o comentário de validação diz o mesmo na issue. Depois de validar, você digita sozinha no prompt:
+
+> validado e autorizo o merge de F-14
+
+O ship roda, um comentário de entrega vai para a issue e o run termina. Só "validado" deixaria o F-14 em `validating` com o run ligado.
+
+
+### 14.194 Uma extensão do VS Code pelo bootstrap: a rodada da extensão, o esqueleto e o `.vsix`
+
+O brief da Ana descreve uma extensão que lista, no VS Code, os pull requests à espera de revisão. Rodada 1:
+
+```
+Claude: 1. Tipo de app → Recomendação: VS Code extension. O brief fala de um comando
+       dentro do VS Code, não de telas do app nem de uma API.
+    2. Perfil de arquitetura → Recomendação: vscode-extension (o único para uma extensão do VS Code).
+> ok
+```
+
+No lugar das rodadas 2 a 8 vem uma só:
+
+```
+Claude: X1. Nome → Recomendação: review-helper (kebab-case; vira o name do package.json
+       e o prefixo dos comandos, review-helper.hello).
+    X2. Nome de exibição e descrição → Recomendação: "Review Helper" e "Shows the pull
+       requests waiting for a review."
+    X3. Publicador → Recomendação: ana-souza.  X4. Licença → Recomendação: MIT.
+    X5. Repositório → Recomendação: ana-souza/review-helper (o `origin` já o dá).
+    27. Board → Recomendação: GitHub Issues + Projects (o código está no GitHub).
+    28c. Raiz das worktrees → Recomendação: D:\wt\review-helper.
+    28d. Merge → Recomendação: direct.  34. Modelos → as linhas de sempre, sem as de tela.
+    20a. Idiomas do manual → Recomendação: pt-BR.
+    Já está claro: uma extensão não tem banco, ambientes, idiomas de UI nem telas do
+    próprio agile; branch principal main, fluxo trunk.
+> ok
+```
+
+Depois da pergunta de fechamento, do resumo e do "confirmo", o Claude descreve o esqueleto e, com o seu sim, copia o `templates/vscode-extension/` com os tokens trocados (`package.json`, `tsconfig.json`, `.vscodeignore`, `.gitignore`, `README.md`, `LICENSE`, `.vscode/launch.json` e `tasks.json`, `src/extension.ts`, `src/core/greeter.ts`, os dois testes e o `.claude/agile/build.json`), confere no registro do npm as versões dos quatro pacotes e roda o `npm install`, que escreve o `package-lock.json`. Depois roda `npm ci`, `npm test` e `npm run package` e mostra o que o npm respondeu:
+
+```
+> review-helper@0.1.0 test
+> tsc -p . && node --test "out/test/**/*.test.js"
+
+✔ src/core imports nothing from vscode (2.4235ms)
+✔ hello greets by name (0.6187ms)
+ℹ tests 2
+ℹ pass 2
+ℹ fail 0
+ DONE  Packaged: C:\dev\review-helper\review-helper-0.1.0.vsix (7 files, 3.68 KB)
+```
+
+O `CLAUDE.md` tem `Profile: vscode-extension` e nenhuma linha de idiomas de UI; não há solução, `templates/dotnet/` nem baseline de avisos. O `.vsix` leva `out/extension.js` e `out/core/greeter.js` e deixa `src/` e `out/test/` de fora. Para ver a extensão rodando, a Ana abre a pasta no VS Code e aperta F5 com "Run Extension": o Extension Development Host abre com o comando "Review Helper: Say hello" na paleta. Ao fim, o Claude lembra que o `package.json` é o manifesto, escrito à mão, que a versão mora nele e que o `/agile:publish` recusa o perfil até o item do Marketplace (#264) existir.
+
+### 14.195 As seções offline do perfil: o `/agile:sync` traz os arquivos de um `mobile` e de um `web-api`
+
+O Bolso é um projeto `mobile` sincronizado na 0.176.0, com o `docs/agile/profile.md` nunca editado e o `runtime-themes-maui.md` já copiado. Neste `/agile:sync` o `sync.js plan` lista o perfil como `update`, os dois arquivos offline como `new` e o de tema como `same`:
+
+```
+update   docs/agile/profile.md
+new      docs/agile/profile-sections/offline-writes-api.md
+new      docs/agile/profile-sections/offline-first-mobile.md
+same     docs/agile/profile-sections/runtime-themes-maui.md
+```
+
+Você aprova, e o `apply` responde:
+
+```
+copied   docs/agile/profile.md
+copied   docs/agile/profile-sections/offline-writes-api.md
+copied   docs/agile/profile-sections/offline-first-mobile.md
+```
+
+O `profile.md` do Bolso passou de 10.163 para 8.034 palavras: `## Offline-first` e `## Offline writes (the API)` viraram uma linha cada, o ponteiro com o `Read when`, e o texto delas está nos arquivos novos (1.759 e 447 palavras). Um item que acrescenta um campo numa tela existente não lê nenhum dos dois; um item que muda o merge de uma atualização pendente lê o `offline-first-mobile.md`.
+
+No API do Bolso, um projeto `web-api` na mesma versão, o `sync.js plan` lista `update` para o `docs/agile/profile.md` e `new` para os dois arquivos abaixo, o segundo com 314 palavras, as sete linhas do portão:
+
+```
+new      docs/agile/profile-sections/offline-writes-api.md
+new      docs/agile/profile-sections/forced-update-gate.md
+```
+
+O perfil passou de 3.583 para 2.891 palavras e o `## Forced update` continua com a introdução dele, agora seguida de um `### Forced update (the gate)` que só tem o ponteiro. Um item que muda o portão de versão (`X-App-Version`, `426`) lê esse arquivo; um que só acrescenta um endpoint, não.
+
+Se você tivesse acrescentado uma linha sua ao `profile.md`, a tabela o listaria como `edited`, o `apply` recusaria e o Claude faria o merge de três vias: a sua linha fica, cada seção vira o ponteiro, e os arquivos chegam como `new` do mesmo jeito.
+
+### 14.196 O ship mostra uma lista de 8 itens e uma tabela de 2 colunas como NOTE
+
+Você escreveu as regras do F-12 numa lista só e juntou duas colunas numa tabela. Antes de fechar o ship, o Claude roda a contagem no arquivo do item:
+
+```powershell
+node "<plugin>scriptsdensity.js" check docs/features/F-12-exam-board.md
+```
+
+```bash
+node "<plugin>/scripts/density.js" check docs/features/F-12-exam-board.md
+```
+
+O arquivo tem estas seções (o resto dele cabe nos limites):
+
+```markdown
+# Exam board registration
+
+## Rules
+- BR1: an exam board has a name
+- BR2: the acronym is unique
+- BR3: the acronym has at most 8 letters
+- BR4: a board can be archived
+- BR5: an archived board has no new exam
+- BR6: the list is sorted by name
+- BR7: the name is trimmed
+- BR8: a deleted board stays in reports
+
+## Fields
+| Field | Rule |
+|---|---|
+| Name | required |
+```
+
+A saída traz um achado por linha:
+
+```text
+list Rules 8 > 7
+table Fields 2 columns, a list in disguise
+```
+
+O relatório do ship mostra as duas linhas como `NOTE docs/features/F-12-exam-board.md: list Rules 8 > 7` e `NOTE docs/features/F-12-exam-board.md: table Fields 2 columns, a list in disguise`. O ship segue: nada é parado e nada é escrito no arquivo.
+
+Para tirar as notas, divida as regras em duas seções e troque a tabela por uma lista. Num template do plugin, ou no manual acima do número guardado em `scripts/density-baseline.json`, o mesmo achado seria uma falha do `check-all`.
+
+### 14.197 Um run do `/agile:resolve` passa de 75% do teto de custo e depois entra no estado de limite
+
+Na acme-shop, o run da issue 52 (o F-14) segue sem você. A cada chamada de ferramenta o guarda do run soma o uso de todas as sessões do run. Quando a soma passa de 75% do teto de custo, você vê um aviso, e o run segue:
+
+```text
+Resolve #52: 75% do teto de custo (7.5M de 10M ponderado, estimativa) · 186 de 400 turnos.
+```
+
+Você quer ver onde a contagem está e roda o `status` do guarda num terminal, na pasta da acme-shop:
+
+```powershell
+node "<plugin>/scripts/run-guard.js" status
+```
+
+```bash
+node "<plugin>/scripts/run-guard.js" status
+```
+
+```text
+agile run-guard STATUS: run 52 on main, active; branches: feature/F-14 (C:\dev\acme-shop\.git\agile\resolve\52.json); count 7.5M of 10M weighted, 186 of 400 turns
+```
+
+O build continua e a soma chega ao teto. A próxima edição é recusada, e você vê:
+
+```text
+Resolve #52: limite atingido (teto de custo: 10.0M de 10M ponderado); a run só posta o comentário de parada. Encerre com run-guard.js end 52 no terminal.
+```
+
+A sessão recebe a recusa com o que ainda passa (os caminhos encurtados):
+
+```text
+[agile run-guard] Edit refused: the run reached its cost ceiling, its limit state (count 10.0M of 10M weighted, 248 of 400 turns, limit reached (ceiling)): only Read, Glob, Grep, mcp__ccd_turn__*, a Write in the scratchpad, resolve-issue.js comment 52 --kind stop --file <f>, events.js add <id> stop "<text>" and run-guard.js stop 52 pass. Resolve #52: limite atingido (teto de custo: 10.0M de 10M ponderado); a run só posta o comentário de parada. Encerre com run-guard.js end 52 no terminal. Resolve run 52 is on (C:\dev\acme-shop\.git\agile\resolve\52.json).
+Bypass, only by the owner: node "<plugin>\scripts\run-guard.js" end 52 in a terminal, or restart Claude Code with AGILE_HOOKS=off.
+```
+
+Ela posta o comentário de parada na issue (o motivo é o teto de custo), grava o evento `stop` e para o run. O `end` é seu: você decide se a issue vale outro run, que começa com a contagem do zero, ou se o F-14 segue no fluxo normal com o `/agile:autopilot`.
+
+### 14.198 O `/agile:resolve --driver` leva a issue até a validação pelo terminal, retoma depois de uma sessão morta e recebe a sua autorização
+
+Na acme-shop, a issue 52 já virou o F-12 (Exportar pedidos), aprovado, com o run do guarda ligado. Você quer que o resto rode sem uma sessão só carregando tudo. Numa sessão do projeto você digita:
+
+```text
+> /agile:resolve acme/acme-shop#52 --driver
+```
+
+O Claude confere a issue sem escrever nada e mostra o comando do driver, com a pasta do plugin que está rodando:
+
+```powershell
+node "C:\Users\ana\.claude\plugins\cache\canary\agile\<versão>\scripts\resolve.js" 'acme/acme-shop#52'
+```
+
+```bash
+node "C:/Users/ana/.claude/plugins/cache/canary/agile/<versão>/scripts/resolve.js" 'acme/acme-shop#52'
+```
+
+Você roda o comando num terminal, na pasta da acme-shop. Cada linha é uma sessão nova do Claude Code, sem janela; a primeira termina na linha de contexto novo antes do `frontend`, a segunda passa da sua hora de limite com o `OrdersExport.cs` pela metade, e a terceira chega à parada 2 (a saída do script num repositório de teste da acme-shop, os caminhos encurtados):
+
+```text
+resolve acme/acme-shop#52 session 1: approved -> approved, ok, run 1.4M of 10M, 61 of 400 turns, US$ 1.9412
+resolve acme/acme-shop#52 session 2: approved -> approved, timeout, run 2.6M of 10M, 118 of 400 turns, US$ 0.0000
+resolve acme/acme-shop#52 session 3: approved -> stop 2, ok, run 3.9M of 10M, 172 of 400 turns, US$ 2.4407
+agile resolve VALIDATION: F-12 está em validação; o roteiro está em C:\dev\acme-shop-f-12\docs\features\F-12-export-orders.md (## Validation script), com os passos não conferidos sem tela. Valide, rode o mesmo comando e digite a frase de autorização
+```
+
+A sessão 2 não se perdeu: antes da 3, o driver passou o `secret-guard.js` no que estava na worktree e gravou o commit `wip(F-12): interrupted at approved` na branch `feature/F-12`, e a sessão 3 retomou dali. Se você tivesse fechado o terminal no meio, a sessão morreria junto, e o mesmo comando faria esse mesmo commit antes de seguir.
+
+Você valida o app pelo roteiro, roda o mesmo comando no terminal e digita a frase quando ele pede:
+
+```text
+Digite a frase de autorização de F-12 (validado e autorizo o merge de F-12):
+> validado e autorizo o merge de F-12
+resolve acme/acme-shop#52 session 4: stop 2 -> stop 2, ok, run 3.9M of 10M, 172 of 400 turns, US$ 0.0061
+resolve acme/acme-shop#52 session 5: stop 2 -> shipping, ok, run not begun, US$ 0.8823
+agile resolve SHIPPED: F-12 entregue; a worktree C:\dev\acme-shop-f-12 ficou: feche o que a prende e remova com worktree.js remove
+```
+
+A sessão 4 não tem nenhuma ferramenta: ela só recebe a frase, que o hook do guarda registra no arquivo do run. O driver lê o registro de volta e só então roda a sessão 5, a do ship, que faz o merge, posta o comentário de entrega e encerra o run (daí o `run not begun` na linha dela).
+
+A worktree do F-12 ficou porque um programa ainda a usava; o driver a nomeia em vez de tentar de novo. Um `validado` sozinho, ou a frase de outro item, não registra nada e encerra com `REFUSED`.
+
+### 14.199 Um épico inteiro pelo `/agile:resolve`: três features num `epic/<slug>`, uma parada de conflito e a autorização pelo slug
+
+Na acme-shop, a issue 60, "Frete por região", tem o rótulo `epic`. Você digita:
+
+```text
+> /agile:resolve #60
+```
+
+Antes do guarda, o Claude cria `epic/frete-regiao` com a worktree dela e commita ali o arquivo do épico em `draft`. A quebra sai sem perguntas (saída do script num repositório de teste da acme-shop):
+
+```text
+agile resolve-check epic: OK: 3 features, at most 6
+```
+
+São F-20 (tabela de regiões), F-21 (frete por região, depende da F-20) e F-22 (frete no carrinho). Cada uma entra em `epic/frete-regiao` sem parar e sem subir versão. A F-21 conta a F-20 como entregue na branch do épico:
+
+```text
+F-20 delivered on epic/frete-regiao
+agile deps FREE
+```
+
+A F-22 mexe na mesma linha de `src/Freight.cs` que a F-21. Antes do merge:
+
+```text
+agile resolve-check conflict: STOP: a merge conflict with epic/frete-regiao: src/Freight.cs
+```
+
+A execução comenta na issue e para o guarda. Você resolve o conflito na branch da F-22 e encerra o run num terminal:
+
+```text
+agile run-guard ENDED: run 60; every hook is back to its normal behavior
+```
+
+O mesmo `/agile:resolve #60` retoma da linha `Autopilot:` com um autoteste novo. Com as três dentro, o corpo da issue 60 recebe um roteiro só: uma seção por feature, os passos de ponta a ponta e o que foi assumido. Você valida e digita, por engano, o id de uma feature:
+
+```text
+> validado e autorizo o merge de F-21
+```
+
+Nada é registrado. Com o slug, o `status` do guarda passa a dizer `authorized` (o caminho encurtado):
+
+```text
+> validado e autorizo o merge de frete-regiao
+agile run-guard STATUS: run 60 on main, active, authorized; branches: epic/frete-regiao, feature/F-22 (...\.git\agile\resolve\60.json); count 0.0M of 10M weighted, 0 of 400 turns
+```
+
+Daí o ship do épico: uma subida de versão, o merge em `main`, as quatro issues fechadas em Done, a retro com você e a limpeza das branches.

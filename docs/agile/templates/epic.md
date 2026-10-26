@@ -13,6 +13,12 @@ Created by /agile:epic. Features are refined one at a time with /agile:refine.
 
 Technical terms: [glossary](../glossary.md)
 
+## Resume here
+- Status: draft (<YYYY-MM-DD>)
+- Stopped at: <where the work stopped, one line>
+- Next action: <one concrete action, and who acts>
+- Waiting on: <an owner decision, an item, or nothing>
+
 ## Goal
 <!-- The business outcome, in one or two sentences. -->
 

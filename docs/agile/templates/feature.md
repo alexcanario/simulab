@@ -21,6 +21,12 @@ Remove these comments when the file leaves `idea`.
 
 Technical terms: [glossary](../glossary.md)
 
+## Resume here
+- Status: idea (<YYYY-MM-DD>)
+- Stopped at: <where the work stopped, one line>
+- Next action: <one concrete action, and who acts>
+- Waiting on: <an owner decision, an item, or nothing>
+
 ## Summary
 <!-- 2-3 lines captured from the chat. -->
 

@@ -12,6 +12,12 @@ It records how we decided. It is not a spec: refinement happens in the feature f
 
 Technical terms: [glossary](../glossary.md)
 
+## Resume here
+- Status: open (<YYYY-MM-DD>)
+- Stopped at: <where the discussion stopped, one line>
+- Next action: <one concrete action, and who acts>
+- Waiting on: <an owner decision, an item, or nothing>
+
 ## Idea
 <!-- The idea as the owner described it, in two lines. -->
 

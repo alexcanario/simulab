@@ -1584,3 +1584,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Lesson 2, score 3/6: an approved data migration read another module's schema against ADR-0005, and the module's migration tests migrate their own schema alone, so an unguarded read fails with 42P01; settled by change note v2 (read-only, `to_regclass` guard in a `DO` block). Went to `.claude/rules/agile/question-bank-project.md` as a hidden fact.
 - Lesson 3, score 2/7: the full suite took 384 s of test time (budget 300 s), Identity 6 m 11 s, Catalog 6 m 12 s, QuestionBank 6 m 15 s. Added to the open idea F-144 (board #197 sent again, whole, in pt-BR), as the owner chose at the similar-item card.
 - Decisions sorted: D2, the `QuestionBank:SeedImagesOnStart` switch off in `SimulabApiFactory`, went to `.claude/rules/agile/question-bank-tests-project.md` as a hidden fact; the ADR-0005 exception and the `DO` block planning went with lesson 2; item decisions stay in F-110 (`Down` keeps what a curator updated, Q13's spreadsheet as a table, the image files' origin).
+
+## 2026-10-26 - Sync with agile@canary 0.185.0
+- From 0.175.0 to 0.185.0. Copied: `output-style.md`, templates `bug.md`, `discussion.md`, `epic.md`, `feature.md`, `deploy-aca.md`, `workflow.pt-BR.md`, `workflow-examples.pt-BR.md`. Merged: `profile.md` (added the Contracts line; kept the project's `<Version>` on `Simulab.Api.csproj`, not the plugin's `Directory.Build.props` text).
+- Left alone: `git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (no upstream change). Declined: none.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: column and link lines present; new technical terms not scanned. Build and tests not run (no build file changed).
+- Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
