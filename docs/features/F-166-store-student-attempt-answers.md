@@ -104,8 +104,6 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 
 ## Docs
 - flow: new docs/flows/exam-attempt.md — start, answer and submit, the per-type answer shapes, the states and the access rules, as a sequence of API calls.
-- architecture: update docs/architecture-overview.md — the new `ExamEngine` module, its schema and its contracts with `Catalog` and `QuestionBank`.
-
 ## Acceptance criteria
 - AC1 Given a published edition with three published questions, one draft and one annulled, when a `Student` starts an attempt, then the answer is 201 and the attempt is in progress with exactly the three published questions in paper-number order, each with its id, paper number, version number and type, and the start time recorded.
 - AC2 [sec] (T7) Given an in-progress attempt of a student on an edition, when the same student starts again on it, then the answer is 200 with the same attempt id and no second row exists, also when two starts arrive at the same time.
@@ -132,7 +130,7 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 
 ## Criterion → test
 
-Tests locked: 2b5289b4339285b4656750ea8f146c3c10fe47b9 (9 files); unlocks: 0
+Tests locked: 4a2b362e03905ab8947e18631276b1eb3e8d16b8 (10 files); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
@@ -143,7 +141,7 @@ Tests locked: 2b5289b4339285b4656750ea8f146c3c10fe47b9 (9 files); unlocks: 0
 | AC5 | `StartAttemptEndpointTests.Start_OnAPublishedEditionWithNoPublishedQuestion_Answers422` |
 | AC6 | `AttemptReadEndpointTests.Read_AfterTheQuestionsWereEditedAnnulledOrUnpublished_StillListsTheSameQuestionsAndVersions` |
 | AC7 | `SaveAnswerEndpointTests.Save_AValidAnswerOfEachOfTheEightTypes_IsReadBackAsSaved`, `SaveAnswerEndpointTests.Save_Answers200WithTheQuestionAndItsAnswer`, `SaveAnswerEndpointTests.Save_AnEssayWithWindowsLineBreaks_IsKeptWithOneKindOfLineBreakAndNothingElseChanged` |
-| AC8 | `SaveAnswerEndpointTests.Save_AnAnswerThatDoesNotFitTheQuestion_Answers400WithOneEntryPerField_AndStoresNothing`, `SaveAnswerEndpointTests.Save_ABodyWithAMissingOrUnknownType_Answers400AnswerInvalid_AndStoresNothing`, `SaveAnswerEndpointTests.Save_AQuestionThatIsNotInTheAttempt_Answers404_AndStoresNothing` |
+| AC8 | `AnswerCheckerTests` (repeated item and blank, an option named twice, the essay lines, the characters of an open answer), `SaveAnswerEndpointTests.Save_AnAnswerThatDoesNotFitTheQuestion_Answers400WithOneEntryPerField_AndStoresNothing`, `SaveAnswerEndpointTests.Save_ABodyWithAMissingOrUnknownType_Answers400AnswerInvalid_AndStoresNothing`, `SaveAnswerEndpointTests.Save_AQuestionThatIsNotInTheAttempt_Answers404_AndStoresNothing` |
 | AC9 | `SaveAnswerEndpointTests.Save_AnotherAnswerToTheSameQuestion_ReplacesTheFirst_AndTheLastOfTwoInARowIsWhatIsRead`, `SaveAnswerEndpointTests.Clear_MakesTheQuestionBlankAgain_AndClearingABlankOneAnswers204Too`, `SaveAnswerEndpointTests.Save_TwoAtTheSameTime_LeavesOneOfThemAndOneRow` |
 | AC10 | `SubmitAttemptEndpointTests.Submit_AnAttemptWithBlanks_IsSubmittedWithTheServersTime_AndTheBlanksStayBlank` |
 | AC11 | `SubmitAttemptEndpointTests.Save_OrClear_OnASubmittedAttempt_Answers409_AndNothingChanges`, `SubmitAttemptEndpointTests.Submit_AgainAnAttemptAlreadySubmitted_Answers200WithTheOriginalTime`, `SubmitAttemptEndpointTests.Save_RacingASubmit_IsEitherStoredBeforeItOrRefusedAfterIt_NeverStoredAfterIt` |
@@ -191,6 +189,10 @@ Tests locked: 2b5289b4339285b4656750ea8f146c3c10fe47b9 (9 files); unlocks: 0
 - 2026-10-26: premise answers (owner) — BR10/AC19: option A, stamp `TenantId` from `ICurrentTenant` (null today), rows stay global until F-162, the 404 of AC19 comes from the ownership check; AC22: change it, the item adds the texts of the two permissions, the group `attempts` and every `ExamAttemptErrorCodes` constant in en, pt-BR and pt-PT plus the `WebPermissions` entry. Waiting for `/agile:change F-166` to rewrite BR10, AC19 and AC22 and re-approve them; no plan and no code before it.
 - 2026-10-26: size — one chain (start, answer, submit) behind one API; the plan has 7 steps, inside the file refined; doubt keeps the item whole.
 - 2026-10-26: plan — 1 module skeleton (five projects, solution, host wiring, architecture-test and DocGen lists, `WebPermissions` and the three-locale texts), the `QuestionBank` query contract, migration `InitialExamEngine` and start an attempt → AC1, AC4, AC5, AC14, AC20, AC21, AC22; 2 double start returns the attempt in progress, also at the same time → AC2; 3 read an attempt as owner or `attempts.read`, 404 for anyone else, no answer key, questions fixed → AC6, AC12, AC15 (read), AC16; 4 save and clear the option types (`SingleChoice`, `TrueFalse`, `MultipleAnswer`) with the shape check against the fixed version → AC7 (3 types), AC8 (options, type, question not in attempt), AC9; 5 the other five types, the question limit, the 20,000 cap, line-break normalization and the body limit of the PUT route → AC7, AC8, AC17; 6 submit with the server clock, idempotent retry, 409 on a submitted attempt, `FOR SHARE` against a racing save, a new attempt after a submit, ownership and `TenantId` on every write → AC3, AC10, AC11, AC13, AC15, AC18, AC19; 7 docs: `docs/flows/exam-attempt.md`, `docs/architecture-overview.md`, glossary rows, `DocGen --check` → `ArchitectureOverviewTests`, `techdocs.js check F-166`.
+- 2026-10-26: tests unlocked (the AC10, AC11 and AC18 tests of `SubmitAttemptEndpointTests` were wrong: the fake clock moved 42 and 60 minutes past the 15-minute access token, and an anonymous type had two members of one JSON name; rewritten with 10 minutes and a raw body) — owner chose "Destravar e corrigir"
+- 2026-10-26: the answer column is `json`, not `jsonb`: `jsonb` reorders the members of an object ("text" sorts before "type" at four letters) and the polymorphic read needs the discriminator first; the design said `jsonb`, the code proved it wrong — Claude (technical)
+- 2026-10-26: the answer is kept as the contract's own `AnswerPayload` records (no second set of domain value objects), the 400 field codes gained `exam_attempt.entry_repeated` for a matching item or blank number named twice (BR5 says one answer for each), and the body of the save is read in the endpoint up to `AttemptLimits.SaveBodyMaxBytes` instead of route metadata — Claude (technical)
+- 2026-10-26: the `architecture:` line of `## Docs` was dropped: `techdocs.js check` only accepts pages inside the folder of their kind, and `docs/architecture-overview.md` lives outside `docs/architecture/` (F-23 BR1); the overview was updated by hand all the same (the module, its schema, its contracts) and `ArchitectureOverviewTests` checks it — Claude (technical)
 
 ## Change notes
 ### v2 — 2026-10-26

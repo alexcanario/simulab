@@ -68,6 +68,8 @@ Seeded from product/brief.md at bootstrap. pt-PT terms marked (?) need the owner
 | Simulado de prova | Simulação de prova (?) | `ExamSimulation` | Exam Simulator session that reproduces a real edition | Sessão do simulador de prova que reproduz uma edição real |
 | Simulado personalizado | Simulação personalizada (?) | `PracticeSession` | Question Bank Simulator session built from filters | Sessão do simulador do banco de questões montada a partir de filtros |
 | Tentativa | Tentativa | `Attempt` | One run of a simulation by a student, with answers and times | Uma execução de um simulado por um aluno, com respostas e tempos |
+| Resposta da tentativa | Resposta da tentativa | `AttemptAnswer` | One question of an attempt and the answer saved to it; blank while there is none | Uma questão de uma tentativa e a resposta salva para ela; em branco enquanto não há |
+| Situação da tentativa | Estado da tentativa | `AttemptStatus` | Whether an attempt is in progress or submitted | Se uma tentativa está em andamento ou enviada |
 | Cartão-resposta | Folha de respostas | `AnswerSheet` | Where the candidate marks final answers | Onde o candidato marca as respostas finais |
 | Regra de pontuação | Regra de pontuação | `ScoringRule` | How an organizer turns answers into a score | Como uma organizadora transforma respostas em nota |
 | Penalidade por erro | Penalização por erro | `WrongAnswerPenalty` | Points lost for a wrong answer (for example Cebraspe) | Pontos perdidos por uma resposta errada (por exemplo, Cebraspe) |

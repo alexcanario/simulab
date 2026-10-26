@@ -28,6 +28,13 @@ flowchart LR
         Simulab_Catalog_Domain["Simulab.Catalog.Domain"]
         Simulab_Catalog_Infrastructure["Simulab.Catalog.Infrastructure"]
     end
+    subgraph Modules_ExamEngine["Modules/ExamEngine"]
+        Simulab_ExamEngine_Api["Simulab.ExamEngine.Api"]
+        Simulab_ExamEngine_Application["Simulab.ExamEngine.Application"]
+        Simulab_ExamEngine_Contracts["Simulab.ExamEngine.Contracts"]
+        Simulab_ExamEngine_Domain["Simulab.ExamEngine.Domain"]
+        Simulab_ExamEngine_Infrastructure["Simulab.ExamEngine.Infrastructure"]
+    end
     subgraph Modules_Identity["Modules/Identity"]
         Simulab_Identity_Api["Simulab.Identity.Api"]
         Simulab_Identity_Application["Simulab.Identity.Application"]
@@ -52,6 +59,7 @@ flowchart LR
     Simulab_Api --> Simulab_ApiResults
     Simulab_Api --> Simulab_Catalog_Api
     Simulab_Api --> Simulab_Email
+    Simulab_Api --> Simulab_ExamEngine_Api
     Simulab_Api --> Simulab_Identity_Api
     Simulab_Api --> Simulab_Persistence
     Simulab_Api --> Simulab_QuestionBank_Api
@@ -74,6 +82,20 @@ flowchart LR
     Simulab_Catalog_Infrastructure --> Simulab_Catalog_Application
     Simulab_Catalog_Infrastructure --> Simulab_Persistence
     Simulab_Catalog_Infrastructure --> Simulab_Storage
+    Simulab_ExamEngine_Api --> Simulab_ApiResults
+    Simulab_ExamEngine_Api --> Simulab_ExamEngine_Application
+    Simulab_ExamEngine_Api --> Simulab_ExamEngine_Infrastructure
+    Simulab_ExamEngine_Api --> Simulab_Identity_Contracts
+    Simulab_ExamEngine_Application --> Simulab_ExamEngine_Contracts
+    Simulab_ExamEngine_Application --> Simulab_ExamEngine_Domain
+    Simulab_ExamEngine_Contracts --> Simulab_SharedKernel
+    Simulab_ExamEngine_Domain --> Simulab_ExamEngine_Contracts
+    Simulab_ExamEngine_Domain --> Simulab_SharedKernel
+    Simulab_ExamEngine_Infrastructure --> Simulab_Catalog_Contracts
+    Simulab_ExamEngine_Infrastructure --> Simulab_ExamEngine_Application
+    Simulab_ExamEngine_Infrastructure --> Simulab_Identity_Contracts
+    Simulab_ExamEngine_Infrastructure --> Simulab_Persistence
+    Simulab_ExamEngine_Infrastructure --> Simulab_QuestionBank_Contracts
     Simulab_Identity_Api --> Simulab_ApiResults
     Simulab_Identity_Api --> Simulab_Identity_Application
     Simulab_Identity_Api --> Simulab_Identity_Infrastructure
@@ -107,6 +129,7 @@ flowchart LR
     Simulab_Storage --> Simulab_Storage_Contracts
     Simulab_Web --> Simulab_Ai_Contracts
     Simulab_Web --> Simulab_Catalog_Contracts
+    Simulab_Web --> Simulab_ExamEngine_Contracts
     Simulab_Web --> Simulab_Identity_Contracts
     Simulab_Web --> Simulab_QuestionBank_Contracts
     Simulab_Web --> Simulab_ServiceDefaults
