@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-26)
-- Stopped at: Design passes done; two premises (tenant BR10/AC19, UI texts AC22) and two trade-offs wait for the owner.
-- Next action: Owner answers the card; then /agile:change F-166 for the premises, then plan (step 5).
+- Stopped at: Owner answered the design card; BR10, AC19 and AC22 need a change note before the plan.
+- Next action: Owner types /agile:change F-166; then /agile:build F-166 resumes at step 5 (plan).
 - Waiting on: nothing
 
 ## Summary
@@ -183,6 +183,9 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - 2026-10-26: design coverage — scope, rules, layout, contracts, data, simplicity checked by the architect; read: profile.md, project.md, api-contracts.md, ModuleBoundaryTests, SolutionAssemblies, ErrorCodeTextTests, WebPermissions, ModuleDbContext, F-162.
 - 2026-10-26: traps — T1 reuse `QuestionType` in the Contracts: a Contracts-to-Contracts reference breaks the profile; T2 clear by soft delete: rows pile up and the unique index turns partial; T3 reading BR9 as covering save against submit: an answer could land after the submission (a row lock prevents it).
 - 2026-10-26: premise stopped, waiting for the owner — (1) BR10/AC19: `ICurrentTenant` is always `NoTenant` and the filter hides a row stamped with a tenant from its own student; (2) AC22: the new permissions and error codes need texts in three locales (`RoleResourcesTests`, `ErrorCodeTextTests`) and a `WebPermissions` entry once the module joins the architecture lists.
+- 2026-10-26: design trade-off 13 Save against submit — owner chose as proposed (`SELECT ... FOR SHARE` on the attempt in the save transaction)
+- 2026-10-26: design trade-off 14 Where the answer shape is checked — owner chose as proposed (one `QuestionBank.Contracts` query per save)
+- 2026-10-26: premise answers (owner) — BR10/AC19: option A, stamp `TenantId` from `ICurrentTenant` (null today), rows stay global until F-162, the 404 of AC19 comes from the ownership check; AC22: change it, the item adds the texts of the two permissions, the group `attempts` and every `ExamAttemptErrorCodes` constant in en, pt-BR and pt-PT plus the `WebPermissions` entry. Waiting for `/agile:change F-166` to rewrite BR10, AC19 and AC22 and re-approve them; no plan and no code before it.
 
 ## Out of scope
 - Timer, time limit, pause, abandon, admin close and automatic submit (arrive with the simulator's timer, epic E-06).
