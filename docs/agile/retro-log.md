@@ -1590,3 +1590,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Left alone: `git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (no upstream change). Declined: none.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: column and link lines present; new technical terms not scanned. Build and tests not run (no build file changed).
 - Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
+## 2026-10-26 - F-150 Grader role and user-to-tenant link
+- Events: override 0, question 3 (asked 9, from context 2), assumed 0, rework 1, test-fail 1, blocked 0, change 1, correction 0, stop 0, companion 0. Gate time: 9 passes, 35 min 21 s (2 red). Usage: 18213.4k weighted, context per turn 304k → 594k, 2 sessions.
+- 1 (score 9/8, plugin: agile `[generic]`, applied): the background tests and the Stop hook collided again, against `project-dotnet.md:15`. Evidence: `agile gate RED … MSB3061 (0 -> 22)` and 177 Identity failures `Can't find …Simulab.Api.deps.json`. Per the stronger level, no new line: the second case was added to the ⏳ F-110 row in "Plugin notes — status".
+- 2 (score 5/6, language rule `project-dotnet.md`): a migration test should migrate to its own migration, not the latest (`FixEnumColumnDescriptionsMigrationTests` turned red when F-150 rewrote the same comment). Not applied (owner).
+- 3 (score 6/3, plugin note `[stack: ASP.NET Core minimal APIs]`): in Development a body the route cannot read became a 500 through `UseExceptionHandler`; fixed in F-150 with `StatusCodeSelector`, the code is F-165. Not applied (owner).
+- Decisions: D1 `User` has no tenant filter, project rule applied at the ship (`5cd6d5f`); D2 Domain cannot see the Contracts error codes, not recommended (2/2); D3 the owner ticked the boxes in the file pane, plugin gap 4/2, not applied (owner). Item decisions: 9, they stay in the item. Suite over budget (428 s, 351 s): already tracked in F-144.
