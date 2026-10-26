@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-26)
-- Stopped at: Change note v2 recorded (BR10, AC19, AC22); design passes done, no plan yet.
-- Next action: Run /agile:build F-166: resumes at step 5 (plan).
+- Stopped at: Change note v2 and the 7-step plan are recorded; no test or code yet.
+- Next action: Run /agile:build F-166: resumes at step 9 (tests first, then lock).
 - Waiting on: nothing
 
 ## Summary
@@ -186,6 +186,8 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - 2026-10-26: design trade-off 13 Save against submit — owner chose as proposed (`SELECT ... FOR SHARE` on the attempt in the save transaction)
 - 2026-10-26: design trade-off 14 Where the answer shape is checked — owner chose as proposed (one `QuestionBank.Contracts` query per save)
 - 2026-10-26: premise answers (owner) — BR10/AC19: option A, stamp `TenantId` from `ICurrentTenant` (null today), rows stay global until F-162, the 404 of AC19 comes from the ownership check; AC22: change it, the item adds the texts of the two permissions, the group `attempts` and every `ExamAttemptErrorCodes` constant in en, pt-BR and pt-PT plus the `WebPermissions` entry. Waiting for `/agile:change F-166` to rewrite BR10, AC19 and AC22 and re-approve them; no plan and no code before it.
+- 2026-10-26: size — one chain (start, answer, submit) behind one API; the plan has 7 steps, inside the file refined; doubt keeps the item whole.
+- 2026-10-26: plan — 1 module skeleton (five projects, solution, host wiring, architecture-test and DocGen lists, `WebPermissions` and the three-locale texts), the `QuestionBank` query contract, migration `InitialExamEngine` and start an attempt → AC1, AC4, AC5, AC14, AC20, AC21, AC22; 2 double start returns the attempt in progress, also at the same time → AC2; 3 read an attempt as owner or `attempts.read`, 404 for anyone else, no answer key, questions fixed → AC6, AC12, AC15 (read), AC16; 4 save and clear the option types (`SingleChoice`, `TrueFalse`, `MultipleAnswer`) with the shape check against the fixed version → AC7 (3 types), AC8 (options, type, question not in attempt), AC9; 5 the other five types, the question limit, the 20,000 cap, line-break normalization and the body limit of the PUT route → AC7, AC8, AC17; 6 submit with the server clock, idempotent retry, 409 on a submitted attempt, `FOR SHARE` against a racing save, a new attempt after a submit, ownership and `TenantId` on every write → AC3, AC10, AC11, AC13, AC15, AC18, AC19; 7 docs: `docs/flows/exam-attempt.md`, `docs/architecture-overview.md`, glossary rows, `DocGen --check` → `ArchitectureOverviewTests`, `techdocs.js check F-166`.
 
 ## Change notes
 ### v2 — 2026-10-26
