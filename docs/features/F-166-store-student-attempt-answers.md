@@ -298,7 +298,7 @@ Needed to validate: the app host running from this worktree (you start it in ste
 ### pt-BR
 Necessário para validar: o app host rodando a partir deste worktree (você o inicia no passo 1), uma conta `Student` com e-mail verificado (o passo 2 cria uma; a senha é sua), o `admin@simulab.local` do seed (a senha de desenvolvimento está em `src/Hosts/Simulab.Api/appsettings.Development.json`) e uma edição publicada com questões publicadas (a edição `0198f370-0004-7000-8000-000000000003` está no banco local agora). Tudo no lugar.
 
-1. [ ] Em um terminal, na raiz deste worktree (`D:\wt\simulab\f-166-store-student`), inicie o app host e deixe aberto; espere `https://localhost:7287/api/v1/system/info` responder 200 → o endereço do dashboard do Aspire (a página que lista as partes do app e seus logs) aparece impresso.
+1. [x] Em um terminal, na raiz deste worktree (`D:\wt\simulab\f-166-store-student`), inicie o app host e deixe aberto; espere `https://localhost:7287/api/v1/system/info` responder 200 → o endereço do dashboard do Aspire (a página que lista as partes do app e seus logs) aparece impresso.
    ```bash
    dotnet run --project src/Hosts/Simulab.AppHost
    ```
@@ -306,8 +306,8 @@ Necessário para validar: o app host rodando a partir deste worktree (você o in
    dotnet run --project src/Hosts/Simulab.AppHost
    ```
 2. Pule este passo se você já tem uma conta `Student` verificada nesta máquina.
-   - [ ] 2.1 Abra `https://localhost:7125/sign-up`, preencha e-mail, senha e nome, marque "tenho 18 anos ou mais", os termos e a política de privacidade, e envie → a página diz que a conta foi criada e que um e-mail de confirmação foi enviado.
-   - [ ] 2.2 Abra o Mailpit (a caixa de e-mail local; o endereço é a entrada `mailpit` na lista de recursos do dashboard do Aspire), abra a mensagem desse e-mail e clique no link dentro dela → a página `verify-email` diz que o e-mail foi confirmado.
+   - [x] 2.1 Abra `https://localhost:7125/sign-up`, preencha e-mail, senha e nome, marque "tenho 18 anos ou mais", os termos e a política de privacidade, e envie → a página diz que a conta foi criada e que um e-mail de confirmação foi enviado.
+   - [x] 2.2 Abra o Mailpit (a caixa de e-mail local; o endereço é a entrada `mailpit` na lista de recursos do dashboard do Aspire), abra a mensagem desse e-mail e clique no link dentro dela → a página `verify-email` diz que o e-mail foi confirmado.
 3. Em um segundo terminal, na mesma pasta, defina as três variáveis (use o e-mail e a senha do seu `Student`) e rode o script → a última linha é `ALL OK`.
    ```bash
    export ADMIN_PASSWORD='<admin password>' STUDENT_EMAIL='<student email>' STUDENT_PASSWORD='<student password>'
