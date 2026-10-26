@@ -50,10 +50,10 @@ public sealed class FirstStartLogTests
 
         Errors(logs).Should().BeEmpty();
         logs.Entries.Should().NotContain(entry => entry.EventId.Id == RelationalEventId.MigrationApplying.Id);
-        // F-33 added the catalog context, F-41 the ai one, F-95 the question bank one, to the contexts the host
-        // migrates on start.
+        // F-33 added the catalog context, F-41 the ai one, F-95 the question bank one, F-166 the exam engine one, to the
+        // contexts the host migrates on start.
         logs.Entries.Count(entry => entry.EventId.Id == RelationalEventId.MigrationsNotApplied.Id)
-            .Should().Be(5, "the ai, jobs, identity, catalog and question bank contexts each report the database is already up to date");
+            .Should().Be(6, "the ai, jobs, identity, catalog, question bank and exam engine contexts each report the database is already up to date");
     }
 
     private static IdentityApiFactory CreateFactory(RecordingLoggerProvider logs) =>

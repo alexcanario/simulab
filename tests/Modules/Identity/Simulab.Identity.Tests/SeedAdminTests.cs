@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Simulab.Catalog.Contracts;
+using Simulab.ExamEngine.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Domain.Entities;
 using Simulab.Identity.Infrastructure;
@@ -76,7 +77,7 @@ public sealed class SeedAdminTests
                 .ToListAsync();
         });
 
-        granted.Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All, .. QuestionBankPermissions.All]);
+        granted.Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All, .. QuestionBankPermissions.All, .. ExamEnginePermissions.All]);
     }
 
     [Theory]

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
+using Simulab.ExamEngine.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.Identity.Infrastructure;
 using Simulab.QuestionBank.Contracts;
@@ -32,6 +33,6 @@ public sealed class SystemRoleSeedTests : IdentityApiTests
         system.Should().BeEquivalentTo(IdentityRoles.All);
         holders.Should().Equal(admin.Id);
         // F-33 BR3: Admin holds every permission every registered module declares, not only Identity's.
-        grants.Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All, .. QuestionBankPermissions.All]);
+        grants.Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All, .. QuestionBankPermissions.All, .. ExamEnginePermissions.All]);
     }
 }

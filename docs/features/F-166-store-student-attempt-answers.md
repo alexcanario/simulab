@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-26)
-- Stopped at: Change note v2 and the 7-step plan are recorded; no test or code yet.
-- Next action: Run /agile:build F-166: resumes at step 9 (tests first, then lock).
+- Stopped at: Module built, 65 ExamEngine tests green; the full gate was RED only on 5 Identity tests, fixed and green alone (580), not yet rerun in the gate.
+- Next action: Run gate.js (turn mode) until GREEN, then /agile:review, scan.js, the validation script in en and pt-BR, then validating.
 - Waiting on: nothing
 
 ## Summary
@@ -221,3 +221,4 @@ Tests locked: 4a2b362e03905ab8947e18631276b1eb3e8d16b8 (10 files); unlocks: 1
 - 2026-10-26 question — follow-up: asked 1, from context 0
 - 2026-10-26 change — v2: tenant from ICurrentTenant (BR10, AC19); UI texts and WebPermissions in AC22
 - 2026-10-26 blocked — test wrong: AC10, AC11 and AC18 tests were wrong: the clock moved past the 15 min access token, and an anonymous type had two members of one JSON name
+- 2026-10-26 test-fail — tests failed (Simulab.slnx): Simulab.Identity.Tests.SystemRoleSeedTests.Seed_RoleCreatedBeforeF9_IsMarkedAsSystemAndKeep, 1 red
