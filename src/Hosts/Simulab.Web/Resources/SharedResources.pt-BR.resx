@@ -213,6 +213,11 @@
   <data name="Permission.questions.review.Description" xml:space="preserve"><value>Abrir a fila de revisão, aprovar uma questão em revisão para publicá-la ou rejeitá-la com um motivo.</value></data>
   <data name="Permission.questions.grade.Name" xml:space="preserve"><value>Corrigir questões</value></data>
   <data name="Permission.questions.grade.Description" xml:space="preserve"><value>Corrigir redações e respostas abertas na fila de correção.</value></data>
+  <data name="PermissionGroup.attempts" xml:space="preserve"><value>Tentativas de prova</value></data>
+  <data name="Permission.attempts.take.Name" xml:space="preserve"><value>Fazer provas</value></data>
+  <data name="Permission.attempts.take.Description" xml:space="preserve"><value>Iniciar uma tentativa de uma prova publicada, responder às questões e enviar a tentativa.</value></data>
+  <data name="Permission.attempts.read.Name" xml:space="preserve"><value>Ler tentativas</value></data>
+  <data name="Permission.attempts.read.Description" xml:space="preserve"><value>Ler a tentativa de qualquer aluno, para suporte. Nunca altera uma.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>E-mail</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Nome</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Situação</value></data>
@@ -790,6 +795,19 @@
   <data name="subject.in_use" xml:space="preserve"><value>Esta disciplina está mapeada em disciplinas do edital e não pode ser excluída. A lista foi recarregada.</value></data>
   <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do edital ou é usado por questões e não pode ser excluído. A lista foi recarregada.</value></data>
   <data name="question.not_found" xml:space="preserve"><value>Esta questão não existe mais.</value></data>
+  <data name="exam_attempt.edition_not_found" xml:space="preserve"><value>Esta prova não está disponível.</value></data>
+  <data name="exam_attempt.edition_without_questions" xml:space="preserve"><value>Esta prova ainda não tem questões.</value></data>
+  <data name="exam_attempt.not_found" xml:space="preserve"><value>Esta tentativa não existe mais.</value></data>
+  <data name="exam_attempt.question_not_in_attempt" xml:space="preserve"><value>Esta questão não faz parte da tentativa.</value></data>
+  <data name="exam_attempt.answer_invalid" xml:space="preserve"><value>A resposta não é válida. Confira e tente de novo.</value></data>
+  <data name="exam_attempt.already_submitted" xml:space="preserve"><value>Esta tentativa já foi enviada e não aceita mais respostas.</value></data>
+  <data name="exam_attempt.answer_type_mismatch" xml:space="preserve"><value>A resposta não corresponde ao tipo da questão.</value></data>
+  <data name="exam_attempt.option_unknown" xml:space="preserve"><value>Escolha uma das alternativas da questão.</value></data>
+  <data name="exam_attempt.item_unknown" xml:space="preserve"><value>Associe um dos itens da questão.</value></data>
+  <data name="exam_attempt.blank_unknown" xml:space="preserve"><value>Preencha uma das lacunas da questão.</value></data>
+  <data name="exam_attempt.text_too_long" xml:space="preserve"><value>O texto passa do limite da questão.</value></data>
+  <data name="exam_attempt.answer_empty" xml:space="preserve"><value>Escreva ou escolha uma resposta.</value></data>
+  <data name="exam_attempt.entry_repeated" xml:space="preserve"><value>Um item ou uma lacuna foi respondido duas vezes. Mantenha uma resposta para cada.</value></data>
   <data name="question.topic_not_found" xml:space="preserve"><value>O tópico não existe mais. Escolha outro.</value></data>
   <data name="question.statement_required" xml:space="preserve"><value>Escreva o enunciado.</value></data>
   <data name="question.statement_too_long" xml:space="preserve"><value>O enunciado passa de 10.000 caracteres.</value></data>
