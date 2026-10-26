@@ -3,7 +3,7 @@ feature: F-166
 epic: Exam Simulator
 status: building
 board: 232
-version: 1
+version: 2
 ---
 # Store a student's answers for an attempt
 
@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-26)
-- Stopped at: Owner answered the design card; BR10, AC19 and AC22 need a change note before the plan.
-- Next action: Owner types /agile:change F-166; then /agile:build F-166 resumes at step 5 (plan).
+- Stopped at: Change note v2 recorded (BR10, AC19, AC22); design passes done, no plan yet.
+- Next action: Run /agile:build F-166: resumes at step 5 (plan).
 - Waiting on: nothing
 
 ## Summary
@@ -64,7 +64,7 @@ Checked in the code on 2026-10-26, on `main` at `5fe733b`.
 - BR7 Only the student who owns an attempt reads and changes it; any other student gets 404, as if it did not exist. An `Admin` (permission `attempts.read`) reads any attempt and changes none.
 - BR8 The response of an attempt carries the questions' ids, numbers, versions and types and the student's own answers, never an answer key, a rubric's model answer or an explanation.
 - BR9 Two saves to the same question at once: the last one wins. No concurrency token.
-- BR10 An attempt and its answers are `TenantEntity` rows; `TenantId` comes from the student's tenant (dormant: null for everyone today).
+- BR10 An attempt and its answers are `TenantEntity` rows; `TenantId` is taken from `ICurrentTenant` (null today), so the rows stay global until F-162 wires it to the `tenant_id` claim. No query ignores the tenant filter and none reads the claim.
 - BR11 The attempt records when it started and when it was submitted, and nothing about time limits, pauses or time per question; those arrive with the timer.
 
 ## Screens and API
@@ -125,10 +125,10 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - AC16 [sec] (T4) Given a question with an answer key, an explanation and a model answer, when the attempt is read by the student or by an `Admin`, then the response holds none of them.
 - AC17 [sec] (T6) Given a request body above the limit of the route, when it is sent, then the answer is a 4xx and nothing is stored.
 - AC18 [sec] (T8) Given a submit with a time in the body or headers, when the attempt is submitted, then the stored submission time is the server's clock.
-- AC19 Given attempts of two tenants, when a student of tenant A calls each route on an attempt of tenant B, then it answers 404 and nothing changes; attempt rows carry the student's `TenantId` (null today).
+- AC19 Given an attempt of student B, when student A calls each route on it, then it answers 404 `exam_attempt.not_found` and nothing changes, because the ownership check by `student_id` decides; attempt and answer rows carry the `TenantId` of `ICurrentTenant` (null today).
 - AC20 Given the migration, when it runs on an empty database and again, then it creates the schema `exam_engine` with `attempts` and `attempt_answers` (column comments for every column and enum, a unique index that allows one in-progress attempt per student and edition, with `NULLS NOT DISTINCT` where `TenantId` is in a unique index, and a test that inserts two global duplicates and expects a conflict).
 - AC21 Given the architecture tests, when they run, then `ExamEngine` references other modules only through their `Contracts` projects, and the `/openapi/v1.json` document answers 200 and lists the five routes.
-- AC22 This item adds no UI text, so there is no locale file to complete; the error codes are constants with no message text that a client branches on.
+- AC22 `WebPermissions` lists the `ExamEngine` catalog. In en, pt-BR and pt-PT: name and description of `attempts.take` and `attempts.read`, the group `attempts`, and a text for each constant of `ExamAttemptErrorCodes` (field codes included). `RoleResourcesTests` and `ErrorCodeTextTests` are green.
 
 ## Criterion → test
 | Criterion | Test |
@@ -187,6 +187,13 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - 2026-10-26: design trade-off 14 Where the answer shape is checked — owner chose as proposed (one `QuestionBank.Contracts` query per save)
 - 2026-10-26: premise answers (owner) — BR10/AC19: option A, stamp `TenantId` from `ICurrentTenant` (null today), rows stay global until F-162, the 404 of AC19 comes from the ownership check; AC22: change it, the item adds the texts of the two permissions, the group `attempts` and every `ExamAttemptErrorCodes` constant in en, pt-BR and pt-PT plus the `WebPermissions` entry. Waiting for `/agile:change F-166` to rewrite BR10, AC19 and AC22 and re-approve them; no plan and no code before it.
 
+## Change notes
+### v2 — 2026-10-26
+- What: BR10, AC19 and AC22 rewritten. `TenantId` comes from `ICurrentTenant` (null today), no filter is bypassed and the claim is not read; AC19 is decided by the ownership check on `student_id`; AC22 now covers the `WebPermissions` entry and the en, pt-BR and pt-PT texts of the two permissions, the group `attempts` and every `ExamAttemptErrorCodes` constant.
+- Why: the design pass found that `ICurrentTenant` is always `NoTenant`, so a row stamped with a tenant would be hidden from its own student, and that the Web tests require texts for every new permission and error code.
+- Affected: BR10, AC19, AC22. Not affected: AC1 to AC18, AC20, AC21, the other rules, the routes, `Model: opus`.
+- Re-approved by the owner: 2026-10-26.
+
 ## Out of scope
 - Timer, time limit, pause, abandon, admin close and automatic submit (arrive with the simulator's timer, epic E-06).
 - Scoring, penalties, cut-off and any result screen.
@@ -205,3 +212,4 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - 2026-10-26 question — asked 11, from context 2
 - 2026-10-26 override — Who reads an attempt - chose Dono e Admin over Só o aluno dono (5.2 vs 8.0); kept
 - 2026-10-26 question — follow-up: asked 1, from context 0
+- 2026-10-26 change — v2: tenant from ICurrentTenant (BR10, AC19); UI texts and WebPermissions in AC22
