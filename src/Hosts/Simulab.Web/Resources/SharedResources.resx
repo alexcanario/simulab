@@ -213,6 +213,11 @@
   <data name="Permission.questions.review.Description" xml:space="preserve"><value>Open the review queue, approve a question in review to publish it, or reject it with a reason.</value></data>
   <data name="Permission.questions.grade.Name" xml:space="preserve"><value>Grade questions</value></data>
   <data name="Permission.questions.grade.Description" xml:space="preserve"><value>Grade essays and open answers in the correction queue.</value></data>
+  <data name="PermissionGroup.attempts" xml:space="preserve"><value>Exam attempts</value></data>
+  <data name="Permission.attempts.take.Name" xml:space="preserve"><value>Take exams</value></data>
+  <data name="Permission.attempts.take.Description" xml:space="preserve"><value>Start an attempt at a published exam, answer its questions and submit it.</value></data>
+  <data name="Permission.attempts.read.Name" xml:space="preserve"><value>Read attempts</value></data>
+  <data name="Permission.attempts.read.Description" xml:space="preserve"><value>Read the attempt of any student, for support. Never changes one.</value></data>
   <data name="Users.Column.Email" xml:space="preserve"><value>Email</value></data>
   <data name="Users.Column.Name" xml:space="preserve"><value>Name</value></data>
   <data name="Users.Column.Status" xml:space="preserve"><value>Status</value></data>
@@ -790,6 +795,19 @@
   <data name="subject.in_use" xml:space="preserve"><value>Notice subjects map this subject, so it cannot be deleted. The list was reloaded.</value></data>
   <data name="topic.in_use" xml:space="preserve"><value>Notice subjects map this topic or questions use it, so it cannot be deleted. The list was reloaded.</value></data>
   <data name="question.not_found" xml:space="preserve"><value>This question no longer exists.</value></data>
+  <data name="exam_attempt.edition_not_found" xml:space="preserve"><value>This exam is not available.</value></data>
+  <data name="exam_attempt.edition_without_questions" xml:space="preserve"><value>This exam has no questions yet.</value></data>
+  <data name="exam_attempt.not_found" xml:space="preserve"><value>This attempt no longer exists.</value></data>
+  <data name="exam_attempt.question_not_in_attempt" xml:space="preserve"><value>This question is not part of the attempt.</value></data>
+  <data name="exam_attempt.answer_invalid" xml:space="preserve"><value>The answer is not valid. Check it and try again.</value></data>
+  <data name="exam_attempt.already_submitted" xml:space="preserve"><value>This attempt was already submitted and takes no more answers.</value></data>
+  <data name="exam_attempt.answer_type_mismatch" xml:space="preserve"><value>The answer does not match the type of the question.</value></data>
+  <data name="exam_attempt.option_unknown" xml:space="preserve"><value>Choose one of the options of the question.</value></data>
+  <data name="exam_attempt.item_unknown" xml:space="preserve"><value>Match one of the items of the question.</value></data>
+  <data name="exam_attempt.blank_unknown" xml:space="preserve"><value>Fill in one of the blanks of the question.</value></data>
+  <data name="exam_attempt.text_too_long" xml:space="preserve"><value>The text is longer than the limit of the question.</value></data>
+  <data name="exam_attempt.answer_empty" xml:space="preserve"><value>Write or choose an answer.</value></data>
+  <data name="exam_attempt.entry_repeated" xml:space="preserve"><value>An item or a blank was answered twice. Keep one answer for each.</value></data>
   <data name="question.topic_not_found" xml:space="preserve"><value>The topic no longer exists. Pick another.</value></data>
   <data name="question.statement_required" xml:space="preserve"><value>Write the statement.</value></data>
   <data name="question.statement_too_long" xml:space="preserve"><value>The statement has more than 10,000 characters.</value></data>

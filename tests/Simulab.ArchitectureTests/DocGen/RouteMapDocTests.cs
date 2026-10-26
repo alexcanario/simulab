@@ -23,7 +23,7 @@ public class RouteMapDocTests
 
         var maps = RouteMapDoc.Render(Root).ToDictionary(m => m.Area, m => m.Text);
 
-        maps.Keys.Should().Equal("Catalog", "Identity", "QuestionBank", "System");
+        maps.Keys.Should().Equal("Catalog", "ExamEngine", "Identity", "QuestionBank", "System");
         var text = string.Concat(maps.Values);
         foreach (var (verb, route) in operations)
         {

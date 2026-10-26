@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
+using Simulab.ExamEngine.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.Persistence;
 using Simulab.QuestionBank.Contracts;
@@ -214,7 +215,7 @@ public sealed class RoleAdministrationTests : IdentityApiTests
         CodeOf(await response.Content.ReadAsStringAsync()).Should().Be(IdentityErrorCodes.RoleAdminPermissionRequired);
         // The refusal changes nothing: Admin keeps the seeded set, which is every module's (F-33 BR3).
         (await RoleNamedAsync(admin, IdentityRoles.Admin)).Permissions
-            .Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All, .. QuestionBankPermissions.All]);
+            .Should().BeEquivalentTo([.. IdentityPermissions.All, .. CatalogPermissions.All, .. QuestionBankPermissions.All, .. ExamEnginePermissions.All]);
     }
 
     [Fact]

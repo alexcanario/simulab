@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simulab.ExamEngine.Contracts\Simulab.ExamEngine.Contracts.csproj" />
+    <ProjectReference Include="..\Simulab.ExamEngine.Domain\Simulab.ExamEngine.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -19,6 +19,7 @@ public class DocSetTests
             // generating docs/architecture/Ai/ since F-41, so only this expectation was behind.
             "Ai/data-dictionary.md", "Ai/schema.dbml",
             "Catalog/data-dictionary.md", "Catalog/routes.md", "Catalog/schema.dbml",
+            "ExamEngine/data-dictionary.md", "ExamEngine/routes.md", "ExamEngine/schema.dbml",
             "Identity/data-dictionary.md", "Identity/routes.md", "Identity/schema.dbml",
             "Jobs/data-dictionary.md", "Jobs/schema.dbml",
             "QuestionBank/data-dictionary.md", "QuestionBank/routes.md", "QuestionBank/schema.dbml",

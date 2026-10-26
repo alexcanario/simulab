@@ -3604,6 +3604,158 @@
           }
         }
       }
+    },
+    "/api/v1/exam-engine/attempts": {
+      "post": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "StartAttempt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartAttemptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/exam-engine/attempts/{id}": {
+      "get": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "ReadAttempt",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/exam-engine/attempts/{id}/answers/{questionId}": {
+      "put": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "SaveAnswer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnswerPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptQuestionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "ClearAnswer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/exam-engine/attempts/{id}/submit": {
+      "post": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "SubmitAttempt",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3641,6 +3793,205 @@
         },
         "description": "The body of an annulment (F-101, BR3): why the question is annulled. The body is optional on the wire so a\r\nmissing one is answered with the code of a missing reason, not with a framework error."
       },
+      "AnswerPayload": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/AnswerPayloadSingleChoicePayload"
+          },
+          {
+            "$ref": "#/components/schemas/AnswerPayloadTrueFalsePayload"
+          },
+          {
+            "$ref": "#/components/schemas/AnswerPayloadMultipleAnswerPayload"
+          },
+          {
+            "$ref": "#/components/schemas/AnswerPayloadMatchingPayload"
+          },
+          {
+            "$ref": "#/components/schemas/AnswerPayloadFillInTheBlanksPayload"
+          },
+          {
+            "$ref": "#/components/schemas/AnswerPayloadShortAnswerPayload"
+          },
+          {
+            "$ref": "#/components/schemas/AnswerPayloadOpenAnswerPayload"
+          },
+          {
+            "$ref": "#/components/schemas/AnswerPayloadEssayPayload"
+          }
+        ],
+        "description": "The answer to one question, with the shape of its type (F-166, BR5). The `type` member names the shape. Options\r\nand matching items are told by their position in the question's version, counted from 0.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "SingleChoice": "#/components/schemas/AnswerPayloadSingleChoicePayload",
+            "TrueFalse": "#/components/schemas/AnswerPayloadTrueFalsePayload",
+            "MultipleAnswer": "#/components/schemas/AnswerPayloadMultipleAnswerPayload",
+            "Matching": "#/components/schemas/AnswerPayloadMatchingPayload",
+            "FillInTheBlanks": "#/components/schemas/AnswerPayloadFillInTheBlanksPayload",
+            "ShortAnswer": "#/components/schemas/AnswerPayloadShortAnswerPayload",
+            "OpenAnswer": "#/components/schemas/AnswerPayloadOpenAnswerPayload",
+            "Essay": "#/components/schemas/AnswerPayloadEssayPayload"
+          }
+        }
+      },
+      "AnswerPayloadEssayPayload": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Essay"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "A text of at most the question's size limit, in lines."
+      },
+      "AnswerPayloadFillInTheBlanksPayload": {
+        "properties": {
+          "type": {
+            "enum": [
+              "FillInTheBlanks"
+            ],
+            "type": "string"
+          },
+          "blanks": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/BlankTextPayload"
+            }
+          }
+        },
+        "description": "For each blank number of the version, a text."
+      },
+      "AnswerPayloadMatchingPayload": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Matching"
+            ],
+            "type": "string"
+          },
+          "pairs": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/MatchingPairPayload"
+            }
+          }
+        },
+        "description": "For each left item, at most one right option."
+      },
+      "AnswerPayloadMultipleAnswerPayload": {
+        "properties": {
+          "type": {
+            "enum": [
+              "MultipleAnswer"
+            ],
+            "type": "string"
+          },
+          "optionPositions": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        },
+        "description": "One or more options of the version."
+      },
+      "AnswerPayloadOpenAnswerPayload": {
+        "properties": {
+          "type": {
+            "enum": [
+              "OpenAnswer"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "A text of at most the question's size limit, in characters."
+      },
+      "AnswerPayloadShortAnswerPayload": {
+        "properties": {
+          "type": {
+            "enum": [
+              "ShortAnswer"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "A short text."
+      },
+      "AnswerPayloadSingleChoicePayload": {
+        "properties": {
+          "type": {
+            "enum": [
+              "SingleChoice"
+            ],
+            "type": "string"
+          },
+          "optionPosition": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "One option of the version."
+      },
+      "AnswerPayloadTrueFalsePayload": {
+        "properties": {
+          "type": {
+            "enum": [
+              "TrueFalse"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        },
+        "description": "True or false."
+      },
       "ApproveQuestionRequest": {
         "type": "object",
         "properties": {
@@ -3661,6 +4012,85 @@
           }
         },
         "description": "The body of an approval (F-105, BR5). The body is optional on the wire: a missing one is an approval with no\r\nnote."
+      },
+      "AttemptQuestionResponse": {
+        "required": [
+          "questionId",
+          "paperNumber",
+          "versionNumber",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paperNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "versionNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AttemptQuestionType"
+          },
+          "answer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AnswerPayload"
+              }
+            ]
+          }
+        },
+        "description": "One question of an attempt, fixed at the start (F-166, BR2): its id, its number in the paper, the number of the\r\nversion the student saw and its type. `Answer` is null while the question is blank."
+      },
+      "AttemptQuestionType": {
+        "enum": [
+          "SingleChoice",
+          "TrueFalse",
+          "MultipleAnswer",
+          "Matching",
+          "FillInTheBlanks",
+          "ShortAnswer",
+          "OpenAnswer",
+          "Essay"
+        ],
+        "description": "How a question of an attempt is answered. A copy of the question bank's own list, because a contracts project\r\nreads the shared kernel only; a test keeps the two lists equal (F-166, BR5)."
+      },
+      "BlankTextPayload": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "text": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "The text typed in one blank."
       },
       "ChangePasswordRequest": {
         "required": [
@@ -3764,6 +4194,30 @@
           }
         },
         "description": "A signed-in user erases their own account (F-10 UC2). The account is the token subject (BR1), so the\r\nbody carries only the proof that the person at the keyboard owns it (BR2)."
+      },
+      "MatchingPairPayload": {
+        "type": "object",
+        "properties": {
+          "itemPosition": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "optionPosition": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "A left item and the right option the student matched to it."
       },
       "MoveNoticeSubjectRequest": {
         "type": "object",
@@ -4635,6 +5089,20 @@
         },
         "description": "The tenant a user belongs to after the call (F-150, BR5); null clears it."
       },
+      "StartAttemptRequest": {
+        "type": "object",
+        "properties": {
+          "examEditionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The edition. Required.",
+            "format": "uuid"
+          }
+        },
+        "description": "What starts an attempt (F-166, UC1): the published edition to take."
+      },
       "SystemInfoResponse": {
         "required": [
           "name",
@@ -4720,6 +5188,9 @@
     },
     {
       "name": "QuestionBank"
+    },
+    {
+      "name": "ExamEngine"
     }
   ]
 }

@@ -38,6 +38,13 @@
     <Project Path="src/Modules/Identity/Simulab.Identity.Domain/Simulab.Identity.Domain.csproj" />
     <Project Path="src/Modules/Identity/Simulab.Identity.Infrastructure/Simulab.Identity.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/ExamEngine/">
+    <Project Path="src/Modules/ExamEngine/Simulab.ExamEngine.Api/Simulab.ExamEngine.Api.csproj" />
+    <Project Path="src/Modules/ExamEngine/Simulab.ExamEngine.Application/Simulab.ExamEngine.Application.csproj" />
+    <Project Path="src/Modules/ExamEngine/Simulab.ExamEngine.Contracts/Simulab.ExamEngine.Contracts.csproj" />
+    <Project Path="src/Modules/ExamEngine/Simulab.ExamEngine.Domain/Simulab.ExamEngine.Domain.csproj" />
+    <Project Path="src/Modules/ExamEngine/Simulab.ExamEngine.Infrastructure/Simulab.ExamEngine.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Plans/">
     <Project Path="src/Modules/Plans/Simulab.Plans.Contracts/Simulab.Plans.Contracts.csproj" />
   </Folder>
@@ -70,6 +77,9 @@
   <Folder Name="/tests/Modules/" />
   <Folder Name="/tests/Modules/Catalog/">
     <Project Path="tests/Modules/Catalog/Simulab.Catalog.Tests/Simulab.Catalog.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/ExamEngine/">
+    <Project Path="tests/Modules/ExamEngine/Simulab.ExamEngine.Tests/Simulab.ExamEngine.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Modules/Identity/">
     <Project Path="tests/Modules/Identity/Simulab.Identity.Tests/Simulab.Identity.Tests.csproj" />

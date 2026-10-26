@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Simulab.Catalog.Contracts;
 using Simulab.QuestionBank.Application.Questions;
 using Simulab.QuestionBank.Contracts;
+using Simulab.Persistence;
 using Simulab.QuestionBank.Domain.Entities;
 using Simulab.SharedKernel.Results;
 

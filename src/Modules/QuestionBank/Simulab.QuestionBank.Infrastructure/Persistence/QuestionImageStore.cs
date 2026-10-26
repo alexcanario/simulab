@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Simulab.Persistence;
 using Simulab.QuestionBank.Application.Images;
 using Simulab.QuestionBank.Domain;
 using Simulab.QuestionBank.Domain.Entities;

@@ -80,6 +80,9 @@ public static class QuestionBankModule
         services.AddScoped<IExamEditionUsageCheck, QuestionExamEditionUsageCheck>();
         services.AddScoped<INoticeSubjectUsageCheck, QuestionNoticeSubjectUsageCheck>();
 
+        // F-166: the exam engine asks the published questions of an edition and one version of a question.
+        services.AddScoped<IPublishedQuestionDirectory, PublishedQuestionDirectory>();
+
         return services;
     }
 

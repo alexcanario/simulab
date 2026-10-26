@@ -71,8 +71,8 @@ flowchart TB
 ```
 
 - **Web** — every screen, in pt-BR, pt-PT and en. Talks to the Api only over `/api/v1`; keeps each browser's tokens in Redis (B-3).
-- **Api** — the modules (Identity, Catalog, QuestionBank), the OpenIddict token endpoint and the job worker that sends the emails (F-13).
-- **PostgreSQL** — one database, one schema per module: `identity`, `catalog`, `question_bank`, `jobs`.
+- **Api** — the modules (Identity, Catalog, QuestionBank, ExamEngine), the OpenIddict token endpoint and the job worker that sends the emails (F-13).
+- **PostgreSQL** — one database, one schema per module: `identity`, `catalog`, `question_bank`, `exam_engine`, `jobs`.
 - **Redis** — refresh-token sessions and the access-token revocation set (F-5), and the Web's server-side sessions (B-3).
 - **File storage** — one private blob container behind `IFileStorage` (`Simulab.Storage`), Azurite locally and a storage account of its own in the cloud; only the Api reaches it. The first file it keeps is the notice PDF of an edition (F-89).
 - **Claude API** (planned) — reached only through `IAiGateway`, which checks the plan and records usage and cost.
@@ -82,3 +82,5 @@ flowchart TB
 ## 3. Inside the Api
 
 The modules and the references between their projects are generated: [`docs/architecture/modules.md`](architecture/modules.md).
+
+`ExamEngine` (F-166) keeps a student's attempts and answers in its own schema, `exam_engine`. It reads the exam editions through `Catalog.Contracts` (`IExamEditionDirectory`) and the published questions and their versions through `QuestionBank.Contracts` (`IPublishedQuestionDirectory`), never their tables; an adapter in its Infrastructure project is the only place that knows both. The flow is in [`docs/flows/exam-attempt.md`](flows/exam-attempt.md).

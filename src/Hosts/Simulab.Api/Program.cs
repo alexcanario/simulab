@@ -9,6 +9,8 @@ using Simulab.Api.Features.System;
 using Simulab.Catalog.Api;
 using Simulab.Catalog.Infrastructure;
 using Simulab.Email;
+using Simulab.ExamEngine.Api;
+using Simulab.ExamEngine.Infrastructure;
 using Simulab.Identity.Api;
 using Simulab.QuestionBank.Api;
 using Simulab.QuestionBank.Infrastructure;
@@ -109,6 +111,10 @@ builder.Services.AddCatalogModule(
 // it deletes a topic, and its permission catalog joins the union Identity seeds.
 builder.Services.AddQuestionBankModule(
     builder.Configuration.GetConnectionString("simulab") ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
+// F-166: the ExamEngine module. After Catalog and QuestionBank, whose contracts it reads, and before the permission
+// catalogs are read by EnsureRolesAndPermissionsAsync.
+builder.Services.AddExamEngineModule(
+    builder.Configuration.GetConnectionString("simulab") ?? throw new InvalidOperationException("The connection string 'simulab' is missing."));
 
 builder.Services.AddSingleton<ClientRateLimiter>();
 builder.Services.AddSingleton<ClientAddress>();
@@ -159,6 +165,7 @@ v1.MapGet("/system/info", (IHostEnvironment environment) => new SystemInfoRespon
 v1.MapIdentityEndpoints();
 v1.MapCatalogEndpoints();
 v1.MapQuestionBankEndpoints();
+v1.MapExamEngineEndpoints();
 
 // F-41 (v2), AC9b: the diagnostics route exists only in Development. Outside it the route is never
 // mapped, so it answers 404 rather than being merely hidden.
@@ -179,6 +186,7 @@ if (app.Configuration.GetValue("Database:ApplyMigrationsOnStart", app.Environmen
     await app.Services.MigrateIdentityModuleAsync();
     await app.Services.MigrateCatalogModuleAsync();
     await app.Services.MigrateQuestionBankModuleAsync();
+    await app.Services.MigrateExamEngineModuleAsync();
 
     // F-110 BR8: the files of the seeded question images, right after the migration that seeds their rows.
     if (app.Configuration.GetValue("QuestionBank:SeedImagesOnStart", true))
