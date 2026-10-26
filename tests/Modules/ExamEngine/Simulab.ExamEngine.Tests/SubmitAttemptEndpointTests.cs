@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using Simulab.ExamEngine.Contracts;
 using Simulab.SharedKernel.Serialization;
 
@@ -29,7 +28,7 @@ public sealed class SubmitAttemptEndpointTests : ExamEngineApiTests
     {
         var (student, attempt, questions) = await StartedEveryTypeAsync();
         await SavedAsync(student, attempt.Id, Single(questions), new SingleChoicePayload(1));
-        Factory.Clock.Advance(TimeSpan.FromMinutes(42));
+        Factory.Clock.Advance(TimeSpan.FromMinutes(10));
 
         var submitted = await SubmittedAsync(student, attempt.Id);
 
@@ -63,7 +62,7 @@ public sealed class SubmitAttemptEndpointTests : ExamEngineApiTests
     {
         var (student, attempt, _) = await StartedEveryTypeAsync();
         var first = await SubmittedAsync(student, attempt.Id);
-        Factory.Clock.Advance(TimeSpan.FromHours(1));
+        Factory.Clock.Advance(TimeSpan.FromMinutes(10));
 
         var again = await SubmittedAsync(student, attempt.Id);
 
@@ -110,7 +109,7 @@ public sealed class SubmitAttemptEndpointTests : ExamEngineApiTests
         Factory.Clock.Advance(TimeSpan.FromMinutes(5));
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{Attempts}/{attempt.Id}/submit")
         {
-            Content = JsonContent.Create(new { submittedAt = "2001-01-01T00:00:00Z", SubmittedAt = "2001-01-01T00:00:00Z" }, options: AppJson.Options)
+            Content = new StringContent("""{"submittedAt":"2001-01-01T00:00:00Z","SubmittedAt":"2001-01-01T00:00:00Z"}""", System.Text.Encoding.UTF8, "application/json")
         };
         request.Headers.TryAddWithoutValidation("Date", "Mon, 01 Jan 2001 00:00:00 GMT");
         request.Headers.TryAddWithoutValidation("X-Submitted-At", "2001-01-01T00:00:00Z");

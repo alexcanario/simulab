@@ -131,6 +131,9 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - AC22 `WebPermissions` lists the `ExamEngine` catalog. In en, pt-BR and pt-PT: name and description of `attempts.take` and `attempts.read`, the group `attempts`, and a text for each constant of `ExamAttemptErrorCodes` (field codes included). `RoleResourcesTests` and `ErrorCodeTextTests` are green.
 
 ## Criterion → test
+
+Tests locked: 2b5289b4339285b4656750ea8f146c3c10fe47b9 (9 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `StartAttemptEndpointTests.Start_PublishedEdition_Answers201WithThePublishedQuestionsInPaperNumberOrder` |
@@ -215,3 +218,4 @@ The reading of an attempt by an `Admin` is not audited in this item (see `## Dec
 - 2026-10-26 override — Who reads an attempt - chose Dono e Admin over Só o aluno dono (5.2 vs 8.0); kept
 - 2026-10-26 question — follow-up: asked 1, from context 0
 - 2026-10-26 change — v2: tenant from ICurrentTenant (BR10, AC19); UI texts and WebPermissions in AC22
+- 2026-10-26 blocked — test wrong: AC10, AC11 and AC18 tests were wrong: the clock moved past the 15 min access token, and an anonymous type had two members of one JSON name
