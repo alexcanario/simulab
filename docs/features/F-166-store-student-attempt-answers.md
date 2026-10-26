@@ -1,7 +1,7 @@
 ---
 feature: F-166
 epic: Exam Simulator
-status: refining
+status: approved
 board: 232
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: refining (2026-10-26)
-- Stopped at: File written after the question round; waiting for the owner to read it and approve.
-- Next action: Read the file and type aprovo F-166 (owner).
+- Status: approved (2026-10-26)
+- Stopped at: Approved by the owner on 2026-10-26.
+- Next action: Build it with /agile:build F-166 (owner types it).
 - Waiting on: nothing
 
 ## Summary
