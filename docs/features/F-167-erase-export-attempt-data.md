@@ -1,7 +1,7 @@
 ---
 feature: F-167
 epic: Exam Simulator
-status: refining
+status: approved
 board: 233
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: refining (2026-10-26)
-- Stopped at: File written after the answers of the question round (2026-10-26); waiting for the owner to read it and approve.
-- Next action: Read this file and say "aprovo F-167" (owner).
+- Status: approved (2026-10-26)
+- Stopped at: Approved by the owner (2026-10-26).
+- Next action: /agile:build F-167 (owner).
 - Waiting on: nothing
 
 ## Summary
@@ -118,6 +118,7 @@ Struck threat: a student with very many attempts makes the file large (S1, D). F
 - 2026-10-26 — The farewell email and `Account.Erase.Explanation` stay as they are: they already say that only records that no longer identify the person are kept — Claude (technical).
 - 2026-10-26 — The app manual pages `my-account.md` ("Baixar meus dados") and `erase-account.md` get a line each in pt-BR at the ship; pt-PT and en are frozen (F-124) — Claude (technical).
 - 2026-10-26 — No new package, for code or tests: EF Core, Npgsql, the test host and the job runner exist — Claude (technical).
+- 2026-10-26 — Approved by the owner ("aprovo F-167").
 - 2026-10-26 — Struck threat, a student with very many attempts makes the file large — Claude (technical): accepted by F-16 BR6; revisit with the "job plus emailed link" change F-16 already names when study history is large.
 
 ## Out of scope
