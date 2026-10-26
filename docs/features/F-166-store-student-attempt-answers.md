@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: idea (2026-10-26)
-- Stopped at: Captured as an idea from D-9; nothing refined yet.
-- Next action: Refine it with /agile:refine F-166 (owner).
+- Stopped at: Refinement started; reading the code and the profile.
+- Next action: Answer the question round (owner).
 - Waiting on: nothing
 
 ## Summary
