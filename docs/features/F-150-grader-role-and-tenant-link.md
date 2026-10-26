@@ -1,7 +1,7 @@
 ---
 feature: F-150
 epic: Partner tenants
-status: building
+status: validating
 board: 208
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-25)
-- Stopped at: Code done and committed (797ed10, 17666d6, e6eda84); affected tests green (Identity 580, Web 2646, Api 83, QuestionBank 840, architecture 301); screen checked through the app host
-- Next action: /agile:review F-150 (step 16, a door: permissions and tenant), then the security scan, the validation script and status validating
+- Status: validating (2026-10-26)
+- Stopped at: Build done: review (2 minors: 1 fixed, 1 became F-165), scan GREEN, validation script written
+- Next action: Owner follows the validation script; then /agile:ship F-150
 - Waiting on: nothing
 
 ## Summary
@@ -202,6 +202,9 @@ Tests locked: 1f8d58fe8481b95e6bae57af129cef37a1f6788c (9 files); unlocks: 0
 - 2026-10-26: Review coverage — correctness (BR1–BR12, AC1–AC23 against handler, store, queries, export, erasure, token issue, seed, `WebPermissions`, dialog save and retry), security (route group policy, one-field body, T1–T6 mapped to AC11–AC16), data (comment-only migration and its Down, audit entry in the same save, entry stays global), locks (`git diff 1f8d58f` on the 9 locked paths empty, 0 unlocks, post-lock edits of other tests read), localization (16 key lines in the three resx, no hardcoded text, glossary rows), tests (every AC can fail), rules (naming, api-contracts, ui-project, project.md; the `User` filter exception goes to the rule text at the ship); not checked: none
 - 2026-10-26: traps — T1 unique email index per tenant: a path that skips the sign-up check (an import, the partner registration of F-162) can write one address twice, and the lookups by email then throw; T2 the audit stores only the tenant id: once a `Tenant` entity has a name, history and export need a lookup by action to show it
 - 2026-10-26: security scan — `agile scan GREEN` (gitleaks: 8 findings, all triaged before; semgrep: 2 medium open in `tools/Simulab.DocGen/GeneratedDocs.cs`, outside this item)
+- 2026-10-26: validation step 1 — the Git Bash start ran on 2026-10-25 (the screen check: Web 200, sign-in, users, history and roles screens). The PowerShell start ran on 2026-10-26: the app host and its dashboard came up, but the Web did not answer within 5 minutes and `docker ps -a` showed `simulab-postgres`, `simulab-redis`, `simulab-azurite` and `simulab-mailpit` as `Exited (255)` since the earlier host was stopped; cause not verified (not a code change of this item: the same code started from Git Bash)
+- 2026-10-26: Reuse: `RunExclusiveAsync` and the role-administration lock (`RoleAdministrationStore`), `RoleChange`/`RoleChangeItem` for the audit, the F-9 dialog and typed client, `AppTextField`, `PermissionCatalog.InitialGrants`, the F-16 export query
+- 2026-10-26: Shortcuts: none
 
 ## Out of scope
 - A `Tenant` entity, a partner registration screen and a tenant picker — the first partner brings them (epic Partner tenants).
@@ -223,6 +226,78 @@ Tests locked: 1f8d58fe8481b95e6bae57af129cef37a1f6788c (9 files); unlocks: 0
 
 ## Validation script
 <!-- Written at the end of build. -->
+
+### English
+Needed to validate: the local app host with an administrator and a second account — you provide them; the administrator is the seeded `admin@simulab.local` (password in `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`), the second account is created in step 3.
+
+1. Start the app on the item's own database (`simulab_f150`; Claude's screen check already used it: the admin holds Grader and tenant `3f2a9c10…`). Close Visual Studio or any app host running from this folder first. Expected: the Aspire dashboard address is printed; the Web answers at https://localhost:7125.
+   Git Bash:
+   ```bash
+   cd /d/wt/simulab/f-150-grader-role-and && Database__Name=simulab_f150 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   cd D:\wt\simulab\f-150-grader-role-and; $env:Database__Name = 'simulab_f150'; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. The Grader role:
+   - [ ] 2.1 Sign in at https://localhost:7125/sign-in as `admin@simulab.local`; in the sidebar (the left-hand menu) open Administration > Roles → the list shows Grader with the "System" chip and 1 permission.
+   - [ ] 2.2 Click Edit on Grader → the permission is "Grade questions"; the name field cannot be changed. Cancel.
+3. [ ] A second account: open https://localhost:7125/sign-up in a private window, create `ana.f150@exemplo.com`, open Mailpit from the Aspire dashboard and click the verification link.
+4. Give access, as the admin:
+   - [ ] 4.1 Administration > Users → the table has a Tenant column; the new account shows "—".
+   - [ ] 4.2 On the new account's row click the pencil (Edit roles) → the access dialog (the small window "Access of …", with the roles and the Tenant field) opens.
+   - [ ] 4.3 Tick Grader, type `partner-a` in Tenant and click Save → the field says "Paste a tenant id such as 3f2a9c10-…"; nothing is saved.
+   - [ ] 4.4 Replace it with `3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f` and Save → "Access of ana.f150@exemplo.com saved."; the row shows Student and Grader chips and `3f2a9c10`.
+5. The audit trail:
+   - [ ] 5.1 On the same row click History → the role history (Administration > Role history, filtered by that user) shows "User's tenant changed" with "Added: 3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f" and "User's roles changed" with "Added: Grader".
+   - [ ] 5.2 Back on Users, open the dialog again, clear Tenant and Save → the row shows "—"; the history gets a "User's tenant changed" with "Removed: 3f2a9c10-…".
+6. The second account, with a tenant:
+   - [ ] 6.1 As the admin set the tenant of `ana.f150@exemplo.com` back to `3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f`.
+   - [ ] 6.2 In the private window sign in as `ana.f150@exemplo.com` → the sign-in works and the menu is the Student's (no Administration section).
+   - [ ] 6.3 Open https://localhost:7125/admin/users in that window → access is refused (the not-authorized page).
+7. The least-privileged role (AC21), as the admin:
+   - [ ] 7.1 Administration > Roles > Add: name `Access desk`, only "Manage roles and user roles"; Save.
+   - [ ] 7.2 Users: give `ana.f150@exemplo.com` only `Access desk` (untick Student and Grader) and Save.
+   - [ ] 7.3 In the private window sign out and in again as `ana.f150@exemplo.com`; Administration > Users opens; edit the admin's tenant (paste `8d1e0b77-2c3a-4f19-a6b5-112233445566`) and Save → saved, no error.
+8. Language and keyboard, as the admin:
+   - [ ] 8.1 Switch the language to Português (Brasil) in the top bar → the column reads "Tenant", the dialog title "Acesso de …" and the help "Cole o id do tenant; deixe vazio para nenhum."
+   - [ ] 8.2 Keyboard only: Tab to a row's pencil, Enter opens the dialog, Tab to Tenant, type a GUID, Tab to Salvar, Enter → saved; Esc on an open dialog with a change asks before discarding.
+
+### pt-BR
+Necessário para validar: o app host local com um administrador e uma segunda conta — você fornece; o administrador é o `admin@simulab.local` da carga inicial (senha em `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`), a segunda conta é criada no passo 3.
+
+1. Suba o app no banco próprio do item (`simulab_f150`; a conferência de tela do Claude já o usou: o admin tem Corretor e o tenant `3f2a9c10…`). Feche antes o Visual Studio ou qualquer app host rodando desta pasta. Esperado: o endereço do painel do Aspire aparece; o Web responde em https://localhost:7125.
+   Git Bash:
+   ```bash
+   cd /d/wt/simulab/f-150-grader-role-and && Database__Name=simulab_f150 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   cd D:\wt\simulab\f-150-grader-role-and; $env:Database__Name = 'simulab_f150'; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. O papel Corretor:
+   - [ ] 2.1 Entre em https://localhost:7125/sign-in como `admin@simulab.local`; no sidebar (menu lateral esquerdo) abra Administração > Papéis → a lista mostra Corretor com o selo "Sistema" e 1 permissão.
+   - [ ] 2.2 Clique em Editar no Corretor → a permissão é "Corrigir questões"; o campo do nome não muda. Cancele.
+3. [ ] Uma segunda conta: abra https://localhost:7125/sign-up numa janela anônima, crie `ana.f150@exemplo.com`, abra o Mailpit pelo painel do Aspire e clique no link de verificação.
+4. Dar acesso, como admin:
+   - [ ] 4.1 Administração > Usuários → a tabela tem a coluna Tenant; a conta nova mostra "—".
+   - [ ] 4.2 Na linha da conta nova clique no lápis (Editar papéis) → abre o diálogo de acesso (a janelinha "Acesso de …", com os papéis e o campo Tenant).
+   - [ ] 4.3 Marque Corretor, digite `partner-a` em Tenant e clique em Salvar → o campo diz "Cole um id de tenant como 3f2a9c10-…"; nada é salvo.
+   - [ ] 4.4 Troque por `3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f` e Salve → "Acesso de ana.f150@exemplo.com salvo."; a linha mostra os chips Estudante e Corretor e `3f2a9c10`.
+5. A trilha de auditoria:
+   - [ ] 5.1 Na mesma linha clique em Histórico → o histórico de papéis (Administração > Histórico de papéis, filtrado por esse usuário) mostra "Tenant do usuário alterado" com "Adicionado: 3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f" e "Papéis do usuário alterados" com "Adicionado: Corretor".
+   - [ ] 5.2 De volta em Usuários, abra o diálogo de novo, apague o Tenant e Salve → a linha mostra "—"; o histórico ganha um "Tenant do usuário alterado" com "Removido: 3f2a9c10-…".
+6. A segunda conta, com tenant:
+   - [ ] 6.1 Como admin, volte o tenant de `ana.f150@exemplo.com` para `3f2a9c10-7b1e-4c55-9d2e-0a1b2c3d4e5f`.
+   - [ ] 6.2 Na janela anônima entre como `ana.f150@exemplo.com` → a entrada funciona e o menu é o do Estudante (sem a seção Administração).
+   - [ ] 6.3 Abra https://localhost:7125/admin/users nessa janela → o acesso é recusado (a página de não autorizado).
+7. O papel de menor privilégio (AC21), como admin:
+   - [ ] 7.1 Administração > Papéis > Adicionar: nome `Access desk`, só "Gerenciar papéis e atribuições"; Salvar.
+   - [ ] 7.2 Usuários: dê a `ana.f150@exemplo.com` só `Access desk` (desmarque Estudante e Corretor) e Salve.
+   - [ ] 7.3 Na janela anônima saia e entre de novo como `ana.f150@exemplo.com`; Administração > Usuários abre; edite o tenant do admin (cole `8d1e0b77-2c3a-4f19-a6b5-112233445566`) e Salve → salvo, sem erro.
+8. Idioma e teclado, como admin:
+   - [ ] 8.1 Troque o idioma para English na barra de cima → a coluna diz "Tenant", o título do diálogo "Access of …" e a ajuda "Paste the tenant id; leave empty for none."
+   - [ ] 8.2 Só teclado: Tab até o lápis de uma linha, Enter abre o diálogo, Tab até Tenant, digite um GUID, Tab até Save, Enter → salvo; Esc num diálogo com alteração pergunta antes de descartar.
 
 ## Events
 <!-- Written only by events.js. -->
