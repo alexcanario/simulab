@@ -1615,3 +1615,11 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Left alone: `i18n.md`, `naming.md`, `profile.md` (edited, upstream unchanged); manual build files (no upstream change). Declined: none.
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: column present; new technical terms not scanned. Build and tests not run (no build file changed).
 - Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
+## 2026-10-27 - F-167 Erase and export a student's attempt data
+- Events: override 0, question 1 (asked 2, from context 3), assumed 0, rework 1, test-fail 0, blocked 0, change 1, correction 0, stop 0, companion 0. Gate time: 7 passes, 31 min 35 s (0 red). Usage: 9588.7k weighted, context per turn 161k → 469k, 1 session, 200 turns.
+- 1 (score 8/6, plugin note `[generic]`, recorded): an update-stamp test compares before and after; "is set" passed on rows already stamped by their last save. Evidence: review finding 1 and the `rework` event of the item.
+- 2 (score 6/5, plugin note `[generic]`, recorded): main moved during the ship by a docs-only commit (`425ebf9`) and the merge gate asked a third full run (388 s of tests) for no code change.
+- 3 (score 5/4, plugin note `[generic]`, recorded): `preview_start` runs the main checkout's code, so the worktree's app host for the validation was started from the shell with `Database__Name=simulab_f167`.
+- Decisions: 26 item decisions stay in the item. Shortcuts: none. Glossary: nothing missing.
+- Process note, not a lesson: the F-166 note on the development client secret in `validate.ps1` (`[generic]` 4/3) happened again in F-167: `secret-guard` stopped the commit of `docs/validation/F-167/validate.ps1:12` until the line got `agile:allow-secret`. Seen twice.
