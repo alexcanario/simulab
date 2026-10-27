@@ -33,7 +33,7 @@
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
 |---|---|---|---|---|---|---|---|---|
 | 12 | F-168 | Exam rules of an edition | idea | - | Exam Simulator | - | F-170, F-171, F-174 | in cut exam-simulator; level 1; feature; Must; size M |
-| 13 | F-169 | Take an exam edition | refining | opus | Exam Simulator | - | F-170, F-171, F-173, F-178 | in cut exam-simulator; level 1; feature; Must; size M |
+| 13 | F-169 | Take an exam edition | approved | opus | Exam Simulator | - | F-170, F-171, F-173, F-178 | in cut exam-simulator; level 1; feature; Must; size M |
 | 14 | F-170 | Exam timer | idea | - | Exam Simulator | F-169, F-168 | F-176 | in cut exam-simulator; level 2: waits on F-169, F-168; feature; Must; size M |
 | 15 | F-171 | Score and result of an attempt | idea | - | Exam Simulator | F-168, F-169 | F-172, F-173, F-174, F-175, F-176 | in cut exam-simulator; level 2: waits on F-168, F-169; feature; Must; size M |
 
@@ -54,8 +54,8 @@
 
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
 |---|---|---|---|---|---|---|---|---|
-| 24 | B-35 | Starting an attempt without an edition answers with a 404 code | idea | - | Exam Simulator | - | - | level 1; bug |
-| 25 | B-36 | An oversized answer body answers a bare 413 | idea | - | Exam Simulator | - | - | level 1; bug |
+| 24 | B-36 | An oversized answer body answers a bare 413 | idea | - | Exam Simulator | - | - | level 1; bug |
+| 25 | B-37 | Starting an attempt with a malformed body answers a 400 with no code | idea | - | Exam Simulator | - | - | level 1; bug |
 | 26 | F-119 | A list that keeps its state in the address follows a menu click to the plain URL | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size S |
 | 27 | F-120 | Architecture test for section id selectors | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size S |
 | 28 | F-143 | Align the external ingestion lab with E-9 | idea | - | AI-assisted exam import | - | - | level 1; feature; Should; size S |
@@ -123,7 +123,7 @@
 ### MVP: exam-simulator
 
 - [ ] 12. F-168 — Exam rules of an edition [idea] — unlocks F-170, F-171, F-174 — why in cut exam-simulator; level 1; feature; Must; size M
-- [ ] 13. F-169 — Take an exam edition [refining] — model opus — unlocks F-170, F-171, F-173, F-178 — why in cut exam-simulator; level 1; feature; Must; size M
+- [ ] 13. F-169 — Take an exam edition [approved] — model opus — unlocks F-170, F-171, F-173, F-178 — why in cut exam-simulator; level 1; feature; Must; size M
 - [ ] 14. F-170 — Exam timer [idea] — waits on F-169, F-168 — unlocks F-176 — why in cut exam-simulator; level 2: waits on F-169, F-168; feature; Must; size M
 - [ ] 15. F-171 — Score and result of an attempt [idea] — waits on F-168, F-169 — unlocks F-172, F-173, F-174, F-175, F-176 — why in cut exam-simulator; level 2: waits on F-168, F-169; feature; Must; size M
 
@@ -140,8 +140,8 @@
 
 ### Later
 
-- [ ] 24. B-35 — Starting an attempt without an edition answers with a 404 code [idea] — why level 1; bug
-- [ ] 25. B-36 — An oversized answer body answers a bare 413 [idea] — why level 1; bug
+- [ ] 24. B-36 — An oversized answer body answers a bare 413 [idea] — why level 1; bug
+- [ ] 25. B-37 — Starting an attempt with a malformed body answers a 400 with no code [idea] — why level 1; bug
 - [ ] 26. F-119 — A list that keeps its state in the address follows a menu click to the plain URL [idea] — why level 1; feature; Should; size S
 - [ ] 27. F-120 — Architecture test for section id selectors [idea] — why level 1; feature; Should; size S
 - [ ] 28. F-143 — Align the external ingestion lab with E-9 [idea] — why level 1; feature; Should; size S
@@ -186,7 +186,7 @@
 
 ## Summary
 
-- Delivered: 142
+- Delivered: 143
 - MVP mockup-stitch-1-formulario: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-2-navegacao: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-3-barra-app: 3 open (3 in the cuts, 0 their dependencies)

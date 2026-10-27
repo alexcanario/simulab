@@ -1,7 +1,7 @@
 ---
 bug: B-35
 feature: F-166
-status: validating
+status: done
 board: 243
 severity: low
 epic: Exam Simulator
@@ -12,9 +12,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-27)
-- Stopped at: Built and checked; validation script ready (2026-10-27)
-- Next action: Owner runs the validation script, then /agile:ship B-35
+- Status: done (2026-10-27)
+- Stopped at: Shipped: merged 6843415 on main (2026-10-27)
+- Next action: nothing; the item is done
 - Waiting on: nothing
 
 ## What happens
@@ -143,5 +143,16 @@ There is no screen: every check is a call to the API, made by one script (`docs/
 - 2026-10-27 question — asked 3, from context 0
 
 ## Delivery
-- Branch: bug/B-35
-- Merge: -
+- Branch: bug/B-35 (deleted; never pushed)
+- Merge: 6843415 on main (2026-10-27), version 1.24.1
+- Tests: full suite 5464 passed, 0 failed, in 15 projects (`gate.js ship`, 2 runs: 33 s build + 449 s tests, then after the version bump 57 s build + 680 s tests; over the 5 min budget, F-177)
+- Security scan: `agile scan GREEN`, closed by Claude: none
+- App manual: unchanged (no screen calls the start yet)
+- Validated by the owner in the conversation (2026-10-27, "validado"); no step was ticked in the widget.
+- Validation evidence:
+  1. [ ] not tested (step 1, start the app host)
+  2. [ ] not tested (step 2, run the script)
+  3. [ ] not tested (step 3, stop the app host)
+  Evidence: 0 of 3 tested
+Gate time: 6 passes, 38 min 8 s — turn 2 (3 min 39 s), ship 2 (20 min 19 s), scan 2 (14 min 10 s); 0 red
+Usage: 3294.1k weighted (estimate) — refine 13% · build 52% · ship 22% · other 14% — context per turn 127k → 245k — 2 sessions, 146 turns
