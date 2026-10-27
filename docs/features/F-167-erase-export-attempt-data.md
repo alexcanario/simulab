@@ -1,7 +1,7 @@
 ---
 feature: F-167
 epic: Exam Simulator
-status: validating
+status: done
 board: 233
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-27)
-- Stopped at: Validated by the owner on 2026-10-27 ("validado F-167").
-- Next action: /agile:ship F-167 (owner).
+- Status: done (2026-10-27)
+- Stopped at: Shipped on 2026-10-27: merge 2f9670a, app version 1.24.0, board #233 closed.
+- Next action: nothing: done.
 - Waiting on: nothing
 
 ## Summary
@@ -306,3 +306,14 @@ Necessário para validar: o app host rodando a partir deste worktree no banco pr
 - 2026-10-26 question — asked 2, from context 3
 - 2026-10-27 change — v2: BR1 and AC7 keep the attempt audit fields; erased answer rows carry the erasure update stamp
 - 2026-10-27 rework — review 1: AC7 test did not prove the erasure stamp; new test file AttemptErasureStampTests
+
+## Delivery
+- Branch: feature/F-167 (removed; never pushed)
+- Merge: 2f9670a (board #233), app version 1.24.0
+- Tests: full suite 5463 tests in 15 projects, 0 failures, 36 s build and 388 s test run (the ship's last run, after bringing main in); over the 5 min budget by 88 s of test time (F-177)
+- Manual pages: docs/manual/pt-BR/my-account.md, docs/manual/pt-BR/erase-account.md (pt-PT and en frozen, F-124)
+- Validated by the owner on 2026-10-27 ("validado F-167"); both validation scripts ran green in the build (ALL OK in Git Bash and PowerShell 7)
+- Validation evidence: 0 of 11 boxes ticked in the widget; every path recorded as not tested
+
+Gate time: 7 passes, 31 min 35 s — turn 2 (1 min 48 s), ship 3 (21 min 26 s), scan 2 (8 min 21 s); 0 red
+Usage: 9588.7k weighted (estimate) — build 19% · review 34% · ship 13% · other 34% — agents 12% — context per turn 161k → 469k — 1 session, 200 turns
