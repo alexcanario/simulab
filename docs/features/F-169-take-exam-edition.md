@@ -1,7 +1,7 @@
 ---
 feature: F-169
 epic: Exam Simulator
-status: approved
+status: building
 board: 235
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-27)
-- Stopped at: Change note v2 approved (answer sheet legend and ranges, primarySelected colour).
-- Next action: Owner types /agile:build F-169 (session model: opus).
+- Status: building (2026-10-27)
+- Stopped at: Build started; design passes next.
+- Next action: Run system-design and architect, then plan.
 - Waiting on: nothing
 
 ## Summary
