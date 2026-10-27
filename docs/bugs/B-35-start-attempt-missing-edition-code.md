@@ -1,7 +1,7 @@
 ---
 bug: B-35
 feature: F-166
-status: approved
+status: building
 board: 243
 severity: low
 epic: Exam Simulator
@@ -12,9 +12,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-27)
-- Stopped at: Approved by the owner (2026-10-27)
-- Next action: /agile:build B-35
+- Status: building (2026-10-27)
+- Stopped at: Build started (2026-10-27)
+- Next action: Write the regression tests, see them fail, lock them
 - Waiting on: nothing
 
 ## What happens
@@ -77,6 +77,7 @@ Verified on the main branch (F-166 merged, `1e83f94`), 2026-10-27.
 - 2026-10-27 — A body that does not bind is out of scope, registered as B-37 (board #247) — keeps this bug small; the fix there reads the body by hand, a different change — asked
 - 2026-10-27 — The handler returns the field entries and the endpoint writes `errors`, as `SaveAsync` does, instead of a validation filter — one shape for the module's 400s, no new mechanism — Claude
 - 2026-10-27 — No validation screen; the check is one HTTP script, as in F-166 — the item has no screen — Claude
+- 2026-10-27: plan — 1 regression tests for `{}` and the empty Guid, plus the `EditionRequired` constant as skeleton → both red, locked; 2 handler guard with the field entry and the endpoint writing `errors` → AC1, AC2 and the F-166 AC4 test (AC3) green; 3 the key in the three resource files → `ErrorCodeTextTests` green (AC4); 4 validation scripts `docs/validation/B-35/` → gate GREEN
 
 ## Open questions
 - (none)
