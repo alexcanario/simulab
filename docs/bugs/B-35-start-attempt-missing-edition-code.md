@@ -1,7 +1,7 @@
 ---
 bug: B-35
 feature: F-166
-status: refining
+status: approved
 board: 243
 severity: low
 epic: Exam Simulator
@@ -12,9 +12,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: refining (2026-10-27)
-- Stopped at: Question round answered; file filled (2026-10-27)
-- Next action: Owner reads the file and types: aprovo B-35
+- Status: approved (2026-10-27)
+- Stopped at: Approved by the owner (2026-10-27)
+- Next action: /agile:build B-35
 - Waiting on: nothing
 
 ## What happens
@@ -26,6 +26,7 @@ Evidence (review of F-166, 2026-10-26): `src/Modules/ExamEngine/Simulab.ExamEngi
 - Depends on: F-166 (delivered, merged on the main branch).
 - Waits on (to start): nothing.
 - Needed to validate: nothing.
+- Model: opus (changes the error answer of a public API route)
 - Suggested path: `/agile:refine` → `/agile:build` (or `/agile:autopilot B-35`, cause clear, fix small).
 - Parallel with: none that edits the ExamEngine start handler.
 
