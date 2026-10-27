@@ -6,5 +6,16 @@ namespace Simulab.ExamEngine.Application.Attempts;
 /// </summary>
 public sealed class EraseStudentTextsHandler(IAttemptStore store)
 {
-    public Task HandleAsync(Guid studentId, CancellationToken cancellationToken) => throw new NotImplementedException();
+    public async Task HandleAsync(Guid studentId, CancellationToken cancellationToken)
+    {
+        var attempts = await store.FindAllOfStudentForErasureAsync(studentId, cancellationToken);
+        foreach (var attempt in attempts)
+        {
+            // A system action: allowed on any status, so it never fails (BR2).
+            attempt.EraseTexts();
+        }
+
+        // Never an answer text in an exception: a failure's message is kept on the job row (jobs.last_error).
+        await store.SaveChangesAsync(cancellationToken);
+    }
 }

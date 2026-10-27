@@ -103,6 +103,9 @@ Struck threat: a student with very many attempts makes the file large (S1, D). F
 - AC14 (BR11) Given the `/account` page, when the "Your data" card is read, then its explanation names the attempts and answers in pt-BR, pt-PT and en, and the missing-key test stays green.
 
 ## Criterion → test
+
+Tests locked: fb380939072daaed68b803ad5c25fa7f6480993e (6 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `AttemptDataExportTests.Export_HasEveryAttemptAndAnswerOfTheStudent_OldestFirst_InPaperOrder` |

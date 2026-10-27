@@ -43,4 +43,26 @@ public sealed class AttemptAnswer : TenantEntity
     }
 
     internal void Set(AnswerPayload? answer) => Answer = answer;
+
+    /// <summary>
+    /// F-167 BR1: the texts of the answer become null, the shape and the blank numbers stay. The answer is assigned only
+    /// when a text is there, so a row with nothing to erase is not written and a second call changes nothing (BR4).
+    /// </summary>
+    internal void EraseText()
+    {
+        AnswerPayload? erased = Answer switch
+        {
+            ShortAnswerPayload { Text: not null } shortAnswer => shortAnswer with { Text = null },
+            OpenAnswerPayload { Text: not null } openAnswer => openAnswer with { Text = null },
+            EssayPayload { Text: not null } essay => essay with { Text = null },
+            FillInTheBlanksPayload { Blanks: { } blanks } fillIn when blanks.Any(blank => blank.Text is not null) =>
+                fillIn with { Blanks = [.. blanks.Select(blank => blank with { Text = null })] },
+            _ => null
+        };
+
+        if (erased is not null)
+        {
+            Answer = erased;
+        }
+    }
 }
