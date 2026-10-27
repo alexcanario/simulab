@@ -1,7 +1,7 @@
 ---
 feature: F-168
 epic: Exam Simulator
-status: building
+status: validating
 board: 234
 version: 1
 ---
@@ -10,10 +10,10 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-27)
-- Stopped at: Build started: status building.
-- Next action: Design passes (system-design, architect), then the plan.
-- Waiting on: nothing
+- Status: validating (2026-10-27)
+- Stopped at: Build done: tests green, scan GREEN, validation script written.
+- Next action: Owner follows the validation script (8 steps) and says it passed.
+- Waiting on: owner
 
 ## Summary
 An admin records, on an exam edition, the rules the notice sets for the paper: its duration, the points per question of each notice subject, the cut-off of the objective paper and of the essay. The Manaus 2026 edition gets its rules seeded (5 hours; 1.50 or 2.00 points per question; pass at 60 of 100 points; essay of 20 points, pass at 10). Today `ExamEdition` and `NoticeSubject` carry none of this (epic E-06, "What exists").
@@ -184,6 +184,14 @@ Tests locked: 1d4a43df29f443d24509c61e804a21689f16b1cb (7 files); unlocks: 0
 - 2026-10-27: traps — T1 store the objective total: stale on every subject edit; T2 refuse a cut-off above the total: order of edits would matter; T3 `double` for points: 99.999… flips the pass at the cut-off
 - 2026-10-27: plan — 1 schema migration, edition rules in entity, API, form card "Exam rules" after Paper and aside, codes with their texts → AC1, AC2, AC3, AC7, AC11; 2 points per question in entity, `CopyTo`, API, dialog field and section row → AC4, AC9; 3 objective total (`ObjectiveMaxScores` in Contracts, `ExamEditionResponse`, section total line through `NoticeSubjectTotals`, form missing list and cut-off warning) → AC5, AC6, AC8; 4 directory entries with rules, total and points → AC12; 5 published response and the student's rules line → AC10; 6 seed data migration `SeedManausExamRules` → AC13; 7 flow page, `DocGen`, locale check → AC14, `DocGen --check`, `techdocs.js check`
 
+- 2026-10-27 — The rules are set by `ExamEdition.SetRules`, called by the handler after `Create`/`Update`, instead of four more positional parameters: every existing caller and test keeps compiling — Claude (technical)
+- 2026-10-27 — Three tests of earlier items changed with the layout (not locked): `ExamEditionFormTests.Render_Add_ShowsTheThreeSections…` gains "Exam rules" in the card list, and `NoticeSubjectsSectionTests.Dialog_Add_ShowsTheThreeFieldsInOrder…` and `NoticeSubjectCoversDialogTests.Dialog_Add_ShowsTheCoversFieldLast…` gain `notice-subject-points` in the input list — Claude (technical)
+- 2026-10-27 — The section's total line adds the points only when some row has them: a list with no points at all reads as before (the F-74 tests hold) — Claude (technical)
+- 2026-10-27 — App-host check: started on `simulab_f168`; the migrations and the seed ran, and the published read through the Api answered Manaus with 300 / 100.00 / 60.00 / 20.00 / 10.00. The screens were not opened: the seeded admin lands on "Our documents changed", and accepting terms needs the owner's yes; the screens are in the validation script (steps 2 to 8) — Claude (technical)
+- 2026-10-27 — Test time: `Simulab.Catalog.Tests` ran 706 tests in 2 min 16 s, over the 2 min integration budget (retro finding) — Claude (technical)
+- 2026-10-27 — Reuse: `NoticeSubjectGroups.Totals` extended for the objective total, `ObjectiveMaxScores.Compute` shared by the Api, the directory, the published read and the Web, `AppTextField`/`AppSectionCard`/`AppAlert`/`AppFormAside` of the kit, the F-78 seed pattern (frozen literals, only empty values) — Claude (technical)
+- 2026-10-27 — Shortcuts: none — Claude (technical)
+
 ## Out of scope
 - Minimum score per notice subject: F-180.
 - Penalties, partial credit and annulment scoring models: F-174.
@@ -198,6 +206,82 @@ Tests locked: 1d4a43df29f443d24509c61e804a21689f16b1cb (7 files); unlocks: 0
 ## Change notes
 
 ## Validation script
+
+### English
+Needed to validate: the seeded Manaus 2026 edition and the seeded admin (in place: the worktree's own database `simulab_f168` has them); a signed-in `Student` account for step 6 (owner: register one on that database, as `docs/infra.md` says for B-35).
+
+1. Start the app on the item's own database (`simulab_f168`, nothing shared). Stop any other app host first (F-169's included): one app host at a time.
+   - [ ] 1.1 Run, from `D:\wt\simulab\f-168-edition-exam-rules`:
+
+```bash
+Database__Name=simulab_f168 dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+```powershell
+$env:Database__Name = 'simulab_f168'; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+   - 1.2 Expected: the line `Dashboard: https://localhost:17162/login?t=...`; the app is at `https://localhost:7125`.
+2. Sign in as `admin@simulab.local` and open the Manaus 2026 edition: sidebar > Content > Exams > "Guarda Municipal" (Manaus) > "Editions" section > 2026.
+   - 2.1 The card "Exam rules" comes right after "Paper": Duration 5 h 0 min, objective cut-off 60.00, essay maximum 20.00, essay cut-off 10.00 (the seed).
+   - 2.2 Under the cut-off: "Objective total: 100.00 points, from the notice subjects." The aside (the summary column on the right) shows Duration "5 h" and Cut-off "60 / 100".
+3. Notice subjects of the same page (section "Notice subjects", below the form).
+   - [ ] 3.1 Check that each row shows its points: 2.00 pt on Direito Constitucional and Legislação específica, 1.50 pt on the other seven; the total line ends with "100.00 points".
+   - [ ] 3.2 Edit "Informática", clear "Points per question", save: the total line says "1 subject has no points per question…", and the form's blue notice "Still missing:" names Informática.
+   - [ ] 3.3 Edit "Informática" again, type 1.50, save: the total is back to 100.00 points.
+4. Refusals and the warning, in the "Exam rules" card.
+   - [ ] 4.1 Hours 0, minutes 10, Save: the duration field says "The duration must be between 15 minutes and 8 hours."; set 5 h 0 min back.
+   - [ ] 4.2 Essay cut-off 25, Save: the essay cut-off field says it cannot be above the essay maximum; set 10 back.
+   - [ ] 4.3 Objective cut-off 120, Save: the edition saves and a yellow warning says the cut-off is above the objective total (100 points); set 60 back and save.
+5. A published edition with no rule.
+   - [ ] 5.1 In "Publication" choose Published; clear the five rule fields; Save: the edition saves and stays Published, and "Still missing:" lists Duration, Objective cut-off and Essay maximum.
+   - [ ] 5.2 Type the rules back (5 h 0 min, 60, 20, 10) and Save.
+6. The student's exam page and one permission check.
+   - [ ] 6.1 Sign out; sign in with the `Student` account; sidebar > Study > Catalog > "Guarda Municipal" (Manaus).
+   - [ ] 6.2 Check that the 2026 card shows the line "5 h · 100 points, pass at 60 · Essay 20 points, pass at 10"; an edition with no rules shows no line.
+   - [ ] 6.3 Open `https://localhost:7125/admin/exams` as the student: access is denied.
+7. One language switch, as the admin, on the Manaus edition form.
+   - [ ] 7.1 Switch to Português (Portugal): the card reads "Regras da prova", "Nota mínima da prova objetiva (pontos)" and the decimals use a comma (60,00); switch to Português (Brasil): "Nota de corte da objetiva (pontos)".
+8. Keyboard only, on the edition form.
+   - [ ] 8.1 With Tab only, reach "Duration (hours)", type 4, Tab to "Minutes", type 30, Tab to Save and press Space: the edition saves and the aside shows "4 h 30 min"; set 5 h 0 min back the same way.
+
+### pt-BR
+Necessário para validar: a edição Manaus 2026 e o admin do seed (já existem: o banco próprio do worktree, `simulab_f168`, tem os dois); uma conta `Student` logada para o passo 6 (você: cadastre uma nesse banco, como o `docs/infra.md` descreve para o B-35).
+
+1. Suba o app no banco próprio do item (`simulab_f168`, nada compartilhado). Antes, pare qualquer outro app host (o do F-169 também): um app host por vez.
+   - [ ] 1.1 Rode, em `D:\wt\simulab\f-168-edition-exam-rules`:
+
+```bash
+Database__Name=simulab_f168 dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+```powershell
+$env:Database__Name = 'simulab_f168'; dotnet run --project src/Hosts/Simulab.AppHost --launch-profile https
+```
+
+   - 1.2 Esperado: a linha `Dashboard: https://localhost:17162/login?t=...`; o app fica em `https://localhost:7125`.
+2. Entre como `admin@simulab.local` e abra a edição Manaus 2026: menu lateral > Conteúdo > Provas > "Guarda Municipal" (Manaus) > seção "Edições" > 2026.
+   - 2.1 O card "Regras da prova" vem logo depois de "Prova": Duração 5 h 0 min, nota de corte da objetiva 60,00, nota máxima da redação 20,00, nota de corte da redação 10,00 (o seed).
+   - 2.2 Abaixo da nota de corte: "Total da prova objetiva: 100,00 pontos, pelas disciplinas do edital." O aside (a coluna de resumo à direita) mostra Duração "5 h" e Nota de corte "60 / 100".
+3. Disciplinas do edital da mesma página (seção "Disciplinas do edital", abaixo do formulário).
+   - [ ] 3.1 Confira que cada linha mostra seus pontos: 2,00 pt em Direito Constitucional e Legislação específica, 1,50 pt nas outras sete; a linha de total termina com "100,00 pontos".
+   - [ ] 3.2 Edite "Informática", apague "Pontos por questão", salve: a linha de total diz "1 disciplina não tem pontos por questão…", e o aviso azul "Ainda falta:" do formulário cita Informática.
+   - [ ] 3.3 Edite "Informática" de novo, digite 1,50, salve: o total volta a 100,00 pontos.
+4. Recusas e o alerta, no card "Regras da prova".
+   - [ ] 4.1 Horas 0, minutos 10, Salvar: o campo de duração diz "A duração deve ficar entre 15 minutos e 8 horas."; volte para 5 h 0 min.
+   - [ ] 4.2 Nota de corte da redação 25, Salvar: o campo diz que ela não pode ficar acima da nota máxima; volte para 10.
+   - [ ] 4.3 Nota de corte da objetiva 120, Salvar: a edição salva e um alerta amarelo diz que a nota de corte está acima do total da prova objetiva (100 pontos); volte para 60 e salve.
+5. Uma edição publicada sem nenhuma regra.
+   - [ ] 5.1 Em "Publicação" escolha Publicada; apague os cinco campos de regra; Salvar: a edição salva e continua Publicada, e "Ainda falta:" lista Duração, Nota de corte da objetiva e Nota máxima da redação.
+   - [ ] 5.2 Digite as regras de volta (5 h 0 min, 60, 20, 10) e Salvar.
+6. A página da prova para o aluno e uma checagem de permissão.
+   - [ ] 6.1 Saia; entre com a conta `Student`; menu lateral > Estudar > Catálogo > "Guarda Municipal" (Manaus).
+   - [ ] 6.2 Confira que o card de 2026 mostra a linha "5 h · 100 pontos, aprovação com 60 · Redação de 20 pontos, aprovação com 10"; uma edição sem regras não mostra linha.
+   - [ ] 6.3 Abra `https://localhost:7125/admin/exams` como aluno: o acesso é negado.
+7. Uma troca de idioma, como admin, no formulário da edição Manaus.
+   - [ ] 7.1 Troque para Português (Portugal): o card diz "Regras da prova", "Nota mínima da prova objetiva (pontos)" e os decimais usam vírgula (60,00); troque para Português (Brasil): "Nota de corte da objetiva (pontos)".
+8. Só teclado, no formulário da edição.
+   - [ ] 8.1 Só com Tab, chegue a "Duração (horas)", digite 4, Tab até "Minutos", digite 30, Tab até Salvar e aperte Espaço: a edição salva e o aside mostra "4 h 30 min"; volte para 5 h 0 min do mesmo jeito.
 
 ## Events
 
