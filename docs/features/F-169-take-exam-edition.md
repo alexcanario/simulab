@@ -1,7 +1,7 @@
 ---
 feature: F-169
 epic: Exam Simulator
-status: building
+status: validating
 board: 235
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-27)
-- Stopped at: All six plan steps done; whole gate GREEN; techdocs GREEN; DocGen up to date; scan GREEN; validation script written.
-- Next action: Owner decides on /agile:review (the item opens a door), then status validating and the board body.
+- Status: validating (2026-10-27)
+- Stopped at: Review fixed (3fba187); scan GREEN after the fixes; status validating; owner ticked steps 1, 2.1, 2.2
+- Next action: Owner follows the validation script from step 3 and says it passed; then /agile:ship F-169
 - Waiting on: nothing
 
 ## Summary
