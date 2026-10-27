@@ -1,5 +1,5 @@
 {
-  "version": "0.190.0",
+  "version": "0.195.0",
   "files": {
     ".claude/rules/agile/api-contracts.md": "b89627eeff25fdd7",
     ".claude/rules/agile/build-config.md": "10036965f8131836",
@@ -25,9 +25,9 @@
     "docs/agile/templates/project-claude.md": "9740d87be9988095",
     "docs/agile/templates/tech-page.md": "2eff0cc69175555a",
     "docs/agile/templates/ui-map.md": "b05a64b27a3e73a4",
-    "docs/agile/workflow.pt-BR.md": "038b0da3fbed2a62",
+    "docs/agile/workflow.pt-BR.md": "8604e18e989bbf24",
     "docs/agile/workflow-examples.pt-BR.md": "124eec38de7e35a1",
-    "docs/agile/profile.md": "b8f54fb5efecd356",
+    "docs/agile/profile.md": "87d0409a29e89d3b",
     "docs/agile/profile-sections/runtime-themes-mudblazor.md": "64ab65963ee27cd9",
     "docs/agile/profile-sections/local-services.md": "6f6463ddcd02c9a0",
     "docs/agile/profile-sections/deploy-aspire.md": "949f099498551034",

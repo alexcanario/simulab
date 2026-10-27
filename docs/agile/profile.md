@@ -139,3 +139,9 @@ Shared section: `docs/agile/profile-sections/deploy-aca.md`. Read when: the item
 
 ## Deploy recipe (containers without Aspire)
 Shared section: `docs/agile/profile-sections/deploy-compose.md`. Read when: the item touches an environment whose Deploy command is not an `aspire deploy` line, its compose file or images.
+
+## Autonomy
+- Reserved: `new-module` — a new module or service boundary
+- Delegated: `layout-in-kit` — a layout inside the UI kit's patterns
+- Delegated: `field-order` — the order of the fields of a form or a list
+- Delegated: `ui-text` — error and empty texts in the kit's tone

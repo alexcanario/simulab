@@ -1619,6 +1619,12 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: column present; new technical terms not scanned. Build and tests not run (no build file changed).
 - Missing capabilities, not captured: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
 
+## 2026-10-27 - Sync with agile@canary 0.195.0
+- From 0.190.0 to 0.195.0. Copied: `workflow.pt-BR.md` (autonomy policy #339, `autonomy.js`, version read from `sync.json` #354). Merged: `profile.md` (no conflict; new `## Autonomy` section).
+- Left alone: `git.md`, `i18n.md`, `naming.md` (edited, upstream unchanged); manual build files (no upstream change). Declined: none.
+- Baseline: already present. Docs command: already declared (DocGen). Plugin notes marked: none. Rule or template copies removed: none. Glossary: pt-BR column and link lines present; no technical term found missing in a probe of common terms (not a full scan). Build and tests not run (no build file changed).
+- Missing capabilities, not captured as items: release pipeline (0.64.0), Azure login check in `agile-deploy.js` (0.2.0).
+
 ## 2026-10-27 - F-167 Erase and export a student's attempt data
 - Events: override 0, question 1 (asked 2, from context 3), assumed 0, rework 1, test-fail 0, blocked 0, change 1, correction 0, stop 0, companion 0. Gate time: 7 passes, 31 min 35 s (0 red). Usage: 9588.7k weighted, context per turn 161k → 469k, 1 session, 200 turns.
 - 1 (score 8/6, plugin note `[generic]`, recorded): an update-stamp test compares before and after; "is set" passed on rows already stamped by their last save. Evidence: review finding 1 and the `rework` event of the item.
