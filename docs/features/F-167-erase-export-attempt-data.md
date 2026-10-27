@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-26)
-- Stopped at: Building started (status building, Criterion to test table written); stopped before the design passes (4b).
-- Next action: /agile:build F-167 (resumes at 4b: system-design then architect, opus).
+- Status: building (2026-10-27)
+- Stopped at: Design passes done and verified; owner chose a change note on BR1/AC7 (audit stamp on erased answer rows) and own export records.
+- Next action: /agile:change F-167 (owner), then /agile:build F-167 resumes at step 5 (plan).
 - Waiting on: nothing
 
 ## Summary
@@ -138,6 +138,11 @@ Struck threat: a student with very many attempts makes the file large (S1, D). F
 - 2026-10-26 — No new package, for code or tests: EF Core, Npgsql, the test host and the job runner exist — Claude (technical).
 - 2026-10-26 — Approved by the owner ("aprovo F-167").
 - 2026-10-26 — Struck threat, a student with very many attempts makes the file large — Claude (technical): accepted by F-16 BR6; revisit with the "job plus emailed link" change F-16 already names when study history is large.
+- 2026-10-27 — Design passes (system-design, architect; opus). Accepted: `IDataExportSection { Name; GetAsync(userId) → JsonElement }` in `Identity.Contracts`, asked after `GetIdentityDataAsync` and before the notice, logged and rethrown on failure, names that repeat or collide with `format`/`version`/`exportedAt`/`identity` refused; `DataExportResponse` carries the sections as extension data, or the endpoint composes a `JsonObject` if CA2227 fires (checked by building `Identity.Contracts` right after); `Attempt.EraseTexts()` (any status) with an internal `AttemptAnswer.EraseText()` that assigns only when a text is non-null; `EraseStudentTextsHandler(Guid)` in Application; `UserErasedConsumer` in Infrastructure; the lookup locks the student's rows `FOR UPDATE` in one transaction (`using`) and ignores only the soft-delete filter (architect finding 3, precedent `TopicStore.cs:89`), keeping the tenant filter; `[JsonIgnore(Condition = Never)]` on `SubmittedAt` and `Answer` of the export records so BR7's `null` holds under `AppJson`'s `WhenWritingNull` (architect finding 2); a 500 with no new error code (`UseExceptionHandler`, no new resource key); "Exam attempts" added to `RequiredCategories`; a classification test over every `JsonDerivedType` of `AnswerPayload`; AC13 checked at the step that adds the last cross-module reference (architect finding 5); no exception message carries answer text (it lands in `jobs.last_error`). Dropped: none. Stopped for the owner: the audit stamp on the erased answer rows against BR1 (architect finding 1) — Claude (technical), verified against the files.
+- 2026-10-27 — Design coverage: architect checked simplicity, scope, contracts, data, rules, layout against the profile, `CLAUDE.md`, `.claude/rules/agile/`, the item file and the code it cites; not checked: none.
+- 2026-10-27 — Traps — T1 ignoring the tenant filter to reach every row: opens a cross-tenant read in the export and settles F-162's question here (avoided; F-162 must revisit the erasure lookup); T2 one `ExecuteUpdate` or raw SQL over the `json` column: the rule leaves the entity and a ninth shape is missed in silence (avoided); T3 reusing `AttemptResponse` as the export section: a member added for the screen enters the legal file unasked (avoided, pending trade-off 6).
+- 2026-10-27 — Design trade-off 6 Shape of the export records — owner chose as proposed (own `Exported*` records in `ExamEngine.Contracts`).
+- 2026-10-27 — Audit stamp on the erased answer rows — owner chose the recommended change note on BR1/AC7 (attempt rows keep their audit fields; changed answer rows carry the erasure's update stamp); the build waits for `/agile:change F-167` before writing AC7's test.
 
 ## Out of scope
 - Reading or exporting an attempt on behalf of another person (an `Admin` exporting a student's data on request).
