@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-BR
-features: [F-35, F-74, F-75, F-78, F-86, F-89, F-96, F-99]
-updated: 2026-10-21
+features: [F-35, F-74, F-75, F-78, F-86, F-89, F-96, F-99, F-168]
+updated: 2026-10-27
 ---
 # Edições de um exame
 
@@ -29,6 +29,19 @@ Apenas uma conta com a permissão "Gerenciar o catálogo" — o papel Admin a te
 ### Alterar, publicar ou despublicar uma edição
 1. Escolha **Editar** na linha dela.
 2. Mude o que precisar. Para publicar ou despublicar, escolha o outro cartão em **Publicação**. Escolha **Salvar**.
+
+### Registrar as regras da prova
+O cartão **Regras da prova**, logo abaixo de **Prova**, guarda o que o edital define para a prova: quanto tempo ela dura e quantos pontos são precisos para passar. Toda regra é opcional, e uma edição sem regras pode ser salva e publicada.
+1. Em **Duração (horas)** e **Minutos**, digite quanto tempo a prova dura (por exemplo 5 e 0). Deixe os dois vazios quando o edital não fixa tempo.
+2. Em **Nota de corte da objetiva (pontos)**, digite quantos pontos da prova objetiva o candidato precisa para ser aprovado.
+3. Se a prova tem redação, digite a **Nota máxima da redação (pontos)** e, se o edital diz, a **Nota de corte da redação (pontos)**.
+4. Escolha **Salvar**. As regras são salvas junto com o resto da edição; apagar um campo e salvar tira aquela regra.
+
+- Abaixo da nota de corte aparece o **total da prova objetiva**: a soma, em todas as disciplinas do edital, do número de questões vezes os pontos por questão. Ele só aparece quando toda disciplina tem número de questões e pontos; enquanto falta algum, o total aparece como desconhecido.
+- O aviso **Ainda falta** lista as regras ainda vazias e as disciplinas sem número de questões ou sem pontos. É só um lembrete: nada é bloqueado.
+- Quando a nota de corte passa do total da prova objetiva, um alerta amarelo avisa, mas a edição é salva mesmo assim: confira a nota de corte ou os pontos das disciplinas.
+- O resumo à direita mostra a duração e a nota de corte (com o total, quando conhecido, como "60 / 100").
+- Os alunos veem as regras de cada edição publicada numa linha da página do exame no [catálogo](catalog.md).
 
 ### Guardar o PDF do edital
 O Simulab pode guardar uma cópia do edital da edição, para que ele continue disponível mesmo que o site oficial mude de endereço ou saia do ar. O PDF e o **link do edital** são independentes: nenhum dos dois é obrigatório para salvar ou publicar uma edição.
@@ -57,6 +70,10 @@ Um exame que ainda tem edições não pode ser excluído, nem uma banca que algu
 | Data de aplicação | O dia em que a prova foi aplicada | Opcional, também para publicar. Não pode ser anterior a 1º de janeiro do ano do edital |
 | PDF do edital | Uma cópia do edital guardada no Simulab | Opcional, um por edição. Precisa ser um PDF de verdade (a extensão do nome não basta), com até 20 MB. É enviado só quando você salva |
 | Situação | Rascunho fica só na administração; Publicada é oferecida aos alunos | Obrigatório. Começa em Rascunho |
+| Duração | Quanto tempo a prova dura, em horas e minutos | Opcional, de 15 minutos a 8 horas. Vazio é sem limite de tempo |
+| Nota de corte da objetiva | Os pontos da prova objetiva precisos para passar | Opcional, de 0,01 a 1000, no máximo duas casas decimais |
+| Nota máxima da redação | A escala da redação, como o edital diz | Opcional, de 0,01 a 1000, no máximo duas casas decimais |
+| Nota de corte da redação | Os pontos da redação precisos para passar | Opcional, mesma faixa. Só com a nota máxima da redação, e não acima dela |
 
 Um exame não pode ter duas edições com o mesmo ano, cargo e banca; maiúsculas e acentos não tornam um cargo diferente, e uma edição excluída ainda conta.
 
@@ -77,22 +94,29 @@ Um exame não pode ter duas edições com o mesmo ano, cargo e banca; maiúscula
 | O arquivo tem mais de 20 MB. | O arquivo passa do limite. | Escolha um arquivo menor ou reduza o PDF. |
 | Esta edição não tem PDF do edital. | Nenhum arquivo foi guardado, ou ele foi removido com a sua tela aberta. | Escolha um PDF e salve. |
 | O armazenamento de arquivos não está configurado neste servidor, então o PDF não pode ser salvo. | O servidor não tem o armazenamento de arquivos ligado. | Avise quem administra a instalação; o resto da edição continua funcionando. |
+| A duração deve ficar entre 15 minutos e 8 horas. | A duração é curta ou longa demais. | Corrija as horas e os minutos, ou deixe os dois vazios. |
+| Informe uma nota de corte de 0,01 a 1000 pontos com no máximo duas casas decimais. | A nota de corte da objetiva está fora da faixa ou não é um número. | Corrija o valor ou deixe vazio. |
+| Informe uma nota máxima da redação de 0,01 a 1000 pontos com no máximo duas casas decimais. | A nota máxima da redação está fora da faixa ou não é um número. | Corrija o valor ou deixe vazio. |
+| Informe uma nota de corte da redação de 0,01 a 1000 pontos com no máximo duas casas decimais. | A nota de corte da redação está fora da faixa ou não é um número. | Corrija o valor ou deixe vazio. |
+| Preencha a nota máxima da redação antes da nota de corte. | Há nota de corte da redação sem nota máxima. | Preencha a nota máxima ou apague a nota de corte. |
+| A nota de corte da redação não pode ficar acima da nota máxima. | A nota de corte passa da nota máxima da redação. | Diminua a nota de corte ou aumente a nota máxima. |
 
 ## Disciplinas do edital
 No cartão **Disciplinas do edital**, abaixo do formulário da edição, você registra as disciplinas exatamente como o edital as apresenta: o grupo (por exemplo "Conhecimentos Básicos"), o nome da disciplina e o número de questões. O cartão só aparece depois que a edição é salva; numa edição nova ele pede para salvar primeiro. Cada disciplina é salva pelo seu próprio diálogo ou ação: o botão **Salvar** da edição nunca as salva. Funciona em edições em rascunho e publicadas.
 
 ### Edições que já vêm preenchidas
-As quatro edições de guarda municipal (Curitiba 2025, Manaus 2026, Salvador 2026 e Maceió 2026) já trazem as disciplinas do próprio edital, com grupo, número de questões e o campo **Abrange** preenchido, em todos os ambientes. Você as altera como qualquer outra disciplina do edital, e a alteração não é desfeita por atualizações do sistema. Uma edição que já tinha disciplinas digitadas por você, ou que foi excluída, não recebe as do edital. Algumas disciplinas, como as de conhecimentos que a taxonomia ainda não tem, ficam sem o campo **Abrange**; o preenchimento delas depende de novos itens na [lista comum](subjects.md).
+As quatro edições de guarda municipal (Curitiba 2025, Manaus 2026, Salvador 2026 e Maceió 2026) já trazem as disciplinas do próprio edital, com grupo, número de questões e o campo **Abrange** preenchido, em todos os ambientes. A edição Manaus 2026 também traz as regras do edital (5 horas, nota de corte 60, redação de 20 pontos com corte 10) e os pontos por questão (2,00 em Direito Constitucional e Legislação específica, 1,50 nas demais, total 100); um valor que você já tinha digitado é mantido. Você as altera como qualquer outra disciplina do edital, e a alteração não é desfeita por atualizações do sistema. Uma edição que já tinha disciplinas digitadas por você, ou que foi excluída, não recebe as do edital. Algumas disciplinas, como as de conhecimentos que a taxonomia ainda não tem, ficam sem o campo **Abrange**; o preenchimento delas depende de novos itens na [lista comum](subjects.md).
 
 ### Adicionar uma disciplina
 1. No cartão, escolha **Adicionar disciplina do edital**.
 2. Se o edital agrupa as disciplinas, escolha um grupo já usado (a lista sugere ao digitar, sem diferenciar maiúsculas e acentos) ou digite um novo. Deixe vazio se o edital não agrupa. Ao adicionar várias seguidas, o grupo da última adicionada já vem preenchido.
-3. Digite a **disciplina** como o edital a nomeia e, se o edital informa, o **número de questões** (de 1 a 500; vazio quer dizer que o edital não informa).
+3. Digite a **disciplina** como o edital a nomeia e, se o edital informa, o **número de questões** (de 1 a 500; vazio quer dizer que o edital não informa) e os **pontos por questão** (por exemplo 1,50; vazio quer dizer que o edital não informa).
 4. Escolha **Salvar**. A nova disciplina entra no fim do seu grupo, ou no fim da lista quando o grupo é novo.
 
 ### Ver, ordenar, alterar e excluir
 - As disciplinas aparecem sob o título do seu grupo, na ordem do edital. Quando nenhuma tem grupo, não há título. Um traço (—) quer dizer que o número de questões não foi informado.
 - Abaixo da lista, o total soma só os números informados e diz quantas disciplinas ficaram fora da soma por não terem número. O total não é guardado nem conferido com nada.
+- Cada disciplina com pontos mostra os pontos por questão ao lado do número de questões ("1,50 pt"). Quando toda disciplina tem número e pontos, o total acrescenta os pontos da prova objetiva ("100,00 pontos"); quando só algumas têm pontos, ele diz quantas ainda não têm.
 - **Mover para cima** e **Mover para baixo** trocam a disciplina com a vizinha do mesmo grupo. A primeira do grupo não sobe e a última não desce (o botão fica desativado e explica o motivo); uma disciplina nunca muda de grupo ao ser movida.
 - **Editar** abre o mesmo diálogo preenchido. Mudar o grupo leva a disciplina para o fim do novo grupo; mudar só o nome ou o número mantém a posição.
 - **Excluir** pede confirmação e remove a disciplina da edição. Ela pode ser adicionada de novo depois.
@@ -125,6 +149,7 @@ O edital nomeia as disciplinas com as próprias palavras ("Raciocínio Lógico-M
 | Grupo | O título sob o qual o edital lista a disciplina | Opcional, até 100 caracteres. Vazio é "Sem grupo" |
 | Disciplina | A disciplina como o edital a nomeia | Obrigatório, de 2 a 200 caracteres |
 | Número de questões | Quantas questões o edital reserva à disciplina | Opcional, número inteiro de 1 a 500 |
+| Pontos por questão | Quanto vale cada questão da disciplina, como o edital diz | Opcional, de 0,01 a 100, no máximo duas casas decimais. A cópia de outra edição leva os pontos junto |
 | Abrange | As disciplinas e os tópicos da taxonomia que a disciplina do edital cobre | Opcional, até 50 itens. Um tópico não pode ser escolhido junto com a disciplina inteira dele |
 
 Na mesma edição, o nome da disciplina não pode se repetir dentro do mesmo grupo (maiúsculas e acentos não contam; "sem grupo" é um grupo). Uma disciplina excluída não conta.
@@ -137,6 +162,7 @@ Na mesma edição, o nome da disciplina não pode se repetir dentro do mesmo gru
 | A disciplina é longa demais: no máximo 200 caracteres. | O nome passa de 200 caracteres. | Encurte o nome. |
 | O grupo é longo demais: no máximo 100 caracteres. | O grupo passa de 100 caracteres. | Encurte o grupo. |
 | Informe um número inteiro de 1 a 500, ou deixe vazio. | O número não é inteiro ou está fora do intervalo. | Corrija ou deixe vazio. |
+| Informe um número de 0,01 a 100 com no máximo duas casas decimais, ou deixe vazio. | Os pontos por questão estão fora da faixa ou não são um número. | Corrija ou deixe vazio. |
 | Este grupo já tem uma disciplina com este nome (maiúsculas e acentos não contam). | A mesma disciplina já está no grupo. | Mude o nome ou o grupo. |
 | Esta disciplina não está mais na edição. A lista foi recarregada. | Alguém a excluiu com a sua tela aberta. | Confira a lista atualizada. |
 | Esta disciplina não pode ir nessa direção. A lista foi recarregada. | Outra pessoa já a moveu. | Confira a ordem atual. |

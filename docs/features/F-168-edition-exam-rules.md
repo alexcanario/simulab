@@ -287,5 +287,6 @@ $env:Database__Name = 'simulab_f168'; dotnet run --project src/Hosts/Simulab.App
 
 - 2026-10-27 question — asked 8, from context 1
 - 2026-10-27 question — asked 3, from context 0
+- 2026-10-27 test-fail — build blocked by a running process (Simulab.slnx), 1 red
 
 ## Delivery
