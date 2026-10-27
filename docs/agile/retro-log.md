@@ -1648,3 +1648,9 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - 3 (score 6/3, not applied by the owner): the owner ticked validation boxes in the item file instead of the widget, so the evidence read 0 of 14 tested; step 3.2's wording read as an expected refusal.
 - Decisions: 30 item decisions stay in the item. Shortcuts: none. Glossary: 1 row (`numeric(p, s)`).
 - Process note, not a lesson: the full suite took about 10 min (slowest projects 9 m 41 s to 9 m 54 s), over the 5 min budget, and `Simulab.Catalog.Tests` alone 2 m 16 s against 2 min; F-177 holds the budget work.
+
+## 2026-10-27 - B-36 An oversized answer body answers a bare 413
+- Events: question 1 (asked 4, from context 0), all others 0. Gate time: 5 passes, 17 min 39 s; 0 red. Usage: 1002.4k weighted, build 81%.
+- No lesson proposed: the fix was one line plus one code and three texts; the tests were seen failing for the missing `code` before the fix. The first run of the ExamEngine tests after the fix ended in `CS0006` (missing reference assemblies) and passed on a rerun alone; cause not verified, so no rule.
+- Decisions: 8 item decisions stay in the item. Shortcuts: none. Glossary: nothing missing.
+- Process note, not a lesson: the full suite took about 11 min (slowest projects 9 m 53 s to 9 m 56 s, ExamEngine 6 m 8 s), over the 5 min budget; F-177 holds the budget work.
