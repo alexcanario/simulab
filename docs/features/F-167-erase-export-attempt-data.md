@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: validating (2026-10-27)
-- Stopped at: Built, reviewed (1 minor finding fixed), scan GREEN; validation script written and run by Claude (both scripts ALL OK).
-- Next action: The owner follows ## Validation script, then /agile:ship F-167.
+- Stopped at: Validated by the owner on 2026-10-27 ("validado F-167").
+- Next action: /agile:ship F-167 (owner).
 - Waiting on: nothing
 
 ## Summary
