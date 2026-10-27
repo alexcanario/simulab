@@ -158,6 +158,7 @@ Every note tagged `plugin` in this log, and what happened to it in agile@canary 
 | ⏳ | agile | `[generic]` score 5/4: `feature-build` step 12 starts the app host with `preview_start`, but `preview_start` reads the main checkout's `.claude/launch.json` and runs the main branch's code, not the worktree's. F-167 started the worktree's app host from the shell (`Database__Name=simulab_f167 dotnet run --project src/Hosts/Simulab.AppHost`). Suggest a launch entry per worktree, or the step naming the shell path with the item's database knob | F-167 | |
 | ⏳ | agile | `[generic]` score 6/6: `feature-ship` runs `version.js ship` (step 8b) after the first full `gate.js ship` (step 4); when a test reads the version (`AppVersionTests`), the bump forces a second full run. B-35: 449 s of tests, then 680 s more after the bump. Suggest running the version bump before the first full gate | B-35 | |
 | ⏳ | agile | `[generic]` score 6/3: `cleanup.js run` read the whole `Worktrees:` line of `CLAUDE.md` as the root, prose included, and printed ``orphans: D:\wt\simulab` — one folder per item does not exist``, so the orphan scan never looks at a folder here. Suggest reading only the path (up to the first backtick or space) | B-35 | |
+| ⏳ | agile | `[generic]` score 8/7: the validation app host, still running from the item's worktree, made the first `gate.js ship` of the ship RED (`agile gate RED: build blocked by a running process (Simulab.slnx)`, MSB3061 on `Simulab.AppHost.exe`, `Simulab.Api.exe`, `Simulab.Web.exe`). Seen twice: F-80 and F-168, each with a `test-fail` event, and the project rule written after F-80 did not prevent it. Suggest a check `gate.js ship` runs before it builds: list the processes whose image sits under the worktree's `bin/`, and since typing ship counts as closing them, stop the app host tree (or name it and stop) before building | F-168 | |
 
 This project receives those versions through `/agile:sync`; the last one recorded is in `.claude/agile/sync.json`.
 
@@ -1633,3 +1634,11 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - 3 (score 1/4, hidden fact, written to `docs/infra.md`, "A worktree's own database"): how to get a signed-in `Student` in a worktree's own database (register, then `status = 'Active'` and `email_verified_at`).
 - Decisions: 3 item decisions stay in the item. Shortcuts: none. Glossary: nothing missing.
 - Process note, not a lesson: the full suite is over the 5 min budget again (7 m 29 s, then 11 m 20 s on the second run, cause of the slower run not measured); F-177 holds the budget work.
+
+## 2026-10-27 - F-168 Exam rules of an edition
+- Events: question 2 (asked 11, from context 1), test-fail 1, all others 0. Gate time: 6 passes, 22 min 58 s; 1 red. Usage: 14323.5k weighted, build 76%.
+- 1 (score 8/7, plugin note `[generic]`, recorded; stronger level, the F-80 rule already existed): the validation app host was still running from the worktree and the first `gate.js ship` was RED (`build blocked by a running process`); suggest a check in `gate.js ship` that stops the worktree's app host before building.
+- 2 (score 2/5, not applied by the owner): in a worktree's own database the seeded admin lands on "Our documents changed", so the build's screen check could not open the admin screens without accepting terms.
+- 3 (score 6/3, not applied by the owner): the owner ticked validation boxes in the item file instead of the widget, so the evidence read 0 of 14 tested; step 3.2's wording read as an expected refusal.
+- Decisions: 30 item decisions stay in the item. Shortcuts: none. Glossary: 1 row (`numeric(p, s)`).
+- Process note, not a lesson: the full suite took about 10 min (slowest projects 9 m 41 s to 9 m 54 s), over the 5 min budget, and `Simulab.Catalog.Tests` alone 2 m 16 s against 2 min; F-177 holds the budget work.
