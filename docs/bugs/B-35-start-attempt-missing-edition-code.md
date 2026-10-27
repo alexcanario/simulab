@@ -95,6 +95,8 @@ There is no screen: every check is a call to the API, made by one script (`docs/
 
 ## Events
 
+- 2026-10-27 question — asked 3, from context 0
+
 ## Delivery
 - Branch: bug/B-35
 - Merge: -
