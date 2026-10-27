@@ -97,6 +97,7 @@ Callers: `ReadBodyAsync` is private and called only by `SaveAsync` (`AttemptEndp
 - 2026-10-27 — pt-BR text "A resposta é grande demais para ser salva. Encurte o texto e tente de novo."; en and pt-PT carry the same meaning — asked
 - 2026-10-27 — Kestrel's server-wide bare 413 is left alone and not captured as an idea — asked
 - 2026-10-27 — `ErrorKind.Validation` for the error: the status is set by the override, and the kind matches the upload routes' too-large errors — decided (technical, no product impact)
+- 2026-10-27 — Approved by the owner ("aprovo B-36"); `deps.js block`: free (F-166 delivered) — asked
 
 ## Open questions
 - (none)
