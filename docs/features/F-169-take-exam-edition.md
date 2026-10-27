@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-27)
-- Stopped at: Build started; design passes next.
-- Next action: Run system-design and architect, then plan.
+- Stopped at: Plan steps 1-4 done (content, sections, pictures, Web client, primarySelected token); tests locked at d577569 and green.
+- Next action: Plan step 5: call the frontend agent (sonnet) for the three screens, then gate.js ship.
 - Waiting on: nothing
 
 ## Summary
