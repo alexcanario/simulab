@@ -72,7 +72,7 @@ Callers: `ReadBodyAsync` is private and called only by `SaveAsync` (`AttemptEndp
 - `SharedResources.resx`, `.pt-BR.resx`, `.pt-PT.resx` (Web host): the key with the texts of `## Screens and API`.
 
 ## Docs
-- update `docs/flows/exam-attempt.md` sections "Rules" (line on the save limit: 413 `exam_attempt.answer_too_large`) and "Errors" (one new line).
+- flow: update docs/flows/exam-attempt.md#Rules — the save limit answers 413 `exam_attempt.answer_too_large`; the Errors list gets one new line.
 
 ## Regression test
 

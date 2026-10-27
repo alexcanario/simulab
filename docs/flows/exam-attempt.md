@@ -1,7 +1,7 @@
 ---
 title: Starting, answering and submitting an exam attempt
 summary: How a student starts an attempt on a published exam edition, saves an answer to each question, submits it, who may read it, and what an account erasure and a data export do with it, as a sequence of calls.
-items: [F-166, F-167]
+items: [F-166, F-167, B-36]
 ---
 # Starting, answering and submitting an exam attempt
 
