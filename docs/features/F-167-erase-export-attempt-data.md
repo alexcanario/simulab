@@ -114,7 +114,7 @@ Tests locked: fb380939072daaed68b803ad5c25fa7f6480993e (6 files); unlocks: 0
 | AC4 | `AttemptDataExportTests.Export_StudentWithNoAttempt_HasAnEmptyList_AndTheRestOfTheFileAsBefore` |
 | AC5 | `DataExportFailingSectionTests.Export_WhenASectionThrows_AnswersAServerErrorWithoutDetail_NoFile_NoNotice_AndLogsIt` |
 | AC6 | `DataExportWithoutSectionsTests.Export_WithNoSection_HasOnlyTheMembersOfBefore` (a guard: green before the code too) |
-| AC7 | `AttemptErasureTests.Erase_ClearsTheFourTextsOfEveryAttempt_AndKeepsEverythingElse`; `AttemptEraseTextsRuleTests.EraseTexts_ClearsEveryText_KeepsEveryOtherValue_OnAnyStatus`, `.Samples_CoverEveryShapeOfTheAnswer` |
+| AC7 | `AttemptErasureTests.Erase_ClearsTheFourTextsOfEveryAttempt_AndKeepsEverythingElse`; `AttemptEraseTextsRuleTests.EraseTexts_ClearsEveryText_KeepsEveryOtherValue_OnAnyStatus`, `.Samples_CoverEveryShapeOfTheAnswer`; `AttemptErasureStampTests.Erase_StampsTheErasedRowsWithANewTimeAndNoUser_AndLeavesTheOthersStamps` (added after the lock, review finding 1) |
 | AC8 | `AttemptErasureTests.Erase_LeavesEveryRowOfAnotherStudentAsItWas` |
 | AC9 | `AttemptErasureTests.UserErased_DeliveredAgain_ChangesNothing_AndAStudentWithNoAttemptSucceeds`; `AttemptEraseTextsRuleTests.EraseTexts_Twice_TheSecondChangesNothing` |
 | AC10 | `AttemptErasureTests.Erase_FailingHalfWay_ChangesNoAttempt_AndTheRetryErasesAllThree` |
@@ -147,6 +147,12 @@ Tests locked: fb380939072daaed68b803ad5c25fa7f6480993e (6 files); unlocks: 0
 - 2026-10-27 — Design trade-off 6 Shape of the export records — owner chose as proposed (own `Exported*` records in `ExamEngine.Contracts`).
 - 2026-10-27 — Audit stamp on the erased answer rows — owner chose the recommended change note on BR1/AC7 (attempt rows keep their audit fields; changed answer rows carry the erasure's update stamp); the build waits for `/agile:change F-167` before writing AC7's test.
 - 2026-10-27: plan — 1 erasure path (index + migration, locked lookup by student, `Attempt.EraseTexts`, handler, `UserErasedConsumer`) → AC7, AC12, AC13 (module boundaries after the consumer); 2 erasure guarantees (other student, repeat, failure half-way, payload classification) → AC8, AC9, AC10; 3 admin read after erasure → AC11; 4 export port in Identity (`IDataExportSection`, sections in the file, name guard) → AC6, AC4 (identity half); 5 ExamEngine export section (`Exported*` records, read by student) → AC1, AC2, AC3, AC4, AC13; 6 failing section → AC5; 7 text, register row, flow page → AC14, `DataProcessingRegisterTests`, `techdocs.js check`.
+- 2026-10-27 — AC6's test is a guard: it was green before the code too, since it proves that nothing else in the file changed — Claude (technical).
+- 2026-10-27 — Review finding 1 (minor, confirmed): AC7's test only checked that `updated_at` was set, which every saved row already was; fixed with a new test file, `AttemptErasureStampTests`, comparing the stamp before and after and requiring a null `updated_by`; the lock stays intact — owner chose "Teste novo".
+- 2026-10-27 — Review coverage: correctness, security, data, contracts, localization, locks, simplicity, rules, none with a finding; read: the 30 files of the diff from `424606b`, the item file, `.claude/rules/agile/api-contracts.md` and `project.md`; the reviewer ran no test.
+- 2026-10-27 — Traps — T1 the export reads through the soft-delete filter while the erasure ignores it: once a route soft-deletes an attempt, it leaves the portability file but keeps its texts until the erasure (no delete route today); T2 the export loads whole graphs and serializes twice, growing with the study history (accepted by F-16 BR6); T3 the erasure keeps the tenant filter, so after F-162 tenant rows would be locked but not erased while the job succeeds (deferred to F-162, design trap T1).
+- 2026-10-27 — Reuse: the lock-then-load pattern of `AttemptStore.LockAndLoadAsync`, `IgnoreQueryFilters([SoftDeleteFilter])` as in `TopicStore.cs:89`, the in-process `AddIntegrationEventConsumer`, the port-in-Contracts pattern of `ITopicUsageCheck`, `RecordingLoggerProvider` and the shared Api test host.
+- 2026-10-27 — Shortcuts: none.
 
 ## Out of scope
 - Reading or exporting an attempt on behalf of another person (an `Admin` exporting a student's data on request).
@@ -170,3 +176,4 @@ Tests locked: fb380939072daaed68b803ad5c25fa7f6480993e (6 files); unlocks: 0
 
 - 2026-10-26 question — asked 2, from context 3
 - 2026-10-27 change — v2: BR1 and AC7 keep the attempt audit fields; erased answer rows carry the erasure update stamp
+- 2026-10-27 rework — review 1: AC7 test did not prove the erasure stamp; new test file AttemptErasureStampTests
