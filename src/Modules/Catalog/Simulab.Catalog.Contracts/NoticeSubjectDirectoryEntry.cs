@@ -6,9 +6,11 @@ namespace Simulab.Catalog.Contracts;
 /// <param name="Group">The group it sits under, when it has one.</param>
 /// <param name="Label">What the notice calls it.</param>
 /// <param name="QuestionCount">How many questions the notice gives it, when it says.</param>
+/// <param name="PointsPerQuestion">What each of its questions is worth, when the notice says (F-168).</param>
 public sealed record NoticeSubjectDirectoryEntry(
     Guid Id,
     Guid ExamEditionId,
     string? Group,
     string Label,
-    int? QuestionCount);
+    int? QuestionCount,
+    decimal? PointsPerQuestion = null);

@@ -53,6 +53,17 @@
                           Hint="@L["NoticeSubjects.Field.QuestionCount.Hint"]"
                           Error="@_questionCountError" />
 
+            @* F-168 UC2: bound as text for the same reason, read in the reader's culture ("1,50" in pt-BR). *@
+            <AppTextField TValue="string"
+                          Id="notice-subject-points"
+                          Label="@L["NoticeSubjects.Field.PointsPerQuestion"]"
+                          Placeholder="@ScoreText.ForField(1.5m)"
+                          Value="_pointsText"
+                          ValueChanged="@((string? value) => OnPointsChanged(value))"
+                          Autocomplete="off"
+                          Hint="@L["NoticeSubjects.Field.PointsPerQuestion.Hint"]"
+                          Error="@_pointsError" />
+
             <AppMultiPickField Id="@CoversId"
                                Label="@L["NoticeSubjects.Field.Covers"]"
                                Placeholder="@L["NoticeSubjects.Field.Covers.Placeholder"]"
@@ -117,9 +128,11 @@
     private string? _group;
     private string? _label;
     private string? _questionCountText;
+    private string? _pointsText;
     private string? _groupError;
     private string? _labelError;
     private string? _questionCountError;
+    private string? _pointsError;
     private string? _error;
     private bool _saving;
     private bool _focusFirstField;
@@ -141,6 +154,7 @@
         Trimmed(_group) != StartGroup
         || Trimmed(_label) != (NoticeSubject?.Label ?? string.Empty)
         || Trimmed(_questionCountText) != (NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture) ?? string.Empty)
+        || Trimmed(_pointsText) != (ScoreText.ForField(NoticeSubject?.PointsPerQuestion) ?? string.Empty)
         || !_picks.Select(pick => pick.Key).ToHashSet().SetEquals(_initialKeys);
 
     // BR7: in edit mode a group that differs from the saved one (case and accents do not count) sends the row to the
@@ -169,6 +183,7 @@
         _group = StartGroup;
         _label = NoticeSubject?.Label ?? string.Empty;
         _questionCountText = NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture);
+        _pointsText = ScoreText.ForField(NoticeSubject?.PointsPerQuestion);
         _focusFirstField = true;
 
         // The row's own chips: they show and can be removed before, and without, the taxonomy.
@@ -235,6 +250,24 @@
         _questionCountText = value;
         _questionCountError = QuestionCountError(value);
     }
+
+    private void OnPointsChanged(string? value)
+    {
+        _pointsText = value;
+        _pointsError = PointsError(value);
+    }
+
+    // F-168 BR3, comfort only: a number from 0.01 to 100 with at most two places; the Api runs the same check.
+    private string? PointsError(string? text) =>
+        !ScoreText.TryParse(text, out var points)
+        || (points is { } value
+            && (value < CatalogLimits.NoticeSubjectPointsPerQuestionMin
+                || value > CatalogLimits.NoticeSubjectPointsPerQuestionMax
+                || decimal.Round(value, CatalogLimits.ScoreDecimalPlaces) != value))
+            ? Errors.For(CatalogErrorCodes.NoticeSubjectPointsPerQuestionInvalid)
+            : null;
+
+    private decimal? ParsedPoints() => ScoreText.TryParse(_pointsText, out var points) ? points : null;
 
     // Blank means "the notice does not say" (null); anything else must be a whole number.
     private static bool TryParseCount(string? text, out int? count)
@@ -510,7 +543,8 @@
         _groupError = GroupError(_group);
         _labelError = LabelError(_label);
         _questionCountError = QuestionCountError(_questionCountText);
-        if (_groupError is not null || _labelError is not null || _questionCountError is not null)
+        _pointsError = PointsError(_pointsText);
+        if (_groupError is not null || _labelError is not null || _questionCountError is not null || _pointsError is not null)
         {
             return;
         }
@@ -528,7 +562,8 @@
                 pick.IsWhole ? pick.SubjectId : (Guid?)null,
                 pick.TopicId))
             .ToList();
-        var result = await Save(new SaveNoticeSubjectRequest(group.Length == 0 ? null : group, Trimmed(_label), ParsedCount(), mappings));
+        var result = await Save(new SaveNoticeSubjectRequest(
+            group.Length == 0 ? null : group, Trimmed(_label), ParsedCount(), mappings, ParsedPoints()));
 
         _saving = false;
         if (result.IsSuccess)
@@ -550,6 +585,9 @@
                 break;
             case CatalogErrorCodes.NoticeSubjectQuestionCountInvalid:
                 _questionCountError = Errors.For(result.ErrorCode);
+                break;
+            case CatalogErrorCodes.NoticeSubjectPointsPerQuestionInvalid:
+                _pointsError = Errors.For(result.ErrorCode);
                 break;
             case CatalogErrorCodes.NoticeSubjectMappingOverlap:
             case CatalogErrorCodes.NoticeSubjectMappingTargetNotFound:

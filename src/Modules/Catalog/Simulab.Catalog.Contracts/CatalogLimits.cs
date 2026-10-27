@@ -81,6 +81,27 @@ public static class CatalogLimits
     /// <summary>The most entries a notice subject's mapping may hold (F-75, BR1).</summary>
     public const int NoticeSubjectMappingMax = 50;
 
+    /// <summary>The shortest paper an edition may state, in whole minutes (F-168, BR2).</summary>
+    public const int ExamEditionDurationMinutesMin = 15;
+
+    /// <summary>The longest paper an edition may state, in whole minutes: 8 hours (F-168, BR2).</summary>
+    public const int ExamEditionDurationMinutesMax = 480;
+
+    /// <summary>The lowest score a cut-off or an essay maximum may state, in points (F-168, BR5 and BR6).</summary>
+    public const decimal ExamEditionScoreMin = 0.01m;
+
+    /// <summary>The highest score a cut-off or an essay maximum may state, in points (F-168, BR5 and BR6).</summary>
+    public const decimal ExamEditionScoreMax = 1000m;
+
+    /// <summary>The fewest points a question of a notice subject may be worth (F-168, BR3).</summary>
+    public const decimal NoticeSubjectPointsPerQuestionMin = 0.01m;
+
+    /// <summary>The most points a question of a notice subject may be worth (F-168, BR3).</summary>
+    public const decimal NoticeSubjectPointsPerQuestionMax = 100m;
+
+    /// <summary>How many decimal places a score or the points per question may carry (F-168, BR3, BR5 and BR6).</summary>
+    public const int ScoreDecimalPlaces = 2;
+
     /// <summary>The shortest a name may be (BR8).</summary>
     public const int NameMinLength = 2;
 }

@@ -69,6 +69,11 @@ else
                             {
                                 <span class="app-muted">@L["ExamEditions.Row.AppliedOn", appliedOn.ToString("d", CultureInfo.CurrentCulture)]</span>
                             }
+                            @* F-168 UC4: the rules of the paper in one line, only those it has; none, no line. *@
+                            @if (ExamRulesText.Line(L, edition) is { } rules)
+                            {
+                                <span class="app-edition-rules">@rules</span>
+                            }
                             @if (!string.IsNullOrWhiteSpace(edition.NoticeUrl))
                             {
                                 @* BR9: another site, in a new tab, and the accessible name starts with the visible text and says so. *@

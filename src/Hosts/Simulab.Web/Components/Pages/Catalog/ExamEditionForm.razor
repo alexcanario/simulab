@@ -102,6 +102,78 @@ else
                 </AppFormGrid>
             </AppSectionCard>
 
+            @* F-168 UC1 to UC3: the rules the notice sets for the paper. Every one is optional (BR1); the scores are bound
+               as text and read in the reader's culture. The objective total is the notice subjects' (BR4), read from the
+               section below, and a cut-off above it is only a warning (BR5). *@
+            <AppSectionCard Id="edition-section-rules"
+                            Title="@L["ExamRules.Section.Title"]"
+                            Icon="@AppIcons.Rules"
+                            Subtitle="@L["ExamRules.Section.Subtitle"]">
+                <AppFormGrid Columns="2">
+                    <AppTextField TValue="int?"
+                                  Id="edition-duration-hours"
+                                  Label="@L["ExamRules.Field.DurationHours"]"
+                                  Value="_durationHours"
+                                  ValueChanged="@((int? value) => OnDurationHoursChanged(value))"
+                                  InputType="InputType.Number"
+                                  Autocomplete="off"
+                                  Hint="@L["ExamRules.Field.Duration.Hint"]"
+                                  Error="@_durationError" />
+
+                    <AppTextField TValue="int?"
+                                  Id="edition-duration-minutes"
+                                  Label="@L["ExamRules.Field.DurationMinutes"]"
+                                  Value="_durationMinutes"
+                                  ValueChanged="@((int? value) => OnDurationMinutesChanged(value))"
+                                  InputType="InputType.Number"
+                                  Autocomplete="off" />
+
+                    <AppTextField TValue="string"
+                                  Id="edition-objective-cut-off"
+                                  Label="@L["ExamRules.Field.ObjectiveCutOff"]"
+                                  Value="_objectiveCutOff"
+                                  ValueChanged="@((string? value) => OnObjectiveCutOffChanged(value))"
+                                  Autocomplete="off"
+                                  Hint="@L["ExamRules.Field.ObjectiveCutOff.Hint"]"
+                                  Error="@_objectiveCutOffError" />
+
+                    <div class="app-exam-rules-total">
+                        <p id="edition-objective-total" class="app-muted">@ObjectiveTotalText</p>
+                    </div>
+
+                    <AppTextField TValue="string"
+                                  Id="edition-essay-max-score"
+                                  Label="@L["ExamRules.Field.EssayMaxScore"]"
+                                  Value="_essayMax"
+                                  ValueChanged="@((string? value) => OnEssayMaxChanged(value))"
+                                  Autocomplete="off"
+                                  Error="@_essayMaxError" />
+
+                    <AppTextField TValue="string"
+                                  Id="edition-essay-cut-off"
+                                  Label="@L["ExamRules.Field.EssayCutOff"]"
+                                  Value="_essayCutOff"
+                                  ValueChanged="@((string? value) => OnEssayCutOffChanged(value))"
+                                  Autocomplete="off"
+                                  Hint="@L["ExamRules.Field.EssayCutOff.Hint"]"
+                                  Error="@_essayCutOffError" />
+                </AppFormGrid>
+
+                @if (CutOffAboveTotal)
+                {
+                    <div id="edition-cut-off-above-total">
+                        <AppAlert Severity="Severity.Warning" Text="@L["ExamRules.CutOffAboveTotal", ScoreText.Compact(_objectiveTotal!.Value)]" />
+                    </div>
+                }
+
+                @if (MissingRules.Count > 0)
+                {
+                    <div id="edition-rules-missing" class="app-exam-rules-missing">
+                        <AppAlert Severity="Severity.Info" Text="@($"{L["ExamRules.Missing.Title"]} {string.Join(" · ", MissingRules)}")" />
+                    </div>
+                }
+            </AppSectionCard>
+
             <AppSectionCard Id="edition-section-notice"
                             Title="@L["ExamEditions.Section.Notice"]"
                             Icon="@AppIcons.Notice"
@@ -199,7 +271,7 @@ else
        the edition form - the edition's Save never saves one, and the aside keeps summarising only the edition. On a
        new edition the section only says to save the edition first (AC17). *@
     <MudPaper Class="app-form-card mt-4" Elevation="0">
-        <NoticeSubjectsSection ExamId="ExamId" EditionId="@_saved?.Id" />
+        <NoticeSubjectsSection ExamId="ExamId" EditionId="@_saved?.Id" RowsChanged="OnSubjectsChanged" />
     </MudPaper>
 
     @* F-96, UC3: the questions that came from this edition, in paper order. Rendered only for who also holds
@@ -241,6 +313,19 @@ else
     private string? _appliedOnError;
     private string? _statusError;
     private string? _documentError;
+    private int? _durationHours;
+    private int? _durationMinutes;
+    private string? _objectiveCutOff;
+    private string? _essayMax;
+    private string? _essayCutOff;
+    private string? _durationError;
+    private string? _objectiveCutOffError;
+    private string? _essayMaxError;
+    private string? _essayCutOffError;
+    // F-168 UC3: the notice subjects as the section below last loaded them; null until it has.
+    private IReadOnlyList<NoticeSubjectResponse>? _subjects;
+    private decimal? _objectiveTotal;
+    private IReadOnlyList<string> _incompleteSubjects = [];
     private ChosenDocument? _chosen;
     private bool _removeDocument;
     private string? _error;
@@ -292,8 +377,60 @@ else
         new(L["ExamEditions.Field.Position"], NullIfBlank(_position)),
         new(L["ExamEditions.Field.NoticeReference"], NullIfBlank(_noticeReference)),
         new(L["ExamEditions.Field.AppliedOn"], _appliedOn?.ToString("d", CultureInfo.CurrentCulture)),
-        new(L["ExamEditions.Field.Status"], _status is { } status ? ExamEditionText.StatusName(L, status) : null)
+        new(L["ExamEditions.Field.Status"], _status is { } status ? ExamEditionText.StatusName(L, status) : null),
+        new(L["ExamRules.Aside.Duration"], ParsedDuration() is { } minutes ? ExamRulesText.Duration(L, minutes) : null),
+        new(L["ExamRules.Aside.CutOff"], CutOffSummary)
     ];
+
+    // "60 / 100" once the total is known, "60" before it (F-168, aside).
+    private string? CutOffSummary =>
+        ParsedScore(_objectiveCutOff) is not { } cutOff
+            ? null
+            : _objectiveTotal is { } total
+                ? L["ExamRules.Aside.CutOffOfTotal", ScoreText.Compact(cutOff), ScoreText.Compact(total)]
+                : ScoreText.Compact(cutOff);
+
+    // F-168 BR4: the objective total of the section's rows, or why it is unknown.
+    private string ObjectiveTotalText =>
+        _objectiveTotal is { } total
+            ? L["ExamRules.ObjectiveTotal", total.ToString("N2", CultureInfo.CurrentCulture)]
+            : _subjects is { Count: 0 }
+                ? L["ExamRules.ObjectiveTotal.NoSubjects"]
+                : L["ExamRules.ObjectiveTotal.Unknown"];
+
+    // F-168 BR5: a warning, never a refusal.
+    private bool CutOffAboveTotal =>
+        _objectiveTotal is { } total && ParsedScore(_objectiveCutOff) is { } cutOff && cutOff > total;
+
+    // F-168 UC3 and AC8: what the reader may still want to fill; publishing is never blocked by it (BR1).
+    private IReadOnlyList<string> MissingRules
+    {
+        get
+        {
+            List<string> missing = [];
+            if (ParsedDuration() is null)
+            {
+                missing.Add(L["ExamRules.Missing.Duration"]);
+            }
+
+            if (ParsedScore(_objectiveCutOff) is null)
+            {
+                missing.Add(L["ExamRules.Missing.ObjectiveCutOff"]);
+            }
+
+            if (ParsedScore(_essayMax) is null)
+            {
+                missing.Add(L["ExamRules.Missing.EssayMaxScore"]);
+            }
+
+            if (_incompleteSubjects.Count > 0)
+            {
+                missing.Add(L["ExamRules.Missing.Subjects", string.Join(", ", _incompleteSubjects)]);
+            }
+
+            return missing;
+        }
+    }
 
     private IReadOnlyList<AppChecklistItem> AsideChecklist =>
     [
@@ -309,6 +446,10 @@ else
             (_organizerError, "edition-organizer", L["ExamEditions.Field.Organizer"]),
             (_noticeYearError, "edition-notice-year", L["ExamEditions.Field.NoticeYear"]),
             (_positionError, "edition-position", L["ExamEditions.Field.Position"]),
+            (_durationError, "edition-duration-hours", L["ExamRules.Field.Duration"]),
+            (_objectiveCutOffError, "edition-objective-cut-off", L["ExamRules.Field.ObjectiveCutOff"]),
+            (_essayMaxError, "edition-essay-max-score", L["ExamRules.Field.EssayMaxScore"]),
+            (_essayCutOffError, "edition-essay-cut-off", L["ExamRules.Field.EssayCutOff"]),
             (_noticeReferenceError, "edition-notice-reference", L["ExamEditions.Field.NoticeReference"]),
             (_noticeUrlError, "edition-notice-url", L["ExamEditions.Field.NoticeUrl"]),
             (_appliedOnError, "edition-applied-on", L["ExamEditions.Field.AppliedOn"]),
@@ -327,6 +468,10 @@ else
         || Trimmed(_noticeUrl) != (_saved?.NoticeUrl ?? string.Empty)
         || _appliedOn != _saved?.AppliedOn
         || _status != (_saved?.Status ?? ExamEditionStatus.Draft)
+        || ParsedDuration() != _saved?.DurationMinutes
+        || Trimmed(_objectiveCutOff) != (ScoreText.ForField(_saved?.ObjectiveCutOffScore) ?? string.Empty)
+        || Trimmed(_essayMax) != (ScoreText.ForField(_saved?.EssayMaxScore) ?? string.Empty)
+        || Trimmed(_essayCutOff) != (ScoreText.ForField(_saved?.EssayCutOffScore) ?? string.Empty)
         || _chosen is not null
         || _removeDocument;
 
@@ -388,7 +533,94 @@ else
         _noticeUrl = edition.NoticeUrl ?? string.Empty;
         _appliedOn = edition.AppliedOn;
         _status = edition.Status;
+        _durationHours = edition.DurationMinutes / 60;
+        _durationMinutes = edition.DurationMinutes % 60;
+        _objectiveCutOff = ScoreText.ForField(edition.ObjectiveCutOffScore);
+        _essayMax = ScoreText.ForField(edition.EssayMaxScore);
+        _essayCutOff = ScoreText.ForField(edition.EssayCutOffScore);
     }
+
+    // F-168 BR2: hours and minutes become whole minutes; both empty is no time limit.
+    private int? ParsedDuration() =>
+        _durationHours is null && _durationMinutes is null ? null : ((_durationHours ?? 0) * 60) + (_durationMinutes ?? 0);
+
+    private static decimal? ParsedScore(string? text) => ScoreText.TryParse(text, out var value) ? value : null;
+
+    private void OnDurationHoursChanged(int? value)
+    {
+        _durationHours = value;
+        _durationError = DurationError();
+    }
+
+    private void OnDurationMinutesChanged(int? value)
+    {
+        _durationMinutes = value;
+        _durationError = DurationError();
+    }
+
+    private void OnObjectiveCutOffChanged(string? value)
+    {
+        _objectiveCutOff = value;
+        _objectiveCutOffError = ScoreError(value, CatalogErrorCodes.ExamEditionObjectiveCutOffInvalid);
+    }
+
+    private void OnEssayMaxChanged(string? value)
+    {
+        _essayMax = value;
+        _essayMaxError = ScoreError(value, CatalogErrorCodes.ExamEditionEssayMaxScoreInvalid);
+        _essayCutOffError = EssayCutOffError();
+    }
+
+    private void OnEssayCutOffChanged(string? value)
+    {
+        _essayCutOff = value;
+        _essayCutOffError = EssayCutOffError();
+    }
+
+    // F-168 UC3: the section below reports its rows after every load; the form names the incomplete ones.
+    private void OnSubjectsChanged(IReadOnlyList<NoticeSubjectResponse> rows)
+    {
+        _subjects = rows;
+        var result = ObjectiveMaxScores.Compute([.. rows.Select(row => (row.QuestionCount, row.PointsPerQuestion))]);
+        _objectiveTotal = result.Total;
+        _incompleteSubjects = [.. result.IncompleteRows.Select(index => rows[index].Label)];
+    }
+
+    // Comfort only, as the other fields: the Api runs the same checks (F-168, BR2, BR5 and BR6).
+    private string? DurationError() =>
+        ParsedDuration() is { } minutes
+        && (minutes < CatalogLimits.ExamEditionDurationMinutesMin || minutes > CatalogLimits.ExamEditionDurationMinutesMax
+            || _durationHours < 0 || _durationMinutes < 0)
+            ? Errors.For(CatalogErrorCodes.ExamEditionDurationInvalid)
+            : null;
+
+    private string? ScoreError(string? text, string code) =>
+        !ScoreText.TryParse(text, out var value) || (value is { } score && !IsScore(score)) ? Errors.For(code) : null;
+
+    private string? EssayCutOffError()
+    {
+        if (ScoreError(_essayCutOff, CatalogErrorCodes.ExamEditionEssayCutOffInvalid) is { } invalid)
+        {
+            return invalid;
+        }
+
+        if (ParsedScore(_essayCutOff) is not { } cutOff)
+        {
+            return null;
+        }
+
+        return ParsedScore(_essayMax) switch
+        {
+            null => Errors.For(CatalogErrorCodes.ExamEditionEssayCutOffWithoutMax),
+            { } max when cutOff > max => Errors.For(CatalogErrorCodes.ExamEditionEssayCutOffAboveMax),
+            _ => null
+        };
+    }
+
+    private static bool IsScore(decimal value) =>
+        value >= CatalogLimits.ExamEditionScoreMin
+        && value <= CatalogLimits.ExamEditionScoreMax
+        && decimal.Round(value, CatalogLimits.ScoreDecimalPlaces) == value;
 
     // Content › Exams › the exam › the edition. The last crumb shows the saved values, not the ones being typed.
     private void BuildBreadcrumbs()
@@ -511,6 +743,10 @@ else
         _noticeUrlError = NoticeUrlError();
         _appliedOnError = AppliedOnError();
         _statusError = _status is null ? Errors.For(CatalogErrorCodes.ExamEditionStatusInvalid) : null;
+        _durationError = DurationError();
+        _objectiveCutOffError = ScoreError(_objectiveCutOff, CatalogErrorCodes.ExamEditionObjectiveCutOffInvalid);
+        _essayMaxError = ScoreError(_essayMax, CatalogErrorCodes.ExamEditionEssayMaxScoreInvalid);
+        _essayCutOffError = EssayCutOffError();
 
         if (ErrorSummaryItems.Count > 0)
         {
@@ -532,7 +768,11 @@ else
             NullIfBlank(_noticeReference),
             NullIfBlank(_noticeUrl),
             _appliedOn,
-            _status!.Value.ToString());
+            _status!.Value.ToString(),
+            ParsedDuration(),
+            ParsedScore(_objectiveCutOff),
+            ParsedScore(_essayMax),
+            ParsedScore(_essayCutOff));
 
         var result = token is null
             ? ApiResult.Failed<ExamEditionResponse>(ErrorText.UnexpectedCode)
@@ -686,6 +926,20 @@ else
                 break;
             case CatalogErrorCodes.ExamEditionStatusInvalid:
                 _statusError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionDurationInvalid:
+                _durationError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionObjectiveCutOffInvalid:
+                _objectiveCutOffError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionEssayMaxScoreInvalid:
+                _essayMaxError = text;
+                break;
+            case CatalogErrorCodes.ExamEditionEssayCutOffInvalid:
+            case CatalogErrorCodes.ExamEditionEssayCutOffWithoutMax:
+            case CatalogErrorCodes.ExamEditionEssayCutOffAboveMax:
+                _essayCutOffError = text;
                 break;
             case CatalogErrorCodes.ExamEditionNoticeDocumentNotPdf:
             case CatalogErrorCodes.ExamEditionNoticeDocumentTooLarge:

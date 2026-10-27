@@ -95,6 +95,9 @@ public static class AppIcons
     /// <summary>F-35: the notice (edital) an edition was cut from.</summary>
     public const string Notice = Icons.Material.Outlined.Article;
 
+    /// <summary>F-168: the exam rules of an edition (duration, cut-offs, essay scale).</summary>
+    public const string Rules = Icons.Material.Outlined.Rule;
+
     /// <summary>F-35: an address the reader can follow.</summary>
     public const string Link = Icons.Material.Outlined.Link;
 

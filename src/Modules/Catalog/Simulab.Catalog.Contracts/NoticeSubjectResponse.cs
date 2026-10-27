@@ -11,4 +11,5 @@ public sealed record NoticeSubjectResponse(
     string? Group,
     string Label,
     int? QuestionCount,
-    IReadOnlyList<NoticeSubjectMappingResponse>? Mappings = null);
+    IReadOnlyList<NoticeSubjectMappingResponse>? Mappings = null,
+    decimal? PointsPerQuestion = null);

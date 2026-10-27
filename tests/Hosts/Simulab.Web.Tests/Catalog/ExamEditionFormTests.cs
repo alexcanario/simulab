@@ -80,7 +80,7 @@ public sealed class ExamEditionFormTests : CatalogPageTestContext
 
         page.Find("h1").TextContent.Should().Be("Add edition");
         page.FindComponents<AppSectionCard>().Select(section => section.Instance.Title).Should().Equal(
-            "Paper", "Notice and application", "Publication", "Notice subjects");
+            "Paper", "Exam rules", "Notice and application", "Publication", "Notice subjects");
 
         var paper = page.Find("section[aria-labelledby='edition-section-paper-title']");
         paper.QuerySelectorAll("#edition-organizer").Should().ContainSingle();

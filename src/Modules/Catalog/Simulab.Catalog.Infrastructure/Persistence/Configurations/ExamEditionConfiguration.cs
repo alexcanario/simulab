@@ -33,6 +33,22 @@ public sealed class ExamEditionConfiguration : IEntityTypeConfiguration<ExamEdit
                 "(notice_document_blob_name IS NULL AND notice_document_file_name IS NULL AND notice_document_size IS NULL AND notice_document_uploaded_at IS NULL)"
                 + " OR (notice_document_blob_name IS NOT NULL AND notice_document_file_name IS NOT NULL AND notice_document_uploaded_at IS NOT NULL"
                 + " AND notice_document_size IS NOT NULL AND notice_document_size BETWEEN 1 AND 20971520)");
+
+            // F-168 BR2, BR5 and BR6: every rule is optional; a stated one sits inside its range, and the essay cut-off
+            // needs its maximum and stays under it. The two decimal places are the entity's (the column would round).
+            table.HasCheckConstraint(
+                "ck_exam_editions_duration",
+                "duration_minutes IS NULL OR duration_minutes BETWEEN 15 AND 480");
+            table.HasCheckConstraint(
+                "ck_exam_editions_objective_cut_off",
+                "objective_cut_off_score IS NULL OR objective_cut_off_score BETWEEN 0.01 AND 1000");
+            table.HasCheckConstraint(
+                "ck_exam_editions_essay_max_score",
+                "essay_max_score IS NULL OR essay_max_score BETWEEN 0.01 AND 1000");
+            table.HasCheckConstraint(
+                "ck_exam_editions_essay_cut_off",
+                "essay_cut_off_score IS NULL"
+                + " OR (essay_max_score IS NOT NULL AND essay_cut_off_score BETWEEN 0.01 AND essay_max_score)");
         });
         builder.HasKey(edition => edition.Id);
 
@@ -64,6 +80,21 @@ public sealed class ExamEditionConfiguration : IEntityTypeConfiguration<ExamEdit
         builder.Property(edition => edition.NoticeUrl)
             .HasMaxLength(CatalogLimits.ExamEditionNoticeUrlMaxLength)
             .HasComment("The official address of the notice, an absolute http or https URL.");
+
+        builder.Property(edition => edition.DurationMinutes)
+            .HasComment("How long the paper lasts, in whole minutes from 15 to 480. Empty means no time limit.");
+
+        builder.Property(edition => edition.ObjectiveCutOffScore)
+            .HasPrecision(6, 2)
+            .HasComment("The points of the objective paper a candidate needs to pass, 0.01 to 1000. Empty when the notice says none.");
+
+        builder.Property(edition => edition.EssayMaxScore)
+            .HasPrecision(6, 2)
+            .HasComment("The scale of the essay as the notice states it, 0.01 to 1000. Empty when there is no essay or it is not stated.");
+
+        builder.Property(edition => edition.EssayCutOffScore)
+            .HasPrecision(6, 2)
+            .HasComment("The essay points a candidate needs to pass, never above the essay maximum. Empty when not stated.");
 
         builder.Property(edition => edition.AppliedOn)
             .HasComment("The day the paper was applied. Optional, also to publish.");
