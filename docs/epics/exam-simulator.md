@@ -34,7 +34,8 @@ Verified on 2026-10-26, on `main` at `8d0059d`:
 | F-166 | Store a student's answers for an attempt | The `ExamEngine` module: attempt and answers, fixed questions with versions, no screen | Must | L | - | - | no | refining |
 | F-167 | Erase and export a student's attempt data | Erasure anonymizes attempts; "download my data" includes them | Must | S | F-166 | - | no | idea |
 | F-168 | Exam rules of an edition | Duration, points per question for each notice subject, objective and essay cut-off, in the edition form; the Manaus 2026 rules seeded | Must | M | - | - | no | idea |
-| F-169 | Take an exam edition | The student picks a published edition, answers question by question with base texts and images, uses the answer sheet, sees the notice subjects as sections, writes the essay and submits | Must | L | F-166 | - | yes | idea |
+| F-169 | Take an exam edition | The student starts from a published edition, answers the option questions with base texts and images, uses the answer sheet, sees the notice subjects as sections and submits | Must | M | F-166 | - | yes | refining |
+| F-178 | Written and structured answers in the simulator | Matching, fill in the blanks, short answer, open answer and the essay with its line limit, on the F-169 screen (split from F-169) | Must | M | F-169 | - | no | idea |
 | F-170 | Exam timer | Server countdown from the edition's duration, warning near the end, automatic submit, resume after closing the browser | Must | M | F-169, F-168 | - | no | idea |
 | F-171 | Score and result of an attempt | Score by the edition's rules: total, per notice subject, passed or not at the cut-off, essay awaiting grade | Must | M | F-166, F-168, F-169 | - | yes | idea |
 | F-172 | Answer review after an attempt | Each question with the student's answer, the key, the explanation and the annulled ones | Should | M | F-171 | - | no | idea |
@@ -48,6 +49,7 @@ Verified on 2026-10-26, on `main` at `8d0059d`:
 2. F-168 — the rules the timer and the score read; `Catalog` module, no overlap with `ExamEngine` — path: `/agile:refine` → `/agile:build` — parallel with: F-166, F-167.
 3. F-167 — F-166 is not released without it (F-166 decision of 2026-10-26) — path: `/agile:refine` → `/agile:build` — parallel with: F-168.
 4. F-169 — the first screen a tester uses — path: `/agile:refine` with `/agile:screen` → `/agile:build` — parallel with: none.
+4b. F-178 — the other five question types on the same screen (split from F-169, 2026-10-27) — path: `/agile:refine` → `/agile:build` — parallel with: F-170, F-171.
 5. F-170 — the time limit that makes it feel real; imports the Simulae timer, lock and auto-submit — path: `/agile:refine` → `/agile:build` — parallel with: F-171.
 6. F-171 — the score and cut-off; closes the first release cut — path: `/agile:refine` with `/agile:screen` → `/agile:build` — parallel with: F-170.
 7. F-172 — path: `/agile:autopilot` — parallel with: F-173.
