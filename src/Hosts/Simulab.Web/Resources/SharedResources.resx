@@ -801,6 +801,7 @@
   <data name="exam_attempt.not_found" xml:space="preserve"><value>This attempt no longer exists.</value></data>
   <data name="exam_attempt.question_not_in_attempt" xml:space="preserve"><value>This question is not part of the attempt.</value></data>
   <data name="exam_attempt.answer_invalid" xml:space="preserve"><value>The answer is not valid. Check it and try again.</value></data>
+  <data name="exam_attempt.answer_too_large" xml:space="preserve"><value>The answer is too large to be saved. Shorten the text and try again.</value></data>
   <data name="exam_attempt.already_submitted" xml:space="preserve"><value>This attempt was already submitted and takes no more answers.</value></data>
   <data name="exam_attempt.answer_type_mismatch" xml:space="preserve"><value>The answer does not match the type of the question.</value></data>
   <data name="exam_attempt.option_unknown" xml:space="preserve"><value>Choose one of the options of the question.</value></data>

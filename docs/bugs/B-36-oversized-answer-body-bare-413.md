@@ -75,6 +75,9 @@ Callers: `ReadBodyAsync` is private and called only by `SaveAsync` (`AttemptEndp
 - update `docs/flows/exam-attempt.md` sections "Rules" (line on the save limit: 413 `exam_attempt.answer_too_large`) and "Errors" (one new line).
 
 ## Regression test
+
+Tests locked: 0955a2392edd0ea5b8cb81facae9b06b469427d4 (2 files); unlocks: 0
+
 - `SaveAnswerEndpointTests.Save_ABodyAboveTheLimitOfTheRoute_Answers4xx_AndStoresNothing` becomes AC1: asserts 413, `code` `exam_attempt.answer_too_large` and no `errors`. Seen failing before the fix (today it answers an empty body, so the `code` read fails).
 - A new chunked-body case for AC2, through the real HTTP pipeline (`WebApplicationFactory`, shared `AppJson.Options`).
 

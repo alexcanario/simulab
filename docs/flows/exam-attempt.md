@@ -45,7 +45,7 @@ sequenceDiagram
 - A submitted attempt never changes. Submitting it again answers 200 with the original time; saving or clearing answers 409. The submission time is the server's clock, whatever the body or headers say.
 - A save takes a shared row lock on the attempt and a submit an exclusive one, so a save that was answered 200 is stored before the submit and one that arrives after it answers 409. Two saves to one question at once: the last wins, with no concurrency token.
 - Only the owner reads and changes an attempt; anyone else gets the answer of an id that does not exist (404 `exam_attempt.not_found`). A user holding `attempts.read` (`Admin` only) reads any attempt and changes none.
-- The body of a save is read in the endpoint up to `AttemptLimits.SaveBodyMaxBytes`; above it the answer is 413.
+- The body of a save is read in the endpoint up to `AttemptLimits.SaveBodyMaxBytes`; above it (declared `Content-Length` or a chunked body that grows past it) the answer is 413 problem details with `exam_attempt.answer_too_large`, no `errors` member, and nothing is stored.
 - Rows carry the `TenantId` of `ICurrentTenant` (null until F-162); the tenant filter of the module's context hides another tenant's attempt, so no query ignores it. The erasure lookup (below) ignores only the soft-delete filter; how it reaches rows of a tenant waits for F-162.
 - The answer column is `json`, not `jsonb`: `jsonb` reorders the members of an object and the polymorphic read needs `type` first.
 
@@ -94,4 +94,5 @@ sequenceDiagram
 - `exam_attempt.not_found` — 404 the attempt does not exist or is another student's.
 - `exam_attempt.question_not_in_attempt` — 404 the question is not one of the attempt.
 - `exam_attempt.answer_invalid` — 400 the answer does not fit; each entry of `errors` has a `field` and one of `answer_type_mismatch`, `option_unknown`, `item_unknown`, `blank_unknown`, `text_too_long`, `answer_empty`, `entry_repeated`.
+- `exam_attempt.answer_too_large` — 413 the body of a save is above `AttemptLimits.SaveBodyMaxBytes`; the body is not parsed, so the answer names no field.
 - `exam_attempt.already_submitted` — 409 a save or a clear on a submitted attempt.
