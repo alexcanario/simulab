@@ -1,7 +1,7 @@
 ---
 feature: F-168
 epic: Exam Simulator
-status: idea
+status: refining
 board: 234
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: idea (2026-10-26)
-- Stopped at: Captured by the E-06 breakdown; nothing refined yet.
-- Next action: Refine it beside F-166 (owner).
+- Status: refining (2026-10-27)
+- Stopped at: Refinement started in D:/wt/simulab/f-168-edition-exam-rules.
+- Next action: Claude asks the round of questions.
 - Waiting on: nothing
 
 ## Summary
