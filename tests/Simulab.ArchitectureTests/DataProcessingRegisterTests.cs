@@ -19,7 +19,7 @@ public class DataProcessingRegisterTests
     private static readonly string[] ProcessorColumns =
         ["Company", "Service used", "Personal data it receives", "Where it processes", "Transfer basis", "Contract", "Source"];
 
-    private static readonly string[] RequiredCategories = ["Account", "Consent evidence", "Account events", "One-time tokens", "Sessions"];
+    private static readonly string[] RequiredCategories = ["Account", "Consent evidence", "Account events", "One-time tokens", "Sessions", "Exam attempts"];
 
     private static readonly Regex PathInBackticks = new(@"`([^`\s]+/[^`\s]+\.[A-Za-z]+)`", RegexOptions.CultureInvariant);
 

@@ -100,6 +100,9 @@ namespace Simulab.ExamEngine.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_attempts");
 
+                    b.HasIndex("StudentId")
+                        .HasDatabaseName("ix_attempts_student");
+
                     b.HasIndex("TenantId", "StudentId", "ExamEditionId")
                         .IsUnique()
                         .HasDatabaseName("ux_attempts_tenant_student_edition_in_progress")

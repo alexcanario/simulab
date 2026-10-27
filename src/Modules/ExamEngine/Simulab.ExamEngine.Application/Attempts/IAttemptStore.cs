@@ -31,6 +31,13 @@ public interface IAttemptStore
     /// </summary>
     Task<Attempt?> FindForSubmitAsync(Guid studentId, Guid attemptId, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Every attempt of the student, whatever its status and soft-deleted ones included, with its answers, to erase their
+    /// texts (F-167 BR1, BR4, BR5): the rows are found by the student id alone and locked until
+    /// <see cref="SaveChangesAsync"/>, so the erasure is one transaction.
+    /// </summary>
+    Task<IReadOnlyList<Attempt>> FindAllOfStudentForErasureAsync(Guid studentId, CancellationToken cancellationToken);
+
     /// <summary>Saves what the rules changed and ends the transaction the lock opened.</summary>
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

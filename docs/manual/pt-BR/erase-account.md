@@ -1,8 +1,8 @@
 ---
 page: erase-account
 locale: pt-BR
-features: [F-10]
-updated: 2026-09-20
+features: [F-10, F-167]
+updated: 2026-10-27
 ---
 # Apagar sua conta
 
@@ -26,9 +26,10 @@ Você pode desistir a qualquer momento antes do passo 4, clicando em **Cancelar*
 - Suas sessões, neste e em todos os outros aparelhos.
 - Os links que o Simulab enviou por e-mail (confirmação e redefinição de senha).
 - Os papéis que a conta tinha.
+- Os textos que você escreveu nas respostas dos simulados (respostas curtas, abertas, redações e lacunas). Eles são apagados alguns segundos depois, em segundo plano.
 
 ### O que fica
-- Registros que não dizem mais quem você é, usados nas estatísticas das questões.
+- Registros que não dizem mais quem você é, usados nas estatísticas das questões, entre eles as suas tentativas de simulado: as questões, as alternativas que você escolheu e as datas, sem os textos.
 - A prova de que você aceitou os Termos de Uso e a Política de Privacidade — a versão, a data e o idioma, sem o seu endereço. A lei obriga o Simulab a guardar isso.
 
 ### Depois de apagar

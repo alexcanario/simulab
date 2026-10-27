@@ -1,7 +1,7 @@
 ---
 title: Starting, answering and submitting an exam attempt
-summary: How a student starts an attempt on a published exam edition, saves an answer to each question, submits it, and who may read it, as a sequence of API calls.
-items: [F-166]
+summary: How a student starts an attempt on a published exam edition, saves an answer to each question, submits it, who may read it, and what an account erasure and a data export do with it, as a sequence of calls.
+items: [F-166, F-167]
 ---
 # Starting, answering and submitting an exam attempt
 
@@ -46,8 +46,47 @@ sequenceDiagram
 - A save takes a shared row lock on the attempt and a submit an exclusive one, so a save that was answered 200 is stored before the submit and one that arrives after it answers 409. Two saves to one question at once: the last wins, with no concurrency token.
 - Only the owner reads and changes an attempt; anyone else gets the answer of an id that does not exist (404 `exam_attempt.not_found`). A user holding `attempts.read` (`Admin` only) reads any attempt and changes none.
 - The body of a save is read in the endpoint up to `AttemptLimits.SaveBodyMaxBytes`; above it the answer is 413.
-- Rows carry the `TenantId` of `ICurrentTenant` (null until F-162); the tenant filter of the module's context hides another tenant's attempt, so no query ignores it.
+- Rows carry the `TenantId` of `ICurrentTenant` (null until F-162); the tenant filter of the module's context hides another tenant's attempt, so no query ignores it. The erasure lookup (below) ignores only the soft-delete filter; how it reaches rows of a tenant waits for F-162.
 - The answer column is `json`, not `jsonb`: `jsonb` reorders the members of an object and the polymorphic read needs `type` first.
+
+## Account erasure (F-167)
+When a student erases the account (F-10), the `account.erased` job publishes `UserErased`; the ExamEngine's `UserErasedConsumer` calls `EraseStudentTextsHandler`.
+1. `IAttemptStore.FindAllOfStudentForErasureAsync` opens a transaction, locks every attempt row of the student (`FOR UPDATE`, found through `ix_attempts_student`) and loads them with their answers, soft-deleted ones included.
+2. `Attempt.EraseTexts` sets to null the text of each `ShortAnswer`, `OpenAnswer`, `Essay` and each blank of a `FillInTheBlanks` answer, whatever the status; the shape, the blank numbers, the choice answers, the times and the attempt row stay. A row with no text is not written.
+3. One `SaveChanges` commits all of them, or none: a failure fails the job attempt and the job's backoff runs it again from the same point (F-59). A second delivery finds nothing to erase and succeeds.
+- The erased answer rows carry the erasure's update stamp (`updated_at`, `updated_by` null); the attempt rows keep their audit fields.
+- An `Admin` holding `attempts.read` still reads the attempt: the same questions and versions, the choices as saved, the texts null.
+
+```mermaid
+sequenceDiagram
+    participant J as Job worker
+    participant I as Identity (account.erased)
+    participant E as ExamEngine (UserErasedConsumer)
+    participant D as exam_engine tables
+    J->>I: run account.erased
+    I->>I: revoke every session
+    I->>E: UserErased(userId) (in process)
+    E->>D: lock the student's attempts FOR UPDATE
+    E->>D: clear the free texts, one transaction
+    E-->>I: done, or throw (the job runs again after its backoff)
+```
+
+## Data export (F-167)
+`POST /api/v1/identity/data-exports` (F-16) asks every registered `IDataExportSection` after the identity section and before the notice email. The ExamEngine's `ExamEngineDataExportSection` adds `examEngine.attempts`: every attempt of the token subject, oldest first, each with its id, edition, status, `startedAt`, `submittedAt` (null in progress) and its questions in paper-number order with the answer as saved (null when blank). Never a statement, option text, key, explanation or tenant id; an empty list when there is none.
+- A section that throws, or whose name is already a member of the file, fails the whole export: 500 with no detail, no file, no notice, an error log naming the section.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant I as Identity (ExportDataHandler)
+    participant E as ExamEngine (ExamEngineDataExportSection)
+    U->>I: POST /data-exports {currentPassword}
+    I->>I: password and lockout, identity section
+    I->>E: GetAsync(token subject)
+    E-->>I: examEngine section (JSON)
+    I->>I: queue the notice email
+    I-->>U: 200 file {format, version, exportedAt, identity, examEngine}
+```
 
 ## Errors
 - `exam_attempt.edition_not_found` — 404 the edition is a draft or unknown, or 400 no edition was sent.
