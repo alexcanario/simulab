@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F-169 - Take an exam edition (mockup)</title>
+<style>
+/* ===========================================================================
+   F-169 mockup - three screens:
+   1. /catalog/exams/{id}        the start action on each published edition [changed]
+   2. /attempts/{id}             the simulator, answer sheet (side panel / phone drawer), submit dialog [new]
+   3. /attempts/{id}/submitted   the submitted page [new]
+   Every colour is an identity token (docs/design/identity.tokens.json) or a keycap edge of DESIGN.md; no new colour.
+   No external request: no web font (Bricolage Grotesque falls back to system-ui here), no icon font, no image file.
+   =========================================================================== */
+:root {
+  --font: "Bricolage Grotesque", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+  --r-chip: 6px; --r: 12px; --r-card: 20px;
+
+  --primary: #0F3266; --primary-contrast: #FFFFFF; --primary-darken: #10366E; --primary-lighten: #DCE8F5;
+  --edge-primary: #6B7C91;
+  --info: #2478C5; --info-contrast: #FFFFFF;
+  --success: #1A9E8C; --success-contrast: #0B1B2E;
+  --warning: #D98B1A; --warning-contrast: #0B1B2E;
+  --error: #B83232; --error-contrast: #FFFFFF;
+  --text: #0B1B2E; --text-2: #52647A; --action: #52647A;
+  --disabled: #52647A; --disabled-bg: #E6ECF5;
+  --bg: #F2F5FB; --bg-gray: #E6ECF5; --surface: #FFFFFF;
+  --drawer: #0F3266; --drawer-text: #FFFFFFEB;
+  --appbar: #FFFFFF; --appbar-text: #0B1B2E;
+  --lines-inputs: #6B7C91; --divider: #D9E1EE;
+  --link: #1D64A8; --brand: #0F3266;
+}
+[data-theme="dark"] {
+  --primary: #47A0EB; --primary-contrast: #0B1B2E; --primary-darken: #4DADFE; --primary-lighten: #1A4583;
+  --edge-primary: #1F6FB5;
+  --info: #47A0EB; --info-contrast: #0B1B2E;
+  --error: #FF9C94; --error-contrast: #0B1B2E;
+  --text: #F2F5FB; --text-2: #B8C4D2; --action: #B8C4D2;
+  --disabled: #B8C4D2; --disabled-bg: #081938;
+  --bg: #0B2149; --bg-gray: #081938; --surface: #12386F;
+  --drawer: #081938; --drawer-text: #B8C4D2;
+  --appbar: #12386F; --appbar-text: #F2F5FB;
+  --lines-inputs: #7F9BC0; --divider: #24497F;
+  --link: #8CC4F5; --brand: #F2F5FB;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+body { font-family: var(--font); font-weight: 500; font-size: .9375rem; line-height: 1.375rem; background: var(--bg); color: var(--text); }
+svg { display: block; flex-shrink: 0; fill: currentColor; }
+button { font: inherit; color: inherit; }
+a { color: var(--link); }
+:is(a, button, [tabindex]):focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.vh { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+h1, h2, h3 { font-weight: 800; letter-spacing: -.01em; }
+
+/* ---- demo chrome (not part of the product) ---- */
+.demo { position: sticky; top: 0; z-index: 50; display: flex; flex-direction: column; gap: var(--s1);
+  padding: var(--s2) var(--s4); background: var(--bg-gray); border-bottom: 1px dashed var(--lines-inputs); font-size: .75rem; }
+.demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.demo-label { font-weight: 800; letter-spacing: .04em; color: var(--text-2); min-width: 72px; }
+.demo button { font-size: .75rem; font-weight: 600; padding: 2px 10px; border-radius: 20px; cursor: pointer;
+  border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text); }
+.demo button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--primary-contrast); }
+.demo-note { color: var(--text-2); font-style: italic; }
+.stage { padding: var(--s4); display: flex; justify-content: center; }
+.frame { width: 100%; max-width: 1280px; min-height: 720px; border: 1px solid var(--divider); background: var(--bg); position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.frame.phone { max-width: 390px; min-height: 780px; }
+
+/* ---- buttons (keycaps) ---- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s4);
+  border-radius: var(--r); font-size: .875rem; font-weight: 800; line-height: 1.25rem; cursor: pointer; text-decoration: none; border: 0; white-space: nowrap; }
+.btn svg { width: 20px; height: 20px; }
+.btn-filled { background: var(--primary); color: var(--primary-contrast); box-shadow: 0 3px 0 var(--edge-primary); margin-bottom: 3px; }
+.btn-filled:hover { background: var(--primary-darken); }
+.btn-outlined { background: var(--surface); color: var(--text); border: 2px solid var(--lines-inputs); }
+.btn-outlined:hover { background: var(--bg); }
+.btn-text { background: none; color: var(--link); text-decoration: underline; padding: 0 var(--s2); }
+.btn:disabled, .btn[aria-disabled="true"] { background: var(--disabled-bg); color: var(--disabled); border-color: transparent; box-shadow: none; cursor: default; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: none; color: var(--action); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.icon-btn:hover { background: var(--bg); }
+.icon-btn svg { width: 22px; height: 22px; }
+.spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+
+/* ---- alerts (AppAlert, filled) ---- */
+.alert { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s2) var(--s3); border-radius: var(--r); font-size: .875rem; line-height: 1.25rem; margin-bottom: var(--s4); overflow-wrap: anywhere; }
+.alert svg { width: 20px; height: 20px; margin-top: 0; }
+.alert-error { background: var(--error); color: var(--error-contrast); }
+.alert-info { background: var(--info); color: var(--info-contrast); }
+.alert-action { margin-left: auto; background: none; border: 0; color: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; white-space: nowrap; min-height: 24px; }
+
+/* ---- main layout (catalog, submitted) ---- */
+.appbar { height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s3);
+  background: var(--appbar); color: var(--appbar-text); border-bottom: 1px solid var(--divider); }
+.brand-sym { display: flex; gap: 3px; }
+.brand-sym span { width: 11px; height: 11px; border-radius: 3px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-name { font-weight: 800; color: var(--brand); }
+.brand-co { font-size: .75rem; color: var(--text-2); }
+.spacer { flex: 1; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--success); color: var(--success-contrast); display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 800; }
+.shell { flex: 1; display: flex; min-height: 0; }
+.drawer { width: 56px; flex-shrink: 0; background: var(--drawer); color: var(--drawer-text); border-right: 1px solid var(--divider); padding-top: var(--s3); display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
+.drawer span { width: 24px; height: 24px; border-radius: 6px; border: 2px solid currentColor; opacity: .85; }
+.phone .drawer { display: none; }
+.content { flex: 1; padding: var(--s5); min-width: 0; }
+.phone .content { padding: var(--s4); }
+.crumbs { font-size: .875rem; color: var(--text-2); display: flex; gap: var(--s2); flex-wrap: wrap; margin-bottom: var(--s1); }
+.crumbs a { color: var(--link); }
+.page-title { font-size: 1.75rem; line-height: 2rem; letter-spacing: -.02em; margin-bottom: var(--s5); }
+.layout2 { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s5); align-items: start; }
+.phone .layout2 { grid-template-columns: minmax(0, 1fr); }
+.card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-card); padding: var(--s5); }
+.phone .card { padding: var(--s4); }
+.sec-card { border: 1px solid var(--divider); border-radius: var(--r-card); padding: var(--s4); }
+.sec-head { display: flex; gap: var(--s3); align-items: center; margin-bottom: var(--s1); }
+.sec-head h2 { font-size: 1rem; line-height: 1.25rem; }
+.sec-sub { font-size: .875rem; color: var(--text-2); margin-bottom: var(--s4); }
+.rows { list-style: none; display: flex; flex-direction: column; }
+.row { display: flex; gap: var(--s4); align-items: center; padding: var(--s3) 0; border-top: 1px solid var(--divider); flex-wrap: wrap; }
+.row-main { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: var(--s1); }
+.row-line { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+.muted { color: var(--text-2); font-size: .875rem; }
+.disclosure { font-size: .875rem; color: var(--link); text-decoration: underline; }
+.phone .row .btn { width: 100%; }
+.aside { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-card); padding: var(--s4); }
+.aside h2 { font-size: 1rem; margin-bottom: var(--s3); }
+.aside dl { display: grid; grid-template-columns: auto 1fr; gap: var(--s2) var(--s3); font-size: .875rem; }
+.aside dt { color: var(--text-2); }
+
+/* ---- page state (AppPageState) ---- */
+.pstate { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s3); padding: var(--s6) var(--s4); max-width: 560px; margin: 0 auto; }
+.pstate > svg { width: 48px; height: 48px; color: var(--action); }
+.pstate.success > svg { color: var(--success); }
+.pstate h1, .pstate h2.ps-title { font-size: 1.75rem; line-height: 2rem; letter-spacing: -.02em; }
+.pstate p { overflow-wrap: anywhere; }
+.facts { display: flex; gap: var(--s5); justify-content: center; flex-wrap: wrap; margin: var(--s2) 0; }
+.facts div { display: flex; flex-direction: column; align-items: center; }
+.facts dt { font-size: .75rem; color: var(--text-2); font-weight: 800; letter-spacing: .04em; }
+.facts dd { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.loading { display: flex; align-items: center; gap: var(--s3); color: var(--text-2); padding: var(--s6) 0; justify-content: center; }
+.errstate { display: flex; flex-direction: column; align-items: center; gap: var(--s3); padding: var(--s6) 0; text-align: center; }
+.errstate svg { width: 40px; height: 40px; color: var(--error); }
+
+/* ---- exam session layout (ExamSessionLayout) ---- */
+.session-bar { height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s4);
+  background: var(--appbar); color: var(--appbar-text); border-bottom: 1px solid var(--divider); }
+.session-title { font-size: 1rem; line-height: 1.25rem; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.phone .session-title { font-size: .875rem; }
+.sheet-open-btn { min-height: 40px; padding: 0 var(--s3); flex-shrink: 0; }
+.sheet-badge { font-family: var(--mono); font-size: .75rem; font-weight: 700; }
+.session-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s5); padding: var(--s5); align-items: start; }
+.phone .session-body { grid-template-columns: minmax(0, 1fr); padding: var(--s3); }
+.q-card { max-width: 760px; width: 100%; justify-self: center; }
+.q-section { font-size: .75rem; line-height: 1rem; font-weight: 800; letter-spacing: .04em; color: var(--text-2); margin-bottom: var(--s2); overflow-wrap: anywhere; }
+.q-section .range { font-weight: 500; letter-spacing: 0; }
+.q-head { display: flex; align-items: baseline; gap: var(--s3); margin-bottom: var(--s4); flex-wrap: wrap; }
+.q-head h2 { font-size: 1.25rem; line-height: 1.5rem; }
+.q-head h2:focus { outline: none; }
+.q-head h2:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+.q-pos { font-size: .75rem; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.base-cap { font-size: .75rem; font-weight: 800; letter-spacing: .04em; color: var(--text-2); margin-bottom: var(--s1); }
+.qc { overflow-wrap: anywhere; }
+.qc p + p { margin-top: var(--s2); }
+.qc img, .qc svg.figure { max-width: 100%; height: auto; }
+.qc table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: var(--s2) 0; }
+.qc th, .qc td { border: 1px solid var(--divider); padding: 2px var(--s2); white-space: nowrap; }
+.q-base { margin-bottom: var(--s4); padding: var(--s3) var(--s4); border: 1px solid var(--divider); border-radius: var(--r); font-size: .875rem; line-height: 1.25rem; }
+.figure-wrap { margin: var(--s3) 0; }
+.figure-cap { font-size: .75rem; color: var(--text-2); }
+.q-hint { font-size: .75rem; line-height: 1rem; color: var(--text-2); margin: var(--s4) 0 var(--s2); }
+.opts { display: flex; flex-direction: column; gap: var(--s2); }
+.opts[aria-busy="true"] .opt { cursor: progress; }
+.opt { display: flex; align-items: flex-start; gap: var(--s3); min-height: 44px; padding: var(--s2) var(--s3); border: 1px solid var(--lines-inputs); border-radius: var(--r); cursor: pointer; background: var(--surface); }
+.opt:hover { background: var(--bg); }
+.opt.on { border-color: var(--primary); background: var(--primary-lighten); box-shadow: inset 0 0 0 1px var(--primary); }
+.ind { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; border: 2px solid var(--lines-inputs); display: flex; align-items: center; justify-content: center; }
+.ind.radio { border-radius: 50%; }
+.ind.box { border-radius: 4px; }
+.opt.on .ind { border-color: var(--primary); }
+.opt.on .ind.radio::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
+.opt.on .ind.box { background: var(--primary); color: var(--primary-contrast); }
+.ind.box svg { width: 16px; height: 16px; }
+.opt-letter { flex-shrink: 0; width: 24px; height: 24px; border-radius: 999px; background: var(--primary-lighten); color: var(--text); font-size: .8125rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.opt.on .opt-letter { background: var(--surface); }
+.opt-text { flex: 1; min-width: 0; padding-top: 1px; }
+.save-status { min-height: 24px; margin-top: var(--s2); font-size: .75rem; color: var(--text-2); display: flex; align-items: center; gap: var(--s2); }
+.save-status svg { width: 16px; height: 16px; color: var(--success); }
+.save-status .spinner { width: 14px; height: 14px; }
+.q-nav { display: flex; justify-content: space-between; gap: var(--s3); margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--divider); }
+.q-submit { display: flex; justify-content: flex-end; margin-top: var(--s3); }
+.phone .q-nav .btn { flex: 1; }
+.phone .q-submit .btn { width: 100%; }
+
+/* ---- answer sheet (AppAnswerSheet) ---- */
+.sheet { position: sticky; top: var(--s4); max-height: calc(100vh - 140px); overflow-y: auto; background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-card); padding: var(--s4); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
+.sheet-head h2 { font-size: 1rem; line-height: 1.25rem; }
+.sheet-progress { font-size: .875rem; margin: var(--s1) 0 var(--s2); font-variant-numeric: tabular-nums; }
+.legend { display: flex; gap: var(--s4); font-size: .75rem; color: var(--text-2); margin-bottom: var(--s3); flex-wrap: wrap; }
+.legend span { display: inline-flex; align-items: center; gap: var(--s1); }
+.legend i { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--lines-inputs); display: inline-flex; align-items: center; justify-content: center; }
+.legend i.ans { background: var(--primary-lighten); border-color: var(--primary); color: var(--text); }
+.legend i svg { width: 12px; height: 12px; }
+.sheet-sec { font-size: .8125rem; line-height: 1.125rem; margin: var(--s3) 0 var(--s2); overflow-wrap: anywhere; }
+.cells { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, 40px); gap: 6px; }
+.cell { width: 40px; height: 36px; border-radius: 8px; border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text);
+  font-family: var(--mono); font-size: .8125rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 1px; padding: 0; }
+.cell:hover { background: var(--bg); }
+.cell.ans { background: var(--primary-lighten); border-color: var(--primary); }
+.cell.ans svg { width: 11px; height: 11px; }
+.cell[aria-current="step"] { border: 2px solid var(--text); font-weight: 800; }
+.overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, .45); z-index: 20; }
+.sheet-drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 86%; max-width: 340px; z-index: 21; background: var(--surface); border-left: 1px solid var(--divider); padding: var(--s4); overflow-y: auto; }
+
+/* ---- dialog (AppConfirmDialog) ---- */
+.dialog { position: absolute; z-index: 31; left: 50%; top: 22%; transform: translateX(-50%); width: min(480px, calc(100% - 32px));
+  background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-card); padding: var(--s5); }
+.dialog h2 { font-size: 1.25rem; line-height: 1.5rem; margin-bottom: var(--s3); }
+.dialog p { overflow-wrap: anywhere; }
+.dialog p + p { margin-top: var(--s2); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--s2); margin-top: var(--s5); flex-wrap: wrap; }
+.dlg-overlay { z-index: 30; }
+.ann { margin: 0 var(--s4) var(--s4); padding: var(--s2) var(--s3); border: 1px dashed var(--lines-inputs); border-radius: var(--r); font-size: .75rem; color: var(--text-2); max-width: 1280px; align-self: center; width: calc(100% - 32px); }
+</style>
+</head>
+<body>
+
+<div class="demo" aria-label="Mockup controls">
+  <div class="demo-row"><span class="demo-label">SCREEN</span><span id="d-screen"></span></div>
+  <div class="demo-row"><span class="demo-label">STATE</span><span id="d-state" class="demo-row"></span></div>
+  <div class="demo-row">
+    <span class="demo-label">THEME</span><span id="d-theme"></span>
+    <span class="demo-label" style="margin-left:12px">LANGUAGE</span><span id="d-lang"></span>
+    <span class="demo-label" style="margin-left:12px">VIEWPORT</span><span id="d-vp"></span>
+  </div>
+</div>
+
+<div class="stage"><div id="frame" class="frame"></div></div>
+<div class="ann" id="ann"></div>
+
+<script>
+/* ===================== icons (Material Outlined paths) ===================== */
+const IC = {
+  left: 'M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z',
+  right: 'M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z',
+  send: 'M4.01 6.03l7.51 3.22-7.52-1 .01-2.22m7.5 8.72L4 17.97v-2.22l7.51-1M2.01 3 2 10l15 2-15 2 .01 7L23 12 2.01 3z',
+  check: 'M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+  grid: 'M3 3v8h8V3H3zm6 6H5V5h4v4zm-6 4v8h8v-8H3zm6 6H5v-4h4v4zm4-16v8h8V3h-8zm6 6h-4V5h4v4zm-6 4v8h8v-8h-8zm6 6h-4v-4h4v4z',
+  close: 'M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',
+  play: 'M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z',
+  verified: 'M16.59 7.58 10 14.17l-3.59-3.58L5 12l5 5 8-8zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z',
+  error: 'M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z',
+  info: 'M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z',
+  dark: 'M9.37 5.51c-.18.64-.27 1.31-.27 1.99 0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27C17.45 17.19 14.93 19 12 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49zM12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z',
+  lang: 'm12.87 15.07-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7 1.62-4.33L19.12 17h-3.24z',
+  menu: 'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z',
+  home: 'M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z',
+  back: 'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
+  notfound: 'M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM8 7h3v5H8z',
+  editions: 'M17 10H7v2h10v-2zm2-7h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zm-5-5H7v2h7v-2z'
+};
+const icon = (k, cls) => `<svg viewBox="0 0 24 24" aria-hidden="true"${cls ? ` class="${cls}"` : ''}><path d="${IC[k]}"/></svg>`;
+
+/* ===================== UI texts (resource keys; values per locale) ===================== */
+const T = {
+  'pt-BR': {
+    'Layout.SkipToContent': 'Pular para o conteúdo',
+    'Nav.Section.Study': 'Estudar', 'Catalog.Title': 'Catálogo', 'ExamEditions.Section.Title': 'Edições',
+    'Catalog.Editions.Subtitle': 'As edições publicadas desta prova, da mais recente para a mais antiga.',
+    'Catalog.Exam.About': 'Sobre a prova', 'Catalog.Editions.NoticeLink': 'Edital', 'Catalog.Editions.Syllabus': 'Conteúdo programático',
+    'Catalog.Editions.Take': 'Fazer este simulado', 'Catalog.Editions.Take.Name': 'Fazer este simulado: {0}',
+    'Catalog.Editions.TakeFailed': 'Não foi possível iniciar o simulado. Tente de novo.',
+    'Attempt.Leave': 'Sair e continuar depois',
+    'Attempt.PageTitle': 'Questão {0} · {1}', 'Attempt.Section.Range': 'Questões {0} a {1}', 'Attempt.Section.Other': 'Outras',
+    'Attempt.Question.Title': 'Questão {0}', 'Attempt.Question.Position': '{0} de {1}', 'Attempt.Question.BaseText': 'Texto-base',
+    'Attempt.Question.SingleHint': 'Marque uma alternativa. Clique nela de novo para limpar.',
+    'Attempt.Question.TrueFalseHint': 'Julgue o item. Clique na sua escolha de novo para limpar.',
+    'Attempt.Question.MultipleHint': 'Marque todas as alternativas corretas. Desmarque todas para limpar a resposta.',
+    'Attempt.Question.NotYetSupported': 'Este tipo de resposta ainda não está no simulador. A questão fica em branco e conta como em branco.',
+    'Questions.TrueFalse.True': 'Certo', 'Questions.TrueFalse.False': 'Errado',
+    'Attempt.Save.Saving': 'Salvando…', 'Attempt.Save.Saved': 'Resposta salva', 'Attempt.Save.Cleared': 'Resposta apagada',
+    'Attempt.Save.Failed': 'Sua resposta não foi salva. A questão voltou a como estava; marque de novo.',
+    'Attempt.Nav.Previous': 'Anterior', 'Attempt.Nav.Next': 'Próxima',
+    'Attempt.AnswerSheet.Title': 'Cartão-resposta', 'Attempt.AnswerSheet.Open': 'Cartão-resposta ({0} de {1} respondidas)',
+    'Attempt.AnswerSheet.Close': 'Fechar o cartão-resposta', 'Attempt.AnswerSheet.Progress': '{0} de {1} respondidas',
+    'Attempt.AnswerSheet.Answered': 'Respondida', 'Attempt.AnswerSheet.Blank': 'Em branco', 'Attempt.AnswerSheet.CellName': 'Questão {0}: {1}',
+    'Attempt.Submit.Action': 'Enviar prova', 'Attempt.Submit.Title': 'Enviar a prova?',
+    'Attempt.Submit.Blanks': '{0} questões estão em branco: {1}.', 'Attempt.Submit.OneBlank': '1 questão está em branco: {0}.',
+    'Attempt.Submit.NoBlank': 'Nenhuma questão está em branco.', 'Attempt.Submit.Final': 'Depois de enviar, você não pode mudar suas respostas.',
+    'Attempt.Submit.Submitting': 'Enviando…', 'Attempt.Submit.Failed': 'A prova não foi enviada. Suas respostas continuam salvas; tente de novo.',
+    'Attempt.Load.Failed': 'Não foi possível carregar a prova.',
+    'Attempt.Submitted.Title': 'Prova enviada', 'Attempt.Submitted.Message': 'Suas respostas de {0} foram enviadas em {1} às {2}.',
+    'Attempt.Submitted.Answered': 'Respondidas', 'Attempt.Submitted.Blank': 'Em branco', 'Attempt.Submitted.BackToEdition': 'Voltar à prova',
+    'Attempt.Submitted.LoadFailed': 'Não foi possível carregar a prova enviada.',
+    'Common.Cancel': 'Cancelar', 'Common.TryAgain': 'Tentar novamente', 'Common.GoHome': 'Ir para o início', 'Common.Loading': 'Carregando…',
+    'NotFound.Title': 'Página não encontrada', 'NotFound.Message': 'A página que você procura não existe.',
+    'Theme': 'Tema escuro', 'Language': 'Idioma'
+  },
+  'pt-PT': {
+    'Layout.SkipToContent': 'Saltar para o conteúdo',
+    'Nav.Section.Study': 'Estudar', 'Catalog.Title': 'Catálogo', 'ExamEditions.Section.Title': 'Edições',
+    'Catalog.Editions.Subtitle': 'As edições publicadas desta prova, da mais recente para a mais antiga.',
+    'Catalog.Exam.About': 'Sobre a prova', 'Catalog.Editions.NoticeLink': 'Aviso de abertura', 'Catalog.Editions.Syllabus': 'Conteúdo programático',
+    'Catalog.Editions.Take': 'Fazer esta simulação', 'Catalog.Editions.Take.Name': 'Fazer esta simulação: {0}',
+    'Catalog.Editions.TakeFailed': 'Não foi possível iniciar a simulação. Tente novamente.',
+    'Attempt.Leave': 'Sair e continuar mais tarde',
+    'Attempt.PageTitle': 'Questão {0} · {1}', 'Attempt.Section.Range': 'Questões {0} a {1}', 'Attempt.Section.Other': 'Outras',
+    'Attempt.Question.Title': 'Questão {0}', 'Attempt.Question.Position': '{0} de {1}', 'Attempt.Question.BaseText': 'Texto-base',
+    'Attempt.Question.SingleHint': 'Marque uma alternativa. Clique nela novamente para a limpar.',
+    'Attempt.Question.TrueFalseHint': 'Julgue a afirmação. Clique novamente na sua escolha para a limpar.',
+    'Attempt.Question.MultipleHint': 'Assinale todas as alternativas corretas. Desmarque-as todas para limpar a resposta.',
+    'Attempt.Question.NotYetSupported': 'Este tipo de resposta ainda não está no simulador. A questão fica em branco e conta como em branco.',
+    'Questions.TrueFalse.True': 'Certo', 'Questions.TrueFalse.False': 'Errado',
+    'Attempt.Save.Saving': 'A guardar…', 'Attempt.Save.Saved': 'Resposta guardada', 'Attempt.Save.Cleared': 'Resposta apagada',
+    'Attempt.Save.Failed': 'A sua resposta não foi guardada. A questão voltou ao que estava; marque novamente.',
+    'Attempt.Nav.Previous': 'Anterior', 'Attempt.Nav.Next': 'Seguinte',
+    'Attempt.AnswerSheet.Title': 'Folha de respostas', 'Attempt.AnswerSheet.Open': 'Folha de respostas ({0} de {1} respondidas)',
+    'Attempt.AnswerSheet.Close': 'Fechar a folha de respostas', 'Attempt.AnswerSheet.Progress': '{0} de {1} respondidas',
+    'Attempt.AnswerSheet.Answered': 'Respondida', 'Attempt.AnswerSheet.Blank': 'Em branco', 'Attempt.AnswerSheet.CellName': 'Questão {0}: {1}',
+    'Attempt.Submit.Action': 'Submeter prova', 'Attempt.Submit.Title': 'Submeter a prova?',
+    'Attempt.Submit.Blanks': '{0} questões estão em branco: {1}.', 'Attempt.Submit.OneBlank': '1 questão está em branco: {0}.',
+    'Attempt.Submit.NoBlank': 'Nenhuma questão está em branco.', 'Attempt.Submit.Final': 'Depois de submeter, não pode alterar as suas respostas.',
+    'Attempt.Submit.Submitting': 'A submeter…', 'Attempt.Submit.Failed': 'A prova não foi submetida. As suas respostas continuam guardadas; tente novamente.',
+    'Attempt.Load.Failed': 'Não foi possível carregar a prova.',
+    'Attempt.Submitted.Title': 'Prova submetida', 'Attempt.Submitted.Message': 'As suas respostas de {0} foram submetidas em {1} às {2}.',
+    'Attempt.Submitted.Answered': 'Respondidas', 'Attempt.Submitted.Blank': 'Em branco', 'Attempt.Submitted.BackToEdition': 'Voltar à prova',
+    'Attempt.Submitted.LoadFailed': 'Não foi possível carregar a prova submetida.',
+    'Common.Cancel': 'Cancelar', 'Common.TryAgain': 'Tentar novamente', 'Common.GoHome': 'Ir para o início', 'Common.Loading': 'A carregar…',
+    'NotFound.Title': 'Página não encontrada', 'NotFound.Message': 'A página que procura não existe.',
+    'Theme': 'Tema escuro', 'Language': 'Idioma'
+  },
+  'en': {
+    'Layout.SkipToContent': 'Skip to content',
+    'Nav.Section.Study': 'Study', 'Catalog.Title': 'Catalog', 'ExamEditions.Section.Title': 'Editions',
+    'Catalog.Editions.Subtitle': 'The published editions of this exam, newest first.',
+    'Catalog.Exam.About': 'About the exam', 'Catalog.Editions.NoticeLink': 'Notice', 'Catalog.Editions.Syllabus': 'Syllabus',
+    'Catalog.Editions.Take': 'Take this exam', 'Catalog.Editions.Take.Name': 'Take this exam: {0}',
+    'Catalog.Editions.TakeFailed': 'The exam could not be started. Try again.',
+    'Attempt.Leave': 'Leave and continue later',
+    'Attempt.PageTitle': 'Question {0} · {1}', 'Attempt.Section.Range': 'Questions {0} to {1}', 'Attempt.Section.Other': 'Other',
+    'Attempt.Question.Title': 'Question {0}', 'Attempt.Question.Position': '{0} of {1}', 'Attempt.Question.BaseText': 'Base text',
+    'Attempt.Question.SingleHint': 'Mark one option. Click it again to clear it.',
+    'Attempt.Question.TrueFalseHint': 'Judge the statement. Click your choice again to clear it.',
+    'Attempt.Question.MultipleHint': 'Mark every option that applies. Untick them all to clear the answer.',
+    'Attempt.Question.NotYetSupported': 'This kind of answer is not in the simulator yet. The question stays blank and counts as blank.',
+    'Questions.TrueFalse.True': 'True', 'Questions.TrueFalse.False': 'False',
+    'Attempt.Save.Saving': 'Saving…', 'Attempt.Save.Saved': 'Answer saved', 'Attempt.Save.Cleared': 'Answer cleared',
+    'Attempt.Save.Failed': 'Your answer was not saved. The question is as it was before; mark it again.',
+    'Attempt.Nav.Previous': 'Previous', 'Attempt.Nav.Next': 'Next',
+    'Attempt.AnswerSheet.Title': 'Answer sheet', 'Attempt.AnswerSheet.Open': 'Answer sheet ({0} of {1} answered)',
+    'Attempt.AnswerSheet.Close': 'Close the answer sheet', 'Attempt.AnswerSheet.Progress': '{0} of {1} answered',
+    'Attempt.AnswerSheet.Answered': 'Answered', 'Attempt.AnswerSheet.Blank': 'Blank', 'Attempt.AnswerSheet.CellName': 'Question {0}: {1}',
+    'Attempt.Submit.Action': 'Submit exam', 'Attempt.Submit.Title': 'Submit the exam?',
+    'Attempt.Submit.Blanks': '{0} questions are blank: {1}.', 'Attempt.Submit.OneBlank': '1 question is blank: {0}.',
+    'Attempt.Submit.NoBlank': 'No question is blank.', 'Attempt.Submit.Final': 'After submitting you cannot change your answers.',
+    'Attempt.Submit.Submitting': 'Submitting…', 'Attempt.Submit.Failed': 'The exam was not submitted. Your answers are kept; try again.',
+    'Attempt.Load.Failed': 'The exam could not be loaded.',
+    'Attempt.Submitted.Title': 'Exam submitted', 'Attempt.Submitted.Message': 'Your answers to {0} were submitted on {1} at {2}.',
+    'Attempt.Submitted.Answered': 'Answered', 'Attempt.Submitted.Blank': 'Blank', 'Attempt.Submitted.BackToEdition': 'Back to the exam',
+    'Attempt.Submitted.LoadFailed': 'The submitted exam could not be loaded.',
+    'Common.Cancel': 'Cancel', 'Common.TryAgain': 'Try again', 'Common.GoHome': 'Go to the home page', 'Common.Loading': 'Loading…',
+    'NotFound.Title': 'Page not found', 'NotFound.Message': 'The page you are looking for does not exist.',
+    'Theme': 'Dark theme', 'Language': 'Language'
+  }
+};
+const LANG_NAMES = { 'pt-BR': 'Português (Brasil)', 'pt-PT': 'Português (Portugal)', 'en': 'English' };
+
+/* ===================== sample data (content stays in pt-BR, the exam's language) ===================== */
+const CL = 'pt-BR';
+const BASE_MANAUS = '<p>Criada para proteger o patrimônio municipal, a Guarda Municipal de Manaus passou, na última década, a atuar também na mediação de conflitos, na proteção de escolas e no apoio à fiscalização de trânsito. Para o comandante ouvido pela reportagem, “a presença próxima da comunidade previne mais do que qualquer viatura”.</p><p>Os dados de 2025 mostram que a maior parte dos atendimentos ocorreu nas zonas Norte e Leste, onde a expansão urbana foi mais rápida e os equipamentos públicos são mais recentes.</p>';
+const FIGURE = `<div class="figure-wrap"><svg class="figure" viewBox="0 0 360 160" width="360" height="160" role="img" aria-label="Gráfico de barras: atendimentos por zona em 2025 — Norte 4.200, Leste 3.900, Sul 2.100, Oeste 1.800, Centro-Sul 1.300.">
+<g fill="currentColor" opacity=".85"><rect x="20" y="20" width="44" height="110"/><rect x="88" y="28" width="44" height="102"/><rect x="156" y="75" width="44" height="55"/><rect x="224" y="83" width="44" height="47"/><rect x="292" y="96" width="44" height="34"/></g>
+<g font-size="11" fill="currentColor"><text x="26" y="146">Norte</text><text x="92" y="146">Leste</text><text x="164" y="146">Sul</text><text x="228" y="146">Oeste</text><text x="290" y="146">C.-Sul</text></g></svg>
+<p class="figure-cap">Atendimentos da Guarda Municipal por zona, 2025.</p></div>`;
+const SPECIFIC = {
+  1: { base: BASE_MANAUS, stmt: '<p>De acordo com o texto, a atuação da Guarda Municipal de Manaus na última década:</p>',
+       opts: ['limitou-se à proteção do patrimônio municipal.', 'ampliou-se para a mediação de conflitos e a proteção de escolas.', 'substituiu a fiscalização de trânsito feita pelo estado.', 'concentrou-se nas zonas Sul e Oeste da cidade.'] },
+  2: { base: BASE_MANAUS, stmt: '<p>No trecho “a presença próxima da comunidade previne mais do que qualquer viatura”, as aspas indicam:</p>',
+       opts: ['ironia do autor.', 'fala de outra pessoa reproduzida no texto.', 'termo estrangeiro.', 'título de obra.'] },
+  3: { base: BASE_MANAUS, stmt: '<p>O gráfico a seguir, citado no texto, mostra os atendimentos da Guarda Municipal por zona da cidade em 2025.</p>' + FIGURE + '<p>Com base no texto e no gráfico, é correto afirmar que:</p>',
+       opts: ['as zonas Norte e Leste somam mais da metade dos atendimentos.', 'a zona Centro-Sul teve mais atendimentos do que a zona Oeste.', 'os atendimentos foram distribuídos igualmente entre as zonas.', 'a zona Sul teve o maior número de atendimentos.'] },
+  4: { base: BASE_MANAUS, stmt: '<p>A palavra “equipamentos”, no segundo parágrafo, refere-se a:</p>',
+       opts: ['ferramentas de uso pessoal dos guardas.', 'viaturas e armamentos.', 'instalações de serviço público, como escolas e postos de saúde.', 'aparelhos eletrônicos de monitoramento.'] },
+  46: { stmt: '<p>Segundo a Lei Orgânica do Município de Manaus, compete privativamente ao Município:</p>',
+        opts: ['legislar sobre direito penal.', 'organizar e prestar os serviços públicos de interesse local.', 'emitir moeda.', 'manter relações com Estados estrangeiros.'] },
+  48: { stmt: '<p>Conforme o Estatuto Geral das Guardas Municipais (Lei nº 13.022/2014), é princípio mínimo de atuação das guardas municipais:</p>',
+        opts: ['a proteção dos direitos humanos fundamentais.', 'o uso progressivo da força em qualquer situação.', 'a subordinação à Polícia Militar.', 'o sigilo de todos os seus atos.'] },
+  60: { stmt: '<p>Ao abordar um cidadão em situação de vulnerabilidade em praça pública, o guarda municipal deve priorizar:</p>',
+        opts: ['a remoção imediata da pessoa do local.', 'o encaminhamento à rede de assistência social do município.', 'a lavratura de auto de infração.', 'a condução à delegacia mais próxima.'] }
+};
+const GENERIC = [
+  'Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão.',
+  'Uma sequência numérica segue a regra 3, 7, 15, 31, ... Qual é o sétimo termo?',
+  'No Windows 11, o atalho que abre o Explorador de Arquivos é:',
+  'De acordo com o Código de Posturas do Município de Manaus, assinale a alternativa correta.',
+  'Sobre o uso da força pelos agentes de segurança pública municipal, assinale a alternativa correta.'
+];
+const GENERIC_OPTS = [
+  ['Haviam muitas pessoas na fila.', 'Fazem dez anos que ele chegou.', 'Existem soluções para o problema.', 'Houveram reclamações sobre o serviço.'],
+  ['127', '255', '511', '1.023'],
+  ['Ctrl + E', 'Windows + E', 'Alt + F4', 'Windows + D'],
+  ['A colocação de mesas em calçadas dispensa licença.', 'O comércio ambulante depende de autorização do Município.', 'O Município não fiscaliza ruído urbano.', 'A poda de árvores em via pública é livre.'],
+  ['Deve ser sempre o primeiro recurso.', 'Deve ser proporcional e necessário.', 'Dispensa registro posterior.', 'É vedado em qualquer circunstância.']
+];
+function buildManaus() {
+  const secs = [['Língua Portuguesa', 1, 15], ['Raciocínio Lógico-Matemático', 16, 25], ['Noções de Informática', 26, 30], ['Legislação Municipal e Estatuto das Guardas', 31, 50], ['Conhecimentos Específicos', 51, 60]];
+  const qs = [];
+  secs.forEach((s, i) => {
+    for (let n = s[1]; n <= s[2]; n++) {
+      if (n === 47) continue; // annulled: left out of the attempt (F-166 BR2)
+      const sp = SPECIFIC[n];
+      qs.push({ n, sec: i, type: 'single', base: sp ? sp.base : null, stmt: sp ? sp.stmt : `<p>${GENERIC[i]}</p>`, opts: sp ? sp.opts : GENERIC_OPTS[i] });
+    }
+  });
+  return { edition: 'Guarda Municipal de Manaus 2026 · Consulplan', examId: 'manaus', sections: secs.map(s => s[0]), qs };
+}
+function buildSample() {
+  const qs = [
+    { n: 1, sec: 0, type: 'single', stmt: '<p>A capital do Estado do Amazonas é:</p>', opts: ['Belém.', 'Manaus.', 'Porto Velho.', 'Boa Vista.'] },
+    { n: 2, sec: 0, type: 'tf', stmt: '<p>O Encontro das Águas ocorre na confluência dos rios Negro e Solimões, nas proximidades de Manaus.</p>' },
+    { n: 3, sec: 0, type: 'multiple', stmt: '<p>São atribuições previstas para as guardas municipais na Lei nº 13.022/2014:</p>',
+      opts: ['zelar pelos bens, equipamentos e prédios públicos do Município.', 'julgar infrações penais de menor potencial ofensivo.', 'colaborar com a pacificação de conflitos.', 'expedir carteiras de identidade.'] },
+    { n: 4, sec: 1, type: 'other', stmt: '<p>Associe cada figura de linguagem ao exemplo correspondente.</p><table><tr><th>Figura</th><th>Exemplo</th></tr><tr><td>1. Metáfora</td><td>a) “Sua boca é um cadeado.”</td></tr><tr><td>2. Hipérbole</td><td>b) “Chorei rios de lágrimas.”</td></tr></table>' },
+    { n: 5, sec: 1, type: 'other', base: '<p>“A cidade cresce para os lados da floresta, e com ela crescem as perguntas sobre o que é cuidar de um lugar.”</p>', stmt: '<p>A partir do texto-base, escreva uma redação dissertativa sobre o papel da guarda municipal na vida da cidade.</p>' },
+    { n: 6, sec: 2, type: 'single', stmt: '<p>Qual destas medidas de primeiros socorros é a correta diante de uma hemorragia externa?</p>', opts: ['Aplicar compressão direta sobre o ferimento.', 'Lavar o ferimento com álcool.', 'Retirar objetos encravados.', 'Oferecer água à vítima.'] }
+  ];
+  return { edition: 'Edição de exemplo F-110 · todos os tipos de questão', examId: 'sample', sections: ['Conhecimentos Gerais', 'Língua Portuguesa', null], qs };
+}
+const LONG = {
+  edition: 'Concurso Público para Provimento de Cargos Efetivos da Guarda Municipal de Manaus — Edital nº 001/2026 — Guarda Municipal de 2ª Classe · Consulplan',
+  section: 'Legislação Municipal, Lei Orgânica do Município de Manaus, Estatuto Geral das Guardas Municipais (Lei nº 13.022/2014) e Código de Posturas',
+  stmt: '<p>Considere a seguinte situação hipotética: durante o patrulhamento preventivo no entorno de uma escola municipal da zona Norte, em horário de saída dos alunos, um guarda municipal observa um vendedor ambulante sem autorização, uma discussão entre dois responsáveis por causa de uma vaga de estacionamento e um grupo de adolescentes que pichava o muro da escola. Com base na Lei nº 13.022/2014 (Estatuto Geral das Guardas Municipais), na Lei Orgânica do Município de Manaus e no Código de Posturas do Município, e considerando os princípios de proteção dos direitos humanos fundamentais, de preservação da vida e de uso progressivo da força, assinale a alternativa que apresenta a sequência de providências mais adequada para o guarda municipal, sem extrapolar as suas competências legais:</p><table><tr><th>Ocorrência</th><th>Norma aplicável</th><th>Órgão competente</th><th>Prazo de comunicação</th><th>Observação</th></tr><tr><td>Comércio ambulante</td><td>Código de Posturas, art. 112</td><td>Secretaria Municipal de Fiscalização</td><td>24 horas</td><td>Registro fotográfico recomendado</td></tr></table>',
+  opt: 'Mediar a discussão entre os responsáveis, preservar a integridade dos adolescentes e comunicar a pichação ao Conselho Tutelar e à autoridade policial, registrando a ocorrência, e acionar a fiscalização municipal quanto ao comércio ambulante, sem apreender mercadorias por iniciativa própria, porque a apreensão depende de ato do órgão de fiscalização competente e de lavratura do respectivo auto pela autoridade administrativa.'
+};
+
+/* ===================== state ===================== */
+const S = { screen: 'sim', lang: 'pt-BR', theme: 'light', phone: false, cat: 'ready', sub: 'ready', sim: 'answered' };
+let M = null;  // simulator model
+const t = (k, ...a) => (T[S.lang][k] ?? k).replace(/\{(\d)\}/g, (_, i) => a[i]);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const letter = i => String.fromCharCode(65 + i);
+
+const SIM_STATES = [
+  ['loading', 'Loading'], ['loadError', 'Load failed'], ['notFound', 'Not found (BR11)'],
+  ['first', 'New attempt (Q1)'], ['resumed', 'Resumed (first blank)'], ['answered', 'Ready: base text + image'],
+  ['saving', 'Saving'], ['saveFailed', 'Save failed (BR7)'], ['tf', 'True/false'], ['multiple', 'Multiple answer'],
+  ['otherType', 'Other type (BR8)'], ['last', 'Last question'], ['drawer', 'Answer sheet drawer (phone)'],
+  ['dialog', 'Submit dialog: blanks'], ['dialogNone', 'Submit dialog: no blank'], ['dialogLong', 'Submit dialog: long list'],
+  ['submitting', 'Submitting'], ['submitFailed', 'Submit failed'], ['conflict', '409 already submitted → submitted page'], ['long', 'Long text']
+];
+const CAT_STATES = [['ready', 'Student (ready)'], ['starting', 'Starting'], ['startFailed', 'Start failed'], ['curator', 'Curator (no action)'], ['long', 'Long text']];
+const SUB_STATES = [['ready', 'Ready'], ['loading', 'Loading'], ['loadError', 'Load failed'], ['notFound', 'Not found (BR11)'], ['long', 'Long text']];
+
+function answersFor(ds, nums, fill) {
+  const a = {};
+  ds.qs.forEach(q => { if (nums.includes(q.n)) a[q.n] = fill(q); });
+  return a;
+}
+function presetSim(key) {
+  const manaus = buildManaus(), sample = buildSample();
+  const all = manaus.qs.map(q => q.n);
+  const pick = q => letter((q.n * 7) % 4);
+  M = { ds: manaus, idx: 0, answers: {}, load: 'ready', saving: false, pending: null, status: '', saveFailed: false,
+        sheetOpen: false, dialog: false, submitting: false, submitFailed: false, long: false };
+  const at = n => M.ds.qs.findIndex(q => q.n === n);
+  switch (key) {
+    case 'loading': M.load = 'loading'; break;
+    case 'loadError': M.load = 'error'; break;
+    case 'notFound': M.load = 'notfound'; break;
+    case 'first': break;
+    case 'resumed': M.answers = answersFor(manaus, [1,2,3,4,5,6,7,8,9,10,11,14,16,17,18,19,20], pick); M.idx = at(12); break;
+    case 'answered': M.answers = { 1: 'B', 2: 'B', 3: 'A' }; M.idx = at(3); M.status = 'saved'; break;
+    case 'saving': M.answers = { 1: 'B', 2: 'B', 3: 'A' }; M.idx = at(4); M.saving = true; M.pending = 'C'; M.status = 'saving'; break;
+    case 'saveFailed': M.answers = { 1: 'B', 2: 'B', 3: 'A' }; M.idx = at(4); M.saveFailed = true; break;
+    case 'tf': M.ds = sample; M.answers = { 1: 'B', 2: 'T' }; M.idx = 1; M.status = 'saved'; break;
+    case 'multiple': M.ds = sample; M.answers = { 1: 'B', 2: 'T', 3: ['A', 'C'] }; M.idx = 2; M.status = 'saved'; break;
+    case 'otherType': M.ds = sample; M.answers = { 1: 'B', 2: 'T', 3: ['A', 'C'] }; M.idx = 3; break;
+    case 'last': M.answers = answersFor(manaus, all.filter(n => ![12, 30, 58].includes(n)), pick); M.idx = manaus.qs.length - 1; break;
+    case 'drawer': S.phone = true; M.answers = answersFor(manaus, all.filter(n => n < 47 && n !== 12 && n !== 30), pick); M.idx = at(48); M.sheetOpen = true; break;
+    case 'dialog': M.answers = answersFor(manaus, all.filter(n => ![12, 30, 58].includes(n)), pick); M.idx = manaus.qs.length - 1; M.dialog = true; break;
+    case 'dialogNone': M.answers = answersFor(manaus, all, pick); M.idx = manaus.qs.length - 1; M.dialog = true; break;
+    case 'dialogLong': M.answers = answersFor(manaus, all.filter(n => n <= 19), pick); M.idx = at(20); M.dialog = true; break;
+    case 'submitting': M.answers = answersFor(manaus, all.filter(n => ![12, 30, 58].includes(n)), pick); M.idx = manaus.qs.length - 1; M.submitting = true; break;
+    case 'submitFailed': M.answers = answersFor(manaus, all.filter(n => ![12, 30, 58].includes(n)), pick); M.idx = manaus.qs.length - 1; M.submitFailed = true; break;
+    case 'conflict': S.screen = 'submitted'; S.sub = 'ready'; S.sim = 'answered'; break;
+    case 'long': M.long = true; M.answers = answersFor(manaus, all.filter(n => n < 31), pick); M.idx = at(48); M.answers[48] = 'A'; break;
+  }
+}
+
+/* ===================== screen 1: catalog exam page [changed] ===================== */
+function mainShell(inner) {
+  return `<a class="vh" href="#main-content">${t('Layout.SkipToContent')}</a>
+  <header class="appbar">
+    <button class="icon-btn" aria-label="Menu">${icon('menu')}</button>
+    <span class="brand-sym" aria-hidden="true"><span style="background:#1A9E8C"></span><span style="background:#2478C5"></span><span style="background:#F5A020"></span></span>
+    <span class="brand-text"><span class="brand-name">Simulab</span><span class="brand-co">Control Alt Systems</span></span>
+    <span class="spacer"></span>
+    <button class="icon-btn" data-act="theme" aria-label="${t('Theme')}">${icon('dark')}</button>
+    <button class="icon-btn" data-act="lang" aria-label="${t('Language')}">${icon('lang')}</button>
+    <span class="avatar" aria-hidden="true">AC</span>
+  </header>
+  <div class="shell"><nav class="drawer" aria-label="Menu"><span></span><span></span><span></span><span></span></nav>
+  <main id="main-content" tabindex="-1" class="content">${inner}</main></div>`;
+}
+function renderCatalog() {
+  const curator = S.cat === 'curator', long = S.cat === 'long';
+  const eds = [
+    { id: 'e1', label: long ? LONG.edition : '2026 · Guarda Municipal de 2ª Classe · Consulplan (CONSULPLAN)', ref: 'Edital nº 001/2026', applied: '08/03/2026' },
+    { id: 'e2', label: '2022 · Guarda Municipal · Instituto Acesso (ACESSO)', ref: 'Edital nº 002/2022', applied: '22/05/2022' }
+  ];
+  const rows = eds.map((e, i) => {
+    let btn = '';
+    if (!curator) {
+      const starting = S.cat === 'starting' && i === 0;
+      btn = `<button class="btn btn-outlined" ${starting ? 'disabled aria-busy="true"' : ''} data-act="start"
+        aria-label="${esc(t('Catalog.Editions.Take.Name', e.label))}">${starting ? '<span class="spinner" aria-hidden="true"></span>' : icon('play')}${t('Catalog.Editions.Take')}</button>`;
+    }
+    return `<li class="row"><div class="row-main">
+      <div class="row-line"><strong lang="${CL}" style="overflow-wrap:anywhere">${esc(e.label)}</strong></div>
+      <div class="row-line"><span class="muted" lang="${CL}">${e.ref}</span><span class="muted">${S.lang === 'en' ? 'Applied on' : 'Aplicada em'} ${e.applied}</span><a href="#" onclick="return false">${t('Catalog.Editions.NoticeLink')}</a></div>
+      <span class="disclosure">${t('Catalog.Editions.Syllabus')}</span>
+    </div>${btn}</li>`;
+  }).join('');
+  const alert = S.cat === 'startFailed' ? `<div class="alert alert-error" role="alert">${icon('error')}<span>${t('Catalog.Editions.TakeFailed')}</span></div>` : '';
+  const inner = `<nav class="crumbs" aria-label="Breadcrumb"><span>${t('Nav.Section.Study')}</span><span aria-hidden="true">/</span><a href="#">${t('Catalog.Title')}</a><span aria-hidden="true">/</span><span lang="${CL}">Guarda Municipal de Manaus</span></nav>
+  <h1 class="page-title" lang="${CL}">Guarda Municipal de Manaus</h1>
+  <div class="layout2">
+    <div class="card"><section class="sec-card" aria-labelledby="eds-h">
+      <div class="sec-head">${icon('editions')}<h2 id="eds-h">${t('ExamEditions.Section.Title')}</h2></div>
+      <p class="sec-sub">${t('Catalog.Editions.Subtitle')}</p>${alert}<ul class="rows">${rows}</ul>
+    </section></div>
+    <aside class="aside"><h2>${t('Catalog.Exam.About')}</h2><dl>
+      <dt>Órgão</dt><dd lang="${CL}">Prefeitura de Manaus</dd><dt>Abrangência</dt><dd>Municipal</dd><dt>Município</dt><dd lang="${CL}">Manaus (AM)</dd><dt>Edições</dt><dd>2</dd>
+    </dl></aside>
+  </div>`;
+  document.title = 'Guarda Municipal de Manaus · Simulab';
+  return mainShell(inner);
+}
+
+/* ===================== screen 2: simulator [new] ===================== */
+const answered = n => { const a = M.answers[n]; return Array.isArray(a) ? a.length > 0 : !!a; };
+function sectionsOf(ds) {
+  // BR3: sections are notice subjects, ordered by their lowest paper number; no subject = last section "Other".
+  const map = new Map();
+  ds.qs.forEach(q => { const k = ds.sections[q.sec] ?? null; if (!map.has(k)) map.set(k, []); map.get(k).push(q); });
+  const list = [...map.entries()].map(([label, qs]) => ({ label, qs: qs.sort((a, b) => a.n - b.n) }));
+  return list.sort((a, b) => (a.label === null) - (b.label === null) || a.qs[0].n - b.qs[0].n);
+}
+function secLabel(sec) { return sec.label === null ? t('Attempt.Section.Other') : (M.long && sec.label.startsWith('Legislação') ? LONG.section : sec.label); }
+function sessionBar(showEdition) {
+  const total = M.ds.qs.length, done = M.ds.qs.filter(q => answered(q.n)).length;
+  const ed = M.long ? LONG.edition : M.ds.edition;
+  const sheetBtn = S.phone && showEdition ? `<button class="btn btn-outlined sheet-open-btn" data-act="openSheet" aria-label="${esc(t('Attempt.AnswerSheet.Open', done, total))}" aria-expanded="${M.sheetOpen}" aria-controls="sheet-drawer">${icon('grid')}<span class="sheet-badge" aria-hidden="true">${done}/${total}</span></button>` : '';
+  return `<a class="vh" href="#main-content">${t('Layout.SkipToContent')}</a>
+  <header class="session-bar">
+    ${showEdition ? `<h1 class="session-title" lang="${CL}" title="${esc(ed)}">${esc(ed)}</h1>` : ''}
+    <span class="spacer"></span>
+    ${showEdition ? (S.phone
+      ? `<a class="icon-btn" href="#" data-act="toCatalog" aria-label="${t('Attempt.Leave')}" title="${t('Attempt.Leave')}">${icon('back')}</a>`
+      : `<a href="#" data-act="toCatalog" style="white-space:nowrap;font-size:.875rem">${t('Attempt.Leave')}</a>`) : ''}${sheetBtn}
+    <button class="icon-btn" data-act="theme" aria-label="${t('Theme')}" title="${t('Theme')}">${icon('dark')}</button>
+    <button class="icon-btn" data-act="lang" aria-label="${t('Language')}" title="${t('Language')}">${icon('lang')}</button>
+  </header>`;
+}
+function sheetHtml(inDrawer) {
+  const total = M.ds.qs.length, done = M.ds.qs.filter(q => answered(q.n)).length, cur = M.ds.qs[M.idx].n;
+  const secs = sectionsOf(M.ds).map((s, i) => `<h3 class="sheet-sec" id="sh-${inDrawer ? 'd' : 'p'}-${i}" ${s.label === null ? '' : `lang="${CL}"`}>${esc(secLabel(s))}</h3>
+    <ul class="cells" aria-labelledby="sh-${inDrawer ? 'd' : 'p'}-${i}">${s.qs.map(q => {
+      const a = answered(q.n);
+      return `<li><button class="cell${a ? ' ans' : ''}" data-go="${q.n}" ${q.n === cur ? 'aria-current="step"' : ''}
+        aria-label="${esc(t('Attempt.AnswerSheet.CellName', q.n, a ? t('Attempt.AnswerSheet.Answered') : t('Attempt.AnswerSheet.Blank')))}">${q.n}${a ? icon('check') : ''}</button></li>`;
+    }).join('')}</ul>`).join('');
+  return `<div class="sheet-head"><h2 id="sheet-title-${inDrawer ? 'd' : 'p'}">${t('Attempt.AnswerSheet.Title')}</h2>
+    ${inDrawer ? `<button class="icon-btn" data-act="closeSheet" aria-label="${t('Attempt.AnswerSheet.Close')}" title="${t('Attempt.AnswerSheet.Close')}">${icon('close')}</button>` : ''}</div>
+    <p class="sheet-progress">${t('Attempt.AnswerSheet.Progress', done, total)}</p>
+    <div class="legend" aria-hidden="true"><span><i class="ans">${icon('check')}</i>${t('Attempt.AnswerSheet.Answered')}</span><span><i></i>${t('Attempt.AnswerSheet.Blank')}</span></div>
+    ${secs}`;
+}
+function optionsHtml(q) {
+  const busy = M.saving ? 'aria-busy="true"' : '';
+  const cur = M.saving ? M.pending : M.answers[q.n];
+  if (q.type === 'other') return `<div class="alert alert-info" role="status" style="margin-top:16px">${icon('info')}<span>${t('Attempt.Question.NotYetSupported')}</span></div>`;
+  if (q.type === 'multiple') {
+    const set = Array.isArray(cur) ? cur : [];
+    return `<p class="q-hint" id="q-hint">${t('Attempt.Question.MultipleHint')}</p>
+    <div class="opts" role="group" aria-labelledby="q-title" aria-describedby="q-hint" ${busy}>${q.opts.map((o, i) => {
+      const on = set.includes(letter(i));
+      return `<div class="opt${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" data-opt="${letter(i)}">
+        <span class="ind box">${on ? icon('check') : ''}</span><span class="opt-letter">${letter(i)}</span><div class="opt-text qc" lang="${CL}">${o}</div></div>`;
+    }).join('')}</div>`;
+  }
+  const items = q.type === 'tf'
+    ? [['T', t('Questions.TrueFalse.True'), ''], ['F', t('Questions.TrueFalse.False'), '']]
+    : q.opts.map((o, i) => [letter(i), (M.long && q.n === 48 && i === 0) ? LONG.opt : o, letter(i)]);
+  const marked = items.findIndex(it => it[0] === cur);
+  return `<p class="q-hint" id="q-hint">${t(q.type === 'tf' ? 'Attempt.Question.TrueFalseHint' : 'Attempt.Question.SingleHint')}</p>
+  <div class="opts" role="radiogroup" aria-labelledby="q-title" aria-describedby="q-hint" ${busy}>${items.map((it, i) => {
+    const on = it[0] === cur, tab = on || (marked < 0 && i === 0) ? 0 : -1;
+    return `<div class="opt${on ? ' on' : ''}" role="radio" aria-checked="${on}" tabindex="${tab}" data-opt="${it[0]}">
+      <span class="ind radio"></span>${it[2] ? `<span class="opt-letter">${it[2]}</span>` : ''}<div class="opt-text qc" ${q.type === 'tf' ? '' : `lang="${CL}"`}>${it[1]}</div></div>`;
+  }).join('')}</div>`;
+}
+function renderSim() {
+  if (M.load === 'notfound') {
+    document.title = t('NotFound.Title') + ' · Simulab';
+    return sessionBar(false) + `<main id="main-content" tabindex="-1" class="content"><div class="pstate">${icon('notfound')}<h1>${t('NotFound.Title')}</h1><p>${t('NotFound.Message')}</p>
+      <a class="btn btn-filled" href="#" onclick="return false">${icon('home')}${t('Common.GoHome')}</a></div></main>`;
+  }
+  if (M.load !== 'ready') {
+    const body = M.load === 'loading'
+      ? `<div class="loading" role="status"><span class="spinner" aria-hidden="true"></span>${t('Common.Loading')}</div>`
+      : `<div class="errstate">${icon('error')}<p>${t('Attempt.Load.Failed')}</p><button class="btn btn-outlined" data-act="retryLoad">${t('Common.TryAgain')}</button></div>`;
+    return sessionBar(false) + `<div class="session-body"><main id="main-content" tabindex="-1" class="card q-card">${body}</main>${S.phone ? '' : '<div class="sheet" aria-hidden="true"></div>'}</div>`;
+  }
+  const qs = M.ds.qs, q = qs[M.idx], secs = sectionsOf(M.ds), sec = secs.find(s => s.qs.includes(q));
+  const first = M.idx === 0, last = M.idx === qs.length - 1, inert = M.submitting ? 'disabled' : '';
+  const stmt = M.long && q.n === 48 ? LONG.stmt : q.stmt;
+  const status = M.status === 'saving' ? `<span class="spinner" aria-hidden="true"></span>${t('Attempt.Save.Saving')}`
+    : M.status === 'saved' ? `${icon('verified')}${t('Attempt.Save.Saved')}`
+    : M.status === 'cleared' ? `${icon('verified')}${t('Attempt.Save.Cleared')}` : '';
+  const alertSlot = M.saveFailed ? `<div class="alert alert-error" role="alert">${icon('error')}<span>${t('Attempt.Save.Failed')}</span></div>`
+    : M.submitFailed ? `<div class="alert alert-error" role="alert">${icon('error')}<span>${t('Attempt.Submit.Failed')}</span><button class="alert-action" data-act="submit">${t('Common.TryAgain')}</button></div>` : '';
+  document.title = t('Attempt.PageTitle', q.n, M.long ? LONG.edition : M.ds.edition);
+  const card = `<main id="main-content" tabindex="-1" class="card q-card">
+    <p class="q-section"><span ${sec.label === null ? '' : `lang="${CL}"`}>${esc(secLabel(sec))}</span> · <span class="range">${t('Attempt.Section.Range', sec.qs[0].n, sec.qs[sec.qs.length - 1].n)}</span></p>
+    <div class="q-head"><h2 id="q-title" tabindex="-1">${t('Attempt.Question.Title', q.n)}</h2><span class="q-pos">${t('Attempt.Question.Position', M.idx + 1, qs.length)}</span></div>
+    ${alertSlot}
+    ${q.base ? `<section aria-label="${t('Attempt.Question.BaseText')}"><p class="base-cap" aria-hidden="true">${t('Attempt.Question.BaseText')}</p><div class="q-base qc" lang="${CL}">${q.base}</div></section>` : ''}
+    <div class="qc" lang="${CL}">${stmt}</div>
+    ${optionsHtml(q)}
+    <div class="save-status" role="status">${q.type === 'other' ? '' : status}</div>
+    <div class="q-nav">
+      <button class="btn btn-outlined" data-act="prev" ${first || M.submitting ? 'disabled' : ''}>${icon('left')}${t('Attempt.Nav.Previous')}</button>
+      <button class="btn btn-filled" data-act="next" ${last || M.submitting ? 'disabled' : ''}>${t('Attempt.Nav.Next')}${icon('right')}</button>
+    </div>
+    <div class="q-submit"><button class="btn btn-outlined" data-act="submit" ${inert} ${M.submitting ? `aria-label="${t('Attempt.Submit.Submitting')}"` : ''}>${M.submitting ? '<span class="spinner" aria-hidden="true"></span>' : icon('send')}${t('Attempt.Submit.Action')}</button></div>
+  </main>`;
+  const panel = S.phone ? '' : `<nav class="sheet" aria-labelledby="sheet-title-p">${sheetHtml(false)}</nav>`;
+  const drawer = S.phone && M.sheetOpen ? `<div class="overlay" data-act="closeSheet"></div><nav class="sheet-drawer" id="sheet-drawer" aria-labelledby="sheet-title-d">${sheetHtml(true)}</nav>` : '';
+  let dialog = '';
+  if (M.dialog) {
+    const blanks = qs.filter(x => !answered(x.n)).map(x => x.n);
+    const sep = ', ';
+    const msg = blanks.length === 0 ? t('Attempt.Submit.NoBlank') : blanks.length === 1 ? t('Attempt.Submit.OneBlank', blanks[0]) : t('Attempt.Submit.Blanks', blanks.length, blanks.join(sep));
+    dialog = `<div class="overlay dlg-overlay"></div><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-t" aria-describedby="dlg-m">
+      <h2 id="dlg-t">${t('Attempt.Submit.Title')}</h2><div id="dlg-m"><p>${msg}</p><p>${t('Attempt.Submit.Final')}</p></div>
+      <div class="dialog-actions"><button class="btn btn-text" data-act="cancelDlg">${t('Common.Cancel')}</button><button class="btn btn-filled" data-act="confirmSubmit">${t('Attempt.Submit.Action')}</button></div></div>`;
+  }
+  return sessionBar(true) + `<div class="session-body">${card}${panel}</div>${drawer}${dialog}`;
+}
+
+/* ===================== screen 3: submitted page [new] ===================== */
+function renderSubmitted() {
+  let inner;
+  if (S.sub === 'loading') inner = `<div class="loading" role="status"><span class="spinner" aria-hidden="true"></span>${t('Common.Loading')}</div>`;
+  else if (S.sub === 'loadError') inner = `<div class="errstate">${icon('error')}<p>${t('Attempt.Submitted.LoadFailed')}</p><button class="btn btn-outlined">${t('Common.TryAgain')}</button></div>`;
+  else if (S.sub === 'notFound') inner = `<div class="pstate">${icon('notfound')}<h1>${t('NotFound.Title')}</h1><p>${t('NotFound.Message')}</p><a class="btn btn-filled" href="#" onclick="return false">${icon('home')}${t('Common.GoHome')}</a></div>`;
+  else {
+    const ed = S.sub === 'long' ? LONG.edition : 'Guarda Municipal de Manaus 2026 · Consulplan';
+    const date = S.lang === 'en' ? '10/27/2026' : '27/10/2026', time = S.lang === 'en' ? '3:42 PM' : '15:42';
+    inner = `<div class="pstate success">${icon('verified')}<h1>${t('Attempt.Submitted.Title')}</h1>
+      <p>${t('Attempt.Submitted.Message', `<span lang="${CL}">${esc(ed)}</span>`, date, time)}</p>
+      <dl class="facts"><div><dt>${t('Attempt.Submitted.Answered')}</dt><dd>56</dd></div><div><dt>${t('Attempt.Submitted.Blank')}</dt><dd>3</dd></div></dl>
+      <a class="btn btn-filled" href="#" data-act="toCatalog">${icon('back')}${t('Attempt.Submitted.BackToEdition')}</a></div>`;
+  }
+  document.title = (S.sub === 'notFound' ? t('NotFound.Title') : t('Attempt.Submitted.Title')) + ' · Simulab';
+  return mainShell(inner);
+}
+
+/* ===================== render + demo chrome ===================== */
+function pills(el, list, cur, on) {
+  el.innerHTML = list.map(([k, l]) => `<button type="button" aria-pressed="${k === cur}" data-k="${k}">${l}</button>`).join(' ');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => on(b.dataset.k));
+}
+const NOTES = {
+  catalog: 'Screen 1, /catalog/exams/{id} [changed]: one outlined "take" button per published edition, only for attempts.take (BR1, AC17). Rows, aside and links are F-36 as built.',
+  sim: 'Screen 2, /attempts/{id} [new], ExamSessionLayout: no menu, no breadcrumb. Click options, Previous/Next, sheet cells and Submit: the mockup behaves (saves always succeed here except in "Save failed"). Content stays in pt-BR (the exam\'s language) in every UI locale.',
+  submitted: 'Screen 3, /attempts/{id}/submitted [new], MainLayout + AppPageState. Also the target of the 409 already_submitted reply (BR7) and of opening a submitted attempt (BR10).'
+};
+function render() {
+  document.documentElement.dataset.theme = S.theme;
+  document.documentElement.lang = S.lang;
+  const f = document.getElementById('frame');
+  f.className = 'frame' + (S.phone ? ' phone' : '');
+  f.innerHTML = S.screen === 'catalog' ? renderCatalog() : S.screen === 'sim' ? renderSim() : renderSubmitted();
+  pills(document.getElementById('d-screen'), [['catalog', '1. Catalog exam page'], ['sim', '2. Simulator'], ['submitted', '3. Submitted page']], S.screen, k => { S.screen = k; if (k === 'sim') presetSim(S.sim); render(); });
+  const states = S.screen === 'catalog' ? CAT_STATES : S.screen === 'sim' ? SIM_STATES : SUB_STATES;
+  const cur = S.screen === 'catalog' ? S.cat : S.screen === 'sim' ? S.sim : S.sub;
+  pills(document.getElementById('d-state'), states, cur, k => {
+    if (S.screen === 'catalog') S.cat = k; else if (S.screen === 'sim') { S.sim = k; presetSim(k); } else S.sub = k; render();
+  });
+  pills(document.getElementById('d-theme'), [['light', 'Light'], ['dark', 'Dark']], S.theme, k => { S.theme = k; render(); });
+  pills(document.getElementById('d-lang'), Object.keys(LANG_NAMES).map(k => [k, LANG_NAMES[k]]), S.lang, k => { S.lang = k; render(); });
+  pills(document.getElementById('d-vp'), [['desk', 'Desktop'], ['phone', 'Phone (390 px)']], S.phone ? 'phone' : 'desk', k => { S.phone = k === 'phone'; if (!S.phone && M) M.sheetOpen = false; render(); });
+  document.getElementById('ann').textContent = NOTES[S.screen];
+  wire(f);
+}
+function focusQuestion() { const h = document.getElementById('q-title'); if (h) h.focus(); }
+function go(i) { M.idx = i; M.status = ''; M.saveFailed = false; M.sheetOpen = false; render(); focusQuestion(); }
+function choose(val) {
+  if (M.saving || M.submitting) return;
+  const q = M.ds.qs[M.idx]; const prev = M.answers[q.n];
+  let next;
+  if (q.type === 'multiple') { const set = Array.isArray(prev) ? [...prev] : []; next = set.includes(val) ? set.filter(x => x !== val) : [...set, val].sort(); }
+  else next = prev === val ? null : val;  // clicking the marked one again clears it (BR6)
+  M.saving = true; M.pending = next; M.status = 'saving'; M.saveFailed = false; render();
+  setTimeout(() => {
+    M.saving = false; M.pending = null;
+    const empty = next === null || (Array.isArray(next) && next.length === 0);
+    if (empty) { delete M.answers[q.n]; M.status = 'cleared'; } else { M.answers[q.n] = next; M.status = 'saved'; }
+    render();
+    const el = document.querySelector(`[data-opt="${val}"]`); if (el) el.focus();
+  }, 600);
+}
+function wire(f) {
+  f.querySelectorAll('[data-opt]').forEach(el => {
+    el.onclick = () => choose(el.dataset.opt);
+    el.onkeydown = e => {
+      const group = [...el.parentElement.querySelectorAll('[data-opt]')], i = group.indexOf(el);
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); choose(el.dataset.opt); }
+      if (el.getAttribute('role') === 'radio' && ['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'].includes(e.key)) {
+        e.preventDefault(); // arrows move focus only: marking saves, so selection does not follow focus
+        const n = group[(i + (e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : -1) + group.length) % group.length];
+        group.forEach(g => g.tabIndex = -1); n.tabIndex = 0; n.focus();
+      }
+    };
+  });
+  f.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(M.ds.qs.findIndex(q => q.n === +b.dataset.go)));
+  f.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', e => {
+    const a = b.dataset.act;
+    if (a === 'prev' && M.idx > 0) go(M.idx - 1);
+    else if (a === 'next' && M.idx < M.ds.qs.length - 1) go(M.idx + 1);
+    else if (a === 'openSheet') { M.sheetOpen = true; render(); const c = document.querySelector('.sheet-drawer [data-act="closeSheet"]'); if (c) c.focus(); }
+    else if (a === 'closeSheet') { M.sheetOpen = false; render(); const o = document.querySelector('[data-act="openSheet"]'); if (o) o.focus(); }
+    else if (a === 'submit') { M.submitFailed = false; M.dialog = true; render(); const c = document.querySelector('[data-act="cancelDlg"]'); if (c) c.focus(); }
+    else if (a === 'cancelDlg') { M.dialog = false; render(); const s = document.querySelector('.q-submit .btn'); if (s) s.focus(); }
+    else if (a === 'confirmSubmit') { M.dialog = false; M.submitting = true; render(); setTimeout(() => { S.screen = 'submitted'; S.sub = 'ready'; render(); }, 900); }
+    else if (a === 'retryLoad') { M.load = 'loading'; render(); setTimeout(() => { M.load = 'ready'; render(); }, 700); }
+    else if (a === 'theme') { S.theme = S.theme === 'light' ? 'dark' : 'light'; render(); }
+    else if (a === 'lang') { const ks = Object.keys(LANG_NAMES); S.lang = ks[(ks.indexOf(S.lang) + 1) % ks.length]; render(); }
+    else if (a === 'start') { S.screen = 'sim'; S.sim = 'first'; presetSim('first'); render(); }
+    else if (a === 'toCatalog') { e.preventDefault(); S.screen = 'catalog'; S.cat = 'ready'; render(); }
+  }));
+}
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !M || S.screen !== 'sim') return;
+  if (M.dialog) { M.dialog = false; render(); }
+  else if (M.sheetOpen) { M.sheetOpen = false; render(); const o = document.querySelector('[data-act="openSheet"]'); if (o) o.focus(); }
+});
+presetSim(S.sim);
+render();
+</script>
+</body>
+</html>

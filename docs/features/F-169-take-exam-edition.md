@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: refining (2026-10-27)
-- Stopped at: Question round answered and the file filled; the screen has no mockup yet.
-- Next action: Owner types `/agile:screen F-169`, approves the mockup, then reads this file and says "aprovo F-169".
+- Stopped at: Screen designed (mockup and `### Screen design`), its question round answered.
+- Next action: Owner reads this file and the mockup and says "aprovo F-169".
 - Waiting on: the owner
 
 ## Summary
@@ -60,7 +60,7 @@ Checked in the code on 2026-10-27, on `main` at `1bc9d69`.
 - BR10 The submitted page shows the edition, the submission date and time in the user's time zone, how many questions were answered and how many left blank, and a link back to the edition. Opening the screen of a submitted attempt opens this page. F-171 replaces it with the result.
 - BR11 Only the student who owns the attempt opens its screen, its submitted page, its question content and its images; anyone else, an `Admin` included, gets "not found", as for an id that does not exist. The `Admin` reading of F-166 (`attempts.read`, Api only) is unchanged.
 - BR12 An image opens through the attempt only when it is referenced by a question version fixed in that attempt; any other image id answers 404. The image keeps the headers of F-103 (`nosniff`, `sandbox`, `private`).
-- BR13 Leaving the screen loses nothing: answers are already saved, and starting again from the edition resumes the attempt (BR1). There is no list of attempts (F-173).
+- BR13 Leaving the screen loses nothing: answers are already saved, and starting again from the edition resumes the attempt (BR1). The simulator's bar has a link "Leave and continue later" to `/catalog/exams/{examId}`. There is no list of attempts (F-173).
 
 ## Screens and API
 - `/catalog/exams/{id}` [changed] — a start action on each published edition row (BR1).
@@ -121,6 +121,137 @@ Checked in the code on 2026-10-27, on `main` at `1bc9d69`.
 +------------------------------------------+
 ```
 
+### Screen design
+Mockup: [F-169-take-exam-edition.html](mockups/F-169-take-exam-edition.html) (every state below, light and dark, the three UI locales, desktop and phone). Colors, fonts and radius are the identity tokens (`docs/design/identity.tokens.json`); no new colour.
+
+#### Screen 1 — `/catalog/exams/{id}` [changed]
+- Layout: unchanged (`MainLayout`, `AppPageHeader`, `AppSectionCard` "Editions" with `AppItemRows`, `AppFormAside`). Each edition row gains, at its end (wrapping under the row's text on a phone), one button: `MudButton` `Variant.Outlined`, `StartIcon="@AppIcons.StartAttempt"` (new icon, Material Outlined `PlayCircle`), text `Catalog.Editions.Take`. Outlined, not filled: the page holds one button per edition and the rule allows one primary per page.
+- Permission: rendered only when the user holds `attempts.take` (BR1, AC17); a `Curator` (`catalog.browse` only) sees the rows as today. The button is not merely disabled: it is absent.
+- Action: calls the start of F-166 for that edition and navigates to `/attempts/{id}` with the returned id (new or in progress, BR1). One label for both cases: the catalog read does not say whether an attempt is in progress.
+- States of the action:
+  - starting: the clicked button is disabled, shows a `MudProgressCircular` (small) in place of its icon, wrapped in `aria-hidden="true"` (it renders an unnamed `role="progressbar"`, gallery DOM 2026-10-27), and carries `aria-busy="true"`; the other rows' buttons stay enabled.
+  - start failed: an `AppAlert` `Severity.Error` at the top of the Editions card, text from `ErrorText.For(code)` for a known code (`exam_attempt.edition_not_found`, `exam_attempt.edition_without_questions`), else `Catalog.Editions.TakeFailed`; the button returns to its normal state.
+- Accessible name: `Catalog.Editions.Take.Name` — the visible text followed by the edition's spoken label (year, position, organizer), as the notice link does (F-36 BR9), so five "Take this exam" buttons are told apart.
+
+#### Screen 2 — `/attempts/{id}`, the simulator [new]
+- Layout: a new layout `ExamSessionLayout` (the declared exam-session exception of `ui-project.md`): no app menu, no breadcrumb, no page header. Its bar (`MudAppBar`, the app bar tokens) holds, left to right: the edition label as the page's `h1` (`AppTruncatedText`, one line, full text in its tooltip, in the exam's content language), a spacer, the link `Attempt.Leave` (`AppLink` to `/catalog/exams/{examId}`, BR13; on a phone the icon `AppIcons.Back` with `Attempt.Leave` as its name and tooltip), the answer-sheet button (phone only), `ThemeSwitch`, `LanguageSwitch`. Skip link `Layout.SkipToContent` to the question.
+- Body, from `md` (960 px) up: two columns — the question card (`MudPaper` `app-form-card`, max 760 px) and the answer sheet as a side panel (300 px, sticky, scrolls on its own). Below `md`: one column; the answer sheet is a `MudDrawer` `Variant.Temporary`, `Anchor.End`, opened by the bar's answer-sheet button.
+- The question card, top to bottom:
+  1. Section line (BR3): the notice subject label (content language) and `Attempt.Section.Range` with the lowest and highest paper number of the section ("Questions 31 to 50"; an annulled number inside the range is simply absent, BR4).
+  2. Heading `h2` `Attempt.Question.Title` ("Question 48") with `tabindex="-1"`, and beside it the caption `Attempt.Question.Position` ("47 of 59", the position in the attempt, not the paper number, because the numbering jumps).
+  3. Alert slot (`AppAlert`): save failed (BR7) or submit failed.
+  4. Base text, when the question has one (BR2, AC12): the existing `app-question-base` box above the statement, preceded by the caption `Attempt.Question.BaseText`.
+  5. Statement (`app-question-content`, sanitized HTML; images inline from `/attempts/{id}/images/{imageId}`, scaled to the column, never up, F-103 BR15).
+  6. Answer area, by type:
+     - `SingleChoice`: the options A, B, C… in position order, each a row with a radio indicator, the letter (text) and the option text; hint `Attempt.Question.SingleHint`.
+     - `TrueFalse`: two rows, `Questions.TrueFalse.True` and `Questions.TrueFalse.False` (existing keys), with a radio indicator; hint `Attempt.Question.TrueFalseHint`.
+     - `MultipleAnswer`: the options with a checkbox indicator; hint `Attempt.Question.MultipleHint`.
+     - Any other type (BR8): no answer area; an `AppAlert` `Severity.Info` with `Attempt.Question.NotYetSupported`. The question stays blank.
+     The answer area is a new kit component, `AppAnswerOptions` (modes `Single`, `TrueFalse`, `Multiple`), in the gallery; a selected row is the selected radio card's look (`primary` border, `primaryLighten` fill) plus a filled indicator, so the state is never colour alone.
+  7. Save status: one line, `role="status"`: `Attempt.Save.Saving` with a small `MudProgressCircular` (`aria-hidden="true"`, as above) while a save is in flight, then `Attempt.Save.Saved` or `Attempt.Save.Cleared`; empty before the first click on that question.
+  8. Navigation row: `Attempt.Nav.Previous` (`Variant.Outlined`, `StartIcon` `AppIcons.ChevronLeft`) at the left; `Attempt.Nav.Next` (`Variant.Filled`, `Color.Primary`, `EndIcon` `AppIcons.ChevronRight`) at the right — the screen's one primary. Previous is `disabled` on the first question, Next on the last (AC5). They cross sections (BR5).
+  9. Submit row: `Attempt.Submit.Action` (`Variant.Outlined`, `StartIcon` `AppIcons.Send`), right-aligned, under the navigation, on every question.
+- The answer sheet (new kit component `AppAnswerSheet`), BR4 and AC4:
+  - Heading `h2` `Attempt.AnswerSheet.Title`; under it `Attempt.AnswerSheet.Progress` ("12 of 59 answered") and a legend (`Attempt.AnswerSheet.Answered`, `Attempt.AnswerSheet.Blank`).
+  - One group per section in BR3 order: an `h3` with the notice subject label (content language) and a grid of number buttons in paper order (36 × 36 px, mono grid font). Questions with no notice subject: last group `Attempt.Section.Other`.
+  - A cell is blank (surface, `linesInputs` border), answered (`primaryLighten` fill, `primary` border, a check icon after the number) or current (2 px ink border and bold, `aria-current="step"`), and answered + current together. Answered is marked by the icon, not by colour alone.
+  - A click shows that question (and, on a phone, closes the drawer). The sheet changes only after a save succeeds (BR6).
+  - On a phone the drawer has a close icon button (`AppIcons.Close`, tooltip and name `Attempt.AnswerSheet.Close`) and closes on Esc and on the overlay.
+- Answering (BR6, BR7), no confirm button:
+  - single choice and true/false: a click on an unmarked row marks it and saves; a click on the marked row clears the answer (`DELETE`); marking another row replaces the answer.
+  - multiple answer: each tick saves the whole set; unticking the last one clears the answer.
+  - The row shows the click at once; while the save is in flight the group carries `aria-busy="true"` and ignores further clicks. On success the save status and the sheet update. On failure the group returns to the answer it had before the click, and the alert slot shows `Attempt.Save.Failed` (or `ErrorText.For(code)` for a 4xx code of F-166); on 409 `exam_attempt.already_submitted` the page navigates to `/attempts/{id}/submitted`.
+- Opening (BR5, BR10, BR11): on a new attempt the first question in paper order; on a resumed attempt the first blank one (the first question when none is blank); a submitted attempt navigates to its submitted page; an attempt that is not the user's, or unknown, renders `NotFoundContent` (the app's not-found page, F-134), identical in both cases (AC16).
+- Submit (BR9, AC10): the kit `AppConfirmDialog` (not destructive, `Color.Primary`), title `Attempt.Submit.Title`, message `Attempt.Submit.Blanks` / `Attempt.Submit.OneBlank` / `Attempt.Submit.NoBlank` followed by `Attempt.Submit.Final`; the blank numbers in paper order separated by ", "; confirm `Attempt.Submit.Action`, cancel `Common.Cancel`. Confirm: the Submit button turns disabled with progress (`Attempt.Submit.Submitting` as its accessible name), Previous, Next and the options are inert; success navigates to the submitted page; failure shows `Attempt.Submit.Failed` in the alert slot with the action `Common.TryAgain`, which reopens the dialog.
+- Document title: `Attempt.PageTitle` ("Question 48 · {edition}"), updated on every move.
+
+#### Screen 3 — `/attempts/{id}/submitted` [new]
+- Layout: `MainLayout` (the session is over; menu and switches return), no breadcrumb, as `NotFound.razor`. The body is the kit `AppPageState`: icon `AppIcons.Verified` (`Color.Success`), title `h1` `Attempt.Submitted.Title`, message `Attempt.Submitted.Message` (edition label, date `d` and time `t` in the user's culture and time zone, BR10), child content a two-row summary (`Attempt.Submitted.Answered`, `Attempt.Submitted.Blank`, numbers right after their label, in the user's culture), action `Attempt.Submitted.BackToEdition`: `MudButton` `Variant.Filled` `Color.Primary` with `Href` to `/catalog/exams/{examId}` (a link, not a button) and `StartIcon` `AppIcons.Back`.
+- States: loading (`AppLoadingState`), load failed (`AppErrorState` with `Attempt.Submitted.LoadFailed` and `Common.TryAgain`), not found (`NotFoundContent`, BR11), and an attempt still in progress opens `/attempts/{id}`.
+
+#### States
+| State | Screen | What shows |
+| --- | --- | --- |
+| Loading | 2, 3 | Session bar without the edition label; `AppLoadingState` in the question card; the sheet panel empty (2). `AppLoadingState` (3). |
+| Ready, new attempt | 2 | Question 1, sheet all blank, Previous disabled. |
+| Resumed | 2 | The first blank question; the sheet shows the stored answers. |
+| Saving | 2 | The clicked row marked, group `aria-busy`, status "Saving…"; sheet unchanged. |
+| Saved / cleared | 2 | Status "Answer saved" / "Answer cleared"; sheet cell answered / blank. No snackbar. |
+| Save failed (BR7) | 2 | Row back as before the click; error alert at the top of the card. |
+| Already submitted (409) | 2 → 3 | Navigates to the submitted page. |
+| Other type (BR8) | 2 | Statement and base text, info alert, no answer area; the cell stays blank. |
+| Last question | 2 | Next disabled; Submit always present. |
+| Submit dialog | 2 | Count and numbers of blanks, or "No question is blank", and the final sentence. |
+| Submitting / submit failed | 2 | Submit disabled with progress; then the error alert with "Try again". |
+| Load failed | 2, 3 | `AppErrorState` with "Try again" in the card. |
+| Not found / permission denied (BR11) | 2, 3 | `NotFoundContent`; nothing of the attempt (the bar shows no edition). |
+| Long text | 1, 2, 3 | A long edition label truncates in the bar with a tooltip and wraps on the submitted page; long section labels, statements, options and a long blank list in the dialog wrap (`overflow-wrap: anywhere`); a wide table in a statement scrolls inside its column. |
+| Starting / start failed | 1 | Button disabled with progress; error alert at the top of the Editions card. |
+| Empty | — | Not reachable: F-166 refuses to start an edition without questions (`exam_attempt.edition_without_questions`), shown as "start failed". |
+| Validation error | — | No form field; a refused save (422 codes of F-166) is the save-failed state with its code's text. |
+
+#### Accessibility
+- Landmarks: the bar is the `banner` with the edition as `h1`; the question card is `main` (`#main-content`, the skip link's target); the answer sheet is a `nav` labelled by its heading (it moves between questions).
+- Moving to another question (Previous, Next, a sheet cell) moves focus to the question heading, so a screen reader reads "Question 48, heading level 2"; the position caption follows it.
+- Single choice and true/false: a `role="radiogroup"` labelled by the question heading and described by the hint; each row `role="radio"` with `aria-checked`, the letter as text ("A") before the option text. One tab stop (the marked row, else the first); arrow keys move focus between rows without marking (marking saves, so selection does not follow focus); Space or Enter marks the focused row, or clears it when already marked. This departs from the APG radio pattern on purpose and is written in the kit component.
+- Multiple answer: a `role="group"` labelled by the heading; each row `role="checkbox"` with `aria-checked`, its own tab stop, Space toggles.
+- Rows, cells and buttons are at least 36 px high (cells 36 × 36 px), above the 24 px minimum; every one has the pointer cursor and the kit's focus ring (3 px info, 2 px offset).
+- The save status is a polite live region ("Saving…", "Answer saved", "Answer cleared"); a failed save and a failed submit are `AppAlert` `Severity.Error` (`role="alert"`). The answer-sheet progress is not a live region (the status already speaks).
+- Sheet cells are `button`s named `Attempt.AnswerSheet.CellName` ("Question 48: blank"), the current one with `aria-current="step"`; each section's cells sit in a list under its `h3`.
+- Question content carries `lang` = the question's content language; UI text carries the UI locale. Images keep their stored `alt`; an image with an empty `alt` is decorative.
+- Previous and Next at the ends are really `disabled`. The edition label in the bar is text, not a link.
+- The back action of the submitted page is a link (`a href`), named by its text.
+- Checked in the gallery DOM (`/dev/ui`, 2026-10-27): `MudAppBar` renders a `<header>` (the banner); `MudButton` with `Href` renders `<a href>`; `MudProgressCircular` renders an unnamed `role="progressbar"` with `aria-busy`, so inside a button or the save status it is `aria-hidden`; the kit's `MudDialog` renders `role="dialog"` labelled by its title, moves focus inside and closes on Esc, but carries no `aria-modal` (the build adds it, or the screen check accepts MudBlazor's focus trap); `MudTooltip` adds no `aria-describedby`, so every icon button keeps its own `aria-label`. Still unverified (gallery DOM): `MudDrawer` `Variant.Temporary` `Anchor.End` (focus in, Esc, overlay, focus back to the opener) — the gallery has no temporary drawer; the build checks it at its screen check.
+- Tab order (desktop): skip link → bar switches → options → Previous → Next → Submit → answer-sheet cells in paper order. Phone: skip link → answer-sheet button → switches → options → Previous → Next → Submit; inside the drawer: close → cells.
+
+#### Resource keys
+New keys in `SharedResources` (en / pt-BR / pt-PT). Reused: `Questions.TrueFalse.True`, `Questions.TrueFalse.False`, `Common.Cancel`, `Common.TryAgain`, `Common.GoHome`, `NotFound.Title`, `NotFound.Message`, `Layout.SkipToContent`, the `exam_attempt.*` codes of F-166.
+
+| Key | en | pt-BR | pt-PT |
+| --- | --- | --- | --- |
+| `Catalog.Editions.Take` | Take this exam | Fazer este simulado | Fazer esta simulação |
+| `Catalog.Editions.Take.Name` | Take this exam: {0} | Fazer este simulado: {0} | Fazer esta simulação: {0} |
+| `Catalog.Editions.TakeFailed` | The exam could not be started. Try again. | Não foi possível iniciar o simulado. Tente de novo. | Não foi possível iniciar a simulação. Tente novamente. |
+| `Attempt.Leave` | Leave and continue later | Sair e continuar depois | Sair e continuar mais tarde |
+| `Attempt.PageTitle` | Question {0} · {1} | Questão {0} · {1} | Questão {0} · {1} |
+| `Attempt.Section.Range` | Questions {0} to {1} | Questões {0} a {1} | Questões {0} a {1} |
+| `Attempt.Section.Other` | Other | Outras | Outras |
+| `Attempt.Question.Title` | Question {0} | Questão {0} | Questão {0} |
+| `Attempt.Question.Position` | {0} of {1} | {0} de {1} | {0} de {1} |
+| `Attempt.Question.BaseText` | Base text | Texto-base | Texto-base |
+| `Attempt.Question.SingleHint` | Mark one option. Click it again to clear it. | Marque uma alternativa. Clique nela de novo para limpar. | Marque uma alternativa. Clique nela novamente para a limpar. |
+| `Attempt.Question.TrueFalseHint` | Judge the statement. Click your choice again to clear it. | Julgue o item. Clique na sua escolha de novo para limpar. | Julgue a afirmação. Clique novamente na sua escolha para a limpar. |
+| `Attempt.Question.MultipleHint` | Mark every option that applies. Untick them all to clear the answer. | Marque todas as alternativas corretas. Desmarque todas para limpar a resposta. | Assinale todas as alternativas corretas. Desmarque-as todas para limpar a resposta. |
+| `Attempt.Question.NotYetSupported` | This kind of answer is not in the simulator yet. The question stays blank and counts as blank. | Este tipo de resposta ainda não está no simulador. A questão fica em branco e conta como em branco. | Este tipo de resposta ainda não está no simulador. A questão fica em branco e conta como em branco. |
+| `Attempt.Save.Saving` | Saving… | Salvando… | A guardar… |
+| `Attempt.Save.Saved` | Answer saved | Resposta salva | Resposta guardada |
+| `Attempt.Save.Cleared` | Answer cleared | Resposta apagada | Resposta apagada |
+| `Attempt.Save.Failed` | Your answer was not saved. The question is as it was before; mark it again. | Sua resposta não foi salva. A questão voltou a como estava; marque de novo. | A sua resposta não foi guardada. A questão voltou ao que estava; marque novamente. |
+| `Attempt.Nav.Previous` | Previous | Anterior | Anterior |
+| `Attempt.Nav.Next` | Next | Próxima | Seguinte |
+| `Attempt.AnswerSheet.Title` | Answer sheet | Cartão-resposta | Folha de respostas |
+| `Attempt.AnswerSheet.Open` | Answer sheet ({0} of {1} answered) | Cartão-resposta ({0} de {1} respondidas) | Folha de respostas ({0} de {1} respondidas) |
+| `Attempt.AnswerSheet.Close` | Close the answer sheet | Fechar o cartão-resposta | Fechar a folha de respostas |
+| `Attempt.AnswerSheet.Progress` | {0} of {1} answered | {0} de {1} respondidas | {0} de {1} respondidas |
+| `Attempt.AnswerSheet.Answered` | Answered | Respondida | Respondida |
+| `Attempt.AnswerSheet.Blank` | Blank | Em branco | Em branco |
+| `Attempt.AnswerSheet.CellName` | Question {0}: {1} | Questão {0}: {1} | Questão {0}: {1} |
+| `Attempt.Submit.Action` | Submit exam | Enviar prova | Submeter prova |
+| `Attempt.Submit.Title` | Submit the exam? | Enviar a prova? | Submeter a prova? |
+| `Attempt.Submit.Blanks` | {0} questions are blank: {1}. | {0} questões estão em branco: {1}. | {0} questões estão em branco: {1}. |
+| `Attempt.Submit.OneBlank` | 1 question is blank: {0}. | 1 questão está em branco: {0}. | 1 questão está em branco: {0}. |
+| `Attempt.Submit.NoBlank` | No question is blank. | Nenhuma questão está em branco. | Nenhuma questão está em branco. |
+| `Attempt.Submit.Final` | After submitting you cannot change your answers. | Depois de enviar, você não pode mudar suas respostas. | Depois de submeter, não pode alterar as suas respostas. |
+| `Attempt.Submit.Submitting` | Submitting… | Enviando… | A submeter… |
+| `Attempt.Submit.Failed` | The exam was not submitted. Your answers are kept; try again. | A prova não foi enviada. Suas respostas continuam salvas; tente de novo. | A prova não foi submetida. As suas respostas continuam guardadas; tente novamente. |
+| `Attempt.Load.Failed` | The exam could not be loaded. | Não foi possível carregar a prova. | Não foi possível carregar a prova. |
+| `Attempt.Submitted.Title` | Exam submitted | Prova enviada | Prova submetida |
+| `Attempt.Submitted.Message` | Your answers to {0} were submitted on {1} at {2}. | Suas respostas de {0} foram enviadas em {1} às {2}. | As suas respostas de {0} foram submetidas em {1} às {2}. |
+| `Attempt.Submitted.Answered` | Answered | Respondidas | Respondidas |
+| `Attempt.Submitted.Blank` | Blank | Em branco | Em branco |
+| `Attempt.Submitted.BackToEdition` | Back to the exam | Voltar à prova | Voltar à prova |
+| `Attempt.Submitted.LoadFailed` | The submitted exam could not be loaded. | Não foi possível carregar a prova enviada. | Não foi possível carregar a prova submetida. |
+
 ## Security
 ### Surfaces
 - S1 `GET /api/v1/exam-engine/attempts/{id}/content` — a signed-in user holding `attempts.take`; only the owner gets the content.
@@ -161,7 +292,8 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 - AC16 [sec] (T5) Given an attempt of student A, when student B or an `Admin` opens `/attempts/{id}` or `/attempts/{id}/submitted`, then the not-found page is shown and nothing of the attempt appears.
 - AC17 [sec] (T7) Given a `Curator`, when they open `/catalog/exams/{id}`, then no start action is shown; a `Student` sees it on each published edition.
 - AC18 The architecture tests stay green: `ExamEngine` reads the question bank and the catalog only through their `Contracts`, and `/openapi/v1.json` lists the two new routes.
-- AC19 Every new text (start action, simulator, answer sheet, "Other", notice of BR8, submit dialog, submitted page, messages) exists in pt-BR, pt-PT and en, and the missing-key test is green.
+- AC19 Every new text (start action, simulator, leave link, answer sheet, "Other", notice of BR8, submit dialog, submitted page, messages) exists in pt-BR, pt-PT and en, and the missing-key test is green.
+- AC20 Given an attempt in progress, when the student uses "Leave and continue later" in the simulator's bar, then `/catalog/exams/{examId}` opens, and starting that edition again opens the same attempt with its answers.
 
 ## Criterion → test
 | Criterion | Test |
@@ -185,6 +317,7 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 | AC17 | pending |
 | AC18 | pending |
 | AC19 | pending |
+| AC20 | pending |
 
 ## Decisions
 - 2026-10-27 — Size L judged; split in two: this item keeps the option types, the content read, images, answer sheet, sections and submit; F-178 (issue 246) takes `Matching`, `FillInTheBlanks`, `ShortAnswer`, `OpenAnswer` and the essay — asked ("Split as proposed")
@@ -205,6 +338,13 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 - 2026-10-27 — Sections are ordered by the lowest paper number of their questions, not by the notice subject's display order: the screen follows the paper, and the two agree on Manaus — Claude (technical)
 - 2026-10-27 — A resumed attempt opens on its first blank question — Claude (technical)
 - 2026-10-27 — No new error code: both new routes answer `exam_attempt.not_found` as F-166 BR7 does — Claude (technical)
+- 2026-10-27 — Screen design (`/agile:screen F-169`): mockup `docs/features/mockups/F-169-take-exam-edition.html` — asked
+- 2026-10-27 — A saved answer is told by an inline polite status line, no snackbar per save; the build adds that line to the exam-session exception of `ui-project.md` — asked
+- 2026-10-27 — The simulator's bar has a "Leave and continue later" link back to the exam page (BR13, AC20) — asked
+- 2026-10-27 — A multiple-answer question does not show how many options to mark: the count is part of the key (BR2) — asked
+- 2026-10-27 — The submit dialog uses the kit's `AppConfirmDialog`, so its cancel reads `Common.Cancel`, not the wireframe's "Keep answering" — Claude (technical)
+- 2026-10-27 — New kit components `ExamSessionLayout`, `AppAnswerOptions`, `AppAnswerSheet` and the save status, each in the gallery `/dev/ui`; new icons `AppIcons.StartAttempt` (PlayCircle) and `AppIcons.AnswerSheet` (GridView); theme and language switches stay in the session bar; a resumed attempt shows no extra notice — Claude (technical), shown to the owner
+- 2026-10-27 — Stitch offered — declined
 
 ## Out of scope
 - `Matching`, `FillInTheBlanks`, `ShortAnswer`, `OpenAnswer` and the essay with its line counter (F-178).
