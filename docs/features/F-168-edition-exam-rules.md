@@ -1,7 +1,7 @@
 ---
 feature: F-168
 epic: Exam Simulator
-status: refining
+status: approved
 board: 234
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: refining (2026-10-27)
-- Stopped at: Refinement written; waiting for the owner to read the file.
-- Next action: Owner reads the file and types 'aprovo F-168'.
+- Status: approved (2026-10-27)
+- Stopped at: Approved by the owner.
+- Next action: Owner types /agile:build F-168 --worktree (F-169 is building).
 - Waiting on: nothing
 
 ## Summary
