@@ -233,6 +233,11 @@
       "$value": { "colorSpace": "srgb", "components": [0.1137, 0.3922, 0.6588], "hex": "#1D64A8" },
       "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.549, 0.7686, 0.9608], "hex": "#8CC4F5" } } }
     },
+    "primarySelected": {
+      "$description": "The fill of a marked answer and of an answered cell of the answer sheet (F-169), always with a 2 px primary border. A CSS variable (--app-primary-selected) written by SimulabThemeProvider.",
+      "$value": { "colorSpace": "srgb", "components": [0.8196, 0.8941, 0.9961], "hex": "#D1E4FE" },
+      "$extensions": { "mode": { "dark": { "colorSpace": "srgb", "components": [0.102, 0.2706, 0.5137], "hex": "#1A4583" } } }
+    },
     "brandName": {
       "$description": "The name \"Simulab\" in the app bar and the plus signs of the action shortcut (--app-brand-name): navy in light, ink in dark.",
       "$value": { "colorSpace": "srgb", "components": [0.0588, 0.1961, 0.4], "hex": "#0F3266" },
