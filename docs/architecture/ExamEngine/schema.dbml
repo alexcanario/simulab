@@ -26,6 +26,10 @@ Table attempts {
   student_id uuid [not null, note: 'The student who owns the attempt, an Identity user id. No foreign key: the user lives in another module.']
   submitted_at timestamptz [note: 'When the student submitted, from the server clock. Null while the attempt is in progress.']
 
+  indexes {
+    student_id [name: 'ix_attempts_student']
+  }
+
   Note: 'Entity: Attempt - standard columns: 8 (see data dictionary)'
 }
 
