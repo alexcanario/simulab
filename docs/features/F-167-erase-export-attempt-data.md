@@ -3,7 +3,7 @@ feature: F-167
 epic: Exam Simulator
 status: building
 board: 233
-version: 1
+version: 2
 ---
 # Erase and export a student's attempt data
 
@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-27)
-- Stopped at: Design passes done and verified; owner chose a change note on BR1/AC7 (audit stamp on erased answer rows) and own export records.
-- Next action: /agile:change F-167 (owner), then /agile:build F-167 resumes at step 5 (plan).
+- Stopped at: Change note v2 approved (BR1, AC7: audit stamp on erased answer rows).
+- Next action: /agile:build F-167 resumes at step 5 (plan), then the test phase.
 - Waiting on: nothing
 
 ## Summary
@@ -46,7 +46,7 @@ Checked in the code on 2026-10-26, on `main` at `424606b`.
 - UC3 An `Admin` holding `attempts.read` opens an attempt of an erased student and sees the questions and the answers with the texts empty.
 
 ## Business rules
-- BR1 When `UserErased` arrives, the ExamEngine erases the free texts of every attempt whose `StudentId` is the erased user, whatever the attempt's status. The text of a `ShortAnswer`, an `OpenAnswer`, an `Essay` and of each blank of a `FillInTheBlanks` answer becomes empty (`null`). Everything else stays as it was: the answer's type, the blank numbers, the answers of the other four shapes (`SingleChoice`, `TrueFalse`, `MultipleAnswer`, `Matching`), the student id (the pseudonym, ADR-0001 #9), the edition, the status, the times, the question ids, paper numbers and version numbers, and the audit fields.
+- BR1 When `UserErased` arrives, the ExamEngine erases the free texts of every attempt whose `StudentId` is the erased user, whatever the attempt's status. The text of a `ShortAnswer`, an `OpenAnswer`, an `Essay` and of each blank of a `FillInTheBlanks` answer becomes empty (`null`). Everything else stays as it was: the answer's type, the blank numbers, the answers of the other four shapes (`SingleChoice`, `TrueFalse`, `MultipleAnswer`, `Matching`), the student id (the pseudonym, ADR-0001 #9), the edition, the status, the times, the question ids, paper numbers and version numbers, and the audit fields of the attempt. An answer row whose text is erased carries the erasure's update stamp (`updated_at`, `updated_by`, which is null for this system action); its creation fields are unchanged, and an answer row with nothing to erase is not written.
 - BR2 This is a system action, not a student action: it is allowed on a submitted attempt, and F-166 BR6 ("a submitted attempt never changes") keeps binding every route a student or an `Admin` can call.
 - BR3 An attempt in progress of an erased student is erased the same way and stays in progress: no submission time is invented and no state is added.
 - BR4 The erasure of the texts is atomic and repeatable. All the attempts of the student are changed in one transaction, so a failure leaves none changed and the retry of the job (F-59 BR5) starts from the same point. A second run, or an event delivered twice, changes nothing and succeeds; a student with no attempt succeeds too (the consumer must accept the same event twice, as F-59 BR4 wrote for `UserErased`).
@@ -93,7 +93,7 @@ Struck threat: a student with very many attempts makes the file large (S1, D). F
 - AC4 (BR8) Given a student with no attempt, when they export, then `examEngine.attempts` is an empty list; and `format`, `version` and the whole `identity` section are as before.
 - AC5 [sec] (T3, BR10) Given a registered export section that throws, when the user exports with the right password, then the answer is a server error problem without the exception text, no file and no notice email, and the failure is logged.
 - AC6 (BR9) Given a host with no registered section, when the user exports, then the file has no `examEngine` member and nothing else differs from F-32's file.
-- AC7 (UC1, BR1, BR2, BR3) Given a student with a submitted attempt and an attempt in progress, each with a text in a `ShortAnswer`, an `OpenAnswer`, an `Essay` and a `FillInTheBlanks` answer and with a `SingleChoice`, a `TrueFalse`, a `MultipleAnswer` and a `Matching` answer, when the account is erased and the jobs have run, then the four texts (each blank's text included) are `null` with their types and blank numbers kept, the four other answers are unchanged, the attempts' student id, edition, status, times, question ids, paper numbers, version numbers and audit fields are unchanged, and the attempt in progress is still in progress.
+- AC7 (UC1, BR1, BR2, BR3) Given a student with a submitted attempt and an attempt in progress, each with a text in a `ShortAnswer`, an `OpenAnswer`, an `Essay` and a `FillInTheBlanks` answer and with a `SingleChoice`, a `TrueFalse`, a `MultipleAnswer` and a `Matching` answer, when the account is erased and the jobs have run, then the four texts (each blank's text included) are `null` with their types and blank numbers kept, the four other answers are unchanged, the attempts' student id, edition, status, times, question ids, paper numbers, version numbers and audit fields are unchanged; each answer row whose text was erased has a new `updated_at` and its `created_at`/`created_by` unchanged, and every other answer row is unchanged; and the attempt in progress is still in progress.
 - AC8 [sec] (T4, BR5) Given students A and B with attempts that hold texts, when A is erased, then every row of B's attempts is unchanged.
 - AC9 (BR4) Given the erasure already applied, when `UserErased` is delivered again, then it succeeds and nothing changes; and given an erased student with no attempt, it succeeds too.
 - AC10 [sec] (T5, BR4) Given three attempts of the erased student and a store that fails while the second is written, when the job attempt runs, then none of the three is changed, the job is due again after the backoff, and the next attempt erases the texts of all three.
@@ -156,7 +156,13 @@ Struck threat: a student with very many attempts makes the file large (S1, D). F
 - (none)
 
 ## Change notes
+### v2 — 2026-10-27
+- What: BR1 and AC7 keep the attempt's audit fields unchanged, and an answer row whose text is erased carries the erasure's update stamp (`updated_at`, `updated_by` null); creation fields unchanged; a row with nothing to erase is not written.
+- Why: the audit interceptor (`AuditAndSoftDeleteInterceptor.cs:61-63`) stamps every modified row, so "the audit fields stay" could not hold without skipping it (trap T2); an update with no trail is worse than the stamp (design pass, architect finding 1).
+- Affected: BR1, AC7.
+- Re-approved by the owner on 2026-10-27 ("aprovo").
 
 ## Events
 
 - 2026-10-26 question — asked 2, from context 3
+- 2026-10-27 change — v2: BR1 and AC7 keep the attempt audit fields; erased answer rows carry the erasure update stamp
