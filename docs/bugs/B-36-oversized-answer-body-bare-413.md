@@ -1,7 +1,7 @@
 ---
 bug: B-36
 feature: F-166
-status: building
+status: validating
 board: 244
 severity: low
 epic: Exam Simulator
@@ -12,9 +12,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-27)
-- Stopped at: Build started; tests first
-- Next action: Write the failing tests (AC1, AC2, AC3), commit test(B-36), lock them
+- Status: validating (2026-10-27)
+- Stopped at: Built; gate and scan green; waiting for the owner's validation
+- Next action: Owner runs the validation script, then /agile:ship B-36
 - Waiting on: nothing
 
 ## What happens
@@ -104,6 +104,9 @@ Tests locked: 0955a2392edd0ea5b8cb81facae9b06b469427d4 (2 files); unlocks: 0
 
 - 2026-10-27 — Build started in parallel with F-169 (both touch `AttemptEndpoints.cs` and the `.resx`; different regions) — asked
 - 2026-10-27 — plan — 1 tests first: AC1 rewritten, AC2 chunked case, AC3 key checked in the three `.resx` → seen failing, `test(B-36)` commit, lock; 2 fix: constant `AnswerTooLarge`, `Problem(...413)` in `SaveAsync`, the key in the three `.resx` → affected ExamEngine and Web tests green; 3 docs: `docs/flows/exam-attempt.md` rules and errors lines → `techdocs.js check B-36`; 4 gate, scan, validation script → validating. No design passes (no new project, route, message or schema).
+
+- 2026-10-27 — Reuse: `ApiProblem.Problem` with its `status` override, `Error`/`ErrorKind.Validation`, the existing `ErrorCodeTextTests` (missing-key test) and `UnsizedContent` as the only new test helper
+- 2026-10-27 — Shortcuts: none
 
 ## Open questions
 - (none)
