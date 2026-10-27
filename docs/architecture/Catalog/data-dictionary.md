@@ -35,12 +35,16 @@ Entity: `ExamEdition` — One paper actually applied for an exam: its notice yea
 | created_by | uuid | yes |  |  | Who created the row. Null when no one was signed in, as in a sign-up or a background job. |
 | deleted_at | timestamp with time zone | yes |  |  | When the row was deleted, in UTC. Null while it is not deleted. |
 | deleted_by | uuid | yes |  |  | Who deleted the row. Null while it is not deleted, or when no one was signed in. |
+| duration_minutes | integer | yes |  |  | How long the paper lasts, in whole minutes from 15 to 480. Empty means no time limit. |
+| essay_cut_off_score | numeric(6,2) | yes |  |  | The essay points a candidate needs to pass, never above the essay maximum. Empty when not stated. |
+| essay_max_score | numeric(6,2) | yes |  |  | The scale of the essay as the notice states it, 0.01 to 1000. Empty when there is no essay or it is not stated. |
 | exam_id | uuid | no | FK → exams |  | The exam this paper belongs to. Fixed when the edition is created. |
 | is_deleted | boolean | no |  |  | True once the row was deleted. Rows are never removed; a global query filter hides the deleted ones. |
 | normalized_position | character varying(200) | no |  |  | max 200; The position without case or accents, empty when there is none. The unique index compares it. |
 | notice_reference | character varying(100) | yes |  |  | max 100; How the notice names itself, such as Edital nº 01/2026. Editions cut from one notice share it. |
 | notice_url | character varying(300) | yes |  |  | max 300; The official address of the notice, an absolute http or https URL. |
 | notice_year | integer | no |  |  | The year of the notice, from 1990 to next year. |
+| objective_cut_off_score | numeric(6,2) | yes |  |  | The points of the objective paper a candidate needs to pass, 0.01 to 1000. Empty when the notice says none. |
 | organizer_id | uuid | no | FK → organizers |  | The exam board that applied the paper, as the notice names it. |
 | position | character varying(200) | yes |  |  | max 200; The job the paper selects for. Empty for ENEM, entrance exams and certifications. |
 | status | character varying(40) | no |  |  | max 40; Who can see the edition: Draft or Published. |
@@ -153,6 +157,7 @@ Entity: `NoticeSubject` — A subject as one edition's notice names and groups i
 | label | character varying(200) | no |  |  | max 200; The subject as the notice names it. |
 | normalized_group | character varying(100) | no |  |  | max 100; The group without case or accents, empty when there is none. The unique index compares it. |
 | normalized_label | character varying(200) | no |  |  | max 200; The label without case or accents. The unique index compares it. |
+| points_per_question | numeric(5,2) | yes |  |  | What each question of the subject is worth, 0.01 to 100. Empty when the notice does not say. |
 | question_count | integer | yes |  |  | How many questions the notice states for the subject, 1 to 500. Empty when it does not say. |
 | tenant_id | uuid | yes |  |  | The institution the row belongs to. Null means global data or an individual account, which is every row while multi-tenancy is dormant. |
 | updated_at | timestamp with time zone | yes |  |  | When the row was last changed, in UTC. Null while it has never been changed. |

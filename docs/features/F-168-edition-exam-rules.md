@@ -117,7 +117,8 @@ Checked in the code on 2026-10-27, on `main` at `bacc7d5`.
 
 ## Docs
 - flow: new docs/flows/edition-exam-rules.md — how an admin records the rules and where the student and the other modules read them.
-- architecture: update docs/architecture/Catalog/data-dictionary.md and schema.dbml — the new columns (generated, `DocGen --check`).
+
+The new columns reach `docs/architecture/Catalog/data-dictionary.md` and `schema.dbml` through DocGen (generated files, checked by `DocGen --check`, not technical pages).
 
 ## Acceptance criteria
 - AC1 Given an edition, when the admin saves it with duration 5 h 00 min, objective cut-off 60, essay maximum 20 and essay cut-off 10, then reopening the form shows those values and the API returns `DurationMinutes` 300 and the three scores (UC1).
