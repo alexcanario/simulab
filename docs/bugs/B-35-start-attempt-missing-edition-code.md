@@ -1,7 +1,7 @@
 ---
 bug: B-35
 feature: F-166
-status: building
+status: validating
 board: 243
 severity: low
 epic: Exam Simulator
@@ -12,9 +12,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-27)
-- Stopped at: Build started (2026-10-27)
-- Next action: Write the regression tests, see them fail, lock them
+- Status: validating (2026-10-27)
+- Stopped at: Built and checked; validation script ready (2026-10-27)
+- Next action: Owner runs the validation script, then /agile:ship B-35
 - Waiting on: nothing
 
 ## What happens
@@ -70,8 +70,8 @@ Tests locked: 306bf239be2e042d9c935dbf2cb1d6e08d6f8a59 (1 file); unlocks: 0
 
 - `Start_WithNoEdition_Answers400WithEditionRequired` — `tests/Modules/ExamEngine/Simulab.ExamEngine.Tests` (`StartAttemptEndpointTests`, extends the F-166 AC14 test to assert `code` and the `errors` entry; fails today with `exam_attempt.edition_not_found`) — AC1.
 - `Start_WithEmptyEditionId_Answers400WithEditionRequired` — same class (fails today: 404) — AC2.
-- AC3 is covered by the existing F-166 AC4 test, kept unchanged.
-- AC4 is covered by the missing-key test of the Web resources.
+- AC3 is covered by the existing F-166 AC4 test `Start_OnADraftEditionOrAnUnknownOne_Answers404_AndCreatesNothing` (same class), kept unchanged and green.
+- AC4 is covered by the missing-key test `EveryErrorCode_HasATextInEveryLanguage_AndEveryCodeShapedTextAnswersToACode` (`tests/Hosts/Simulab.Web.Tests/Localization/ErrorCodeTextTests.cs`), green with the new key.
 
 ## Decisions
 - 2026-10-26 — Captured as a bug, severity low, from the F-166 review (finding 2); the owner asked for it to be registered — asked
@@ -81,21 +81,61 @@ Tests locked: 306bf239be2e042d9c935dbf2cb1d6e08d6f8a59 (1 file); unlocks: 0
 - 2026-10-27 — The handler returns the field entries and the endpoint writes `errors`, as `SaveAsync` does, instead of a validation filter — one shape for the module's 400s, no new mechanism — Claude
 - 2026-10-27 — No validation screen; the check is one HTTP script, as in F-166 — the item has no screen — Claude
 - 2026-10-27: plan — 1 regression tests for `{}` and the empty Guid, plus the `EditionRequired` constant as skeleton → both red, locked; 2 handler guard with the field entry and the endpoint writing `errors` → AC1, AC2 and the F-166 AC4 test (AC3) green; 3 the key in the three resource files → `ErrorCodeTextTests` green (AC4); 4 validation scripts `docs/validation/B-35/` → gate GREEN
+- 2026-10-27 — The start returns a `StartAttemptOutcome` (attempt, error, field entries) in the shape of `SaveAnswerOutcome`, and both endpoints write `errors` through one helper — the shared `Result` has no field entries; reuses `AnswerFieldError` (its name says "answer"; a rename is out of scope) — Claude
+- 2026-10-27 — The build ran the scripts on this worktree's own database (`Database__Name=simulab_b35`) with a test student activated there; the owner's run uses the shared `simulab` database, which the item does not change (no migration, every start refused) — Claude
+- Reuse: `SaveAnswerOutcome` shape, `AnswerFieldError`, the `errors` writing of `SaveAsync` (now one helper), the test helpers `ErrorsOf`, `CodeOf`, `BodyAsync`, and the F-166 validation script's form
+- Shortcuts: none
 
 ## Open questions
 - (none)
 
 ## Validation script
-There is no screen: every check is a call to the API, made by one script (`docs/validation/B-35/validate.sh` and `validate.ps1`, written and run at `/agile:build`, as in F-166) that prints one line per check.
+There is no screen: every check is a call to the API, made by one script (`docs/validation/B-35/validate.sh` and `validate.ps1`, as in F-166) that prints one line per check. Both were run at the build against this worktree's app host and printed `ALL OK`.
 
 ### English
-1. [ ] At the root of this worktree (`D:\wt\simulab\b-35-start-attempt`), start the app host and leave it open → `https://localhost:7287/api/v1/system/info` answers 200.
-2. [ ] In a second terminal, set your `Student` email and password and run the script → the lines for `{}` and for the empty Guid show `400 exam_attempt.edition_required` with the field `examEditionId`, the random Guid shows `404 exam_attempt.edition_not_found`, and the last line is `ALL OK`.
+1. [ ] At the root of this worktree (`D:\wt\simulab\b-35-start-attempt`), stop any other app host, start this one and leave it open. It runs on the shared local database `simulab`, where your `Student` account lives: the item has no migration and every start it makes is refused, so it writes nothing there. → `https://localhost:7287/api/v1/system/info` answers 200.
+   ```powershell
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```bash
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. [ ] In a second terminal at the same folder, run the script with your `Student` email and password (replace the two words in capitals) → it prints these four lines; to repeat, run it again (it changes nothing).
+   ```powershell
+   $env:STUDENT_EMAIL = 'EMAIL'; $env:STUDENT_PASSWORD = 'PASSWORD'; ./docs/validation/B-35/validate.ps1
+   ```
+   ```bash
+   STUDENT_EMAIL='EMAIL' STUDENT_PASSWORD='PASSWORD' bash docs/validation/B-35/validate.sh
+   ```
+   ```
+   OK   body {} -> 400 exam_attempt.edition_required examEditionId/exam_attempt.edition_required
+   OK   empty Guid -> 400 exam_attempt.edition_required examEditionId/exam_attempt.edition_required
+   OK   random Guid -> 404 exam_attempt.edition_not_found (no errors)
+   ALL OK
+   ```
 3. [ ] Stop the app host (Ctrl+C in the first terminal) → the terminal is back at its prompt.
 
 ### pt-BR
-1. [ ] Na raiz deste worktree (`D:\wt\simulab\b-35-start-attempt`), suba o app host e deixe aberto → `https://localhost:7287/api/v1/system/info` responde 200.
-2. [ ] Num segundo terminal, defina o e-mail e a senha do seu `Student` e rode o script → as linhas de `{}` e do Guid vazio mostram `400 exam_attempt.edition_required` com o campo `examEditionId`, o Guid aleatório mostra `404 exam_attempt.edition_not_found`, e a última linha é `ALL OK`.
+1. [ ] Na raiz deste worktree (`D:\wt\simulab\b-35-start-attempt`), pare qualquer outro app host, suba este e deixe aberto. Ele usa o banco local compartilhado `simulab`, onde está a sua conta `Student`: o item não tem migração e todo início que ele faz é recusado, então nada é gravado lá. → `https://localhost:7287/api/v1/system/info` responde 200.
+   ```powershell
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```bash
+   dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. [ ] Num segundo terminal, na mesma pasta, rode o script com o e-mail e a senha do seu `Student` (troque as duas palavras em maiúsculas) → ele imprime estas quatro linhas; para repetir, rode de novo (não muda nada).
+   ```powershell
+   $env:STUDENT_EMAIL = 'EMAIL'; $env:STUDENT_PASSWORD = 'PASSWORD'; ./docs/validation/B-35/validate.ps1
+   ```
+   ```bash
+   STUDENT_EMAIL='EMAIL' STUDENT_PASSWORD='PASSWORD' bash docs/validation/B-35/validate.sh
+   ```
+   ```
+   OK   body {} -> 400 exam_attempt.edition_required examEditionId/exam_attempt.edition_required
+   OK   empty Guid -> 400 exam_attempt.edition_required examEditionId/exam_attempt.edition_required
+   OK   random Guid -> 404 exam_attempt.edition_not_found (no errors)
+   ALL OK
+   ```
 3. [ ] Pare o app host (Ctrl+C no primeiro terminal) → o terminal volta ao prompt.
 
 ## Events
