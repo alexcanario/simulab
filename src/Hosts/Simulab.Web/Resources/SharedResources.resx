@@ -1412,4 +1412,50 @@
   <data name="Gallery.States.PageState" xml:space="preserve"><value>Page state: one message and what to do next, for an error or a page that was not found.</value></data>
   <data name="Gallery.States.PageStateTitle" xml:space="preserve"><value>Something needs your attention</value></data>
   <data name="Gallery.States.PageStateMessage" xml:space="preserve"><value>A short message that says what happened and what the user can do next.</value></data>
+  <data name="ExamRules.Section.Title" xml:space="preserve"><value>Exam rules</value></data>
+  <data name="ExamRules.Section.Subtitle" xml:space="preserve"><value>What the notice sets for the paper. Every rule is optional; publishing never waits for them.</value></data>
+  <data name="ExamRules.Field.Duration" xml:space="preserve"><value>Duration</value></data>
+  <data name="ExamRules.Field.DurationHours" xml:space="preserve"><value>Duration (hours)</value></data>
+  <data name="ExamRules.Field.DurationMinutes" xml:space="preserve"><value>Minutes</value></data>
+  <data name="ExamRules.Field.Duration.Hint" xml:space="preserve"><value>From 15 minutes to 8 hours. Empty means no time limit.</value></data>
+  <data name="ExamRules.Field.ObjectiveCutOff" xml:space="preserve"><value>Objective cut-off (points)</value></data>
+  <data name="ExamRules.Field.ObjectiveCutOff.Hint" xml:space="preserve"><value>The points of the objective paper needed to pass.</value></data>
+  <data name="ExamRules.Field.EssayMaxScore" xml:space="preserve"><value>Essay maximum (points)</value></data>
+  <data name="ExamRules.Field.EssayCutOff" xml:space="preserve"><value>Essay cut-off (points)</value></data>
+  <data name="ExamRules.Field.EssayCutOff.Hint" xml:space="preserve"><value>Only with an essay maximum, and not above it.</value></data>
+  <data name="ExamRules.Points.Suffix" xml:space="preserve"><value>points</value></data>
+  <data name="ExamRules.ObjectiveTotal" xml:space="preserve"><value>Objective total: {0} points, from the notice subjects.</value></data>
+  <data name="ExamRules.ObjectiveTotal.Unknown" xml:space="preserve"><value>Objective total: unknown until every notice subject has its number of questions and its points.</value></data>
+  <data name="ExamRules.ObjectiveTotal.NoSubjects" xml:space="preserve"><value>Objective total: no notice subjects yet.</value></data>
+  <data name="ExamRules.Missing.Title" xml:space="preserve"><value>Still missing:</value></data>
+  <data name="ExamRules.Missing.Duration" xml:space="preserve"><value>Duration</value></data>
+  <data name="ExamRules.Missing.ObjectiveCutOff" xml:space="preserve"><value>Objective cut-off</value></data>
+  <data name="ExamRules.Missing.EssayMaxScore" xml:space="preserve"><value>Essay maximum</value></data>
+  <data name="ExamRules.Missing.Subjects" xml:space="preserve"><value>number of questions or points in {0}</value></data>
+  <data name="ExamRules.CutOffAboveTotal" xml:space="preserve"><value>The objective cut-off is above the objective total ({0} points). Check the cut-off or the points of the subjects.</value></data>
+  <data name="ExamRules.Aside.Title" xml:space="preserve"><value>Exam rules</value></data>
+  <data name="ExamRules.Aside.Duration" xml:space="preserve"><value>Duration</value></data>
+  <data name="ExamRules.Aside.CutOff" xml:space="preserve"><value>Cut-off</value></data>
+  <data name="ExamRules.Aside.CutOffOfTotal" xml:space="preserve"><value>{0} / {1}</value></data>
+  <data name="ExamRules.Duration.Hours" xml:space="preserve"><value>{0} h</value></data>
+  <data name="ExamRules.Duration.HoursMinutes" xml:space="preserve"><value>{0} h {1} min</value></data>
+  <data name="ExamRules.Duration.Minutes" xml:space="preserve"><value>{0} min</value></data>
+  <data name="NoticeSubjects.Field.PointsPerQuestion" xml:space="preserve"><value>Points per question</value></data>
+  <data name="NoticeSubjects.Field.PointsPerQuestion.Hint" xml:space="preserve"><value>As the notice states. Empty when it does not say.</value></data>
+  <data name="NoticeSubjects.Row.Points" xml:space="preserve"><value>{0} pt</value></data>
+  <data name="NoticeSubjects.Total.Points" xml:space="preserve"><value>{0} points</value></data>
+  <data name="NoticeSubjects.Total.NoPoints.One" xml:space="preserve"><value>1 subject has no points per question, so the objective total is unknown.</value></data>
+  <data name="NoticeSubjects.Total.NoPoints.Many" xml:space="preserve"><value>{0} subjects have no points per question, so the objective total is unknown.</value></data>
+  <data name="CatalogExam.Rules.Objective" xml:space="preserve"><value>{0} points</value></data>
+  <data name="CatalogExam.Rules.ObjectiveWithCutOff" xml:space="preserve"><value>{0} points, pass at {1}</value></data>
+  <data name="CatalogExam.Rules.CutOffOnly" xml:space="preserve"><value>Pass at {0} points</value></data>
+  <data name="CatalogExam.Rules.Essay" xml:space="preserve"><value>Essay {0} points</value></data>
+  <data name="CatalogExam.Rules.EssayWithCutOff" xml:space="preserve"><value>Essay {0} points, pass at {1}</value></data>
+  <data name="exam_edition.duration_invalid" xml:space="preserve"><value>The duration must be between 15 minutes and 8 hours.</value></data>
+  <data name="exam_edition.objective_cut_off_invalid" xml:space="preserve"><value>Type a cut-off from 0.01 to 1000 points with at most two decimal places.</value></data>
+  <data name="exam_edition.essay_max_score_invalid" xml:space="preserve"><value>Type an essay maximum from 0.01 to 1000 points with at most two decimal places.</value></data>
+  <data name="exam_edition.essay_cut_off_invalid" xml:space="preserve"><value>Type an essay cut-off from 0.01 to 1000 points with at most two decimal places.</value></data>
+  <data name="exam_edition.essay_cut_off_without_max" xml:space="preserve"><value>Fill in the essay maximum before its cut-off.</value></data>
+  <data name="exam_edition.essay_cut_off_above_max" xml:space="preserve"><value>The essay cut-off cannot be above the essay maximum.</value></data>
+  <data name="notice_subject.points_per_question_invalid" xml:space="preserve"><value>Type a number from 0.01 to 100 with at most two decimal places, or leave it empty.</value></data>
 </root>

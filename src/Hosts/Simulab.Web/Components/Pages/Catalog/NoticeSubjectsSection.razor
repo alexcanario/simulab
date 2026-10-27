@@ -128,6 +128,17 @@
                                     <span class="app-notice-subjects-total-unstated app-muted">@UnstatedText</span>
                                 }
                             }
+                            @* F-168 BR4: the objective total once every row states its number and its points; while some
+                               rows have points and others not, how many lack them. A list with no points at all says
+                               nothing more: the notice may not score by subject. *@
+                            @if (NoticeSubjectGroups.PointsText(L, _totals) is { } points)
+                            {
+                                <span class="app-notice-subjects-total-points">@points</span>
+                            }
+                            else if (_totals.NoPointsCount < _rows.Count && NoticeSubjectGroups.NoPointsText(L, _totals) is { } noPoints)
+                            {
+                                <span class="app-notice-subjects-total-no-points app-muted">@noPoints</span>
+                            }
                         </p>
 
                         @* F-75 AC10: how many rows still have no mapping, in secondary text, only above zero. Plain text,
@@ -159,6 +170,12 @@
 
     /// <summary>The edition whose notice subjects are listed; null while the edition is not saved yet (AC17).</summary>
     [Parameter] public Guid? EditionId { get; set; }
+
+    /// <summary>
+    /// F-168 UC3: the rows after every load, so the edition form can name the subjects that lack a number or points
+    /// without a second read (design risk R5).
+    /// </summary>
+    [Parameter] public EventCallback<IReadOnlyList<NoticeSubjectResponse>> RowsChanged { get; set; }
 
     private IReadOnlyList<NoticeSubjectResponse> _rows = [];
     private IReadOnlyList<NoticeSubjectGroup> _groups = [];
@@ -245,6 +262,7 @@
         {
             Apply(rows);
             _copySources = rows.Count == 0 ? await ReadCopySourcesAsync(editionId, token!) : [];
+            await RowsChanged.InvokeAsync(rows);
         }
         else
         {
@@ -372,6 +390,16 @@
         }
 
         builder.CloseElement();
+
+        // F-168 UC2: what each question is worth, only when the notice says.
+        if (row.PointsPerQuestion is { } points)
+        {
+            builder.OpenElement(19, "span");
+            builder.AddAttribute(20, "class", "app-notice-subject-points");
+            builder.AddContent(21, L["NoticeSubjects.Row.Points", points.ToString("N2", CultureInfo.CurrentCulture)].Value);
+            builder.CloseElement();
+        }
+
         builder.CloseElement();
     };
 

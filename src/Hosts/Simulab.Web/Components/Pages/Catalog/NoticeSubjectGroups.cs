@@ -8,8 +8,16 @@ namespace Simulab.Web.Components.Pages.Catalog;
 /// <summary>One heading and the consecutive rows under it; a null label is the rows with no group.</summary>
 public sealed record NoticeSubjectGroup(string? Label, IReadOnlyList<NoticeSubjectResponse> Rows);
 
-/// <summary>The stated numbers of a list of notice subjects: how many, their sum and how many state none.</summary>
-public sealed record NoticeSubjectTotals(int StatedCount, long StatedSum, int UnstatedCount);
+/// <summary>
+/// The stated numbers of a list of notice subjects: how many, their sum and how many state none; since F-168 also the
+/// objective total (null while unknown, BR4) and how many rows state no points per question.
+/// </summary>
+public sealed record NoticeSubjectTotals(
+    int StatedCount,
+    long StatedSum,
+    int UnstatedCount,
+    decimal? ObjectiveMaxScore = null,
+    int NoPointsCount = 0);
 
 /// <summary>
 /// How a list of notice subjects reads once it is on screen (F-74 BR6 and BR8), shared by the back office section and
@@ -48,14 +56,48 @@ public static class NoticeSubjectGroups
         return groups.Any(group => group.Label is not null);
     }
 
-    /// <summary>F-74 BR8: the sum of the stated numbers; rows with no number are left out and counted apart.</summary>
+    /// <summary>
+    /// F-74 BR8: the sum of the stated numbers; rows with no number are left out and counted apart. F-168 BR4: the
+    /// objective total through the one rule of the contracts.
+    /// </summary>
     public static NoticeSubjectTotals Totals(IReadOnlyList<NoticeSubjectResponse> rows)
     {
         ArgumentNullException.ThrowIfNull(rows);
 
         var stated = rows.Where(row => row.QuestionCount is not null).ToList();
+        var objective = ObjectiveMaxScores.Compute([.. rows.Select(row => (row.QuestionCount, row.PointsPerQuestion))]);
 
-        return new NoticeSubjectTotals(stated.Count, stated.Sum(row => (long)row.QuestionCount!.Value), rows.Count - stated.Count);
+        return new NoticeSubjectTotals(
+            stated.Count,
+            stated.Sum(row => (long)row.QuestionCount!.Value),
+            rows.Count - stated.Count,
+            objective.Total,
+            rows.Count(row => row.PointsPerQuestion is null));
+    }
+
+    /// <summary>"100.00 points": the objective total, or null while it is unknown (F-168, BR4).</summary>
+    public static string? PointsText(IStringLocalizer localizer, NoticeSubjectTotals totals)
+    {
+        ArgumentNullException.ThrowIfNull(localizer);
+        ArgumentNullException.ThrowIfNull(totals);
+
+        return totals.ObjectiveMaxScore is { } total
+            ? localizer["NoticeSubjects.Total.Points", total.ToString("N2", CultureInfo.CurrentCulture)].Value
+            : null;
+    }
+
+    /// <summary>"2 subjects have no points per question, so the objective total is unknown."; null when every row has them.</summary>
+    public static string? NoPointsText(IStringLocalizer localizer, NoticeSubjectTotals totals)
+    {
+        ArgumentNullException.ThrowIfNull(localizer);
+        ArgumentNullException.ThrowIfNull(totals);
+
+        return totals.NoPointsCount switch
+        {
+            0 => null,
+            1 => localizer["NoticeSubjects.Total.NoPoints.One"].Value,
+            _ => localizer["NoticeSubjects.Total.NoPoints.Many", totals.NoPointsCount.ToString("N0", CultureInfo.CurrentCulture)].Value
+        };
     }
 
     /// <summary>"Stated in the notice: 15 questions in total".</summary>
