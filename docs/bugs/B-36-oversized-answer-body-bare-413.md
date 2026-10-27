@@ -1,7 +1,7 @@
 ---
 bug: B-36
 feature: F-166
-status: refining
+status: approved
 board: 244
 severity: low
 epic: Exam Simulator
@@ -12,9 +12,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: refining (2026-10-27)
-- Stopped at: Refinement filled: 3 rules, 3 criteria, all answers recommended.
-- Next action: Owner reads the file and types 'aprovo B-36'.
+- Status: approved (2026-10-27)
+- Stopped at: Approved by the owner (2026-10-27).
+- Next action: /agile:build B-36
 - Waiting on: nothing
 
 ## What happens
