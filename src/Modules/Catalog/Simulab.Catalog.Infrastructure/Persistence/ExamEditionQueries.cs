@@ -22,8 +22,9 @@ public sealed class ExamEditionQueries(CatalogModuleDbContext context) : IExamEd
             select new { Edition = edition, Organizer = organizer };
 
         var items = await rows.ToListAsync(cancellationToken);
+        var totals = await ObjectiveMaxScoreReads.TotalsAsync(context, [.. items.Select(row => row.Edition.Id)], cancellationToken);
 
-        return [.. items.Select(row => ToResponse(row.Edition, row.Organizer))];
+        return [.. items.Select(row => ToResponse(row.Edition, row.Organizer, totals.Of(row.Edition.Id)))];
     }
 
     public async Task<ExamEditionResponse?> FindAsync(Guid examId, Guid id, CancellationToken cancellationToken)
@@ -35,12 +36,19 @@ public sealed class ExamEditionQueries(CatalogModuleDbContext context) : IExamEd
                 select new { Edition = edition, Organizer = organizer })
             .FirstOrDefaultAsync(cancellationToken);
 
-        return row is null ? null : ToResponse(row.Edition, row.Organizer);
+        if (row is null)
+        {
+            return null;
+        }
+
+        var totals = await ObjectiveMaxScoreReads.TotalsAsync(context, [row.Edition.Id], cancellationToken);
+
+        return ToResponse(row.Edition, row.Organizer, totals.Of(row.Edition.Id));
     }
 
     // The board's name and acronym come from the same query: the section shows the acronym and the page fills
     // its picker with the name, so a second round trip would buy nothing.
-    private static ExamEditionResponse ToResponse(ExamEdition edition, Organizer organizer) =>
+    private static ExamEditionResponse ToResponse(ExamEdition edition, Organizer organizer, decimal? objectiveMaxScore) =>
         new(
             edition.Id,
             edition.ExamId,
@@ -53,5 +61,10 @@ public sealed class ExamEditionQueries(CatalogModuleDbContext context) : IExamEd
             edition.NoticeUrl,
             edition.AppliedOn,
             edition.Status,
-            edition.NoticeDocument is { } document ? new NoticeDocumentResponse(document.FileName, document.Size, document.UploadedAt) : null);
+            edition.NoticeDocument is { } document ? new NoticeDocumentResponse(document.FileName, document.Size, document.UploadedAt) : null,
+            edition.DurationMinutes,
+            objectiveMaxScore,
+            edition.ObjectiveCutOffScore,
+            edition.EssayMaxScore,
+            edition.EssayCutOffScore);
 }

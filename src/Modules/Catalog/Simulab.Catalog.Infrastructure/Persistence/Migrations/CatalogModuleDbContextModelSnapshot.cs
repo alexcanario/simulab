@@ -250,6 +250,23 @@ namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
                         .HasColumnName("deleted_by")
                         .HasComment("Who deleted the row. Null while it is not deleted, or when no one was signed in.");
 
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("integer")
+                        .HasColumnName("duration_minutes")
+                        .HasComment("How long the paper lasts, in whole minutes from 15 to 480. Empty means no time limit.");
+
+                    b.Property<decimal?>("EssayCutOffScore")
+                        .HasPrecision(6, 2)
+                        .HasColumnType("numeric(6,2)")
+                        .HasColumnName("essay_cut_off_score")
+                        .HasComment("The essay points a candidate needs to pass, never above the essay maximum. Empty when not stated.");
+
+                    b.Property<decimal?>("EssayMaxScore")
+                        .HasPrecision(6, 2)
+                        .HasColumnType("numeric(6,2)")
+                        .HasColumnName("essay_max_score")
+                        .HasComment("The scale of the essay as the notice states it, 0.01 to 1000. Empty when there is no essay or it is not stated.");
+
                     b.Property<Guid>("ExamId")
                         .HasColumnType("uuid")
                         .HasColumnName("exam_id")
@@ -283,6 +300,12 @@ namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("notice_year")
                         .HasComment("The year of the notice, from 1990 to next year.");
+
+                    b.Property<decimal?>("ObjectiveCutOffScore")
+                        .HasPrecision(6, 2)
+                        .HasColumnType("numeric(6,2)")
+                        .HasColumnName("objective_cut_off_score")
+                        .HasComment("The points of the objective paper a candidate needs to pass, 0.01 to 1000. Empty when the notice says none.");
 
                     b.Property<Guid>("OrganizerId")
                         .HasColumnType("uuid")
@@ -336,7 +359,15 @@ namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
                         {
                             t.HasComment("One paper actually applied for an exam: its notice year, the job it selects for, the board that applied it and whether students can see it.");
 
+                            t.HasCheckConstraint("ck_exam_editions_duration", "duration_minutes IS NULL OR duration_minutes BETWEEN 15 AND 480");
+
+                            t.HasCheckConstraint("ck_exam_editions_essay_cut_off", "essay_cut_off_score IS NULL OR (essay_max_score IS NOT NULL AND essay_cut_off_score BETWEEN 0.01 AND essay_max_score)");
+
+                            t.HasCheckConstraint("ck_exam_editions_essay_max_score", "essay_max_score IS NULL OR essay_max_score BETWEEN 0.01 AND 1000");
+
                             t.HasCheckConstraint("ck_exam_editions_notice_document", "(notice_document_blob_name IS NULL AND notice_document_file_name IS NULL AND notice_document_size IS NULL AND notice_document_uploaded_at IS NULL) OR (notice_document_blob_name IS NOT NULL AND notice_document_file_name IS NOT NULL AND notice_document_uploaded_at IS NOT NULL AND notice_document_size IS NOT NULL AND notice_document_size BETWEEN 1 AND 20971520)");
+
+                            t.HasCheckConstraint("ck_exam_editions_objective_cut_off", "objective_cut_off_score IS NULL OR objective_cut_off_score BETWEEN 0.01 AND 1000");
                         });
                 });
 
@@ -511,6 +542,12 @@ namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
                         .HasColumnName("normalized_label")
                         .HasComment("The label without case or accents. The unique index compares it.");
 
+                    b.Property<decimal?>("PointsPerQuestion")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("points_per_question")
+                        .HasComment("What each question of the subject is worth, 0.01 to 100. Empty when the notice does not say.");
+
                     b.Property<int?>("QuestionCount")
                         .HasColumnType("integer")
                         .HasColumnName("question_count")
@@ -547,6 +584,8 @@ namespace Simulab.Catalog.Infrastructure.Persistence.Migrations
                     b.ToTable("notice_subjects", "catalog", t =>
                         {
                             t.HasComment("A subject as one edition's notice names and groups it, with the number of questions the notice states.");
+
+                            t.HasCheckConstraint("ck_notice_subjects_points_per_question", "points_per_question IS NULL OR points_per_question BETWEEN 0.01 AND 100");
                         });
                 });
 

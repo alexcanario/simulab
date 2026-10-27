@@ -44,7 +44,7 @@ public sealed class SaveNoticeSubjectHandler(
                 new Error(CatalogErrorCodes.NoticeSubjectNotFound, ErrorKind.NotFound));
         }
 
-        var candidate = NoticeSubject.Create(editionId, request.Group, request.Label, request.QuestionCount);
+        var candidate = NoticeSubject.Create(editionId, request.Group, request.Label, request.QuestionCount, request.PointsPerQuestion);
         if (candidate.IsFailure)
         {
             return Result.Failure<NoticeSubjectResponse>(candidate.Error!);
@@ -84,7 +84,7 @@ public sealed class SaveNoticeSubjectHandler(
         else
         {
             // The same validation ran on the candidate a moment ago, so this one cannot fail.
-            subject.Update(request.Group, request.Label, request.QuestionCount);
+            subject.Update(request.Group, request.Label, request.QuestionCount, request.PointsPerQuestion);
         }
 
         ReplaceMapping(subject.Id, saved, requested.Value);
@@ -105,7 +105,8 @@ public sealed class SaveNoticeSubjectHandler(
         var answer = await queries.FindAsync(editionId, subject.Id, cancellationToken);
 
         return Result.Success(
-            answer ?? new NoticeSubjectResponse(subject.Id, subject.ExamEditionId, subject.Group, subject.Label, subject.QuestionCount));
+            answer ?? new NoticeSubjectResponse(
+                subject.Id, subject.ExamEditionId, subject.Group, subject.Label, subject.QuestionCount, null, subject.PointsPerQuestion));
     }
 
     /// <summary>BR3 and BR4: every target exists and is live, and no topic joins its own whole subject.</summary>

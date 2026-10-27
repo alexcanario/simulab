@@ -136,6 +136,9 @@ Checked in the code on 2026-10-27, on `main` at `bacc7d5`.
 - AC14 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en), and the missing-key test is green.
 
 ## Criterion → test
+
+Tests locked: 1d4a43df29f443d24509c61e804a21689f16b1cb (7 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `ExamRulesEndpointTests.Save_WithEveryRule_ReturnsAndKeepsThem`; `ExamRulesFormTests.Render_Add_ShowsTheExamRulesCardAfterPaperWithItsFields`, `Save_Add_SendsTheDurationInMinutesAndTheThreeScores`, `Edit_AnEditionWithRules_ShowsTheStoredValuesAndTheAsideSummary` |

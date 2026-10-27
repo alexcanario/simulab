@@ -11,6 +11,24 @@ public static class ObjectiveMaxScores
     /// The total of <paramref name="rows"/>, or null with the indexes of the rows that lack a question count or the
     /// points per question. No row at all is unknown too, with no index: a total of 0 would fail every attempt.
     /// </summary>
-    public static ObjectiveMaxScoreResult Compute(IReadOnlyList<(int? QuestionCount, decimal? PointsPerQuestion)> rows) =>
-        throw new NotImplementedException();
+    public static ObjectiveMaxScoreResult Compute(IReadOnlyList<(int? QuestionCount, decimal? PointsPerQuestion)> rows)
+    {
+        ArgumentNullException.ThrowIfNull(rows);
+
+        var incomplete = new List<int>();
+        var total = 0m;
+        for (var index = 0; index < rows.Count; index++)
+        {
+            if (rows[index] is (int count, decimal points))
+            {
+                total += count * points;
+            }
+            else
+            {
+                incomplete.Add(index);
+            }
+        }
+
+        return new ObjectiveMaxScoreResult(rows.Count > 0 && incomplete.Count == 0 ? total : null, incomplete);
+    }
 }
