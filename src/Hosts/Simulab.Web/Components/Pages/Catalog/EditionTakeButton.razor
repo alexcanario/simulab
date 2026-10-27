@@ -1,0 +1,65 @@
+@inject ExamEngineApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+
+@* F-169, UC1 and BR1: the start action of one published edition. It starts an attempt, or answers the one in progress on that
+   edition (F-166 BR3), and opens it. One label for both cases: the catalog read does not say whether an attempt is in
+   progress. Outlined, not filled: the page holds one of these per edition and has no primary action. The accessible name
+   starts with the visible text and adds the edition, so five of them are told apart. *@
+<MudButton Variant="Variant.Outlined"
+           StartIcon="@(_starting ? null : AppIcons.StartAttempt)"
+           Disabled="_starting"
+           OnClick="StartAsync"
+           Class="app-edition-take"
+           aria-label="@(L["Catalog.Editions.Take.Name", SpokenLabel].Value)"
+           aria-busy="@(_starting ? "true" : null)">
+    @if (_starting)
+    {
+        @* The library's progress renders an unnamed progressbar: hidden, the button's own name says what it does. *@
+        <span class="app-edition-take-progress" aria-hidden="true"><MudProgressCircular Size="Size.Small" Indeterminate="true" /></span>
+    }
+    @L["Catalog.Editions.Take"]
+</MudButton>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    [Parameter, EditorRequired] public Guid EditionId { get; set; }
+
+    /// <summary>The edition as a screen reader hears it: the year, the position and the board.</summary>
+    [Parameter, EditorRequired] public string SpokenLabel { get; set; } = string.Empty;
+
+    /// <summary>The start began: the page forgets the failure of an earlier try.</summary>
+    [Parameter] public EventCallback OnStarting { get; set; }
+
+    /// <summary>The start failed: the stable error code, for the page to turn into text. The button is back to normal.</summary>
+    [Parameter, EditorRequired] public EventCallback<string> OnFailed { get; set; }
+
+    private bool _starting;
+
+    private async Task StartAsync()
+    {
+        if (_starting)
+        {
+            return;
+        }
+
+        _starting = true;
+        await OnStarting.InvokeAsync();
+
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        var token = user is null ? null : await Tokens.GetAccessTokenAsync(user);
+        var result = token is null ? null : await Api.StartAsync(token, EditionId);
+
+        if (result is { IsSuccess: true, Value: { } attempt })
+        {
+            // The page is leaving: the button stays busy until it does.
+            Navigation.NavigateTo($"/attempts/{attempt.Id}");
+            return;
+        }
+
+        _starting = false;
+        await OnFailed.InvokeAsync(result?.ErrorCode ?? ErrorText.UnexpectedCode);
+    }
+}

@@ -2,6 +2,7 @@
 @attribute [Authorize(Policy = PermissionPolicy.Prefix + CatalogPermissions.Browse)]
 @layout MainLayout
 @using Simulab.Catalog.Contracts
+@using Simulab.ExamEngine.Contracts
 @using Simulab.Identity.Contracts
 @using Simulab.Web.Services
 @inject CatalogApiClient Api
@@ -45,6 +46,11 @@ else
                             Title="@L["ExamEditions.Section.Title"]"
                             Icon="@AppIcons.Editions"
                             Subtitle="@L["Catalog.Editions.Subtitle"]">
+                @* F-169, BR1: a start that failed, at the top of the card, in the words of its code. *@
+                @if (_takeError is not null)
+                {
+                    <AppAlert Severity="Severity.Error" Text="@_takeError" />
+                }
                 @* The Api orders the editions (BR8); the page does not sort. *@
                 <AppItemRows TItem="PublishedExamEditionResponse"
                              Items="_exam.Editions"
@@ -91,6 +97,13 @@ else
                                     <MudIcon Icon="@AppIcons.Download" aria-hidden="true" Style="width: 16px; height: 16px; vertical-align: text-bottom" />
                                 </AppLink>
                             }
+                            @* F-169, BR1 and AC17: the start action is absent, not merely disabled, for who lacks attempts.take. *@
+                            <AuthorizeView Policy="@(PermissionPolicy.Prefix + ExamEnginePermissions.Take)">
+                                <EditionTakeButton EditionId="edition.Id"
+                                                   SpokenLabel="@SpokenLabel(edition)"
+                                                   OnStarting="ClearTakeError"
+                                                   OnFailed="ShowTakeError" />
+                            </AuthorizeView>
                         </div>
                         @* F-76: the edition's syllabus, closed until the student opens it. *@
                         <EditionSyllabus EditionId="edition.Id"
@@ -118,6 +131,7 @@ else
     private Guid? _loadedFor;
     private bool _loading;
     private bool _notFound;
+    private string? _takeError;
 
     // BR13: the catalog as it was left. Opened without its keys (a bookmark, a new tab), it is the plain list.
     private string CatalogHref => "/catalog" + CatalogQueryString.Carried(Navigation.Uri);
@@ -136,10 +150,19 @@ else
         await LoadAsync();
     }
 
+    private void ClearTakeError() => _takeError = null;
+
+    // F-169: the two refusals the student can act on have their own words; any other failure is the generic start message.
+    private void ShowTakeError(string code) =>
+        _takeError = code is ExamAttemptErrorCodes.EditionNotFound or ExamAttemptErrorCodes.EditionWithoutQuestions
+            ? Errors.For(code)
+            : L["Catalog.Editions.TakeFailed"].Value;
+
     private async Task LoadAsync()
     {
         _loading = true;
         _notFound = false;
+        _takeError = null;
         _exam = null;
         BuildBreadcrumbs();
 

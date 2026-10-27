@@ -3756,6 +3756,63 @@
           }
         }
       }
+    },
+    "/api/v1/exam-engine/attempts/{id}/content": {
+      "get": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "ReadAttemptContent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/exam-engine/attempts/{id}/images/{imageId}": {
+      "get": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "OpenAttemptImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "imageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {

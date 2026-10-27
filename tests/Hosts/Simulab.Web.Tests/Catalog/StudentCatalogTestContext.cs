@@ -11,6 +11,7 @@ using Simulab.Catalog.Contracts;
 using Simulab.SharedKernel.Serialization;
 using Simulab.Web.Services;
 using Simulab.Web.Services.Auth;
+using Simulab.Web.Tests.Attempts;
 using Simulab.Web.Tests.Auth;
 using Simulab.Web.Tests.Ui;
 
@@ -74,9 +75,13 @@ public abstract class StudentCatalogTestContext : KitTestContext
 
     protected FakeStudentCatalogApi Api { get; } = new();
 
+    /// <summary>F-169: the ExamEngine Api behind the start action of an edition, which a holder of <c>attempts.take</c> sees.</summary>
+    protected FakeExamEngineApi Attempts { get; } = new();
+
     protected StudentCatalogTestContext()
     {
         Services.AddSingleton(new CatalogApiClient(new HttpClient(Api) { BaseAddress = new Uri("https://api.test") }));
+        Services.AddSingleton(new ExamEngineApiClient(new HttpClient(Attempts) { BaseAddress = new Uri("https://api.test") }));
 
         var store = new InMemoryWebSessionStore();
         store.SaveAsync(WebSessionId, new WebSession("jti-1", "access-1", "refresh-1", DateTimeOffset.UtcNow.AddMinutes(10), [CatalogPermissions.Browse], DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(30)));

@@ -30,5 +30,7 @@ internal static class GallerySections
         "gallery-rich-text",
         // F-125: the identity — button variants, the type scale and the palette of the theme in use.
         "gallery-buttons", "gallery-type", "gallery-palette",
+        // F-169: the exam simulator's answer area, answer sheet and save status.
+        "gallery-answer-options", "gallery-answer-sheet", "gallery-save-status",
     ];
 }

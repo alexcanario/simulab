@@ -250,6 +250,7 @@ New keys in `SharedResources` (en / pt-BR / pt-PT). Reused: `Questions.TrueFalse
 | `Attempt.Load.Failed` | The exam could not be loaded. | Não foi possível carregar a prova. | Não foi possível carregar a prova. |
 | `Attempt.Submitted.Title` | Exam submitted | Prova enviada | Prova submetida |
 | `Attempt.Submitted.Message` | Your answers to {0} were submitted on {1} at {2}. | Suas respostas de {0} foram enviadas em {1} às {2}. | As suas respostas de {0} foram submetidas em {1} às {2}. |
+| `Attempt.Submitted.MessageNoEdition` | Your answers were submitted on {0} at {1}. | Suas respostas foram enviadas em {0} às {1}. | As suas respostas foram submetidas em {0} às {1}. |
 | `Attempt.Submitted.Answered` | Answered | Respondidas | Respondidas |
 | `Attempt.Submitted.Blank` | Blank | Em branco | Em branco |
 | `Attempt.Submitted.BackToEdition` | Back to the exam | Voltar à prova | Voltar à prova |
@@ -304,26 +305,26 @@ Tests locked: d5775699db1a399ae36646e4a8eeb7f212a243c5 (5 files); unlocks: 0
 
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
+| AC1 | `CatalogExamTakeTests.TheStartAction_StartsAnAttemptOnThatEdition_AndOpensIt`; `TakeAttemptPageTests.Open_AResumedAttempt_ShowsTheFirstBlankQuestion_AndTheSheetShowsTheStoredAnswers` |
 | AC2 | `AttemptContentEndpointTests.Content_AfterTheQuestionWasEdited_ShowsTheStatementAndOptionsOfTheFixedVersion` |
-| AC3 | `AttemptContentEndpointTests.Content_GroupsTheQuestionsInSectionsByNoticeSubject_InPaperOrder_WithTheOthersLast`; `AttemptSectionsTests.Build_OrdersSectionsByTheirLowestPaperNumber_AndPutsTheQuestionsWithNoSubjectLast`; `AttemptSectionsTests.Build_WithNoNoticeSubject_IsOneLastSection_AndWithNoQuestion_IsEmpty` |
-| AC4 | `AttemptSectionsTests.Build_GivesEachSectionItsLowestAndHighestPaperNumber_WhenTheNumberingJumps`; screen: pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | `AttemptContentEndpointTests.Content_OfASubmittedAttempt_IsReadByItsOwner_WithTheTimeAndTheAnswers`; screen: pending |
-| AC12 | `AttemptContentEndpointTests.Content_CarriesTheBaseText_AndPointsEveryPictureAtTheAttempt`; `AttemptImageEndpointTests.Image_HeldByAFixedVersion_OpensForTheOwner_WithTheStoredTypeAndTheHardeningHeaders`; Web `AttemptImageEndpointTests.Show_ForAHolderOfTake_StreamsTheApisBytes_WithTheStoredTypeAndTheHardeningHeaders`; screen: pending |
+| AC3 | `AttemptContentEndpointTests.Content_GroupsTheQuestionsInSectionsByNoticeSubject_InPaperOrder_WithTheOthersLast`; `AttemptSectionsTests.Build_OrdersSectionsByTheirLowestPaperNumber_AndPutsTheQuestionsWithNoSubjectLast`; `AttemptSectionsTests.Build_WithNoNoticeSubject_IsOneLastSection_AndWithNoQuestion_IsEmpty`; `TakeAttemptPageTests.Open_ANewAttempt_ShowsTheFirstQuestionWithItsSectionTheBaseTextAndTheOptions` |
+| AC4 | `AttemptSectionsTests.Build_GivesEachSectionItsLowestAndHighestPaperNumber_WhenTheNumberingJumps`; `TakeAttemptPageTests.AnswerSheet_ListsEveryNumberGroupedBySection_WithTheNumberingJumping_AndTheOthersLast`; `AppAnswerSheetTests` |
+| AC5 | `TakeAttemptPageTests.NextAndPrevious_ShowTheNeighbourInPaperOrder_AcrossSections_AndAreDisabledAtTheEnds` |
+| AC6 | `TakeAttemptPageTests.MarkingAnOption_SavesIt_AnotherReplacesIt_AndClickingTheMarkedOneClearsIt`; `TakeAttemptPageTests.TrueFalse_ShowsTwoRows_AndMarkingFalseSavesFalse`; `AnswerSelectionContrastTests.MarkedRowAndAnsweredCell_ArePaintedWithThePrimarySelectedFillAndATwoPixelPrimaryBorder`; `ApprovedPaletteTests.PrimarySelected_HoldsTheApprovedValues` |
+| AC7 | `TakeAttemptPageTests.MultipleAnswer_TickingTwoSavesBoth_AndUntickingBothClearsTheAnswer` |
+| AC8 | `TakeAttemptPageTests.ASaveThatFails_PutsTheRowBack_AndSaysTheAnswerWasNotSaved`; `TakeAttemptPageTests.ASaveRefusedBecauseTheAttemptIsSubmitted_OpensTheSubmittedPage` |
+| AC9 | `TakeAttemptPageTests.AQuestionOfAnotherType_ShowsItsStatementAndBaseTextAndTheNotice_AndStaysBlank`; validation step (guard sample edition) |
+| AC10 | `TakeAttemptPageTests.Submit_AsksWithTheBlankQuestionsListed_AndCancellingChangesNothing`; `TakeAttemptPageTests.Submit_WithNoBlankQuestion_SaysNoneIsBlank`; `TakeAttemptPageTests.Submit_Confirmed_SubmitsTheAttempt_AndOpensTheSubmittedPage` |
+| AC11 | `AttemptContentEndpointTests.Content_OfASubmittedAttempt_IsReadByItsOwner_WithTheTimeAndTheAnswers`; `AttemptSubmittedPageTests.Render_ShowsTheEditionTheDateAndTimeTheCountsAndTheLinkToTheEdition`; `AttemptSubmittedPageTests.Render_ShowsTheTimeInTheUsersTimeZone`; `TakeAttemptPageTests.Open_ASubmittedAttempt_OpensItsSubmittedPage` |
+| AC12 | `AttemptContentEndpointTests.Content_CarriesTheBaseText_AndPointsEveryPictureAtTheAttempt`; `AttemptImageEndpointTests.Image_HeldByAFixedVersion_OpensForTheOwner_WithTheStoredTypeAndTheHardeningHeaders`; Web `AttemptImageEndpointTests.Show_ForAHolderOfTake_StreamsTheApisBytes_WithTheStoredTypeAndTheHardeningHeaders`; `TakeAttemptPageTests.ThePicturesOfAQuestion_KeepTheirAttemptAddressAndTheirAltText` |
 | AC13 | `AttemptContentEndpointTests.Content_OfAnotherStudentsAttempt_AnswersLikeAnUnknownId_EvenForAnAdmin_AndAnonymousGets401` |
 | AC14 | `AttemptContentEndpointTests.Content_NeverCarriesAnAnswerKeyATrueFalseKeyAnExplanationOrARubric` |
 | AC15 | `AttemptImageEndpointTests.Image_NotHeldByAFixedVersionOfTheAttempt_Answers404`; `AttemptImageEndpointTests.Image_ThroughAnotherStudentsAttempt_Answers404_EvenForAnAdmin_AndAnonymousGets401`; `AttemptImageEndpointTests.Image_HeldByAFixedVersion_OpensForTheOwner_WithTheStoredTypeAndTheHardeningHeaders`; Web `AttemptImageEndpointTests.Show_TheApiAnswers404_TheWebAnswers404`, `Show_NotSignedIn_GoesToSignIn_AndWithoutTake_IsRefused_AndTheApiIsNotAsked` |
-| AC16 | pending |
-| AC17 | pending |
-| AC18 | `ExamEngineContractTests.TheOpenApiDocument_Answers200_AndListsTheSevenAttemptRoutes`; architecture tests: pending |
-| AC19 | pending |
-| AC20 | pending |
+| AC16 | `TakeAttemptPageTests.Open_AnAttemptThatIsNotTheUsers_ShowsTheNotFoundPage_AndNothingOfTheAttempt`; `AttemptSubmittedPageTests.Open_AnAttemptThatIsNotTheUsers_ShowsTheNotFoundPage_AndNothingOfTheAttempt`; `AttemptPagesAuthorizationTests.EveryAttemptPage_RequiresAttemptsTake`; the Api half is AC13 |
+| AC17 | `CatalogExamTakeTests.ForAUserWithoutTake_NoEditionHasAStartAction`; `CatalogExamTakeTests.ForAHolderOfTake_EachEditionHasAStartActionNamedByTheEdition` |
+| AC18 | `ExamEngineContractTests.TheOpenApiDocument_Answers200_AndListsTheSevenAttemptRoutes`; `ModuleBoundaryTests.Application_ReferencesItsOwnDomainAndContractsOnly` |
+| AC19 | `AttemptResourcesTests.EveryKeyAScreenAsksFor_ExistsInEachLanguage`; `ResourceParityTests` |
+| AC20 | `TakeAttemptPageTests.TheBar_HasTheEditionAsTheH1_AndTheWayOutToTheExamPage_AndNoAppMenu`; `TakeAttemptPhoneTests.TheWayOut_IsAnIconNamedLeaveAndContinueLater`; the resume is AC1's test; validation step (leave and start again) |
 
 ## Decisions
 - 2026-10-27 — Size L judged; split in two: this item keeps the option types, the content read, images, answer sheet, sections and submit; F-178 (issue 246) takes `Matching`, `FillInTheBlanks`, `ShortAnswer`, `OpenAnswer` and the essay — asked ("Split as proposed")
@@ -361,6 +362,8 @@ Tests locked: d5775699db1a399ae36646e4a8eeb7f212a243c5 (5 files); unlocks: 0
 - 2026-10-27 — traps — T1 reuse `QuestionVersionResponse`/`QuestionOptionResponse` in the student content: leaks the key (AC14); T2 copy `GetAttemptHandler`'s `CanReadAnyAsync`: an `Admin` reads content, images and the submitted page (AC13, AC16); T3 serve images through `OpenQuestionImageHandler` alone or by `OwnerId`: serves draft images and refuses base-text images (AC15)
 - 2026-10-27 — design trade-off 7 How the image route proves an image belongs to the attempt — owner chose the alternative (the architect's pick): one `SELECT EXISTS ... LIKE` over the attempt's (question, version) pairs; the F-103 LIKE shortcut gets a second user, written on its marker
 - 2026-10-27: plan — 1 content read, QuestionBank projection and owner-only ExamEngine route → AC2, AC13, AC14; 2 sections, edition and labels in the same read → AC3; 3 images through the attempt, Api route and Web proxy → AC12 (Api), AC15; 4 Web `ExamEngineApiClient` and the `primarySelected` token (theme, tokens, DESIGN.md, ADR-0007) → build, `IdentityTokensTests`, `ApprovedPaletteTests`; 5 the three screens by the `frontend` agent (start action, submitted page, simulator with `ExamSessionLayout`, `AppAnswerOptions`, `AppAnswerSheet`, save status and gallery; removes nothing; one fix round budgeted) → AC1, AC4–AC12, AC16, AC17, AC19, AC20; 6 OpenAPI document and the two flow pages → AC18, `DocGen --check`, `techdocs.js check`
+- 2026-10-27 — Test phase: the Web proxy test `Show_NotSignedIn_GoesToSignIn_AndWithoutTake_IsRefused_AndTheApiIsNotAsked` passed before the handler existed, because the route's `attempts.take` policy is declared where the skeleton maps it; kept, it guards T6 against a later change of the policy — Claude (technical)
+- 2026-10-27 — Frontend hand-off: `AppAnswerMode.Single` renamed `SingleChoice` (CA1720, the only new warning of the first gate run); the agent's key `Attempt.Submitted.MessageNoEdition` (the submitted page when the edition no longer exists) added to the key table; the submit dialog's two sentences are one paragraph, because `AppConfirmDialog` takes one message — accepted; the exam-session exception of `ui-project.md` gains the inline save status line (Decision of 2026-10-27) — Claude (technical)
 
 ## Out of scope
 - `Matching`, `FillInTheBlanks`, `ShortAnswer`, `OpenAnswer` and the essay with its line counter (F-178).
@@ -388,5 +391,6 @@ Written at the end of the build.
 - 2026-10-27 question — asked 12, from context 1
 - 2026-10-27 change — v2: answer sheet legend Current, section ranges, primarySelected colour
 - 2026-10-27 override — Colour of a marked answer — chose "Stitch blue #D1E4FE" over "2 px border with primaryLighten"
+- 2026-10-27 test-fail — 1 new warning(s): CA1720 in src/Hosts/Simulab.Web/Components/Ui/AppAnswerMode.cs, 2 reds
 
 ## Delivery

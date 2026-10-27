@@ -808,6 +808,67 @@
   <data name="exam_attempt.text_too_long" xml:space="preserve"><value>The text is longer than the limit of the question.</value></data>
   <data name="exam_attempt.answer_empty" xml:space="preserve"><value>Write or choose an answer.</value></data>
   <data name="exam_attempt.entry_repeated" xml:space="preserve"><value>An item or a blank was answered twice. Keep one answer for each.</value></data>
+  <data name="Catalog.Editions.Take" xml:space="preserve"><value>Take this exam</value></data>
+  <data name="Catalog.Editions.Take.Name" xml:space="preserve"><value>Take this exam: {0}</value></data>
+  <data name="Catalog.Editions.TakeFailed" xml:space="preserve"><value>The exam could not be started. Try again.</value></data>
+  <data name="Attempt.Leave" xml:space="preserve"><value>Leave and continue later</value></data>
+  <data name="Attempt.PageTitle" xml:space="preserve"><value>Question {0} · {1}</value></data>
+  <data name="Attempt.Section.Range" xml:space="preserve"><value>Questions {0} to {1}</value></data>
+  <data name="Attempt.Section.Other" xml:space="preserve"><value>Other</value></data>
+  <data name="Attempt.Question.Title" xml:space="preserve"><value>Question {0}</value></data>
+  <data name="Attempt.Question.Position" xml:space="preserve"><value>{0} of {1}</value></data>
+  <data name="Attempt.Question.BaseText" xml:space="preserve"><value>Base text</value></data>
+  <data name="Attempt.Question.SingleHint" xml:space="preserve"><value>Mark one option. Click it again to clear it.</value></data>
+  <data name="Attempt.Question.TrueFalseHint" xml:space="preserve"><value>Judge the statement. Click your choice again to clear it.</value></data>
+  <data name="Attempt.Question.MultipleHint" xml:space="preserve"><value>Mark every option that applies. Untick them all to clear the answer.</value></data>
+  <data name="Attempt.Question.NotYetSupported" xml:space="preserve"><value>This kind of answer is not in the simulator yet. The question stays blank and counts as blank.</value></data>
+  <data name="Attempt.Save.Saving" xml:space="preserve"><value>Saving…</value></data>
+  <data name="Attempt.Save.Saved" xml:space="preserve"><value>Answer saved</value></data>
+  <data name="Attempt.Save.Cleared" xml:space="preserve"><value>Answer cleared</value></data>
+  <data name="Attempt.Save.Failed" xml:space="preserve"><value>Your answer was not saved. The question is as it was before; mark it again.</value></data>
+  <data name="Attempt.Nav.Previous" xml:space="preserve"><value>Previous</value></data>
+  <data name="Attempt.Nav.Next" xml:space="preserve"><value>Next</value></data>
+  <data name="Attempt.AnswerSheet.Title" xml:space="preserve"><value>Answer sheet</value></data>
+  <data name="Attempt.AnswerSheet.Open" xml:space="preserve"><value>Answer sheet ({0} of {1} answered)</value></data>
+  <data name="Attempt.AnswerSheet.Close" xml:space="preserve"><value>Close the answer sheet</value></data>
+  <data name="Attempt.AnswerSheet.Progress" xml:space="preserve"><value>{0} of {1} answered</value></data>
+  <data name="Attempt.AnswerSheet.Answered" xml:space="preserve"><value>Answered</value></data>
+  <data name="Attempt.AnswerSheet.Blank" xml:space="preserve"><value>Blank</value></data>
+  <data name="Attempt.AnswerSheet.Current" xml:space="preserve"><value>Current</value></data>
+  <data name="Attempt.AnswerSheet.SectionRange" xml:space="preserve"><value>{0}–{1}</value></data>
+  <data name="Attempt.AnswerSheet.CellName" xml:space="preserve"><value>Question {0}: {1}</value></data>
+  <data name="Attempt.Submit.Action" xml:space="preserve"><value>Submit exam</value></data>
+  <data name="Attempt.Submit.Title" xml:space="preserve"><value>Submit the exam?</value></data>
+  <data name="Attempt.Submit.Blanks" xml:space="preserve"><value>{0} questions are blank: {1}.</value></data>
+  <data name="Attempt.Submit.OneBlank" xml:space="preserve"><value>1 question is blank: {0}.</value></data>
+  <data name="Attempt.Submit.NoBlank" xml:space="preserve"><value>No question is blank.</value></data>
+  <data name="Attempt.Submit.Final" xml:space="preserve"><value>After submitting you cannot change your answers.</value></data>
+  <data name="Attempt.Submit.Submitting" xml:space="preserve"><value>Submitting…</value></data>
+  <data name="Attempt.Submit.Failed" xml:space="preserve"><value>The exam was not submitted. Your answers are kept; try again.</value></data>
+  <data name="Attempt.Load.Failed" xml:space="preserve"><value>The exam could not be loaded.</value></data>
+  <data name="Attempt.Submitted.Title" xml:space="preserve"><value>Exam submitted</value></data>
+  <data name="Attempt.Submitted.Message" xml:space="preserve"><value>Your answers to {0} were submitted on {1} at {2}.</value></data>
+  <data name="Attempt.Submitted.MessageNoEdition" xml:space="preserve"><value>Your answers were submitted on {0} at {1}.</value></data>
+  <data name="Attempt.Submitted.Answered" xml:space="preserve"><value>Answered</value></data>
+  <data name="Attempt.Submitted.Blank" xml:space="preserve"><value>Blank</value></data>
+  <data name="Attempt.Submitted.BackToEdition" xml:space="preserve"><value>Back to the exam</value></data>
+  <data name="Attempt.Submitted.LoadFailed" xml:space="preserve"><value>The submitted exam could not be loaded.</value></data>
+  <data name="Gallery.Section.AnswerOptions" xml:space="preserve"><value>Answer options</value></data>
+  <data name="Gallery.AnswerOptions.Hint" xml:space="preserve"><value>The answer area of an option question: one of a list, true or false, or any number. Marking saves; click a marked row again to clear it.</value></data>
+  <data name="Gallery.AnswerOptions.Single" xml:space="preserve"><value>One option</value></data>
+  <data name="Gallery.AnswerOptions.TrueFalse" xml:space="preserve"><value>True or false</value></data>
+  <data name="Gallery.AnswerOptions.Multiple" xml:space="preserve"><value>Several options</value></data>
+  <data name="Gallery.AnswerOptions.Busy" xml:space="preserve"><value>Saving (the group is busy and ignores clicks)</value></data>
+  <data name="Gallery.AnswerOptions.Long" xml:space="preserve"><value>A long option text wraps</value></data>
+  <data name="Gallery.AnswerOptions.Sample" xml:space="preserve"><value>Sample option {0}</value></data>
+  <data name="Gallery.AnswerOptions.SampleLong" xml:space="preserve"><value>A very long option text that does not fit on one line and has to wrap inside the row without cutting the words or pushing the page wider than its column, even when a word is very long: pneumonoultramicroscopicsilicovolcanoconiosis.</value></data>
+  <data name="Gallery.Section.AnswerSheet" xml:space="preserve"><value>Answer sheet</value></data>
+  <data name="Gallery.AnswerSheet.Hint" xml:space="preserve"><value>The numbers of an attempt grouped by section. A cell is blank, answered or current. A phone shows it in a drawer, with a close button.</value></data>
+  <data name="Gallery.AnswerSheet.Drawer" xml:space="preserve"><value>With a close button (the phone's drawer)</value></data>
+  <data name="Gallery.AnswerSheet.SampleSection" xml:space="preserve"><value>Sample section {0}</value></data>
+  <data name="Gallery.AnswerSheet.SampleLongSection" xml:space="preserve"><value>A section heading so long that it has to wrap onto a second line in the narrow panel of the answer sheet</value></data>
+  <data name="Gallery.Section.SaveStatus" xml:space="preserve"><value>Save status</value></data>
+  <data name="Gallery.SaveStatus.Hint" xml:space="preserve"><value>One polite line under the answer: saving, saved, cleared. No snackbar for each save.</value></data>
   <data name="question.topic_not_found" xml:space="preserve"><value>The topic no longer exists. Pick another.</value></data>
   <data name="question.statement_required" xml:space="preserve"><value>Write the statement.</value></data>
   <data name="question.statement_too_long" xml:space="preserve"><value>The statement has more than 10,000 characters.</value></data>

@@ -179,6 +179,15 @@ public static class AppIcons
     /// <summary>F-105: a reviewer rejects a question with a reason.</summary>
     public const string Reject = Icons.Material.Outlined.Cancel;
 
+    /// <summary>F-169: starts, or resumes, a simulated exam on an edition.</summary>
+    public const string StartAttempt = Icons.Material.Outlined.PlayCircle;
+
+    /// <summary>F-169: the answer sheet of an attempt, the grid of question numbers.</summary>
+    public const string AnswerSheet = Icons.Material.Outlined.GridView;
+
+    /// <summary>F-169: a check mark, for an answered cell of the answer sheet and a saved answer.</summary>
+    public const string Check = Icons.Material.Outlined.Check;
+
     /// <summary>F-95: the rich text field's toolbar.</summary>
     public const string FormatBold = Icons.Material.Outlined.FormatBold;
     public const string FormatItalic = Icons.Material.Outlined.FormatItalic;

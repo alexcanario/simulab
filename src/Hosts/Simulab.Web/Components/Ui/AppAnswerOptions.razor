@@ -1,0 +1,140 @@
+@inject IJSRuntime JS
+
+@* F-169: the answer area of an option question. A radio group (Single, TrueFalse) or a group of checkboxes (Multiple).
+   Marking saves, so selection does not follow focus: the arrow keys only move focus, Space or Enter (a button's own
+   click) marks the focused row, or clears it when it is already marked. This departs from the APG radio pattern on
+   purpose. A marked row is never colour alone: the fill, a 2 px border and a filled indicator say it together. The
+   component is controlled: the page hands the selection in and decides what a change means. *@
+<div id="@Id"
+     class="app-answer-options"
+     role="@(IsMultiple ? "group" : "radiogroup")"
+     aria-labelledby="@LabelledBy"
+     aria-describedby="@DescribedBy"
+     aria-busy="@(Busy ? "true" : null)">
+    @foreach (var option in Options)
+    {
+        var selected = Selected.Contains(option.Position);
+        <button type="button"
+                id="@RowId(option.Position)"
+                class="@(selected ? "app-answer-option app-answer-option-selected" : "app-answer-option")"
+                role="@(IsMultiple ? "checkbox" : "radio")"
+                aria-checked="@(selected ? "true" : "false")"
+                tabindex="@TabIndexOf(option)"
+                @onclick="() => ToggleAsync(option.Position)"
+                @onkeydown="e => OnKeyDownAsync(e, option.Position)">
+            <span class="@(IsMultiple ? "app-answer-indicator app-answer-indicator-box" : "app-answer-indicator app-answer-indicator-radio")" aria-hidden="true">
+                @if (IsMultiple && selected)
+                {
+                    <MudIcon Icon="@AppIcons.Check" Size="Size.Small" />
+                }
+            </span>
+            @if (option.Letter is not null)
+            {
+                <span class="app-answer-letter">@option.Letter</span>
+            }
+            <span class="app-answer-text app-question-content" lang="@(option.Html is null ? null : Lang)">
+                @if (option.Html is not null)
+                {
+                    @((MarkupString)option.Html)
+                }
+                else
+                {
+                    @option.Text
+                }
+            </span>
+        </button>
+    }
+</div>
+
+@code {
+    /// <summary>Prefix of the element ids: the group, and each row as <c>{Id}-option-{position}</c>.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public AppAnswerMode Mode { get; set; }
+
+    [Parameter, EditorRequired] public IReadOnlyList<AppAnswerOption> Options { get; set; } = [];
+
+    /// <summary>The positions that are marked. Empty when the question is blank.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<int> Selected { get; set; } = [];
+
+    /// <summary>The id of the element that names the group (the question heading): the group's accessible name.</summary>
+    [Parameter, EditorRequired] public string LabelledBy { get; set; } = string.Empty;
+
+    /// <summary>The id of the element that describes the group (the hint under the question).</summary>
+    [Parameter] public string? DescribedBy { get; set; }
+
+    /// <summary>The language of the option texts that are content, as a BCP 47 tag.</summary>
+    [Parameter] public string? Lang { get; set; }
+
+    /// <summary>A save is in flight: the group is busy and ignores further clicks.</summary>
+    [Parameter] public bool Busy { get; set; }
+
+    /// <summary>
+    /// The selection after a click: one position, or none when the marked row was clicked again (Single, TrueFalse); the
+    /// whole new set (Multiple).
+    /// </summary>
+    [Parameter, EditorRequired] public EventCallback<IReadOnlyList<int>> OnChange { get; set; }
+
+    private bool IsMultiple => Mode == AppAnswerMode.Multiple;
+
+    private string RowId(int position) => $"{Id}-option-{position}";
+
+    // One tab stop for a radio group: the marked row, else the first. Every checkbox is a stop of its own.
+    private int TabIndexOf(AppAnswerOption option)
+    {
+        if (IsMultiple)
+        {
+            return 0;
+        }
+
+        var holder = Selected.Count > 0 ? Selected[0] : Options.Count > 0 ? Options[0].Position : -1;
+        return option.Position == holder ? 0 : -1;
+    }
+
+    private async Task ToggleAsync(int position)
+    {
+        if (Busy)
+        {
+            return;
+        }
+
+        IReadOnlyList<int> next;
+        if (IsMultiple)
+        {
+            next = [.. (Selected.Contains(position) ? Selected.Where(marked => marked != position) : Selected.Append(position)).Order()];
+        }
+        else
+        {
+            next = Selected.Contains(position) ? Array.Empty<int>() : new[] { position };
+        }
+
+        await OnChange.InvokeAsync(next);
+    }
+
+    // Arrow keys move focus between the rows of a radio group, wrapping at the ends, without marking anything.
+    private async Task OnKeyDownAsync(KeyboardEventArgs args, int position)
+    {
+        if (IsMultiple || Options.Count < 2)
+        {
+            return;
+        }
+
+        var step = args.Key is "ArrowDown" or "ArrowRight" ? 1 : args.Key is "ArrowUp" or "ArrowLeft" ? -1 : 0;
+        if (step == 0)
+        {
+            return;
+        }
+
+        var index = 0;
+        for (var candidate = 0; candidate < Options.Count; candidate++)
+        {
+            if (Options[candidate].Position == position)
+            {
+                index = candidate;
+            }
+        }
+
+        var target = Options[(index + step + Options.Count) % Options.Count];
+        await JS.InvokeVoidAsync("simulabShell.focusOption", RowId(target.Position));
+    }
+}

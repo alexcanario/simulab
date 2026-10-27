@@ -92,6 +92,7 @@ internal static partial class AppCssColours
         {
             "link" => dark ? SimulabTheme.DarkLink : SimulabTheme.LightLink,
             "brand-name" => dark ? SimulabTheme.DarkBrandName : SimulabTheme.LightBrandName,
+            "primary-selected" => dark ? SimulabTheme.DarkPrimarySelected : SimulabTheme.LightPrimarySelected,
             "keycap-primary-edge" => edges.Primary,
             "keycap-secondary-edge" => edges.Secondary,
             "keycap-tertiary-edge" => edges.Tertiary,
@@ -216,7 +217,7 @@ internal static partial class AppCssColours
     [GeneratedRegex(@"var\(\s*--mud-palette-([a-z0-9-]+)\s*\)")]
     private static partial Regex TokenPattern();
 
-    [GeneratedRegex(@"^var\(\s*--app-(link|brand-name|keycap-[a-z]+-edge)\s*\)$")]
+    [GeneratedRegex(@"^var\(\s*--app-(link|brand-name|primary-selected|keycap-[a-z]+-edge)\s*\)$")]
     private static partial Regex AppTokenPattern();
 
     [GeneratedRegex(@"^color-mix\(\s*in srgb\s*,\s*(var\([^)]+\))\s+([0-9.]+)%\s*,\s*transparent\s*\)$")]

@@ -1,0 +1,527 @@
+@page "/attempts/{Id:guid}"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + ExamEnginePermissions.Take)]
+@layout ExamSessionLayout
+@implements IAsyncDisposable
+@using Simulab.ExamEngine.Contracts
+@using Simulab.Web.Components.Pages.QuestionBank
+@inject ExamEngineApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject ErrorText Errors
+@inject IConfirmService Confirm
+@inject NavigationManager Navigation
+@inject IBrowserViewportService Viewport
+@inject IJSRuntime JS
+
+@* F-169, UC2 to UC5: the simulator. One question at a time with its base text and pictures, the answer area of its type,
+   previous and next across the sections, the answer sheet (a side panel, a drawer on a phone) and the submit with its
+   warning about blanks. An answer is saved when it is marked (BR6): the row shows the click at once, the answer sheet
+   changes only after the save succeeded, and a save that fails puts the row back (BR7). Only the owner opens it: an
+   attempt that is not the user's looks exactly like one that does not exist (BR11). *@
+@if (_notFound)
+{
+    <PageTitle>@L["NotFound.Title"]</PageTitle>
+}
+else if (Current is { } titled)
+{
+    <PageTitle>@PageTitleText(titled)</PageTitle>
+}
+
+<div class="@(ShowsAside ? "app-session-body app-session-body-aside" : "app-session-body")">
+    <main id="main-content" tabindex="-1" class="app-session-main">
+        @if (_notFound)
+        {
+            <NotFoundContent />
+        }
+        else if (_loading)
+        {
+            <MudPaper Class="app-form-card app-session-card" Elevation="0">
+                <AppLoadingState />
+            </MudPaper>
+        }
+        else if (Current is null)
+        {
+            <MudPaper Class="app-form-card app-session-card" Elevation="0">
+                <AppErrorState Message="@L["Attempt.Load.Failed"]" OnRetry="LoadAsync" />
+            </MudPaper>
+        }
+        else
+        {
+            var question = Current!;
+            var section = SectionOf(question);
+            <MudPaper Class="app-form-card app-session-card" Elevation="0">
+                @if (section is not null)
+                {
+                    <p class="app-session-section">
+                        <span class="app-session-section-label" lang="@(section.NoticeSubjectId is null ? null : _contentLanguage)">@SectionLabel(section)</span>
+                        <span class="app-session-section-range">@L["Attempt.Section.Range", section.FirstPaperNumber, section.LastPaperNumber]</span>
+                    </p>
+                }
+                <div class="app-session-question-head">
+                    <h2 id="@QuestionTitleId" tabindex="-1" class="app-session-question-title">@L["Attempt.Question.Title", question.PaperNumber]</h2>
+                    <span class="app-session-question-position">@L["Attempt.Question.Position", _currentIndex + 1, _questions.Count]</span>
+                </div>
+
+                @if (_alert is not null)
+                {
+                    <AppAlert Severity="Severity.Error"
+                              Text="@_alert"
+                              OnAction="AlertAction"
+                              ActionText="@AlertActionText" />
+                }
+
+                @if (!QuestionHtml.IsBlank(question.BaseTextHtml))
+                {
+                    <p class="app-session-caption">@L["Attempt.Question.BaseText"]</p>
+                    <div class="app-question-base app-question-content" lang="@question.ContentLanguage">@((MarkupString)question.BaseTextHtml!)</div>
+                }
+
+                <div class="app-question-content app-session-statement" lang="@question.ContentLanguage">@((MarkupString)question.StatementHtml)</div>
+
+                @switch (question.Type)
+                {
+                    case AttemptQuestionType.SingleChoice:
+                        <p id="@HintId" class="app-session-hint">@L["Attempt.Question.SingleHint"]</p>
+                        <AppAnswerOptions Id="attempt-options" Mode="AppAnswerMode.SingleChoice" Options="AnswerRows(question)" Selected="_display"
+                                          LabelledBy="@QuestionTitleId" DescribedBy="@HintId" Lang="@question.ContentLanguage"
+                                          Busy="_saving || _submitting" OnChange="OnAnswerChangedAsync" />
+                        break;
+                    case AttemptQuestionType.TrueFalse:
+                        <p id="@HintId" class="app-session-hint">@L["Attempt.Question.TrueFalseHint"]</p>
+                        <AppAnswerOptions Id="attempt-options" Mode="AppAnswerMode.TrueFalse" Options="AnswerRows(question)" Selected="_display"
+                                          LabelledBy="@QuestionTitleId" DescribedBy="@HintId"
+                                          Busy="_saving || _submitting" OnChange="OnAnswerChangedAsync" />
+                        break;
+                    case AttemptQuestionType.MultipleAnswer:
+                        <p id="@HintId" class="app-session-hint">@L["Attempt.Question.MultipleHint"]</p>
+                        <AppAnswerOptions Id="attempt-options" Mode="AppAnswerMode.Multiple" Options="AnswerRows(question)" Selected="_display"
+                                          LabelledBy="@QuestionTitleId" DescribedBy="@HintId" Lang="@question.ContentLanguage"
+                                          Busy="_saving || _submitting" OnChange="OnAnswerChangedAsync" />
+                        break;
+                    default:
+                        @* BR8: the statement and the base text are shown; the answer is not yet in the simulator (F-178). *@
+                        <AppAlert Severity="Severity.Info" Text="@L["Attempt.Question.NotYetSupported"]" Class="mt-4" />
+                        break;
+                }
+
+                <AppSaveStatus State="_status" />
+
+                <div class="app-session-nav">
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@AppIcons.ChevronLeft"
+                               Disabled="@(_currentIndex == 0 || _submitting)"
+                               OnClick="() => MoveAsync(_currentIndex - 1)">@L["Attempt.Nav.Previous"]</MudButton>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               EndIcon="@AppIcons.ChevronRight"
+                               Disabled="@(_currentIndex == _questions.Count - 1 || _submitting)"
+                               OnClick="() => MoveAsync(_currentIndex + 1)">@L["Attempt.Nav.Next"]</MudButton>
+                </div>
+                <div class="app-session-submit">
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@(_submitting ? null : AppIcons.Send)"
+                               Disabled="_submitting"
+                               OnClick="SubmitAsync"
+                               aria-busy="@(_submitting ? "true" : null)">
+                        @if (_submitting)
+                        {
+                            <span class="app-session-submit-progress" aria-hidden="true"><MudProgressCircular Size="Size.Small" Indeterminate="true" /></span>
+                            @L["Attempt.Submit.Submitting"]
+                        }
+                        else
+                        {
+                            @L["Attempt.Submit.Action"]
+                        }
+                    </MudButton>
+                </div>
+            </MudPaper>
+        }
+    </main>
+    @if (ShowsAside)
+    {
+        <div class="app-session-aside">
+            <AppAnswerSheet Id="attempt-sheet" Sections="SheetSections" Total="_questions.Count" AnsweredCount="AnsweredCount"
+                            CurrentId="@Current?.QuestionId" OnSelect="OpenQuestionAsync" />
+        </div>
+    }
+</div>
+
+@if (_content is not null && !_desktop)
+{
+    <MudDrawer @bind-Open="_sheetOpen"
+               Anchor="Anchor.End"
+               Variant="DrawerVariant.Temporary"
+               Elevation="0"
+               Width="340px"
+               Class="app-session-drawer">
+        @if (_sheetOpen)
+        {
+            <div @onkeydown="OnSheetKeyDown">
+                <AppAnswerSheet Id="attempt-sheet" Sections="SheetSections" Total="_questions.Count" AnsweredCount="AnsweredCount"
+                                CurrentId="@Current?.QuestionId" OnSelect="OpenQuestionAsync" OnClose="CloseSheet" />
+            </div>
+        }
+    </MudDrawer>
+}
+
+@code {
+    private const string QuestionTitleId = "attempt-question-title";
+    private const string HintId = "attempt-question-hint";
+
+    private readonly Guid _viewportSubscription = Guid.NewGuid();
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    [CascadingParameter] private ExamSessionBar? Bar { get; set; }
+
+    [Parameter] public Guid Id { get; set; }
+
+    private AttemptContentResponse? _content;
+    private IReadOnlyList<AttemptQuestionContentResponse> _questions = [];
+    private Dictionary<Guid, int> _index = [];
+
+    // What the Api has stored, by question: the answer sheet and the submit warning read this, never the click.
+    private Dictionary<Guid, AnswerPayload?> _answers = [];
+
+    private IReadOnlyList<int> _display = [];
+    private int _currentIndex;
+    private Guid? _loadedFor;
+    private bool _loading;
+    private bool _notFound;
+    private bool _saving;
+    private bool _submitting;
+    private bool _desktop = true;
+    private bool _sheetOpen;
+    private bool _focusPending;
+    private bool _alertRetry;
+    private string? _alert;
+    private string? _editionLabel;
+    private string? _contentLanguage;
+    private AppSaveState _status;
+
+    private AttemptQuestionContentResponse? Current =>
+        _content is not null && _currentIndex >= 0 && _currentIndex < _questions.Count ? _questions[_currentIndex] : null;
+
+    private bool ShowsAside => _content is not null && _desktop;
+
+    // A failed submit offers "Try again", which asks again; a failed save offers nothing, the student marks the question again.
+    private EventCallback AlertAction => _alertRetry ? EventCallback.Factory.Create(this, SubmitAsync) : default;
+
+    private string? AlertActionText => _alertRetry ? L["Common.TryAgain"].Value : null;
+
+    private int AnsweredCount => _answers.Values.Count(AttemptAnswers.IsAnswered);
+
+    private IReadOnlyList<AppAnswerSheetSection> SheetSections =>
+        _content is null
+            ? []
+            : [.. _content.Sections.Select(section => new AppAnswerSheetSection(
+                SectionLabel(section),
+                section.NoticeSubjectId is null ? null : _contentLanguage,
+                section.FirstPaperNumber,
+                section.LastPaperNumber,
+                [.. section.QuestionIds.Where(_index.ContainsKey).Select(questionId => new AppAnswerSheetCell(
+                    questionId,
+                    _questions[_index[questionId]].PaperNumber,
+                    AttemptAnswers.IsAnswered(_answers[questionId])))]))];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedFor == Id)
+        {
+            return;
+        }
+
+        _loadedFor = Id;
+        await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Viewport.SubscribeAsync(_viewportSubscription, OnViewportChanged, fireImmediately: true);
+        }
+
+        if (_focusPending)
+        {
+            // BR5 and the accessibility notes: after a move the focus is on the question's heading, so a screen reader
+            // reads "Question 48, heading level 2".
+            _focusPending = false;
+            await JS.InvokeVoidAsync("simulabShell.focusElement", QuestionTitleId);
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _notFound = false;
+        _content = null;
+        _alert = null;
+        SyncBar();
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ReadContentAsync(token, Id);
+
+        if (result is { IsSuccess: true, Value: { Status: AttemptStatus.Submitted } })
+        {
+            // BR10: the screen of a submitted attempt opens its submitted page. The loading state stays until it does.
+            Navigation.NavigateTo($"/attempts/{Id}/submitted", replace: true);
+            return;
+        }
+
+        _loading = false;
+        if (result is { IsSuccess: true, Value: { Questions.Count: > 0 } content })
+        {
+            Apply(content);
+        }
+        else
+        {
+            _notFound = result?.ErrorCode == ExamAttemptErrorCodes.NotFound;
+        }
+
+        SyncBar();
+    }
+
+    // BR5: the first question opens on a new attempt, and the first blank one on a resumed attempt.
+    private void Apply(AttemptContentResponse content)
+    {
+        _questions = [.. content.Questions.OrderBy(question => question.PaperNumber)];
+        _index = _questions.Select((question, position) => (question.QuestionId, position)).ToDictionary(pair => pair.QuestionId, pair => pair.position);
+        _answers = _questions.ToDictionary(question => question.QuestionId, question => question.Answer);
+        _editionLabel = AttemptText.EditionLabel(content.Edition);
+        _contentLanguage = content.Edition?.ContentLanguage ?? _questions[0].ContentLanguage;
+
+        var firstBlank = _questions.ToList().FindIndex(question => !AttemptAnswers.IsAnswered(question.Answer));
+        _currentIndex = firstBlank < 0 ? 0 : firstBlank;
+        _display = AttemptAnswers.Selection(_questions[_currentIndex].Answer);
+        _status = AppSaveState.None;
+        _content = content;
+    }
+
+    private AttemptSectionResponse? SectionOf(AttemptQuestionContentResponse question) =>
+        _content?.Sections.FirstOrDefault(section => section.QuestionIds.Contains(question.QuestionId));
+
+    // BR3: a section is its notice subject's label (content); the last section, of the questions with none, is "Other".
+    private string SectionLabel(AttemptSectionResponse section) =>
+        section.NoticeSubjectId is null || string.IsNullOrWhiteSpace(section.Label)
+            ? L["Attempt.Section.Other"].Value
+            : section.Label;
+
+    private string PageTitleText(AttemptQuestionContentResponse question) =>
+        _editionLabel is null
+            ? L["Attempt.Question.Title", question.PaperNumber].Value
+            : L["Attempt.PageTitle", question.PaperNumber, _editionLabel].Value;
+
+    // A true or false question has two rows of the app's own words; the others show the options of the fixed version.
+    private IReadOnlyList<AppAnswerOption> AnswerRows(AttemptQuestionContentResponse question) =>
+        question.Type == AttemptQuestionType.TrueFalse
+            ? [
+                new AppAnswerOption(AttemptAnswers.TrueRow, null, Text: L["Questions.TrueFalse.True"].Value),
+                new AppAnswerOption(AttemptAnswers.FalseRow, null, Text: L["Questions.TrueFalse.False"].Value)
+            ]
+            : [.. question.Options.OrderBy(option => option.Position)
+                .Select(option => new AppAnswerOption(option.Position, QuestionText.Letter(option.Position), Html: option.TextHtml))];
+
+    private void SyncBar()
+    {
+        var edition = _content?.Edition;
+        Bar?.Update(
+            _editionLabel,
+            _contentLanguage,
+            edition is null ? null : $"/catalog/exams/{edition.ExamId}",
+            !_desktop,
+            _content is null ? null : L["Attempt.AnswerSheet.Open", AnsweredCount, _questions.Count].Value,
+            EventCallback.Factory.Create(this, OpenSheet));
+    }
+
+    private Task OnViewportChanged(BrowserViewportEventArgs args)
+    {
+        var desktop = args.Breakpoint >= Breakpoint.Md;
+        if (desktop == _desktop)
+        {
+            return Task.CompletedTask;
+        }
+
+        _desktop = desktop;
+        _sheetOpen = false;
+        SyncBar();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private void OpenSheet() => _sheetOpen = true;
+
+    private void CloseSheet() => _sheetOpen = false;
+
+    private void OnSheetKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Escape")
+        {
+            _sheetOpen = false;
+        }
+    }
+
+    private Task OpenQuestionAsync(Guid questionId)
+    {
+        if (_index.TryGetValue(questionId, out var position))
+        {
+            Move(position);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task MoveAsync(int position)
+    {
+        Move(position);
+        return Task.CompletedTask;
+    }
+
+    // Previous, Next and the answer sheet: the question at that place in paper order, across the sections (BR5).
+    private void Move(int position)
+    {
+        if (_submitting || position < 0 || position >= _questions.Count || position == _currentIndex)
+        {
+            _sheetOpen = false;
+            return;
+        }
+
+        _currentIndex = position;
+        _display = AttemptAnswers.Selection(_answers[_questions[position].QuestionId]);
+        _status = AppSaveState.None;
+        _alert = null;
+        _alertRetry = false;
+        _sheetOpen = false;
+        _focusPending = true;
+    }
+
+    // BR6 and BR7: a click saves the answer, or clears it when the selection is empty. The row shows the click at once
+    // (the page renders at the first await); the stored answers, and with them the sheet, change after the save.
+    private async Task OnAnswerChangedAsync(IReadOnlyList<int> selection)
+    {
+        if (_saving || _submitting || Current is not { } question)
+        {
+            return;
+        }
+
+        var before = _display;
+        _display = selection;
+        _saving = true;
+        _alert = null;
+        _alertRetry = false;
+        _status = AppSaveState.Saving;
+
+        string? failure;
+        AnswerPayload? stored = null;
+        var token = await TokenAsync();
+        if (token is null)
+        {
+            failure = ErrorText.UnexpectedCode;
+        }
+        else if (selection.Count == 0)
+        {
+            failure = (await Api.ClearAnswerAsync(token, Id, question.QuestionId)).ErrorCode;
+        }
+        else
+        {
+            var payload = AttemptAnswers.ToPayload(question.Type, selection);
+            var saved = await Api.SaveAnswerAsync(token, Id, question.QuestionId, payload);
+            failure = saved.ErrorCode;
+            stored = saved.Value?.Answer ?? payload;
+        }
+
+        _saving = false;
+        var stillHere = ReferenceEquals(Current, question);
+        if (failure is null)
+        {
+            _answers[question.QuestionId] = selection.Count == 0 ? null : stored;
+            if (stillHere)
+            {
+                _status = selection.Count == 0 ? AppSaveState.Cleared : AppSaveState.Saved;
+            }
+
+            SyncBar();
+            return;
+        }
+
+        if (failure == ExamAttemptErrorCodes.AlreadySubmitted)
+        {
+            // BR7: the attempt was submitted elsewhere; what there is to see now is its submitted page.
+            Navigation.NavigateTo($"/attempts/{Id}/submitted");
+            return;
+        }
+
+        if (stillHere)
+        {
+            _display = before;
+            _status = AppSaveState.None;
+            _alert = failure.StartsWith("exam_attempt.", StringComparison.Ordinal) ? Errors.For(failure) : L["Attempt.Save.Failed"].Value;
+        }
+    }
+
+    // BR9: the dialog counts the blank questions and lists their numbers; a question of a type this screen cannot answer
+    // is blank, so it is listed too.
+    private async Task SubmitAsync()
+    {
+        if (_submitting || _saving || _content is null)
+        {
+            return;
+        }
+
+        var blanks = _questions
+            .Where(question => !AttemptAnswers.IsAnswered(_answers[question.QuestionId]))
+            .Select(question => question.PaperNumber)
+            .ToList();
+        var warning = blanks.Count switch
+        {
+            0 => L["Attempt.Submit.NoBlank"].Value,
+            1 => L["Attempt.Submit.OneBlank", AttemptAnswers.NumberList(blanks)].Value,
+            _ => L["Attempt.Submit.Blanks", blanks.Count, AttemptAnswers.NumberList(blanks)].Value
+        };
+
+        var confirmed = await Confirm.ConfirmAsync(new ConfirmRequest(
+            L["Attempt.Submit.Title"],
+            $"{warning} {L["Attempt.Submit.Final"].Value}",
+            L["Attempt.Submit.Action"],
+            Destructive: false));
+        if (!confirmed)
+        {
+            return;
+        }
+
+        _submitting = true;
+        _alert = null;
+        _alertRetry = false;
+        StateHasChanged();
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.SubmitAsync(token, Id);
+        if (result is { IsSuccess: true } || result?.ErrorCode == ExamAttemptErrorCodes.AlreadySubmitted)
+        {
+            Navigation.NavigateTo($"/attempts/{Id}/submitted");
+            return;
+        }
+
+        _submitting = false;
+        _alert = L["Attempt.Submit.Failed"].Value;
+        _alertRetry = true;
+    }
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await Viewport.UnsubscribeAsync(_viewportSubscription);
+        }
+        catch (JSDisconnectedException)
+        {
+            // The circuit is gone; nothing to unsubscribe from.
+        }
+    }
+}
