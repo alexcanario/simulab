@@ -1,7 +1,7 @@
 ---
 bug: B-36
 feature: F-166
-status: validating
+status: done
 board: 244
 severity: low
 epic: Exam Simulator
@@ -12,9 +12,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-27)
-- Stopped at: Built; gate and scan green; waiting for the owner's validation
-- Next action: Owner runs the validation script, then /agile:ship B-36
+- Status: done (2026-10-27)
+- Stopped at: Shipped: merged to main af0d08ab, version 1.25.1
+- Next action: Nothing: the item is done
 - Waiting on: nothing
 
 ## What happens
@@ -139,5 +139,10 @@ Tests locked: 0955a2392edd0ea5b8cb81facae9b06b469427d4 (2 files); unlocks: 0
 - 2026-10-27 question — asked 4, from context 0
 
 ## Delivery
-- Branch: bug/B-36
-- Merge: -
+- Branch: bug/B-36 (merged and removed)
+- Merge: af0d08ab (`--no-ff`, pushed to origin/main); app version 1.25.0 -> 1.25.1
+- Tests: full suite green (ExamEngine 87, Web 2768, Catalog 706, Identity 583, QuestionBank 857, Architecture 307, others green); full run took about 11 min against the 5 min budget (retro finding)
+- Manual: unchanged (no screen calls the save route yet); technical page `docs/flows/exam-attempt.md` updated
+- Validation evidence: the owner ran the script and said "Validado" (2026-10-27); tick evidence: 0 of 0 tested
+Gate time: 5 passes, 17 min 39 s — turn 2 (2 min 19 s), ship 1 (10 min 57 s), scan 2 (4 min 23 s); 0 red
+Usage: 1002.4k weighted (estimate) — build 81% · ship 19% — context per turn 174k → 214k — 1 session, 70 turns
