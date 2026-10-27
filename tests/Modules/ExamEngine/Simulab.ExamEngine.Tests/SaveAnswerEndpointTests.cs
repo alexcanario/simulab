@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Simulab.ExamEngine.Contracts;
 
 namespace Simulab.ExamEngine.Tests;
@@ -218,17 +219,73 @@ public sealed class SaveAnswerEndpointTests : ExamEngineApiTests
         (await CountAsync($"SELECT count(*) FROM exam_engine.attempt_answers WHERE attempt_id = '{attempt.Id}' AND question_id = '{questionId}'")).Should().Be(1);
     }
 
-    // AC17: [sec] T6. A body above the limit of the route is refused whole.
+    // AC17 of F-166, B-36 AC1: [sec] T6. A body above the limit of the route is refused whole, with problem details.
     [Fact]
-    public async Task Save_ABodyAboveTheLimitOfTheRoute_Answers4xx_AndStoresNothing()
+    public async Task Save_ABodyAboveTheLimitOfTheRoute_Answers413AnswerTooLarge_AndStoresNothing()
     {
         var (student, attempt, questions) = await StartedEveryTypeAsync();
-        var json = $$"""{"type":"ShortAnswer","text":"{{new string('a', AttemptLimits.SaveBodyMaxBytes + 1)}}"}""";
+        var json = OneByteAboveTheLimit();
 
         var response = await SaveRawAsync(student, attempt.Id, QuestionOf(questions, AttemptQuestionType.ShortAnswer), json);
 
-        ((int)response.StatusCode).Should().BeInRange(400, 499);
+        await AssertAnswerTooLargeAsync(response);
         await AssertEverythingBlankAsync(student, attempt.Id);
+    }
+
+    // B-36 AC2 (BR3): the same body with no Content-Length, so the limit is found while the body is read.
+    [Fact]
+    public async Task Save_AChunkedBodyAboveTheLimitOfTheRoute_Answers413AnswerTooLarge_AndStoresNothing()
+    {
+        var (student, attempt, questions) = await StartedEveryTypeAsync();
+        using var request = new HttpRequestMessage(
+            HttpMethod.Put,
+            $"{Attempts}/{attempt.Id}/answers/{QuestionOf(questions, AttemptQuestionType.ShortAnswer)}")
+        {
+            Content = new UnsizedContent(System.Text.Encoding.UTF8.GetBytes(OneByteAboveTheLimit()))
+        };
+        request.Headers.TransferEncodingChunked = true;
+
+        request.Content.Headers.ContentLength.Should().BeNull("the length of the body is not declared");
+
+        var response = await student.SendAsync(request);
+
+        await AssertAnswerTooLargeAsync(response);
+        await AssertEverythingBlankAsync(student, attempt.Id);
+    }
+
+    private static string OneByteAboveTheLimit()
+    {
+        const string Frame = """{"type":"ShortAnswer","text":""}""";
+        var json = $$"""{"type":"ShortAnswer","text":"{{new string('a', AttemptLimits.SaveBodyMaxBytes + 1 - Frame.Length)}}"}""";
+        System.Text.Encoding.UTF8.GetByteCount(json).Should().Be(AttemptLimits.SaveBodyMaxBytes + 1);
+
+        return json;
+    }
+
+    private static async Task AssertAnswerTooLargeAsync(HttpResponseMessage response)
+    {
+        var body = await response.Content.ReadAsStringAsync();
+        response.StatusCode.Should().Be(HttpStatusCode.RequestEntityTooLarge, body);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/problem+json");
+        response.Content.Headers.ContentType.Should().NotBeNull("the answer carries problem details");
+        var problem = JsonDocument.Parse(body).RootElement;
+        (problem.TryGetProperty("code", out var code) ? code.GetString() : null).Should().Be(ExamAttemptErrorCodes.AnswerTooLarge);
+        (problem.TryGetProperty("status", out var status) ? status.GetInt32() : 0).Should().Be(413);
+        problem.TryGetProperty("errors", out _).Should().BeFalse("the body is not parsed, so no field is named");
+    }
+
+    /// <summary>A body whose length is unknown to the client, so it goes out chunked.</summary>
+    private sealed class UnsizedContent(byte[] bytes) : HttpContent
+    {
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context) =>
+            stream.WriteAsync(bytes, 0, bytes.Length);
+
+        protected override bool TryComputeLength(out long length)
+        {
+            length = 0;
+
+            return false;
+        }
     }
 
     // AC17: the limit leaves room for the largest valid text, every character written as a six-byte escape.

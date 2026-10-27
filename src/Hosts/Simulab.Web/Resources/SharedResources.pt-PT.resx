@@ -801,6 +801,7 @@
   <data name="exam_attempt.not_found" xml:space="preserve"><value>Esta tentativa já não existe.</value></data>
   <data name="exam_attempt.question_not_in_attempt" xml:space="preserve"><value>Esta questão não faz parte da tentativa.</value></data>
   <data name="exam_attempt.answer_invalid" xml:space="preserve"><value>A resposta não é válida. Verifique e tente de novo.</value></data>
+  <data name="exam_attempt.answer_too_large" xml:space="preserve"><value>A resposta é demasiado grande para ser guardada. Encurte o texto e tente de novo.</value></data>
   <data name="exam_attempt.already_submitted" xml:space="preserve"><value>Esta tentativa já foi submetida e não aceita mais respostas.</value></data>
   <data name="exam_attempt.answer_type_mismatch" xml:space="preserve"><value>A resposta não corresponde ao tipo da questão.</value></data>
   <data name="exam_attempt.option_unknown" xml:space="preserve"><value>Escolha uma das alternativas da questão.</value></data>

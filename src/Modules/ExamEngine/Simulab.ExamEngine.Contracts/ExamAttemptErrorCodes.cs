@@ -25,6 +25,9 @@ public static class ExamAttemptErrorCodes
     /// <summary>BR5: the answer does not have the shape of its question; one entry per field says why.</summary>
     public const string AnswerInvalid = "exam_attempt.answer_invalid";
 
+    /// <summary>B-36: the body of a save is longer than <see cref="AttemptLimits.SaveBodyMaxBytes"/>; it is not parsed, so no field is named.</summary>
+    public const string AnswerTooLarge = "exam_attempt.answer_too_large";
+
     /// <summary>BR6: the attempt was submitted and takes no more answers.</summary>
     public const string AlreadySubmitted = "exam_attempt.already_submitted";
 
