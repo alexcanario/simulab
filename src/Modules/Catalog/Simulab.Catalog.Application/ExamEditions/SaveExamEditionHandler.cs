@@ -58,6 +58,14 @@ public sealed class SaveExamEditionHandler(IExamEditionStore store, IExamEdition
             return Result.Failure<ExamEditionResponse>(candidate.Error!);
         }
 
+        // F-168: the exam rules are checked with the rest of the shape, before any lookup.
+        var rules = candidate.Value.SetRules(
+            request.DurationMinutes, request.ObjectiveCutOffScore, request.EssayMaxScore, request.EssayCutOffScore);
+        if (rules.IsFailure)
+        {
+            return Result.Failure<ExamEditionResponse>(rules.Error!);
+        }
+
         var organizerId = candidate.Value.OrganizerId;
         if (!await store.OrganizerExistsAsync(organizerId, cancellationToken))
         {
@@ -98,6 +106,14 @@ public sealed class SaveExamEditionHandler(IExamEditionStore store, IExamEdition
             if (updated.IsFailure)
             {
                 return Result.Failure<ExamEditionResponse>(updated.Error!);
+            }
+
+            // A PUT replaces every rule too: a request that leaves one out clears it (F-168, BR1).
+            var replaced = edition.SetRules(
+                request.DurationMinutes, request.ObjectiveCutOffScore, request.EssayMaxScore, request.EssayCutOffScore);
+            if (replaced.IsFailure)
+            {
+                return Result.Failure<ExamEditionResponse>(replaced.Error!);
             }
         }
 

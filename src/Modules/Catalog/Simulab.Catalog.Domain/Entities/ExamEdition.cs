@@ -51,6 +51,70 @@ public sealed class ExamEdition : TenantEntity
     /// <summary>The notice PDF kept inside Simulab, or null (F-89, BR2): independent of <see cref="NoticeUrl"/>.</summary>
     public NoticeDocument? NoticeDocument { get; private set; }
 
+    /// <summary>How long the paper lasts, in whole minutes; null is no time limit (F-168, BR2).</summary>
+    public int? DurationMinutes { get; private set; }
+
+    /// <summary>The points of the objective paper a candidate needs to pass (F-168, BR5).</summary>
+    public decimal? ObjectiveCutOffScore { get; private set; }
+
+    /// <summary>The scale of the essay as the notice states it (F-168, BR6).</summary>
+    public decimal? EssayMaxScore { get; private set; }
+
+    /// <summary>The essay points a candidate needs to pass; only with a maximum, and not above it (F-168, BR6).</summary>
+    public decimal? EssayCutOffScore { get; private set; }
+
+    /// <summary>
+    /// Replaces the exam rules (F-168). Every rule is optional (BR1); each value's range is checked before the
+    /// relation between the essay pair. A cut-off above the objective total is not refused here: the total lives on
+    /// the notice subjects, saved apart (BR5, trap T2).
+    /// </summary>
+    public Result SetRules(int? durationMinutes, decimal? objectiveCutOffScore, decimal? essayMaxScore, decimal? essayCutOffScore)
+    {
+        if (durationMinutes is { } minutes
+            && (minutes < CatalogLimits.ExamEditionDurationMinutesMin || minutes > CatalogLimits.ExamEditionDurationMinutesMax))
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.ExamEditionDurationInvalid, ErrorKind.Validation));
+        }
+
+        if (objectiveCutOffScore is { } objective && !IsScore(objective))
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.ExamEditionObjectiveCutOffInvalid, ErrorKind.Validation));
+        }
+
+        if (essayMaxScore is { } essayMax && !IsScore(essayMax))
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.ExamEditionEssayMaxScoreInvalid, ErrorKind.Validation));
+        }
+
+        if (essayCutOffScore is { } essayCutOff)
+        {
+            if (!IsScore(essayCutOff))
+            {
+                return Result.Failure(new Error(CatalogErrorCodes.ExamEditionEssayCutOffInvalid, ErrorKind.Validation));
+            }
+
+            if (essayMaxScore is not { } scale)
+            {
+                return Result.Failure(new Error(CatalogErrorCodes.ExamEditionEssayCutOffWithoutMax, ErrorKind.Validation));
+            }
+
+            if (essayCutOff > scale)
+            {
+                return Result.Failure(new Error(CatalogErrorCodes.ExamEditionEssayCutOffAboveMax, ErrorKind.Validation));
+            }
+        }
+
+        DurationMinutes = durationMinutes;
+        ObjectiveCutOffScore = objectiveCutOffScore;
+        EssayMaxScore = essayMaxScore;
+        EssayCutOffScore = essayCutOffScore;
+
+        return Result.Success();
+    }
+
+    private static bool IsScore(decimal value) =>
+        Scores.IsValid(value, CatalogLimits.ExamEditionScoreMin, CatalogLimits.ExamEditionScoreMax);
+
     /// <summary>
     /// Keeps this file as the edition's notice PDF (F-89, BR2 to BR4) and returns the blob name it replaced, null
     /// when there was none, so the caller can delete the old file once the row is saved.

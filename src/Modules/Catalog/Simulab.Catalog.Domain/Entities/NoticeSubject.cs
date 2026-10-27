@@ -40,18 +40,27 @@ public sealed class NoticeSubject : TenantEntity
     /// <summary>Where the row sits inside its edition; groups are blocks of consecutive rows (BR6).</summary>
     public int DisplayOrder { get; private set; }
 
-    public static Result<NoticeSubject> Create(Guid examEditionId, string? group, string? label, int? questionCount)
+    /// <summary>What each of its questions is worth, as the notice states; null when it does not say (F-168, BR3).</summary>
+    public decimal? PointsPerQuestion { get; private set; }
+
+    public static Result<NoticeSubject> Create(
+        Guid examEditionId,
+        string? group,
+        string? label,
+        int? questionCount,
+        decimal? pointsPerQuestion = null)
     {
         var subject = new NoticeSubject { ExamEditionId = examEditionId };
-        var applied = subject.Apply(group, label, questionCount);
+        var applied = subject.Apply(group, label, questionCount, pointsPerQuestion);
 
         return applied.IsFailure
             ? Result.Failure<NoticeSubject>(applied.Error!)
             : Result.Success(subject);
     }
 
-    /// <summary>Replaces the group, the label and the number of questions; the edition never changes (BR1).</summary>
-    public Result Update(string? group, string? label, int? questionCount) => Apply(group, label, questionCount);
+    /// <summary>Replaces the group, the label, the number of questions and the points; the edition never changes (BR1).</summary>
+    public Result Update(string? group, string? label, int? questionCount, decimal? pointsPerQuestion = null) =>
+        Apply(group, label, questionCount, pointsPerQuestion);
 
     /// <summary>
     /// A new row of another edition with this row's group, label and number of questions, placed at
@@ -67,12 +76,13 @@ public sealed class NoticeSubject : TenantEntity
             Label = Label,
             NormalizedLabel = NormalizedLabel,
             QuestionCount = QuestionCount,
+            PointsPerQuestion = PointsPerQuestion,
             DisplayOrder = displayOrder
         };
 
     internal void PlaceAt(int displayOrder) => DisplayOrder = displayOrder;
 
-    private Result Apply(string? group, string? label, int? questionCount)
+    private Result Apply(string? group, string? label, int? questionCount, decimal? pointsPerQuestion)
     {
         var trimmedLabel = label?.Trim() ?? string.Empty;
         if (trimmedLabel.Length == 0)
@@ -102,11 +112,18 @@ public sealed class NoticeSubject : TenantEntity
             return Result.Failure(new Error(CatalogErrorCodes.NoticeSubjectQuestionCountInvalid, ErrorKind.Validation));
         }
 
+        if (pointsPerQuestion is { } points
+            && !Scores.IsValid(points, CatalogLimits.NoticeSubjectPointsPerQuestionMin, CatalogLimits.NoticeSubjectPointsPerQuestionMax))
+        {
+            return Result.Failure(new Error(CatalogErrorCodes.NoticeSubjectPointsPerQuestionInvalid, ErrorKind.Validation));
+        }
+
         Group = trimmedGroup;
         NormalizedGroup = CatalogText.Normalize(trimmedGroup);
         Label = trimmedLabel;
         NormalizedLabel = CatalogText.Normalize(trimmedLabel);
         QuestionCount = questionCount;
+        PointsPerQuestion = pointsPerQuestion;
 
         return Result.Success();
     }

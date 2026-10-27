@@ -469,7 +469,8 @@ public abstract class CatalogPageTestContext : KitTestContext
             {
                 var request = Read<SaveNoticeSubjectRequest>(body);
                 var created = new NoticeSubjectResponse(
-                    Guid.CreateVersion7(), editionId, Blank(request.Group), request.Label!, request.QuestionCount, Resolve(request.Mappings));
+                    Guid.CreateVersion7(), editionId, Blank(request.Group), request.Label!, request.QuestionCount, Resolve(request.Mappings),
+                    request.PointsPerQuestion);
                 InsertLastInGroup(created);
                 return Json(created, HttpStatusCode.Created);
             }
@@ -507,7 +508,8 @@ public abstract class CatalogPageTestContext : KitTestContext
                     Group = Blank(request.Group),
                     Label = request.Label!,
                     QuestionCount = request.QuestionCount,
-                    Mappings = Resolve(request.Mappings)
+                    Mappings = Resolve(request.Mappings),
+                    PointsPerQuestion = request.PointsPerQuestion
                 };
                 if (AppSuggestField.Normalize(updated.Group) == AppSuggestField.Normalize(existing.Group))
                 {
@@ -567,7 +569,13 @@ public abstract class CatalogPageTestContext : KitTestContext
                 request.NoticeReference,
                 request.NoticeUrl,
                 request.AppliedOn,
-                request.ParseStatus() ?? ExamEditionStatus.Draft);
+                request.ParseStatus() ?? ExamEditionStatus.Draft,
+                null,
+                request.DurationMinutes,
+                null,
+                request.ObjectiveCutOffScore,
+                request.EssayMaxScore,
+                request.EssayCutOffScore);
         }
 
         private static IssuingAuthorityResponse SavedAuthority(Guid id, SaveIssuingAuthorityRequest request) =>

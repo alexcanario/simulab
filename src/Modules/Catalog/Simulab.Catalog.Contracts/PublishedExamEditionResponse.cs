@@ -16,4 +16,9 @@ public sealed record PublishedExamEditionResponse(
     string? NoticeUrl,
     DateOnly? AppliedOn,
     IReadOnlyList<NoticeSubjectResponse>? NoticeSubjects = null,
-    NoticeDocumentResponse? NoticeDocument = null);
+    NoticeDocumentResponse? NoticeDocument = null,
+    int? DurationMinutes = null,
+    decimal? ObjectiveMaxScore = null,
+    decimal? ObjectiveCutOffScore = null,
+    decimal? EssayMaxScore = null,
+    decimal? EssayCutOffScore = null);
