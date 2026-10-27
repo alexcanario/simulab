@@ -3,7 +3,7 @@ feature: F-169
 epic: Exam Simulator
 status: approved
 board: 235
-version: 1
+version: 2
 ---
 # Take an exam edition
 
@@ -11,7 +11,7 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: approved (2026-10-27)
-- Stopped at: Approved with the mockup (2026-10-27).
+- Stopped at: Change note v2 approved (answer sheet legend and ranges, primarySelected colour).
 - Next action: Owner types /agile:build F-169 (session model: opus).
 - Waiting on: nothing
 
@@ -123,7 +123,7 @@ Checked in the code on 2026-10-27, on `main` at `1bc9d69`.
 
 ### Screen design
 Stitch: projects/1446701988332564029/screens/6b9e606274624a55a5d1201352720d30 (2026-10-27) — reference only, simulator default state: [HTML](mockups/F-169-take-exam-edition.stitch.html), [PNG](mockups/F-169-take-exam-edition.stitch.png); the approved mockup below rules.
-Mockup: [F-169-take-exam-edition.html](mockups/F-169-take-exam-edition.html) (every state below, light and dark, the three UI locales, desktop and phone). Colors, fonts and radius are the identity tokens (`docs/design/identity.tokens.json`); no new colour.
+Mockup: [F-169-take-exam-edition.html](mockups/F-169-take-exam-edition.html) (every state below, light and dark, the three UI locales, desktop and phone). Colors, fonts and radius are the identity tokens (`docs/design/identity.tokens.json`); one new colour since v2, `primarySelected` (answer options below).
 
 #### Screen 1 — `/catalog/exams/{id}` [changed]
 - Layout: unchanged (`MainLayout`, `AppPageHeader`, `AppSectionCard` "Editions" with `AppItemRows`, `AppFormAside`). Each edition row gains, at its end (wrapping under the row's text on a phone), one button: `MudButton` `Variant.Outlined`, `StartIcon="@AppIcons.StartAttempt"` (new icon, Material Outlined `PlayCircle`), text `Catalog.Editions.Take`. Outlined, not filled: the page holds one button per edition and the rule allows one primary per page.
@@ -148,14 +148,14 @@ Mockup: [F-169-take-exam-edition.html](mockups/F-169-take-exam-edition.html) (ev
      - `TrueFalse`: two rows, `Questions.TrueFalse.True` and `Questions.TrueFalse.False` (existing keys), with a radio indicator; hint `Attempt.Question.TrueFalseHint`.
      - `MultipleAnswer`: the options with a checkbox indicator; hint `Attempt.Question.MultipleHint`.
      - Any other type (BR8): no answer area; an `AppAlert` `Severity.Info` with `Attempt.Question.NotYetSupported`. The question stays blank.
-     The answer area is a new kit component, `AppAnswerOptions` (modes `Single`, `TrueFalse`, `Multiple`), in the gallery; a selected row is the selected radio card's look (`primary` border, `primaryLighten` fill) plus a filled indicator, so the state is never colour alone.
+     The answer area is a new kit component, `AppAnswerOptions` (modes `Single`, `TrueFalse`, `Multiple`), in the gallery; a selected row has the new `primarySelected` fill (`#D1E4FE` light, `#1A4583` dark), a 2 px `primary` border and a filled `primary` indicator, so the state is never colour alone (v2). Contrast: ink `#0B1B2E` on `#D1E4FE` 13.4:1, border `#0F3266` on it 9.7:1; dark: text `#F2F5FB` on `#1A4583` 8.6:1, border `#47A0EB` on it 3.4:1. The build adds `primarySelected` to `SimulabTheme` (as the CSS variable `--app-primary-selected`, the way `link` is written), to `docs/design/identity.tokens.json` and `DESIGN.md` (Primary role: "the fill of a marked answer") and to the approved list of ADR-0007, keeping `IdentityTokensTests` and `ApprovedPaletteTests` green.
   7. Save status: one line, `role="status"`: `Attempt.Save.Saving` with a small `MudProgressCircular` (`aria-hidden="true"`, as above) while a save is in flight, then `Attempt.Save.Saved` or `Attempt.Save.Cleared`; empty before the first click on that question.
   8. Navigation row: `Attempt.Nav.Previous` (`Variant.Outlined`, `StartIcon` `AppIcons.ChevronLeft`) at the left; `Attempt.Nav.Next` (`Variant.Filled`, `Color.Primary`, `EndIcon` `AppIcons.ChevronRight`) at the right — the screen's one primary. Previous is `disabled` on the first question, Next on the last (AC5). They cross sections (BR5).
   9. Submit row: `Attempt.Submit.Action` (`Variant.Outlined`, `StartIcon` `AppIcons.Send`), right-aligned, under the navigation, on every question.
 - The answer sheet (new kit component `AppAnswerSheet`), BR4 and AC4:
-  - Heading `h2` `Attempt.AnswerSheet.Title`; under it `Attempt.AnswerSheet.Progress` ("12 of 59 answered") and a legend (`Attempt.AnswerSheet.Answered`, `Attempt.AnswerSheet.Blank`).
-  - One group per section in BR3 order: an `h3` with the notice subject label (content language) and a grid of number buttons in paper order (36 × 36 px, mono grid font). Questions with no notice subject: last group `Attempt.Section.Other`.
-  - A cell is blank (surface, `linesInputs` border), answered (`primaryLighten` fill, `primary` border, a check icon after the number) or current (2 px ink border and bold, `aria-current="step"`), and answered + current together. Answered is marked by the icon, not by colour alone.
+  - Heading `h2` `Attempt.AnswerSheet.Title`; under it `Attempt.AnswerSheet.Progress` ("12 of 59 answered") and a legend (`Attempt.AnswerSheet.Answered`, `Attempt.AnswerSheet.Blank`, `Attempt.AnswerSheet.Current`; v2).
+  - One group per section in BR3 order: an `h3` with the notice subject label (content language) and, at its right, the section's range `Attempt.AnswerSheet.SectionRange` ("31–50": the lowest and highest paper number of the section; an annulled number inside it is still absent, BR4; v2), then a grid of number buttons in paper order (36 × 36 px, mono grid font). Questions with no notice subject: last group `Attempt.Section.Other`.
+  - A cell is blank (surface, `linesInputs` border), answered (`primarySelected` fill, 2 px `primary` border, a check icon after the number; v2) or current (2 px ink border and bold, `aria-current="step"`), and answered + current together. Answered is marked by the icon, not by colour alone.
   - A click shows that question (and, on a phone, closes the drawer). The sheet changes only after a save succeeds (BR6).
   - On a phone the drawer has a close icon button (`AppIcons.Close`, tooltip and name `Attempt.AnswerSheet.Close`) and closes on Esc and on the overlay.
 - Answering (BR6, BR7), no confirm button:
@@ -236,6 +236,8 @@ New keys in `SharedResources` (en / pt-BR / pt-PT). Reused: `Questions.TrueFalse
 | `Attempt.AnswerSheet.Progress` | {0} of {1} answered | {0} de {1} respondidas | {0} de {1} respondidas |
 | `Attempt.AnswerSheet.Answered` | Answered | Respondida | Respondida |
 | `Attempt.AnswerSheet.Blank` | Blank | Em branco | Em branco |
+| `Attempt.AnswerSheet.Current` | Current | Atual | Atual |
+| `Attempt.AnswerSheet.SectionRange` | {0}–{1} | {0}–{1} | {0}–{1} |
 | `Attempt.AnswerSheet.CellName` | Question {0}: {1} | Questão {0}: {1} | Questão {0}: {1} |
 | `Attempt.Submit.Action` | Submit exam | Enviar prova | Submeter prova |
 | `Attempt.Submit.Title` | Submit the exam? | Enviar a prova? | Submeter a prova? |
@@ -278,9 +280,9 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 - AC1 Given a `Student` on `/catalog/exams/{id}` of an exam with a published edition, when they use the start action of that edition, then an attempt is started and `/attempts/{id}` opens on the first question; when they use it again while that attempt is in progress, then the same attempt opens on its first blank question.
 - AC2 Given an attempt started before a question was edited, when the student opens it, then the statement, base text and options shown are those of the version fixed at the start.
 - AC3 Given the Manaus 2026 attempt, when the screen opens, then the sections are the notice subjects with their labels, ordered by their lowest paper number, each with its questions in paper-number order; a question with no notice subject is in a last section "Other".
-- AC4 Given the Manaus 2026 attempt, when the answer sheet opens, then it lists 59 numbers grouped by section, with 46 followed by 48, each marked answered or blank, and a click on a number shows that question.
+- AC4 Given the Manaus 2026 attempt, when the answer sheet opens, then it lists 59 numbers grouped by section, with 46 followed by 48, each marked answered or blank, the current one marked as current and explained in the legend; each section's heading shows its lowest and highest paper number; a click on a number shows that question.
 - AC5 Given a question, when the student uses next and previous, then the next and the previous question in paper order are shown, across sections; previous is unavailable on the first question and next on the last.
-- AC6 Given a blank single-choice or true/false question, when the student marks an option, then the answer is saved and the answer sheet shows it answered; when they mark another, then it replaces the first; when they click the marked one again, then the answer is cleared and the sheet shows it blank.
+- AC6 Given a blank single-choice or true/false question, when the student marks an option, then the answer is saved and the answer sheet shows it answered, and the marked option and the cell use the `primarySelected` fill with a 2 px border; when they mark another, then it replaces the first; when they click the marked one again, then the answer is cleared and the sheet shows it blank.
 - AC7 Given a multiple-answer question, when the student ticks two options, then the saved answer holds both; when they untick both, then the answer is cleared.
 - AC8 Given a save that fails, when the Api answers an error, then the question shows the answer it had before the click and a message says the answer was not saved; when the Api answers 409 `exam_attempt.already_submitted`, then the submitted page opens.
 - AC9 Given a question of another type (the guard sample edition of F-110), when it is shown, then its statement and base text appear with the notice that this answer is not yet in the simulator, and it stays blank.
@@ -349,6 +351,8 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 - 2026-10-27 — Approved by the owner ("aprovo F-169"), with the mockup
 - 2026-10-27 — Stitch offered again at the owner's request (a reference beside the approved mockup) — failed (generation of the simulator screen timed out; no new screen in project `Simulab` after 10 polls in 5 minutes; not retried)
 - 2026-10-27 — Stitch offered — reference (projects/1446701988332564029/screens/6b9e606274624a55a5d1201352720d30, generated by the owner by hand from the same prompt; downloaded beside the mockup; the approved mockup rules)
+- 2026-10-27 — Colour of a marked answer — owner chose "the Stitch blue #D1E4FE (a new token)" over the recommended "2 px border with the existing primaryLighten" (average 5.4 vs 8.0); kept
+- 2026-10-27 — The `primarySelected` token goes into `identity.tokens.json`, `DESIGN.md` and ADR-0007 at the build, with the theme: `IdentityTokensTests` fails a token the theme does not set — Claude (technical)
 
 ## Out of scope
 - `Matching`, `FillInTheBlanks`, `ShortAnswer`, `OpenAnswer` and the essay with its line counter (F-178).
@@ -362,6 +366,11 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 - (none)
 
 ## Change notes
+### v2 — 2026-10-27
+- What: the answer sheet's legend gains "Current"; each section heading of the answer sheet shows its range of paper numbers; a marked option and an answered cell use a new colour `primarySelected` (`#D1E4FE` light, `#1A4583` dark) with a 2 px `primary` border. New keys `Attempt.AnswerSheet.Current` and `Attempt.AnswerSheet.SectionRange`; the mockup follows.
+- Why: the owner compared the approved mockup with the Stitch reference and took these three from it.
+- Affected: AC4, AC6, `### Screen design` (answer options, answer sheet, resource keys), the mockup. Not affected: the business rules, the other criteria, the API, security and data.
+- Re-approved by the owner: 2026-10-27 ("aprovo F-169").
 
 ## Validation script
 Written at the end of the build.
@@ -369,5 +378,7 @@ Written at the end of the build.
 ## Events
 
 - 2026-10-27 question — asked 12, from context 1
+- 2026-10-27 change — v2: answer sheet legend Current, section ranges, primarySelected colour
+- 2026-10-27 override — Colour of a marked answer — chose "Stitch blue #D1E4FE" over "2 px border with primaryLighten"
 
 ## Delivery

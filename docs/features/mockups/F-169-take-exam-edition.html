@@ -20,6 +20,7 @@
   --r-chip: 6px; --r: 12px; --r-card: 20px;
 
   --primary: #0F3266; --primary-contrast: #FFFFFF; --primary-darken: #10366E; --primary-lighten: #DCE8F5;
+  --primary-selected: #D1E4FE; /* new token primarySelected (change note v2) */
   --edge-primary: #6B7C91;
   --info: #2478C5; --info-contrast: #FFFFFF;
   --success: #1A9E8C; --success-contrast: #0B1B2E;
@@ -35,6 +36,7 @@
 }
 [data-theme="dark"] {
   --primary: #47A0EB; --primary-contrast: #0B1B2E; --primary-darken: #4DADFE; --primary-lighten: #1A4583;
+  --primary-selected: #1A4583;
   --edge-primary: #1F6FB5;
   --info: #47A0EB; --info-contrast: #0B1B2E;
   --error: #FF9C94; --error-contrast: #0B1B2E;
@@ -179,7 +181,7 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -.01em; }
 .opts[aria-busy="true"] .opt { cursor: progress; }
 .opt { display: flex; align-items: flex-start; gap: var(--s3); min-height: 44px; padding: var(--s2) var(--s3); border: 1px solid var(--lines-inputs); border-radius: var(--r); cursor: pointer; background: var(--surface); }
 .opt:hover { background: var(--bg); }
-.opt.on { border-color: var(--primary); background: var(--primary-lighten); box-shadow: inset 0 0 0 1px var(--primary); }
+.opt.on { border-color: var(--primary); background: var(--primary-selected); box-shadow: inset 0 0 0 1px var(--primary); }
 .ind { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; border: 2px solid var(--lines-inputs); display: flex; align-items: center; justify-content: center; }
 .ind.radio { border-radius: 50%; }
 .ind.box { border-radius: 4px; }
@@ -206,14 +208,17 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -.01em; }
 .legend { display: flex; gap: var(--s4); font-size: .75rem; color: var(--text-2); margin-bottom: var(--s3); flex-wrap: wrap; }
 .legend span { display: inline-flex; align-items: center; gap: var(--s1); }
 .legend i { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--lines-inputs); display: inline-flex; align-items: center; justify-content: center; }
-.legend i.ans { background: var(--primary-lighten); border-color: var(--primary); color: var(--text); }
+.legend i.ans { background: var(--primary-selected); border-color: var(--primary); color: var(--text); }
+.legend i.cur { border-color: var(--text); }
+.sheet-sec { display: flex; justify-content: space-between; gap: var(--s2); align-items: baseline; }
+.sheet-range { font-family: var(--mono); font-size: .75rem; font-weight: 600; color: var(--text-2); white-space: nowrap; }
 .legend i svg { width: 12px; height: 12px; }
 .sheet-sec { font-size: .8125rem; line-height: 1.125rem; margin: var(--s3) 0 var(--s2); overflow-wrap: anywhere; }
 .cells { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, 40px); gap: 6px; }
 .cell { width: 40px; height: 36px; border-radius: 8px; border: 1px solid var(--lines-inputs); background: var(--surface); color: var(--text);
   font-family: var(--mono); font-size: .8125rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 1px; padding: 0; }
 .cell:hover { background: var(--bg); }
-.cell.ans { background: var(--primary-lighten); border-color: var(--primary); }
+.cell.ans { background: var(--primary-selected); border: 2px solid var(--primary); }
 .cell.ans svg { width: 11px; height: 11px; }
 .cell[aria-current="step"] { border: 2px solid var(--text); font-weight: 800; }
 .overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, .45); z-index: 20; }
@@ -291,6 +296,7 @@ const T = {
     'Attempt.AnswerSheet.Title': 'Cartão-resposta', 'Attempt.AnswerSheet.Open': 'Cartão-resposta ({0} de {1} respondidas)',
     'Attempt.AnswerSheet.Close': 'Fechar o cartão-resposta', 'Attempt.AnswerSheet.Progress': '{0} de {1} respondidas',
     'Attempt.AnswerSheet.Answered': 'Respondida', 'Attempt.AnswerSheet.Blank': 'Em branco', 'Attempt.AnswerSheet.CellName': 'Questão {0}: {1}',
+    'Attempt.AnswerSheet.Current': 'Atual', 'Attempt.AnswerSheet.SectionRange': '{0}–{1}',
     'Attempt.Submit.Action': 'Enviar prova', 'Attempt.Submit.Title': 'Enviar a prova?',
     'Attempt.Submit.Blanks': '{0} questões estão em branco: {1}.', 'Attempt.Submit.OneBlank': '1 questão está em branco: {0}.',
     'Attempt.Submit.NoBlank': 'Nenhuma questão está em branco.', 'Attempt.Submit.Final': 'Depois de enviar, você não pode mudar suas respostas.',
@@ -324,6 +330,7 @@ const T = {
     'Attempt.AnswerSheet.Title': 'Folha de respostas', 'Attempt.AnswerSheet.Open': 'Folha de respostas ({0} de {1} respondidas)',
     'Attempt.AnswerSheet.Close': 'Fechar a folha de respostas', 'Attempt.AnswerSheet.Progress': '{0} de {1} respondidas',
     'Attempt.AnswerSheet.Answered': 'Respondida', 'Attempt.AnswerSheet.Blank': 'Em branco', 'Attempt.AnswerSheet.CellName': 'Questão {0}: {1}',
+    'Attempt.AnswerSheet.Current': 'Atual', 'Attempt.AnswerSheet.SectionRange': '{0}–{1}',
     'Attempt.Submit.Action': 'Submeter prova', 'Attempt.Submit.Title': 'Submeter a prova?',
     'Attempt.Submit.Blanks': '{0} questões estão em branco: {1}.', 'Attempt.Submit.OneBlank': '1 questão está em branco: {0}.',
     'Attempt.Submit.NoBlank': 'Nenhuma questão está em branco.', 'Attempt.Submit.Final': 'Depois de submeter, não pode alterar as suas respostas.',
@@ -357,6 +364,7 @@ const T = {
     'Attempt.AnswerSheet.Title': 'Answer sheet', 'Attempt.AnswerSheet.Open': 'Answer sheet ({0} of {1} answered)',
     'Attempt.AnswerSheet.Close': 'Close the answer sheet', 'Attempt.AnswerSheet.Progress': '{0} of {1} answered',
     'Attempt.AnswerSheet.Answered': 'Answered', 'Attempt.AnswerSheet.Blank': 'Blank', 'Attempt.AnswerSheet.CellName': 'Question {0}: {1}',
+    'Attempt.AnswerSheet.Current': 'Current', 'Attempt.AnswerSheet.SectionRange': '{0}–{1}',
     'Attempt.Submit.Action': 'Submit exam', 'Attempt.Submit.Title': 'Submit the exam?',
     'Attempt.Submit.Blanks': '{0} questions are blank: {1}.', 'Attempt.Submit.OneBlank': '1 question is blank: {0}.',
     'Attempt.Submit.NoBlank': 'No question is blank.', 'Attempt.Submit.Final': 'After submitting you cannot change your answers.',
@@ -571,7 +579,7 @@ function sessionBar(showEdition) {
 }
 function sheetHtml(inDrawer) {
   const total = M.ds.qs.length, done = M.ds.qs.filter(q => answered(q.n)).length, cur = M.ds.qs[M.idx].n;
-  const secs = sectionsOf(M.ds).map((s, i) => `<h3 class="sheet-sec" id="sh-${inDrawer ? 'd' : 'p'}-${i}" ${s.label === null ? '' : `lang="${CL}"`}>${esc(secLabel(s))}</h3>
+  const secs = sectionsOf(M.ds).map((s, i) => `<h3 class="sheet-sec" id="sh-${inDrawer ? 'd' : 'p'}-${i}"><span ${s.label === null ? '' : `lang="${CL}"`}>${esc(secLabel(s))}</span><span class="sheet-range">${t('Attempt.AnswerSheet.SectionRange', s.qs[0].n, s.qs[s.qs.length - 1].n)}</span></h3>
     <ul class="cells" aria-labelledby="sh-${inDrawer ? 'd' : 'p'}-${i}">${s.qs.map(q => {
       const a = answered(q.n);
       return `<li><button class="cell${a ? ' ans' : ''}" data-go="${q.n}" ${q.n === cur ? 'aria-current="step"' : ''}
@@ -580,7 +588,7 @@ function sheetHtml(inDrawer) {
   return `<div class="sheet-head"><h2 id="sheet-title-${inDrawer ? 'd' : 'p'}">${t('Attempt.AnswerSheet.Title')}</h2>
     ${inDrawer ? `<button class="icon-btn" data-act="closeSheet" aria-label="${t('Attempt.AnswerSheet.Close')}" title="${t('Attempt.AnswerSheet.Close')}">${icon('close')}</button>` : ''}</div>
     <p class="sheet-progress">${t('Attempt.AnswerSheet.Progress', done, total)}</p>
-    <div class="legend" aria-hidden="true"><span><i class="ans">${icon('check')}</i>${t('Attempt.AnswerSheet.Answered')}</span><span><i></i>${t('Attempt.AnswerSheet.Blank')}</span></div>
+    <div class="legend" aria-hidden="true"><span><i class="ans">${icon('check')}</i>${t('Attempt.AnswerSheet.Answered')}</span><span><i></i>${t('Attempt.AnswerSheet.Blank')}</span><span><i class="cur"></i>${t('Attempt.AnswerSheet.Current')}</span></div>
     ${secs}`;
 }
 function optionsHtml(q) {
