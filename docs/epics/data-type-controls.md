@@ -1,6 +1,6 @@
 ---
 epic: data-type-controls
-status: draft
+status: agreed
 board: 250
 ---
 # Data type controls
@@ -8,9 +8,9 @@ board: 250
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: draft (2026-10-27)
-- Stopped at: breakdown agreed in the question round; features captured as ideas
-- Next action: the owner says 'aprovo o épico', then /agile:refine F-183 (waits on nothing)
+- Status: agreed (2026-10-27)
+- Stopped at: epic agreed by the owner; F-181 to F-188 captured as ideas
+- Next action: /agile:refine F-183 (owner; waits on nothing)
 - Waiting on: nothing
 
 ## Goal
@@ -64,6 +64,7 @@ F-181, F-182, F-183, F-184, F-185, F-186
 - 2026-10-27 — A separate epic, not part of `interface-and-screen-composition` — different goal, 8 features — owner.
 - 2026-10-27 — The enforcement (F-186) comes before the reserve features: the architecture tests need only the migrated screens — corrects the order of the catalog draft.
 - 2026-10-27 — The difficulty level gauge of F-154 is delivered by F-184 (level control); F-154 keeps the subject lookup and the counters — owner, similar-items card.
+- 2026-10-27 — Epic agreed — owner ("Aprovo o épico").
 
 ## Retro notes
 
