@@ -22,11 +22,37 @@ internal static class AttemptImageEndpoints
         return app;
     }
 
-    private static Task<IResult> ShowAsync(
+    private static async Task<IResult> ShowAsync(
         Guid id,
         Guid imageId,
         HttpContext context,
         WebSessionTokenAccessor tokens,
-        ExamEngineApiClient api) =>
-        throw new NotImplementedException();
+        ExamEngineApiClient api)
+    {
+        var accessToken = await tokens.GetAccessTokenAsync(context.User, context.RequestAborted);
+        if (accessToken is null)
+        {
+            return Results.Challenge();
+        }
+
+        var response = await api.OpenImageAsync(accessToken, id, imageId, context.RequestAborted);
+        context.Response.RegisterForDispose(response);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            // The Api's answer, unchanged: a 404 stays a 404. A 401 means the session ended.
+            return response.StatusCode == System.Net.HttpStatusCode.Unauthorized
+                ? Results.Challenge()
+                : Results.StatusCode((int)response.StatusCode);
+        }
+
+        // F-103 BR13: the type the Api stored, never sniffed, and a stored file that cannot act as a page of this origin.
+        context.Response.Headers.XContentTypeOptions = "nosniff";
+        context.Response.Headers.ContentSecurityPolicy = "sandbox";
+        context.Response.Headers.CacheControl = "private";
+
+        return Results.Stream(
+            await response.Content.ReadAsStreamAsync(context.RequestAborted),
+            response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream");
+    }
 }

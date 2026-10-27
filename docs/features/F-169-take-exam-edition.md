@@ -299,6 +299,9 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 - AC20 Given an attempt in progress, when the student uses "Leave and continue later" in the simulator's bar, then `/catalog/exams/{examId}` opens, and starting that edition again opens the same attempt with its answers.
 
 ## Criterion → test
+
+Tests locked: d5775699db1a399ae36646e4a8eeb7f212a243c5 (5 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | pending |

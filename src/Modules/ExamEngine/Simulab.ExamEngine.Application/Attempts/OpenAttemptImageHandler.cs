@@ -1,3 +1,4 @@
+using Simulab.ExamEngine.Contracts;
 using Simulab.SharedKernel.Results;
 
 namespace Simulab.ExamEngine.Application.Attempts;
@@ -8,6 +9,18 @@ namespace Simulab.ExamEngine.Application.Attempts;
 /// </summary>
 public sealed class OpenAttemptImageHandler(IAttemptStore store, IAttemptSource source)
 {
-    public Task<Result<AttemptImage>> HandleAsync(Guid userId, Guid attemptId, Guid imageId, CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+    public async Task<Result<AttemptImage>> HandleAsync(Guid userId, Guid attemptId, Guid imageId, CancellationToken cancellationToken)
+    {
+        var attempt = await store.FindAsync(attemptId, cancellationToken);
+        var image = attempt is null || attempt.StudentId != userId
+            ? null
+            : await source.OpenImageAsync(
+                imageId,
+                [.. attempt.Answers.Select(answer => new AttemptVersion(answer.QuestionId, answer.VersionNumber))],
+                cancellationToken);
+
+        return image is null
+            ? Result.Failure<AttemptImage>(new Error(ExamAttemptErrorCodes.NotFound, ErrorKind.NotFound))
+            : Result.Success(image);
+    }
 }
