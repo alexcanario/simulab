@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Simulab.Identity.Application.Abstractions;
@@ -16,6 +17,7 @@ namespace Simulab.Identity.Application.Account;
 public sealed partial class ExportDataHandler(
     UserManager<User> userManager,
     IDataExportQueries queries,
+    IEnumerable<IDataExportSection> sections,
     IRefreshSessionStore sessions,
     IDataExportMailer mailer,
     IIdentityUnitOfWork unitOfWork,
@@ -68,10 +70,52 @@ public sealed partial class ExportDataHandler(
             return Failure(IdentityErrorCodes.DataExportCurrentPasswordInvalid);
         }
 
+        // F-167 BR10: asked before the notice, so a section that fails leaves no file and no email.
+        var other = await SectionsAsync(userId, cancellationToken);
+
         await NotifyAsync(user, exportedAt, cancellationToken);
 
-        return Result.Success(new DataExportResponse(DataExportResponse.FormatName, DataExportResponse.CurrentVersion, exportedAt, identity));
+        return Result.Success(new DataExportResponse(DataExportResponse.FormatName, DataExportResponse.CurrentVersion, exportedAt, identity)
+        {
+            Sections = other.Count == 0 ? null : other
+        });
     }
+
+    /// <summary>
+    /// F-167 BR9, BR10: every registered module section, asked for the token subject alone. A section that throws, or
+    /// whose name is already taken, fails the whole export: an incomplete portability file is worse than none.
+    /// </summary>
+    private async Task<Dictionary<string, JsonElement>> SectionsAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var built = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+        foreach (var section in sections)
+        {
+            if (DataExportResponse.ReservedNames.Contains(section.Name, StringComparer.OrdinalIgnoreCase)
+                || built.ContainsKey(section.Name))
+            {
+                LogSectionNameTaken(logger, section.Name, userId);
+                throw new InvalidOperationException($"The data export section name '{section.Name}' is already taken.");
+            }
+
+            try
+            {
+                built[section.Name] = await section.GetAsync(userId, cancellationToken);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                LogSectionFailed(logger, exception, section.Name, userId);
+                throw;
+            }
+        }
+
+        return built;
+    }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "The data export section {SectionName} failed for user {UserId}; the export was refused.")]
+    private static partial void LogSectionFailed(ILogger logger, Exception exception, string sectionName, Guid userId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "The data export section name {SectionName} is already taken; the export for user {UserId} was refused.")]
+    private static partial void LogSectionNameTaken(ILogger logger, string sectionName, Guid userId);
 
     /// <summary>
     /// BR7: the notice goes through the job queue. Failing to write it must not take the file away from the owner,
