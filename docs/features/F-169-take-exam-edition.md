@@ -302,23 +302,23 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 | Criterion | Test |
 | --- | --- |
 | AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
+| AC2 | `AttemptContentEndpointTests.Content_AfterTheQuestionWasEdited_ShowsTheStatementAndOptionsOfTheFixedVersion` |
+| AC3 | `AttemptContentEndpointTests.Content_GroupsTheQuestionsInSectionsByNoticeSubject_InPaperOrder_WithTheOthersLast`; `AttemptSectionsTests.Build_OrdersSectionsByTheirLowestPaperNumber_AndPutsTheQuestionsWithNoSubjectLast`; `AttemptSectionsTests.Build_WithNoNoticeSubject_IsOneLastSection_AndWithNoQuestion_IsEmpty` |
+| AC4 | `AttemptSectionsTests.Build_GivesEachSectionItsLowestAndHighestPaperNumber_WhenTheNumberingJumps`; screen: pending |
 | AC5 | pending |
 | AC6 | pending |
 | AC7 | pending |
 | AC8 | pending |
 | AC9 | pending |
 | AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
-| AC15 | pending |
+| AC11 | `AttemptContentEndpointTests.Content_OfASubmittedAttempt_IsReadByItsOwner_WithTheTimeAndTheAnswers`; screen: pending |
+| AC12 | `AttemptContentEndpointTests.Content_CarriesTheBaseText_AndPointsEveryPictureAtTheAttempt`; `AttemptImageEndpointTests.Image_HeldByAFixedVersion_OpensForTheOwner_WithTheStoredTypeAndTheHardeningHeaders`; Web `AttemptImageEndpointTests.Show_ForAHolderOfTake_StreamsTheApisBytes_WithTheStoredTypeAndTheHardeningHeaders`; screen: pending |
+| AC13 | `AttemptContentEndpointTests.Content_OfAnotherStudentsAttempt_AnswersLikeAnUnknownId_EvenForAnAdmin_AndAnonymousGets401` |
+| AC14 | `AttemptContentEndpointTests.Content_NeverCarriesAnAnswerKeyATrueFalseKeyAnExplanationOrARubric` |
+| AC15 | `AttemptImageEndpointTests.Image_NotHeldByAFixedVersionOfTheAttempt_Answers404`; `AttemptImageEndpointTests.Image_ThroughAnotherStudentsAttempt_Answers404_EvenForAnAdmin_AndAnonymousGets401`; `AttemptImageEndpointTests.Image_HeldByAFixedVersion_OpensForTheOwner_WithTheStoredTypeAndTheHardeningHeaders`; Web `AttemptImageEndpointTests.Show_TheApiAnswers404_TheWebAnswers404`, `Show_NotSignedIn_GoesToSignIn_AndWithoutTake_IsRefused_AndTheApiIsNotAsked` |
 | AC16 | pending |
 | AC17 | pending |
-| AC18 | pending |
+| AC18 | `ExamEngineContractTests.TheOpenApiDocument_Answers200_AndListsTheSevenAttemptRoutes`; architecture tests: pending |
 | AC19 | pending |
 | AC20 | pending |
 

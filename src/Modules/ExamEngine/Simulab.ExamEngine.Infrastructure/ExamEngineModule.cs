@@ -39,6 +39,8 @@ public static class ExamEngineModule
         services.AddScoped<SaveAnswerHandler>();
         services.AddScoped<ClearAnswerHandler>();
         services.AddScoped<SubmitAttemptHandler>();
+        services.AddScoped<GetAttemptContentHandler>();
+        services.AddScoped<OpenAttemptImageHandler>();
 
         return services;
     }

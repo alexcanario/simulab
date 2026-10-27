@@ -19,6 +19,9 @@ public interface IAttemptSource
     Task<AnswerShape?> FindShapeAsync(Guid questionId, int versionNumber, CancellationToken cancellationToken);
 }
 
+/// <summary>A picture of a question version, opened for the student; the caller disposes the stream (F-169, BR12).</summary>
+public sealed record AttemptImage(Stream Content, string ContentType);
+
 /// <summary>An edition and whether it is published.</summary>
 public sealed record EditionState(Guid Id, bool IsPublished);
 
