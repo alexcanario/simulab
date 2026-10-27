@@ -1,7 +1,7 @@
 ---
 feature: F-168
 epic: Exam Simulator
-status: approved
+status: building
 board: 234
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-27)
-- Stopped at: Approved by the owner.
-- Next action: Owner types /agile:build F-168 --worktree (F-169 is building).
+- Status: building (2026-10-27)
+- Stopped at: Build started: status building.
+- Next action: Design passes (system-design, architect), then the plan.
 - Waiting on: nothing
 
 ## Summary
