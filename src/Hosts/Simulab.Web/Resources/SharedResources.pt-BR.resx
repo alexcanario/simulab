@@ -796,6 +796,7 @@
   <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do edital ou é usado por questões e não pode ser excluído. A lista foi recarregada.</value></data>
   <data name="question.not_found" xml:space="preserve"><value>Esta questão não existe mais.</value></data>
   <data name="exam_attempt.edition_not_found" xml:space="preserve"><value>Esta prova não está disponível.</value></data>
+  <data name="exam_attempt.edition_required" xml:space="preserve"><value>Escolha uma prova para começar.</value></data>
   <data name="exam_attempt.edition_without_questions" xml:space="preserve"><value>Esta prova ainda não tem questões.</value></data>
   <data name="exam_attempt.not_found" xml:space="preserve"><value>Esta tentativa não existe mais.</value></data>
   <data name="exam_attempt.question_not_in_attempt" xml:space="preserve"><value>Esta questão não faz parte da tentativa.</value></data>

@@ -10,6 +10,9 @@ public static class ExamAttemptErrorCodes
     /// <summary>BR1: the edition is unknown or still a draft.</summary>
     public const string EditionNotFound = "exam_attempt.edition_not_found";
 
+    /// <summary>B-35: the start names no edition, or the empty id; also the field code of <c>examEditionId</c>.</summary>
+    public const string EditionRequired = "exam_attempt.edition_required";
+
     /// <summary>BR1: the edition has no published question.</summary>
     public const string EditionWithoutQuestions = "exam_attempt.edition_without_questions";
 

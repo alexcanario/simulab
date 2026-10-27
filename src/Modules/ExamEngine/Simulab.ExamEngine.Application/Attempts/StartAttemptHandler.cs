@@ -12,48 +12,70 @@ public sealed class StartAttemptHandler(
     ICurrentTenant currentTenant,
     TimeProvider clock)
 {
-    public async Task<Result<StartedAttempt>> HandleAsync(
+    public async Task<StartAttemptOutcome> HandleAsync(
         Guid studentId,
         StartAttemptRequest request,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (request.ExamEditionId is not { } editionId)
+        // B-35: no id and the empty id are a malformed body, told apart from an unknown edition before any lookup.
+        if (request.ExamEditionId is not { } editionId || editionId == Guid.Empty)
         {
-            return Result.Failure<StartedAttempt>(new Error(ExamAttemptErrorCodes.EditionNotFound, ErrorKind.Validation));
+            return StartAttemptOutcome.EditionRequired;
         }
 
         if (await store.FindInProgressAsync(studentId, editionId, cancellationToken) is { } inProgress)
         {
-            return Result.Success(new StartedAttempt(AttemptMapper.ToResponse(inProgress), Created: false));
+            return StartAttemptOutcome.Started(new StartedAttempt(AttemptMapper.ToResponse(inProgress), Created: false));
         }
 
         var edition = await source.FindEditionAsync(editionId, cancellationToken);
         if (edition is not { IsPublished: true })
         {
-            return Result.Failure<StartedAttempt>(new Error(ExamAttemptErrorCodes.EditionNotFound, ErrorKind.NotFound));
+            return StartAttemptOutcome.Failed(new Error(ExamAttemptErrorCodes.EditionNotFound, ErrorKind.NotFound));
         }
 
         var questions = await source.ListPublishedQuestionsAsync(editionId, cancellationToken);
         if (questions.Count == 0)
         {
-            return Result.Failure<StartedAttempt>(new Error(ExamAttemptErrorCodes.EditionWithoutQuestions, ErrorKind.BusinessRule));
+            return StartAttemptOutcome.Failed(new Error(ExamAttemptErrorCodes.EditionWithoutQuestions, ErrorKind.BusinessRule));
         }
 
         var attempt = Attempt.Start(studentId, editionId, currentTenant.TenantId, clock.GetUtcNow(), questions);
         if (await store.TryAddAsync(attempt, cancellationToken))
         {
-            return Result.Success(new StartedAttempt(AttemptMapper.ToResponse(attempt), Created: true));
+            return StartAttemptOutcome.Started(new StartedAttempt(AttemptMapper.ToResponse(attempt), Created: true));
         }
 
         // A start that arrived at the same time won the unique rule: its attempt is the one in progress.
         var winner = await store.FindInProgressAsync(studentId, editionId, cancellationToken)
             ?? throw new InvalidOperationException("The unique rule of the attempt in progress refused a row and none was found.");
 
-        return Result.Success(new StartedAttempt(AttemptMapper.ToResponse(winner), Created: false));
+        return StartAttemptOutcome.Started(new StartedAttempt(AttemptMapper.ToResponse(winner), Created: false));
     }
 }
 
 /// <summary>An attempt and whether this call created it: 201 when it did, 200 when the student already had it.</summary>
 public sealed record StartedAttempt(AttemptResponse Attempt, bool Created);
+
+/// <summary>
+/// What a start answers: the attempt, or the failure; a body with no edition comes with its one field entry (B-35), in the
+/// shape of <see cref="SaveAnswerOutcome"/>.
+/// </summary>
+public sealed record StartAttemptOutcome(
+    StartedAttempt? Attempt,
+    Error? Error,
+    IReadOnlyList<AnswerFieldError> Fields)
+{
+    public bool IsSuccess => Error is null;
+
+    public static StartAttemptOutcome EditionRequired { get; } = new(
+        null,
+        new Error(ExamAttemptErrorCodes.EditionRequired, ErrorKind.Validation),
+        [new AnswerFieldError("examEditionId", ExamAttemptErrorCodes.EditionRequired)]);
+
+    public static StartAttemptOutcome Started(StartedAttempt attempt) => new(attempt, null, []);
+
+    public static StartAttemptOutcome Failed(Error error) => new(null, error, []);
+}
