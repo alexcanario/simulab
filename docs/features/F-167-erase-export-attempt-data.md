@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-27)
-- Stopped at: Change note v2 approved (BR1, AC7: audit stamp on erased answer rows).
-- Next action: /agile:build F-167 resumes at step 5 (plan), then the test phase.
+- Stopped at: Plan steps 1-7 built and green (ExamEngine 84, Identity 583, Web 2649, Architecture 307, Api 83; 0 warnings); stopped before the independent review (step 16).
+- Next action: /agile:review F-167, then the security scan, the validation script and validating.
 - Waiting on: nothing
 
 ## Summary
