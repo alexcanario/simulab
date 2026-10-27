@@ -66,6 +66,9 @@ public sealed class AttemptStore(ExamEngineModuleDbContext context) : IAttemptSt
             $"SELECT id AS \"Value\" FROM exam_engine.attempts WHERE id = {attemptId} AND student_id = {studentId} AND is_deleted = false FOR UPDATE",
             cancellationToken);
 
+    public Task<IReadOnlyList<Attempt>> FindAllOfStudentForErasureAsync(Guid studentId, CancellationToken cancellationToken) =>
+        throw new NotImplementedException();
+
     // The lock is taken only on the student's own row, so ownership is decided before any side effect on another row.
     private async Task<Attempt?> LockAndLoadAsync(Guid attemptId, FormattableString lockSql, CancellationToken cancellationToken)
     {

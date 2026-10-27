@@ -5,6 +5,7 @@ using Simulab.ExamEngine.Contracts;
 using Simulab.ExamEngine.Infrastructure.Persistence;
 using Simulab.Identity.Contracts;
 using Simulab.Persistence;
+using Simulab.SharedKernel.Messaging;
 using Simulab.SharedKernel.Security;
 
 namespace Simulab.ExamEngine.Infrastructure;
@@ -39,6 +40,11 @@ public static class ExamEngineModule
         services.AddScoped<SaveAnswerHandler>();
         services.AddScoped<ClearAnswerHandler>();
         services.AddScoped<SubmitAttemptHandler>();
+
+        // F-167: the module's part of an account erasure and of the file a user downloads.
+        services.AddScoped<EraseStudentTextsHandler>();
+        services.AddIntegrationEventConsumer<UserErased, UserErasedConsumer>();
+        services.AddScoped<IDataExportSection, ExamEngineDataExportSection>();
 
         return services;
     }

@@ -118,6 +118,12 @@ public sealed class Attempt : TenantEntity
         return Result.Success();
     }
 
+    /// <summary>
+    /// Erases the free texts of every answer when the student's account is erased (F-167 BR1-BR3): a system action, so
+    /// it is allowed whatever the status and changes nothing else. A second call changes nothing.
+    /// </summary>
+    public Result EraseTexts() => throw new NotImplementedException();
+
     // PostgreSQL keeps microseconds; a time with more digits would read back different from the one the first response showed.
     private static DateTimeOffset ToMicroseconds(DateTimeOffset value) =>
         new(value.Ticks - (value.Ticks % (TimeSpan.TicksPerMillisecond / 1000)), value.Offset);

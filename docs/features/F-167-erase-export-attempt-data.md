@@ -105,20 +105,20 @@ Struck threat: a student with very many attempts makes the file large (S1, D). F
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC1 | `AttemptDataExportTests.Export_HasEveryAttemptAndAnswerOfTheStudent_OldestFirst_InPaperOrder` |
+| AC2 | `AttemptDataExportTests.Export_HoldsNothingOfAnotherStudent_AndTheSectionIsAskedOnlyForTheCaller` |
+| AC3 | `AttemptDataExportTests.Export_SectionCarriesNoKeyExplanationModelAnswerStatementOrTenant` |
+| AC4 | `AttemptDataExportTests.Export_StudentWithNoAttempt_HasAnEmptyList_AndTheRestOfTheFileAsBefore` |
+| AC5 | `DataExportFailingSectionTests.Export_WhenASectionThrows_AnswersAServerErrorWithoutDetail_NoFile_NoNotice_AndLogsIt` |
+| AC6 | `DataExportWithoutSectionsTests.Export_WithNoSection_HasOnlyTheMembersOfBefore` (a guard: green before the code too) |
+| AC7 | `AttemptErasureTests.Erase_ClearsTheFourTextsOfEveryAttempt_AndKeepsEverythingElse`; `AttemptEraseTextsRuleTests.EraseTexts_ClearsEveryText_KeepsEveryOtherValue_OnAnyStatus`, `.Samples_CoverEveryShapeOfTheAnswer` |
+| AC8 | `AttemptErasureTests.Erase_LeavesEveryRowOfAnotherStudentAsItWas` |
+| AC9 | `AttemptErasureTests.UserErased_DeliveredAgain_ChangesNothing_AndAStudentWithNoAttemptSucceeds`; `AttemptEraseTextsRuleTests.EraseTexts_Twice_TheSecondChangesNothing` |
+| AC10 | `AttemptErasureTests.Erase_FailingHalfWay_ChangesNoAttempt_AndTheRetryErasesAllThree` |
+| AC11 | `AttemptErasureTests.Read_ByAnAdmin_AfterTheErasure_ShowsTheQuestionsTheChoicesAndNoText` |
+| AC12 | `AddAttemptsStudentIndexMigrationTests.Up_AddsTheStudentIndex_KeepsTheRows_SecondRunChangesNothing_AndDownDropsOnlyIt` |
+| AC13 | `ModuleBoundaryTests.EveryLayer_ReachesAnotherModuleOnlyThroughItsContracts`, `.Contracts_ReferencesNoSolutionProjectBesidesSharedKernel`, `.Application_ReferencesItsOwnDomainAndContractsOnly` (existing) |
+| AC14 | `DataExplanationResourcesTests.Explanation_NamesTheAttemptsAndAnswers`; `ResourceParityTests` (missing key, existing) |
 
 ## Decisions
 - 2026-10-26 — The erasure keeps the user id as the pseudonym and keeps attempts without a person attached, as decided in ADR-0001 #9 and F-10. Still true here? Yes — confirmed: docs/decisions/ADR-0001-foundation.md
@@ -143,6 +143,7 @@ Struck threat: a student with very many attempts makes the file large (S1, D). F
 - 2026-10-27 — Traps — T1 ignoring the tenant filter to reach every row: opens a cross-tenant read in the export and settles F-162's question here (avoided; F-162 must revisit the erasure lookup); T2 one `ExecuteUpdate` or raw SQL over the `json` column: the rule leaves the entity and a ninth shape is missed in silence (avoided); T3 reusing `AttemptResponse` as the export section: a member added for the screen enters the legal file unasked (avoided, pending trade-off 6).
 - 2026-10-27 — Design trade-off 6 Shape of the export records — owner chose as proposed (own `Exported*` records in `ExamEngine.Contracts`).
 - 2026-10-27 — Audit stamp on the erased answer rows — owner chose the recommended change note on BR1/AC7 (attempt rows keep their audit fields; changed answer rows carry the erasure's update stamp); the build waits for `/agile:change F-167` before writing AC7's test.
+- 2026-10-27: plan — 1 erasure path (index + migration, locked lookup by student, `Attempt.EraseTexts`, handler, `UserErasedConsumer`) → AC7, AC12, AC13 (module boundaries after the consumer); 2 erasure guarantees (other student, repeat, failure half-way, payload classification) → AC8, AC9, AC10; 3 admin read after erasure → AC11; 4 export port in Identity (`IDataExportSection`, sections in the file, name guard) → AC6, AC4 (identity half); 5 ExamEngine export section (`Exported*` records, read by student) → AC1, AC2, AC3, AC4, AC13; 6 failing section → AC5; 7 text, register row, flow page → AC14, `DataProcessingRegisterTests`, `techdocs.js check`.
 
 ## Out of scope
 - Reading or exporting an attempt on behalf of another person (an `Admin` exporting a student's data on request).
