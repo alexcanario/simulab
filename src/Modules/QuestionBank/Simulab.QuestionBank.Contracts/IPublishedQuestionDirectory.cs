@@ -44,7 +44,6 @@ public sealed record QuestionVersionKey(Guid QuestionId, int VersionNumber);
 public sealed record QuestionVersionContent(
     Guid QuestionId,
     int VersionNumber,
-    QuestionType Type,
     string ContentLanguage,
     string StatementHtml,
     IReadOnlyList<QuestionVersionOptionContent> Options,

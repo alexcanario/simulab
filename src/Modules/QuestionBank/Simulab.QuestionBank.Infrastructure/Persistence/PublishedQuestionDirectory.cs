@@ -80,7 +80,6 @@ public sealed class PublishedQuestionDirectory(QuestionBankModuleDbContext conte
             .Select(version => new QuestionVersionContent(
                 version.QuestionId,
                 version.Number,
-                version.Type,
                 version.ContentLanguage,
                 version.StatementHtml,
                 [.. version.Options.OrderBy(option => option.Position).Select(option => new QuestionVersionOptionContent(option.Position, option.TextHtml))],

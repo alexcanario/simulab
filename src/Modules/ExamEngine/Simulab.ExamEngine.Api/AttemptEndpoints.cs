@@ -41,9 +41,14 @@ internal static class AttemptEndpoints
             .WithName("SubmitAttempt");
         attempts.MapGet("/{id:guid}/content", ReadContentAsync)
             .RequireAuthorization(ExamEngineEndpoints.TakePolicy)
+            .Produces<AttemptContentResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
             .WithName("ReadAttemptContent");
         attempts.MapGet("/{id:guid}/images/{imageId:guid}", OpenImageAsync)
             .RequireAuthorization(ExamEngineEndpoints.TakePolicy)
+            // The four formats an upload is admitted in (F-103 QuestionImageFormat); OpenAPI takes no wildcard.
+            .Produces<Stream>(StatusCodes.Status200OK, "image/png", "image/jpeg", "image/gif", "image/webp")
+            .ProducesProblem(StatusCodes.Status404NotFound)
             .WithName("OpenAttemptImage");
 
         return group;
