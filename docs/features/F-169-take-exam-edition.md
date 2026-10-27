@@ -1,7 +1,7 @@
 ---
 feature: F-169
 epic: Exam Simulator
-status: refining
+status: approved
 board: 235
 version: 1
 ---
@@ -10,10 +10,10 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: refining (2026-10-27)
-- Stopped at: Screen designed (mockup and `### Screen design`), its question round answered.
-- Next action: Owner reads this file and the mockup and says "aprovo F-169".
-- Waiting on: the owner
+- Status: approved (2026-10-27)
+- Stopped at: Approved with the mockup (2026-10-27).
+- Next action: Owner types /agile:build F-169 (session model: opus).
+- Waiting on: nothing
 
 ## Summary
 The student's simulator screen: pick a published edition, start an attempt, answer question by question with base texts and images, jump through an answer sheet, see the notice subjects as the sections of the paper in paper order, and submit after a warning about blank questions. No timer here (F-170). It runs on the attempt of F-166.
@@ -21,7 +21,7 @@ Added 2026-10-27 (refinement): split in two; this item is part 1 and covers the 
 
 ## Start
 - Depends on: F-166.
-- Waits on (to start): the mockup of `/agile:screen F-169` approved by the owner, before the approval of this item.
+- Waits on (to start): nothing (the mockup of `/agile:screen F-169` was approved with the item, 2026-10-27).
 - Needed to validate: the seeded Manaus 2026 edition (exists: 60 single-choice questions, question 47 annulled, base texts and two images); a signed-in `Student` account with a verified email (the owner); the guard sample edition of F-110 for a question of another type (exists).
 - Model: opus (a door: a new read of question content and images gated by the owner of an attempt; a public API contract in `ExamEngine`).
 - Suggested path: `/agile:screen F-169` → approval → `/agile:build`.
@@ -345,6 +345,7 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 - 2026-10-27 — The submit dialog uses the kit's `AppConfirmDialog`, so its cancel reads `Common.Cancel`, not the wireframe's "Keep answering" — Claude (technical)
 - 2026-10-27 — New kit components `ExamSessionLayout`, `AppAnswerOptions`, `AppAnswerSheet` and the save status, each in the gallery `/dev/ui`; new icons `AppIcons.StartAttempt` (PlayCircle) and `AppIcons.AnswerSheet` (GridView); theme and language switches stay in the session bar; a resumed attempt shows no extra notice — Claude (technical), shown to the owner
 - 2026-10-27 — Stitch offered — declined
+- 2026-10-27 — Approved by the owner ("aprovo F-169"), with the mockup
 
 ## Out of scope
 - `Matching`, `FillInTheBlanks`, `ShortAnswer`, `OpenAnswer` and the essay with its line counter (F-178).
