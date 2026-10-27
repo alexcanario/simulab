@@ -1,7 +1,7 @@
 ---
 feature: F-169
 epic: Exam Simulator
-status: idea
+status: refining
 board: 235
 version: 1
 ---
@@ -10,10 +10,10 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: idea (2026-10-26)
-- Stopped at: Captured by the E-06 breakdown; nothing refined yet.
-- Next action: Refine it with `/agile:screen` after F-166 is built (owner).
-- Waiting on: F-166
+- Status: refining (2026-10-27)
+- Stopped at: Refinement started; premises being checked in the code.
+- Next action: Answer the question round (owner).
+- Waiting on: nothing
 
 ## Summary
 The student's simulator screen: pick a published edition, start an attempt, answer question by question with base texts and images, jump through an answer sheet, see the notice subjects as the sections of the paper in paper order, write the essay within its line limit, and submit after a warning about blank questions. No timer here (F-170). It runs on the attempt of F-166.
