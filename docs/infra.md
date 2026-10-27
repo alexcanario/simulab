@@ -44,6 +44,7 @@ The same command works in Git Bash and in PowerShell 7 unless two forms are show
 - **A worktree's own database** (rule: worktrees): `AppHost.cs` reads `Database:Name`, so an item's migration never lands in the shared `simulab` database. The Postgres server is the same; Aspire creates the database on first start.
   - Git Bash: `Database__Name=simulab_f42 dotnet run --project src/Hosts/Simulab.AppHost`
   - PowerShell 7: `$env:Database__Name = "simulab_f42"; dotnet run --project src/Hosts/Simulab.AppHost`
+  - A worktree's own database has no `Student`. For a check that needs one signed in, register a test account through `POST /api/v1/identity/registrations` (the terms and privacy versions come from `GET /api/v1/identity/legal-documents/terms` and `.../privacy`), then, in that database only, set `status = 'Active'` and `email_verified_at = now()` in `identity.users`: the token endpoint refuses a `Pending` account with `identity.email_not_verified`, and `email_confirmed` alone is not enough (B-35).
   - Drop it when the item ships (server up, nobody connected to it): `DROP DATABASE simulab_f42;`
 - **Only the database server, through the app host**: there is no flag to start one resource. Start the app host, then in the dashboard's Resources page choose **Stop** on `api` and `web` (and `redis`, `mailpit` when not needed). Postgres stays on `127.0.0.1:5432`.
 - **Only the database server, without the app host**: a container on the app's volume. The Postgres version must be the one that created the volume, and the data path depends on it.
