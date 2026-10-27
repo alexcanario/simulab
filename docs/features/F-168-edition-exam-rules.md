@@ -1,7 +1,7 @@
 ---
 feature: F-168
 epic: Exam Simulator
-status: validating
+status: done
 board: 234
 version: 1
 ---
@@ -10,10 +10,10 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-27)
-- Stopped at: Build done: tests green, scan GREEN, validation script written.
-- Next action: Owner follows the validation script (8 steps) and says it passed.
-- Waiting on: owner
+- Status: done (2026-10-27)
+- Stopped at: Shipped: merged as fb7d964e, version 1.25.0.
+- Next action: Nothing: the item is done.
+- Waiting on: nothing
 
 ## Summary
 An admin records, on an exam edition, the rules the notice sets for the paper: its duration, the points per question of each notice subject, the cut-off of the objective paper and of the essay. The Manaus 2026 edition gets its rules seeded (5 hours; 1.50 or 2.00 points per question; pass at 60 of 100 points; essay of 20 points, pass at 10). Today `ExamEdition` and `NoticeSubject` carry none of this (epic E-06, "What exists").
@@ -290,3 +290,37 @@ $env:Database__Name = 'simulab_f168'; dotnet run --project src/Hosts/Simulab.App
 - 2026-10-27 test-fail — build blocked by a running process (Simulab.slnx), 1 red
 
 ## Delivery
+Gate time: 6 passes, 22 min 58 s — turn 2 (1 min 38 s), ship 2 (14 min 58 s), scan 2 (6 min 22 s); 1 red
+Usage: 14323.5k weighted (estimate) — refine 4% · build 76% · ship 14% · other 6% — agents 7% — context per turn 134k → 546k — 2 sessions, 313 turns
+- Branch: `feature/F-168`, merged into `main` as `fb7d964e` (2026-10-27); app version 1.25.0.
+- Full suite (`gate.js ship`): 5621 tests, 0 failed, warnings baseline 0 — Catalog 706, QuestionBank 857, Identity 583, Web 2765, ExamEngine 86, Api 83, AppHost 122, Architecture 307, others 112; the slowest projects took 9 min 41 s to 9 min 54 s in parallel, over the 5 min suite budget (retro finding).
+- Scan: `agile scan GREEN`; closed by Claude: none.
+- Manual: `docs/manual/pt-BR/exam-editions.md` (exam rules, points per question, new fields and messages), `docs/manual/pt-BR/catalog.md` (the rules line). Technical page: `docs/flows/edition-exam-rules.md`. Glossary: 1 row (`numeric(p, s)`).
+- Validation: the owner said "validado" on 2026-10-27 after step 3.2 (saving a subject without points is accepted, BR3). The boxes were not ticked through the widget, so the evidence reads "not tested" for every path; two boxes (1.1, 3.1) had been marked in the file by hand and were removed, as the file holds `[ ]` only.
+- Validation evidence:
+
+```text
+1. Suba o app no banco próprio do item (`simulab_f168`, nada compartilhado). Antes, pare qualquer outro app host (o do F-169 também): um app host por vez.
+   [ ] 1.1 not tested Rode, em `D:\wt\simulab\f-168-edition-exam-rules`:
+2. Entre como `admin@simulab.local` e abra a edição Manaus 2026: menu lateral > Conteúdo > Provas > "Guarda Municipal" (Manaus) > seção "Edições" > 2026.
+3. Disciplinas do edital da mesma página (seção "Disciplinas do edital", abaixo do formulário).
+   [ ] 3.1 not tested Confira que cada linha mostra seus pontos: 2,00 pt em Direito Constitucional e Legislação específica, 1,50 pt nas outras sete; a linha de total termina com "100,00 pontos".
+   [ ] 3.2 not tested Edite "Informática", apague "Pontos por questão", salve: a linha de total diz "1 disciplina não tem pontos por questão…", e o aviso azul "Ainda falta:" do formulário cita Informática.
+   [ ] 3.3 not tested Edite "Informática" de novo, digite 1,50, salve: o total volta a 100,00 pontos.
+4. Recusas e o alerta, no card "Regras da prova".
+   [ ] 4.1 not tested Horas 0, minutos 10, Salvar: o campo de duração diz "A duração deve ficar entre 15 minutos e 8 horas."; volte para 5 h 0 min.
+   [ ] 4.2 not tested Nota de corte da redação 25, Salvar: o campo diz que ela não pode ficar acima da nota máxima; volte para 10.
+   [ ] 4.3 not tested Nota de corte da objetiva 120, Salvar: a edição salva e um alerta amarelo diz que a nota de corte está acima do total da prova objetiva (100 pontos); volte para 60 e salve.
+5. Uma edição publicada sem nenhuma regra.
+   [ ] 5.1 not tested Em "Publicação" escolha Publicada; apague os cinco campos de regra; Salvar: a edição salva e continua Publicada, e "Ainda falta:" lista Duração, Nota de corte da objetiva e Nota máxima da redação.
+   [ ] 5.2 not tested Digite as regras de volta (5 h 0 min, 60, 20, 10) e Salvar.
+6. A página da prova para o aluno e uma checagem de permissão.
+   [ ] 6.1 not tested Saia; entre com a conta `Student`; menu lateral > Estudar > Catálogo > "Guarda Municipal" (Manaus).
+   [ ] 6.2 not tested Confira que o card de 2026 mostra a linha "5 h · 100 pontos, aprovação com 60 · Redação de 20 pontos, aprovação com 10"; uma edição sem regras não mostra linha.
+   [ ] 6.3 not tested Abra `https://localhost:7125/admin/exams` como aluno: o acesso é negado.
+7. Uma troca de idioma, como admin, no formulário da edição Manaus.
+   [ ] 7.1 not tested Troque para Português (Portugal): o card diz "Regras da prova", "Nota mínima da prova objetiva (pontos)" e os decimais usam vírgula (60,00); troque para Português (Brasil): "Nota de corte da objetiva (pontos)".
+8. Só teclado, no formulário da edição.
+   [ ] 8.1 not tested Só com Tab, chegue a "Duração (horas)", digite 4, Tab até "Minutos", digite 30, Tab até Salvar e aperte Espaço: a edição salva e o aside mostra "4 h 30 min"; volte para 5 h 0 min do mesmo jeito.
+Evidence: 0 of 14 tested
+```
