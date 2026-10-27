@@ -50,4 +50,5 @@ Entity: `Attempt` — A student's attempt at a published exam edition: the quest
 | updated_by | uuid | yes |  |  | Who last changed the row. Null while it has never been changed, or when no one was signed in. |
 
 Indexes:
+- `ix_attempts_student` on student_id
 - `ux_attempts_tenant_student_edition_in_progress` on tenant_id, student_id, exam_edition_id (unique, NULLS NOT DISTINCT, where status = 'InProgress' AND is_deleted = false)

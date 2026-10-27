@@ -110,12 +110,12 @@ internal static class AttemptEndpoints
         }
 
         var outcome = await handler.HandleAsync(studentId, request, cancellationToken);
-        if (outcome.IsFailure)
+        if (!outcome.IsSuccess)
         {
-            return Problem(outcome.Error!);
+            return Problem(outcome.Error!, extensions: ErrorsOf(outcome.Fields));
         }
 
-        var started = outcome.Value;
+        var started = outcome.Attempt!;
 
         return started.Created
             ? Results.Created($"/api/v1/exam-engine/attempts/{started.Attempt.Id}", started.Attempt)
@@ -165,12 +165,14 @@ internal static class AttemptEndpoints
             return Results.Ok(outcome.Question);
         }
 
-        return outcome.Fields.Count == 0
-            ? Problem(outcome.Error!)
-            : Problem(
-                outcome.Error!,
-                extensions: ("errors", outcome.Fields.Select(field => new { field = field.Field, code = field.Code }).ToList()));
+        return Problem(outcome.Error!, extensions: ErrorsOf(outcome.Fields));
     }
+
+    /// <summary>The <c>errors</c> member of a 400, one entry per field, or no member when there is no field entry.</summary>
+    private static (string Name, object Value)[] ErrorsOf(IReadOnlyList<AnswerFieldError> fields) =>
+        fields.Count == 0
+            ? []
+            : [("errors", fields.Select(field => new { field = field.Field, code = field.Code }).ToList())];
 
     private static async Task<IResult> ClearAsync(
         Guid id,

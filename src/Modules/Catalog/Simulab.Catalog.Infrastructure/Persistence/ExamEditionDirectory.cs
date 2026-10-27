@@ -31,8 +31,9 @@ public sealed class ExamEditionDirectory(CatalogModuleDbContext context) : IExam
 
         var ids = examEditionIds.ToList();
 
-        return await Entries(context.ExamEditions.Where(edition => ids.Contains(edition.Id)))
-            .ToListAsync(cancellationToken);
+        return await WithTotalsAsync(
+            await Entries(context.ExamEditions.Where(edition => ids.Contains(edition.Id))).ToListAsync(cancellationToken),
+            cancellationToken);
     }
 
     public async Task<IReadOnlyList<ExamEditionDirectoryEntry>> SearchAsync(
@@ -64,9 +65,14 @@ public sealed class ExamEditionDirectory(CatalogModuleDbContext context) : IExam
                        organizer.Name,
                        edition.NoticeYear,
                        edition.Position,
-                       edition.Status);
+                       edition.Status,
+                       edition.DurationMinutes,
+                       null,
+                       edition.ObjectiveCutOffScore,
+                       edition.EssayMaxScore,
+                       edition.EssayCutOffScore);
 
-        return await rows.AsNoTracking().Take(Math.Max(take, 0)).ToListAsync(cancellationToken);
+        return await WithTotalsAsync(await rows.AsNoTracking().Take(Math.Max(take, 0)).ToListAsync(cancellationToken), cancellationToken);
     }
 
     public async Task<IReadOnlyList<NoticeSubjectDirectoryEntry>> ListNoticeSubjectsAsync(
@@ -79,7 +85,7 @@ public sealed class ExamEditionDirectory(CatalogModuleDbContext context) : IExam
             .ThenBy(subject => subject.CreatedAt)
             .ThenBy(subject => subject.Id)
             .Select(subject => new NoticeSubjectDirectoryEntry(
-                subject.Id, subject.ExamEditionId, subject.Group, subject.Label, subject.QuestionCount))
+                subject.Id, subject.ExamEditionId, subject.Group, subject.Label, subject.QuestionCount, subject.PointsPerQuestion))
             .ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<NoticeSubjectDirectoryEntry>> FindNoticeSubjectsAsync(
@@ -99,7 +105,7 @@ public sealed class ExamEditionDirectory(CatalogModuleDbContext context) : IExam
             .AsNoTracking()
             .Where(subject => ids.Contains(subject.Id))
             .Select(subject => new NoticeSubjectDirectoryEntry(
-                subject.Id, subject.ExamEditionId, subject.Group, subject.Label, subject.QuestionCount))
+                subject.Id, subject.ExamEditionId, subject.Group, subject.Label, subject.QuestionCount, subject.PointsPerQuestion))
             .ToListAsync(cancellationToken);
     }
 
@@ -173,5 +179,20 @@ public sealed class ExamEditionDirectory(CatalogModuleDbContext context) : IExam
             organizer.Name,
             edition.NoticeYear,
             edition.Position,
-            edition.Status);
+            edition.Status,
+            edition.DurationMinutes,
+            null,
+            edition.ObjectiveCutOffScore,
+            edition.EssayMaxScore,
+            edition.EssayCutOffScore);
+
+    // F-168 BR4: the objective total of every entry from one batched read of their live notice subjects.
+    private async Task<IReadOnlyList<ExamEditionDirectoryEntry>> WithTotalsAsync(
+        List<ExamEditionDirectoryEntry> entries,
+        CancellationToken cancellationToken)
+    {
+        var totals = await ObjectiveMaxScoreReads.TotalsAsync(context, [.. entries.Select(entry => entry.Id)], cancellationToken);
+
+        return [.. entries.Select(entry => entry with { ObjectiveMaxScore = totals.Of(entry.Id) })];
+    }
 }

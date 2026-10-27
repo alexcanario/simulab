@@ -148,7 +148,7 @@ public sealed class NoticeSubjectCoversDialogTests : CatalogPageTestContext
         var (_, dialogs, _) = OpenAdd();
 
         dialogs.FindAll("input[id^='notice-subject-']").Select(input => input.Id).Should()
-            .Equal("notice-subject-group", "notice-subject-label", "notice-subject-question-count", Covers);
+            .Equal("notice-subject-group", "notice-subject-label", "notice-subject-question-count", "notice-subject-points", Covers);
         dialogs.Find($"label[for='{Covers}']").TextContent.Trim().Should().Be("Covers");
         var input = dialogs.Find($"#{Covers}");
         input.GetAttribute("role").Should().Be("combobox");

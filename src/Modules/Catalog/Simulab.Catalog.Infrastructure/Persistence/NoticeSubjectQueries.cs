@@ -80,7 +80,8 @@ public sealed class NoticeSubjectQueries(CatalogModuleDbContext context) : INoti
                 subject.ExamEditionId,
                 subject.Group,
                 subject.Label,
-                subject.QuestionCount
+                subject.QuestionCount,
+                subject.PointsPerQuestion
             })
             .ToListAsync(cancellationToken);
 
@@ -110,7 +111,8 @@ public sealed class NoticeSubjectQueries(CatalogModuleDbContext context) : INoti
                 row.Group,
                 row.Label,
                 row.QuestionCount,
-                byRow[row.Id].ToList()))
+                byRow[row.Id].ToList(),
+                row.PointsPerQuestion))
             .ToList();
     }
 }

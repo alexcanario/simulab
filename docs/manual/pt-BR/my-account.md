@@ -1,8 +1,8 @@
 ---
 page: my-account
 locale: pt-BR
-features: [F-8, F-10, F-11, F-16, F-32]
-updated: 2026-09-27
+features: [F-8, F-10, F-11, F-16, F-32, F-167]
+updated: 2026-10-27
 ---
 # Minha conta
 
@@ -40,7 +40,7 @@ Selecione **Segurança**, ao lado de **Alterar senha**, para ativar a verificaç
 2. Digite sua senha atual e clique em **Baixar**. A senha protege o arquivo: ele tem dados pessoais.
 3. O navegador salva `simulab-my-data-<data>.json`, e uma mensagem avisa que o download começou.
 
-O arquivo traz sua conta (e-mail, nome de exibição, telefone, idioma preferido, datas), os papéis que você tem, os termos e a política de privacidade que você aceitou com o endereço IP de onde aceitou, as mudanças feitas nos seus papéis, quantos aparelhos estão conectados e os eventos de segurança da sua própria conta (logins, falhas, bloqueios, mudanças de senha e de verificação em duas etapas). Nunca traz sua senha nem qualquer código de segurança. Nada fica guardado no servidor, e você pode baixar quantas vezes quiser.
+O arquivo traz sua conta (e-mail, nome de exibição, telefone, idioma preferido, datas), os papéis que você tem, os termos e a política de privacidade que você aceitou com o endereço IP de onde aceitou, as mudanças feitas nos seus papéis, quantos aparelhos estão conectados e os eventos de segurança da sua própria conta (logins, falhas, bloqueios, mudanças de senha e de verificação em duas etapas). Traz também todas as tentativas de simulado que você iniciou, da mais antiga para a mais nova, com o estado, as datas e as respostas que você deu a cada questão, exatamente como as salvou; o enunciado, as alternativas e o gabarito não vêm no arquivo. Nunca traz sua senha nem qualquer código de segurança. Nada fica guardado no servidor, e você pode baixar quantas vezes quiser.
 
 Cada download envia um e-mail avisando. Se esse e-mail chegar e não foi você, alguém sabe sua senha: troque-a na hora.
 

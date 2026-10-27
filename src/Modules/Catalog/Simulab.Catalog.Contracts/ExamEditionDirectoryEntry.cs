@@ -13,6 +13,11 @@ namespace Simulab.Catalog.Contracts;
 /// <param name="NoticeYear">The year of the notice.</param>
 /// <param name="Position">The position the edition was for, when it has one.</param>
 /// <param name="Status">Draft or Published.</param>
+/// <param name="DurationMinutes">How long the paper lasts, in whole minutes; null is no time limit (F-168).</param>
+/// <param name="ObjectiveMaxScore">The objective total of its live notice subjects; null while unknown (F-168, BR4).</param>
+/// <param name="ObjectiveCutOffScore">The points of the objective paper needed to pass, when stated (F-168).</param>
+/// <param name="EssayMaxScore">The essay scale, when stated (F-168).</param>
+/// <param name="EssayCutOffScore">The essay points needed to pass, when stated (F-168).</param>
 public sealed record ExamEditionDirectoryEntry(
     Guid Id,
     Guid ExamId,
@@ -22,4 +27,9 @@ public sealed record ExamEditionDirectoryEntry(
     string OrganizerName,
     int NoticeYear,
     string? Position,
-    ExamEditionStatus Status);
+    ExamEditionStatus Status,
+    int? DurationMinutes = null,
+    decimal? ObjectiveMaxScore = null,
+    decimal? ObjectiveCutOffScore = null,
+    decimal? EssayMaxScore = null,
+    decimal? EssayCutOffScore = null);

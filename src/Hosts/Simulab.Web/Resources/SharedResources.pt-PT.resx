@@ -796,6 +796,7 @@
   <data name="topic.in_use" xml:space="preserve"><value>Este tópico está mapeado em disciplinas do aviso ou é usado por questões e não pode ser eliminado. A lista foi recarregada.</value></data>
   <data name="question.not_found" xml:space="preserve"><value>Esta questão já não existe.</value></data>
   <data name="exam_attempt.edition_not_found" xml:space="preserve"><value>Esta prova não está disponível.</value></data>
+  <data name="exam_attempt.edition_required" xml:space="preserve"><value>Escolha uma prova para começar.</value></data>
   <data name="exam_attempt.edition_without_questions" xml:space="preserve"><value>Esta prova ainda não tem questões.</value></data>
   <data name="exam_attempt.not_found" xml:space="preserve"><value>Esta tentativa já não existe.</value></data>
   <data name="exam_attempt.question_not_in_attempt" xml:space="preserve"><value>Esta questão não faz parte da tentativa.</value></data>
@@ -1472,4 +1473,50 @@
   <data name="Gallery.States.PageState" xml:space="preserve"><value>Estado de página: uma mensagem e o que fazer a seguir, para um erro ou uma página não encontrada.</value></data>
   <data name="Gallery.States.PageStateTitle" xml:space="preserve"><value>Algo precisa da sua atenção</value></data>
   <data name="Gallery.States.PageStateMessage" xml:space="preserve"><value>Uma mensagem curta que diz o que aconteceu e o que o utilizador pode fazer a seguir.</value></data>
+  <data name="ExamRules.Section.Title" xml:space="preserve"><value>Regras da prova</value></data>
+  <data name="ExamRules.Section.Subtitle" xml:space="preserve"><value>O que o aviso define para a prova. Todas as regras são opcionais; a publicação nunca espera por elas.</value></data>
+  <data name="ExamRules.Field.Duration" xml:space="preserve"><value>Duração</value></data>
+  <data name="ExamRules.Field.DurationHours" xml:space="preserve"><value>Duração (horas)</value></data>
+  <data name="ExamRules.Field.DurationMinutes" xml:space="preserve"><value>Minutos</value></data>
+  <data name="ExamRules.Field.Duration.Hint" xml:space="preserve"><value>De 15 minutos a 8 horas. Vazio significa sem limite de tempo.</value></data>
+  <data name="ExamRules.Field.ObjectiveCutOff" xml:space="preserve"><value>Nota mínima da prova objetiva (pontos)</value></data>
+  <data name="ExamRules.Field.ObjectiveCutOff.Hint" xml:space="preserve"><value>Os pontos da prova objetiva necessários para ficar aprovado.</value></data>
+  <data name="ExamRules.Field.EssayMaxScore" xml:space="preserve"><value>Nota máxima da redação (pontos)</value></data>
+  <data name="ExamRules.Field.EssayCutOff" xml:space="preserve"><value>Nota mínima da redação (pontos)</value></data>
+  <data name="ExamRules.Field.EssayCutOff.Hint" xml:space="preserve"><value>Só com a nota máxima da redação, e não acima dela.</value></data>
+  <data name="ExamRules.Points.Suffix" xml:space="preserve"><value>pontos</value></data>
+  <data name="ExamRules.ObjectiveTotal" xml:space="preserve"><value>Total da prova objetiva: {0} pontos, a partir das disciplinas do aviso.</value></data>
+  <data name="ExamRules.ObjectiveTotal.Unknown" xml:space="preserve"><value>Total da prova objetiva: desconhecido até todas as disciplinas do aviso terem número de perguntas e pontos.</value></data>
+  <data name="ExamRules.ObjectiveTotal.NoSubjects" xml:space="preserve"><value>Total da prova objetiva: ainda não há disciplinas do aviso.</value></data>
+  <data name="ExamRules.Missing.Title" xml:space="preserve"><value>Ainda falta:</value></data>
+  <data name="ExamRules.Missing.Duration" xml:space="preserve"><value>Duração</value></data>
+  <data name="ExamRules.Missing.ObjectiveCutOff" xml:space="preserve"><value>Nota mínima da prova objetiva</value></data>
+  <data name="ExamRules.Missing.EssayMaxScore" xml:space="preserve"><value>Nota máxima da redação</value></data>
+  <data name="ExamRules.Missing.Subjects" xml:space="preserve"><value>número de perguntas ou pontos em {0}</value></data>
+  <data name="ExamRules.CutOffAboveTotal" xml:space="preserve"><value>A nota mínima da prova objetiva está acima do total da prova objetiva ({0} pontos). Verifique a nota mínima ou os pontos das disciplinas.</value></data>
+  <data name="ExamRules.Aside.Title" xml:space="preserve"><value>Regras da prova</value></data>
+  <data name="ExamRules.Aside.Duration" xml:space="preserve"><value>Duração</value></data>
+  <data name="ExamRules.Aside.CutOff" xml:space="preserve"><value>Nota mínima</value></data>
+  <data name="ExamRules.Aside.CutOffOfTotal" xml:space="preserve"><value>{0} / {1}</value></data>
+  <data name="ExamRules.Duration.Hours" xml:space="preserve"><value>{0} h</value></data>
+  <data name="ExamRules.Duration.HoursMinutes" xml:space="preserve"><value>{0} h {1} min</value></data>
+  <data name="ExamRules.Duration.Minutes" xml:space="preserve"><value>{0} min</value></data>
+  <data name="NoticeSubjects.Field.PointsPerQuestion" xml:space="preserve"><value>Pontos por pergunta</value></data>
+  <data name="NoticeSubjects.Field.PointsPerQuestion.Hint" xml:space="preserve"><value>Como o aviso indica. Vazio quando não indica.</value></data>
+  <data name="NoticeSubjects.Row.Points" xml:space="preserve"><value>{0} pt</value></data>
+  <data name="NoticeSubjects.Total.Points" xml:space="preserve"><value>{0} pontos</value></data>
+  <data name="NoticeSubjects.Total.NoPoints.One" xml:space="preserve"><value>1 disciplina não tem pontos por pergunta, por isso o total da prova objetiva é desconhecido.</value></data>
+  <data name="NoticeSubjects.Total.NoPoints.Many" xml:space="preserve"><value>{0} disciplinas não têm pontos por pergunta, por isso o total da prova objetiva é desconhecido.</value></data>
+  <data name="CatalogExam.Rules.Objective" xml:space="preserve"><value>{0} pontos</value></data>
+  <data name="CatalogExam.Rules.ObjectiveWithCutOff" xml:space="preserve"><value>{0} pontos, aprovação com {1}</value></data>
+  <data name="CatalogExam.Rules.CutOffOnly" xml:space="preserve"><value>Aprovação com {0} pontos</value></data>
+  <data name="CatalogExam.Rules.Essay" xml:space="preserve"><value>Redação de {0} pontos</value></data>
+  <data name="CatalogExam.Rules.EssayWithCutOff" xml:space="preserve"><value>Redação de {0} pontos, aprovação com {1}</value></data>
+  <data name="exam_edition.duration_invalid" xml:space="preserve"><value>A duração tem de ficar entre 15 minutos e 8 horas.</value></data>
+  <data name="exam_edition.objective_cut_off_invalid" xml:space="preserve"><value>Escreva uma nota mínima de 0,01 a 1000 pontos com no máximo duas casas decimais.</value></data>
+  <data name="exam_edition.essay_max_score_invalid" xml:space="preserve"><value>Escreva uma nota máxima da redação de 0,01 a 1000 pontos com no máximo duas casas decimais.</value></data>
+  <data name="exam_edition.essay_cut_off_invalid" xml:space="preserve"><value>Escreva uma nota mínima da redação de 0,01 a 1000 pontos com no máximo duas casas decimais.</value></data>
+  <data name="exam_edition.essay_cut_off_without_max" xml:space="preserve"><value>Preencha a nota máxima da redação antes da nota mínima.</value></data>
+  <data name="exam_edition.essay_cut_off_above_max" xml:space="preserve"><value>A nota mínima da redação não pode ficar acima da nota máxima.</value></data>
+  <data name="notice_subject.points_per_question_invalid" xml:space="preserve"><value>Escreva um número de 0,01 a 100 com no máximo duas casas decimais, ou deixe vazio.</value></data>
 </root>

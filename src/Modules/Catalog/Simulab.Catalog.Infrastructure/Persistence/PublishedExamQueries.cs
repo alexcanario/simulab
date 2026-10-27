@@ -82,14 +82,26 @@ public sealed class PublishedExamQueries(CatalogModuleDbContext context) : IPubl
                     (IReadOnlyList<NoticeSubjectResponse>?)null,
                     edition.NoticeDocument == null
                         ? null
-                        : new NoticeDocumentResponse(edition.NoticeDocument.FileName, edition.NoticeDocument.Size, edition.NoticeDocument.UploadedAt)))
+                        : new NoticeDocumentResponse(edition.NoticeDocument.FileName, edition.NoticeDocument.Size, edition.NoticeDocument.UploadedAt),
+                    edition.DurationMinutes,
+                    null,
+                    edition.ObjectiveCutOffScore,
+                    edition.EssayMaxScore,
+                    edition.EssayCutOffScore))
             .ToListAsync(cancellationToken);
 
         // F-76 BR1: the syllabus of every published edition above, in one read for all of them. A draft edition
-        // is not in the list, so its notice subjects are never asked for.
+        // is not in the list, so its notice subjects are never asked for. F-168 BR4: the objective total comes from
+        // the same rows, so it costs no other query.
         var syllabi = await new NoticeSubjectQueries(context)
             .ListByEditionsAsync([.. editions.Select(edition => edition.Id)], cancellationToken);
-        editions = [.. editions.Select(edition => edition with { NoticeSubjects = syllabi.GetValueOrDefault(edition.Id) ?? [] })];
+        editions = [.. editions.Select(edition =>
+        {
+            var syllabus = syllabi.GetValueOrDefault(edition.Id) ?? [];
+            var total = ObjectiveMaxScores.Compute([.. syllabus.Select(row => (row.QuestionCount, row.PointsPerQuestion))]).Total;
+
+            return edition with { NoticeSubjects = syllabus, ObjectiveMaxScore = total };
+        })];
 
         return new PublishedExamDetailResponse(
             exam.Id,

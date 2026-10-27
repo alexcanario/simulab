@@ -11,8 +11,13 @@ namespace Simulab.Catalog.Contracts;
 /// The full mapping of the row (F-75, BR7): a save replaces it. Null or empty means not mapped (BR2), so a
 /// request that leaves the field out clears the mapping.
 /// </param>
+/// <param name="PointsPerQuestion">
+/// What each question is worth, 0.01 to 100.00 with at most 2 decimal places (F-168, BR3); null when the notice
+/// does not say. A save replaces it, so a request that leaves the field out clears it.
+/// </param>
 public sealed record SaveNoticeSubjectRequest(
     string? Group = null,
     string? Label = null,
     int? QuestionCount = null,
-    IReadOnlyList<NoticeSubjectMappingRequest>? Mappings = null);
+    IReadOnlyList<NoticeSubjectMappingRequest>? Mappings = null,
+    decimal? PointsPerQuestion = null);

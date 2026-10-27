@@ -69,5 +69,8 @@ public sealed class AttemptConfiguration : IEntityTypeConfiguration<Attempt>
             .HasDatabaseName(InProgressIndex)
             .HasFilter($"status = '{nameof(AttemptStatus.InProgress)}' AND is_deleted = false")
             .IsUniquePerTenant();
+
+        // F-167 BR6: every attempt of a student, for the erasure of the texts and the data export.
+        builder.HasIndex(attempt => attempt.StudentId).HasDatabaseName("ix_attempts_student");
     }
 }

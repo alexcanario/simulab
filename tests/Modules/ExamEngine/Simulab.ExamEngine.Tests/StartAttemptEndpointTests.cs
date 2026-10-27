@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using Simulab.ExamEngine.Contracts;
 using Simulab.Identity.Contracts;
 using Simulab.SharedKernel.Serialization;
@@ -182,14 +183,33 @@ public sealed class StartAttemptEndpointTests : ExamEngineApiTests
         (await CountAsync($"SELECT count(*) FROM exam_engine.attempt_answers WHERE attempt_id = '{attempt.Id}' AND tenant_id IS NOT NULL")).Should().Be(0);
     }
 
-    // AC14: a body with no edition is a 400, not a 500.
+    // AC14: a body with no edition is a 400, not a 500. B-35 AC1: with a code of its own and one field entry.
     [Fact]
-    public async Task Start_WithNoEdition_Answers400()
+    public async Task Start_WithNoEdition_Answers400WithEditionRequired()
     {
-        var student = await StudentAsync();
+        var (student, studentId) = await SignedInWithIdAsync(IdentityRoles.Student);
 
-        var response = await student.PostAsJsonAsync(Attempts, new StartAttemptRequest(), AppJson.Options);
+        var response = await student.PostAsync(Attempts, new StringContent("{}", Encoding.UTF8, "application/json"));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, await response.Content.ReadAsStringAsync());
+        await ShouldBeEditionRequiredAsync(response, studentId);
+    }
+
+    // B-35 AC2: the empty Guid is a missing edition, not an unknown one.
+    [Fact]
+    public async Task Start_WithEmptyEditionId_Answers400WithEditionRequired()
+    {
+        var (student, studentId) = await SignedInWithIdAsync(IdentityRoles.Student);
+
+        var response = await student.PostAsJsonAsync(Attempts, new StartAttemptRequest(Guid.Empty), AppJson.Options);
+
+        await ShouldBeEditionRequiredAsync(response, studentId);
+    }
+
+    private async Task ShouldBeEditionRequiredAsync(HttpResponseMessage response, Guid studentId)
+    {
+        var body = await BodyAsync(response, HttpStatusCode.BadRequest);
+        CodeOf(body).Should().Be(ExamAttemptErrorCodes.EditionRequired);
+        ErrorsOf(body).Should().Equal(("examEditionId", ExamAttemptErrorCodes.EditionRequired));
+        (await CountAsync($"SELECT count(*) FROM exam_engine.attempts WHERE student_id = '{studentId}'")).Should().Be(0);
     }
 }

@@ -13,6 +13,10 @@ namespace Simulab.Catalog.Contracts;
 /// <param name="NoticeUrl">The official address of the notice, absolute http or https (BR7).</param>
 /// <param name="AppliedOn">The day the paper was applied; not before 1 January of the notice year (BR8).</param>
 /// <param name="Status">One of Draft or Published, by name, ignoring case. Blank means Draft only when adding (BR9).</param>
+/// <param name="DurationMinutes">How long the paper lasts, whole minutes from 15 to 480; null is no time limit (F-168, BR2).</param>
+/// <param name="ObjectiveCutOffScore">The points of the objective paper needed to pass, 0.01 to 1000.00 (F-168, BR5).</param>
+/// <param name="EssayMaxScore">The essay scale, 0.01 to 1000.00 (F-168, BR6).</param>
+/// <param name="EssayCutOffScore">The essay points needed to pass; only with a maximum, and not above it (F-168, BR6).</param>
 public sealed record SaveExamEditionRequest(
     Guid? OrganizerId = null,
     int? NoticeYear = null,
@@ -20,7 +24,11 @@ public sealed record SaveExamEditionRequest(
     string? NoticeReference = null,
     string? NoticeUrl = null,
     DateOnly? AppliedOn = null,
-    string? Status = null)
+    string? Status = null,
+    int? DurationMinutes = null,
+    decimal? ObjectiveCutOffScore = null,
+    decimal? EssayMaxScore = null,
+    decimal? EssayCutOffScore = null)
 {
     /// <summary>
     /// The status as the enum, or null when it is blank or not one of the names (BR9). A method and not a

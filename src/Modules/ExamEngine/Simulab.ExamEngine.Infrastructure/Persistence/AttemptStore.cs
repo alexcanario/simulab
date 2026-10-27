@@ -66,6 +66,23 @@ public sealed class AttemptStore(ExamEngineModuleDbContext context) : IAttemptSt
             $"SELECT id AS \"Value\" FROM exam_engine.attempts WHERE id = {attemptId} AND student_id = {studentId} AND is_deleted = false FOR UPDATE",
             cancellationToken);
 
+    // F-167: the one read that ignores a filter, the soft-delete one only: a deleted attempt still holds the texts. The
+    // tenant filter stays (trap T1 of the design pass): reaching rows of a tenant waits for F-162.
+    public async Task<IReadOnlyList<Attempt>> FindAllOfStudentForErasureAsync(Guid studentId, CancellationToken cancellationToken)
+    {
+        await context.Database.BeginTransactionIfNoneAsync(cancellationToken);
+        await context.Database
+            .SqlQuery<Guid>($"SELECT id AS \"Value\" FROM exam_engine.attempts WHERE student_id = {studentId} FOR UPDATE")
+            .ToListAsync(cancellationToken);
+
+        return await context.Attempts
+            .IgnoreQueryFilters([ModuleDbContext.SoftDeleteFilter])
+            .Include(attempt => attempt.Answers)
+            .AsSplitQuery()
+            .Where(attempt => attempt.StudentId == studentId)
+            .ToListAsync(cancellationToken);
+    }
+
     // The lock is taken only on the student's own row, so ownership is decided before any side effect on another row.
     private async Task<Attempt?> LockAndLoadAsync(Guid attemptId, FormattableString lockSql, CancellationToken cancellationToken)
     {

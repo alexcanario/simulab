@@ -24,8 +24,16 @@ public sealed class NoticeSubjectConfiguration : IEntityTypeConfiguration<Notice
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("notice_subjects", table => table.HasComment(
-            "A subject as one edition's notice names and groups it, with the number of questions the notice states."));
+        builder.ToTable("notice_subjects", table =>
+        {
+            table.HasComment(
+                "A subject as one edition's notice names and groups it, with the number of questions the notice states.");
+
+            // F-168 BR3: points per question are optional, from 0.01 to 100; the two decimal places are the entity's.
+            table.HasCheckConstraint(
+                "ck_notice_subjects_points_per_question",
+                "points_per_question IS NULL OR points_per_question BETWEEN 0.01 AND 100");
+        });
         builder.HasKey(subject => subject.Id);
 
         builder.Property(subject => subject.ExamEditionId)
@@ -55,6 +63,10 @@ public sealed class NoticeSubjectConfiguration : IEntityTypeConfiguration<Notice
 
         builder.Property(subject => subject.QuestionCount)
             .HasComment("How many questions the notice states for the subject, 1 to 500. Empty when it does not say.");
+
+        builder.Property(subject => subject.PointsPerQuestion)
+            .HasPrecision(5, 2)
+            .HasComment("What each question of the subject is worth, 0.01 to 100. Empty when the notice does not say.");
 
         builder.Property(subject => subject.DisplayOrder)
             .IsRequired()
