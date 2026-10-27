@@ -1,7 +1,7 @@
 ---
 bug: B-36
 feature: F-166
-status: approved
+status: building
 board: 244
 severity: low
 epic: Exam Simulator
@@ -12,9 +12,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-27)
-- Stopped at: Approved by the owner (2026-10-27).
-- Next action: /agile:build B-36
+- Status: building (2026-10-27)
+- Stopped at: Build started; tests first
+- Next action: Write the failing tests (AC1, AC2, AC3), commit test(B-36), lock them
 - Waiting on: nothing
 
 ## What happens
@@ -81,9 +81,9 @@ Callers: `ReadBodyAsync` is private and called only by `SaveAsync` (`AttemptEndp
 ## Criterion → test
 | Criterion | Test |
 |---|---|
-| AC1 | to be filled at ship |
-| AC2 | to be filled at ship |
-| AC3 | to be filled at ship (missing-key test) |
+| AC1 | `SaveAnswerEndpointTests.Save_ABodyAboveTheLimitOfTheRoute_Answers413AnswerTooLarge_AndStoresNothing` |
+| AC2 | `SaveAnswerEndpointTests.Save_AChunkedBodyAboveTheLimitOfTheRoute_Answers413AnswerTooLarge_AndStoresNothing` |
+| AC3 | `AnswerTooLargeTextTests.TheCodeOfAnOversizedAnswer_HasItsApprovedTextInEachLanguage` (en, pt-BR, pt-PT); `ErrorCodeTextTests.EveryErrorCode_HasATextInEveryLanguage_AndEveryCodeShapedTextAnswersToACode` (missing-key test) |
 
 ## Out of scope
 - Kestrel's server-wide request limit (30 MB default) still answers a bare 413 on any route; no ordinary route gets near it and the upload routes handle their own. Not registered (owner, 2026-10-27).
@@ -98,6 +98,9 @@ Callers: `ReadBodyAsync` is private and called only by `SaveAsync` (`AttemptEndp
 - 2026-10-27 — Kestrel's server-wide bare 413 is left alone and not captured as an idea — asked
 - 2026-10-27 — `ErrorKind.Validation` for the error: the status is set by the override, and the kind matches the upload routes' too-large errors — decided (technical, no product impact)
 - 2026-10-27 — Approved by the owner ("aprovo B-36"); `deps.js block`: free (F-166 delivered) — asked
+
+- 2026-10-27 — Build started in parallel with F-169 (both touch `AttemptEndpoints.cs` and the `.resx`; different regions) — asked
+- 2026-10-27 — plan — 1 tests first: AC1 rewritten, AC2 chunked case, AC3 key checked in the three `.resx` → seen failing, `test(B-36)` commit, lock; 2 fix: constant `AnswerTooLarge`, `Problem(...413)` in `SaveAsync`, the key in the three `.resx` → affected ExamEngine and Web tests green; 3 docs: `docs/flows/exam-attempt.md` rules and errors lines → `techdocs.js check B-36`; 4 gate, scan, validation script → validating. No design passes (no new project, route, message or schema).
 
 ## Open questions
 - (none)
