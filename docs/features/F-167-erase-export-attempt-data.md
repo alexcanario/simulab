@@ -1,7 +1,7 @@
 ---
 feature: F-167
 epic: Exam Simulator
-status: building
+status: validating
 board: 233
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-27)
-- Stopped at: Plan steps 1-7 built and green (ExamEngine 84, Identity 583, Web 2649, Architecture 307, Api 83; 0 warnings); stopped before the independent review (step 16).
-- Next action: /agile:review F-167, then the security scan, the validation script and validating.
+- Status: validating (2026-10-27)
+- Stopped at: Built, reviewed (1 minor finding fixed), scan GREEN; validation script written and run by Claude (both scripts ALL OK).
+- Next action: The owner follows ## Validation script, then /agile:ship F-167.
 - Waiting on: nothing
 
 ## Summary
@@ -171,6 +171,135 @@ Tests locked: fb380939072daaed68b803ad5c25fa7f6480993e (6 files); unlocks: 0
 - Why: the audit interceptor (`AuditAndSoftDeleteInterceptor.cs:61-63`) stamps every modified row, so "the audit fields stay" could not hold without skipping it (trap T2); an update with no trail is worse than the stamp (design pass, architect finding 1).
 - Affected: BR1, AC7.
 - Re-approved by the owner on 2026-10-27 ("aprovo").
+
+## Validation script
+The screen part is the "Your data" card of `/account` and the file it downloads; the erasure is checked by two scripts that print one line per check (`docs/validation/F-167/validate.sh` for Git Bash, `validate.ps1` for PowerShell 7). Both were run by Claude against the app host of this worktree on 2026-10-27 and ended in `ALL OK`.
+
+### English
+Needed to validate: the app host running from this worktree on its own database `simulab_f167` (you start it in step 1), one `Student` account with a verified email in that database (step 2 creates one; the password is yours; the account is ERASED in step 5, so use one you do not need) and the seeded `admin@simulab.local` (its development password is in `src/Hosts/Simulab.Api/appsettings.Development.json`). The script makes its own published edition. All in place except the Student, which you create.
+
+1. [ ] Stop any app host you have open. In a terminal at the root of this worktree (`D:\wt\simulab\f-167-erase-export-attempt`), start the app host on the worktree's own database and leave it open; wait until `https://localhost:7287/api/v1/system/info` answers 200 → the Aspire dashboard (the page that lists the app's parts and their logs) address is printed. The item's migration lands only in `simulab_f167`, never in the shared `simulab`.
+   ```bash
+   Database__Name=simulab_f167 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```powershell
+   $env:Database__Name = "simulab_f167"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Create the Student of this check.
+   - [ ] 2.1 Open `https://localhost:7125/sign-up`, fill in an email, a password and the name, tick "I am 18 or older", the terms and the privacy policy, and submit → the page says the account was created and a confirmation email was sent.
+   - [ ] 2.2 Open Mailpit (the local mailbox; its address is the `mailpit` entry in the Aspire dashboard resources list), open the message to that email and click the link inside → the page `verify-email` says the email is confirmed.
+3. The "Your data" card, with the keyboard only (no mouse in this step).
+   - [ ] 3.1 Sign in at `https://localhost:7125` with the Student, open the user menu in the app bar (the strip at the top of every page, with the menu, the brand and the theme, language and user buttons) and choose "Minha conta" ("My account" in English) → the `/account` page opens; the card "Seus dados" says the file holds "todas as tentativas de simulado que você iniciou, com as respostas que deu" (AC14).
+   - [ ] 3.2 Press the language switch (the globe in the app bar) and choose English → the card "Your data" says "all the study attempts you started, with the answers you gave"; choose Português (Portugal) → "todas as tentativas de simulado que iniciou, com as respostas que deu" (AC14). Switch back to Português (Brasil).
+   - [ ] 3.3 With Tab only, reach "Baixar meus dados" and press Enter, type the password, press Enter → a file `simulab-my-data-<date>.json` downloads.
+   - [ ] 3.4 Open the file → the last member is `"examEngine": { "attempts": [] }` after `identity`, and `format` and `version` are `simulab.data-export` and `1` as before (AC4).
+4. In a second terminal at the same folder, set the three variables (your Student's email and password) and run the script → the last line is `ALL OK`. It makes an edition, answers two attempts as the Student, downloads the data, ERASES the account and reads the attempts as the Admin.
+   ```bash
+   export ADMIN_PASSWORD='<admin password>' STUDENT_EMAIL='<student email>' STUDENT_PASSWORD='<student password>'
+   bash docs/validation/F-167/validate.sh
+   ```
+   ```powershell
+   $env:ADMIN_PASSWORD='<admin password>'; $env:STUDENT_EMAIL='<student email>'; $env:STUDENT_PASSWORD='<student password>'
+   pwsh -NoProfile -File docs/validation/F-167/validate.ps1
+   ```
+   Expected output (ids, times and the mark differ on each run):
+   ```text
+   == Step 3: a published edition with a short answer, a fill-in-the-blanks and a single choice question
+   OK   edition <id> published with 3 questions
+   == Step 4: two attempts with texts
+   OK   start the first attempt -> 201
+   OK   save a short answer -> 200
+   OK   save the blanks -> 200
+   OK   save a single choice -> 200
+   OK   submit the first attempt -> 200
+   OK   start the second attempt -> 201
+   OK   save a short answer in the second -> 200
+   == Step 5: download my data
+   OK   export with the right password -> 200
+        members: format version exportedAt identity examEngine
+   OK   the two attempts, oldest first
+        second attempt: status InProgress, submittedAt null
+        first attempt answers: [{"type":"ShortAnswer","text":"TEXT-<mark>-SHORT"},{"type":"FillInTheBlanks","blanks":[{"number":1,"text":"TEXT-<mark>-B1"},{"number":2,"text":"TEXT-<mark>-B2"}]},{"type":"SingleChoice","optionPosition":1}]
+   OK   no statement, explanation or option text in the section
+   == Step 6: erase the account and wait for the job
+   OK   erase the account -> 204
+   OK   the job erased the texts (waited <n> s at most)
+   == Step 7: an Admin reads the attempt after the erasure
+   OK   admin reads the first attempt -> 200
+        status Submitted, answers: [{"type":"ShortAnswer"},{"type":"FillInTheBlanks","blanks":[{"number":1},{"number":2}]},{"type":"SingleChoice","optionPosition":1}]
+   OK   admin reads the second attempt -> 200
+        status InProgress, answers: [{"type":"ShortAnswer"},null,null]
+   OK   the erased student's old token -> 401
+   ALL OK
+   ```
+5. Read the output of step 4 against the rules:
+   - [ ] 5.1 Export: the file has `examEngine` after `identity`, both attempts oldest first, the one in progress with `submittedAt null`, the answers exactly as saved, and no statement, explanation or option text → AC1, AC3.
+   - [ ] 5.2 Erasure: after the job ran, the short answer and each blank have no text, the blank numbers and the single choice are as saved, the first attempt is still `Submitted` and the second still `InProgress` → AC7, AC11.
+   - [ ] 5.3 Access: the Admin (who holds `attempts.read`) reads both attempts with 200, and the erased Student's old token is refused with 401 → AC11.
+6. [ ] Sign in again at `https://localhost:7125` with the Student of step 2 → the sign-in is refused: the account no longer exists. Stop the app host (Ctrl+C in the first terminal) when you finish.
+
+### pt-BR
+Necessário para validar: o app host rodando a partir deste worktree no banco próprio `simulab_f167` (você o inicia no passo 1), uma conta `Student` com e-mail verificado nesse banco (o passo 2 cria uma; a senha é sua; a conta é APAGADA no passo 5, então use uma de que não precise) e o `admin@simulab.local` do seed (a senha de desenvolvimento está em `src/Hosts/Simulab.Api/appsettings.Development.json`). O script cria a própria edição publicada. Tudo no lugar, exceto o Student, que você cria.
+
+1. [ ] Pare qualquer app host que esteja aberto. Em um terminal na raiz deste worktree (`D:\wt\simulab\f-167-erase-export-attempt`), inicie o app host no banco próprio do worktree e deixe aberto; espere `https://localhost:7287/api/v1/system/info` responder 200 → o endereço do dashboard do Aspire (a página que lista as partes do app e seus logs) aparece impresso. A migração do item cai só em `simulab_f167`, nunca no `simulab` compartilhado.
+   ```bash
+   Database__Name=simulab_f167 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```powershell
+   $env:Database__Name = "simulab_f167"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Crie o Student desta verificação.
+   - [ ] 2.1 Abra `https://localhost:7125/sign-up`, preencha e-mail, senha e nome, marque "tenho 18 anos ou mais", os termos e a política de privacidade, e envie → a página diz que a conta foi criada e que um e-mail de confirmação foi enviado.
+   - [ ] 2.2 Abra o Mailpit (a caixa de e-mail local; o endereço é a entrada `mailpit` na lista de recursos do dashboard do Aspire), abra a mensagem desse e-mail e clique no link dentro dela → a página `verify-email` diz que o e-mail foi confirmado.
+3. O cartão "Seus dados", só com o teclado (nada de mouse neste passo).
+   - [ ] 3.1 Entre em `https://localhost:7125` com o Student, abra o menu do usuário na barra superior (a faixa no alto de todas as páginas, com o menu, a marca e os botões de tema, idioma e usuário) e escolha "Minha conta" ("My account" em inglês) → a página `/account` abre; o cartão "Seus dados" diz que o arquivo traz "todas as tentativas de simulado que você iniciou, com as respostas que deu" (AC14).
+   - [ ] 3.2 Aperte o seletor de idioma (o globo na barra superior) e escolha English → o cartão "Your data" diz "all the study attempts you started, with the answers you gave"; escolha Português (Portugal) → "todas as tentativas de simulado que iniciou, com as respostas que deu" (AC14). Volte para Português (Brasil).
+   - [ ] 3.3 Só com Tab, chegue em "Baixar meus dados" e aperte Enter, digite a senha, aperte Enter → um arquivo `simulab-my-data-<data>.json` é baixado.
+   - [ ] 3.4 Abra o arquivo → o último membro é `"examEngine": { "attempts": [] }` depois de `identity`, e `format` e `version` são `simulab.data-export` e `1` como antes (AC4).
+4. Em um segundo terminal, na mesma pasta, defina as três variáveis (e-mail e senha do seu Student) e rode o script → a última linha é `ALL OK`. Ele cria uma edição, responde duas tentativas como o Student, baixa os dados, APAGA a conta e lê as tentativas como o Admin.
+   ```bash
+   export ADMIN_PASSWORD='<admin password>' STUDENT_EMAIL='<student email>' STUDENT_PASSWORD='<student password>'
+   bash docs/validation/F-167/validate.sh
+   ```
+   ```powershell
+   $env:ADMIN_PASSWORD='<admin password>'; $env:STUDENT_EMAIL='<student email>'; $env:STUDENT_PASSWORD='<student password>'
+   pwsh -NoProfile -File docs/validation/F-167/validate.ps1
+   ```
+   Saída esperada (ids, horários e a marca mudam a cada execução):
+   ```text
+   == Step 3: a published edition with a short answer, a fill-in-the-blanks and a single choice question
+   OK   edition <id> published with 3 questions
+   == Step 4: two attempts with texts
+   OK   start the first attempt -> 201
+   OK   save a short answer -> 200
+   OK   save the blanks -> 200
+   OK   save a single choice -> 200
+   OK   submit the first attempt -> 200
+   OK   start the second attempt -> 201
+   OK   save a short answer in the second -> 200
+   == Step 5: download my data
+   OK   export with the right password -> 200
+        members: format version exportedAt identity examEngine
+   OK   the two attempts, oldest first
+        second attempt: status InProgress, submittedAt null
+        first attempt answers: [{"type":"ShortAnswer","text":"TEXT-<mark>-SHORT"},{"type":"FillInTheBlanks","blanks":[{"number":1,"text":"TEXT-<mark>-B1"},{"number":2,"text":"TEXT-<mark>-B2"}]},{"type":"SingleChoice","optionPosition":1}]
+   OK   no statement, explanation or option text in the section
+   == Step 6: erase the account and wait for the job
+   OK   erase the account -> 204
+   OK   the job erased the texts (waited <n> s at most)
+   == Step 7: an Admin reads the attempt after the erasure
+   OK   admin reads the first attempt -> 200
+        status Submitted, answers: [{"type":"ShortAnswer"},{"type":"FillInTheBlanks","blanks":[{"number":1},{"number":2}]},{"type":"SingleChoice","optionPosition":1}]
+   OK   admin reads the second attempt -> 200
+        status InProgress, answers: [{"type":"ShortAnswer"},null,null]
+   OK   the erased student's old token -> 401
+   ALL OK
+   ```
+5. Leia a saída do passo 4 contra as regras:
+   - [ ] 5.1 Exportação: o arquivo tem `examEngine` depois de `identity`, as duas tentativas da mais antiga para a mais nova, a em andamento com `submittedAt null`, as respostas exatamente como salvas, e nenhum enunciado, explicação ou texto de alternativa → AC1, AC3.
+   - [ ] 5.2 Apagamento: depois que o job rodou, a resposta curta e cada lacuna estão sem texto, os números das lacunas e a escolha única estão como salvos, a primeira tentativa continua `Submitted` e a segunda continua `InProgress` → AC7, AC11.
+   - [ ] 5.3 Acesso: o Admin (que tem `attempts.read`) lê as duas tentativas com 200, e o token antigo do Student apagado é recusado com 401 → AC11.
+6. [ ] Entre de novo em `https://localhost:7125` com o Student do passo 2 → a entrada é recusada: a conta não existe mais. Pare o app host (Ctrl+C no primeiro terminal) quando terminar.
 
 ## Events
 
