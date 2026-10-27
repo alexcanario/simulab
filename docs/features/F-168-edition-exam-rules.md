@@ -138,20 +138,20 @@ Checked in the code on 2026-10-27, on `main` at `bacc7d5`.
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
-| AC14 | pending |
+| AC1 | `ExamRulesEndpointTests.Save_WithEveryRule_ReturnsAndKeepsThem`; `ExamRulesFormTests.Render_Add_ShowsTheExamRulesCardAfterPaperWithItsFields`, `Save_Add_SendsTheDurationInMinutesAndTheThreeScores`, `Edit_AnEditionWithRules_ShowsTheStoredValuesAndTheAsideSummary` |
+| AC2 | `ExamRulesEndpointTests.Update_WithEveryRuleCleared_SavesTheEditionWithNoRule`; `ExamRulesFormTests.Save_Edit_EveryRuleCleared_SendsNoRule` |
+| AC3 | `ExamRulesEndpointTests.Save_DurationOutOfRange_IsRefusedWithItsCode`, `Save_DurationAtEitherEnd_IsAccepted`; `ExamRulesFormTests.Save_DurationRefused_ShowsTheMessageOnTheDurationField` |
+| AC4 | `ExamRulesEndpointTests.SaveNoticeSubject_PointsOutOfRange_IsRefusedWithItsCode`, `SaveNoticeSubject_PointsAtEitherEnd_AreKeptAndAnUpdateWithoutThemClearsThem`; `NoticeSubjectPointsTests.Dialog_Add_SendsThePointsPerQuestion`, `Dialog_Edit_ShowsTheStoredPointsAndClearingThemSendsNothing`, `Dialog_PointsRefused_ShowsTheMessageOnThePointsField` |
+| AC5 | `ObjectiveMaxScoresTests` (4 tests); `ExamRulesEndpointTests.Find_ObjectiveMaxScore_IsKnownOnlyWhenEveryLiveSubjectHasCountAndPoints`; `NoticeSubjectPointsTests.Section_EachRow_ShowsItsPointsPerQuestionOrNothing`, `Section_EveryRowComplete_TheTotalLineShowsTheObjectiveTotal`, `Section_ARowWithoutPoints_TheTotalLineSaysTheTotalIsUnknown`; `ExamRulesFormTests.Edit_EverySubjectComplete_ShowsTheObjectiveTotal`, `Edit_ASubjectWithoutPoints_SaysTheTotalIsUnknownAndNamesTheSubject` |
+| AC6 | `ExamRulesEndpointTests.Save_ObjectiveCutOffOutOfRange_IsRefusedWithItsCode`, `Save_ObjectiveCutOffAboveTheKnownTotal_IsSaved`; `ExamRulesFormTests.Edit_CutOffAboveTheKnownTotal_ShowsTheWarningAndStillSaves`, `Edit_CutOffWithinTheTotal_ShowsNoWarning` |
+| AC7 | `ExamRulesEndpointTests.Save_EssayBreach_IsRefusedWithItsCode` (7 cases), `Save_EssayCutOffEqualToTheMaximum_IsAccepted`; `ExamRulesFormTests.Save_ScoreRefused_ShowsTheMessageOnItsField`; `SeedManausExamRulesTests.Table_AnEssayCutOffWithoutAMaximum_IsRefused` |
+| AC8 | `ExamRulesEndpointTests.Save_PublishedEditionWithNoRule_StaysPublished`; `ExamRulesFormTests.Edit_PublishedWithNoRule_SaysWhichRulesAreMissingAndSavesAsPublished` |
+| AC9 | `ExamRulesEndpointTests.CopyNoticeSubjects_CarriesThePointsPerQuestion` |
+| AC10 | `ExamRulesEndpointTests.PublishedRead_CarriesTheRulesAndTheObjectiveTotal`; `CatalogExamRulesLineTests` (3 tests) |
+| AC11 | `ExamRulesEndpointTests.SaveRoutes_WithoutTheManagePermission_AreForbidden_AndADraftsRulesAreNeverPublished` |
+| AC12 | `ExamRulesEndpointTests.Directory_CarriesTheRulesTheObjectiveTotalAndThePoints` |
+| AC13 | `SeedManausExamRulesTests` (6 migration tests) |
+| AC14 | `ExamRulesResourcesTests.EveryNewText_ExistsInTheThreeLanguages`, `EveryNewText_KeepsEveryPlaceholderInEveryLanguage`; `ResourceParityTests`; `ErrorCodeTextTests` |
 
 ## Decisions
 - 2026-10-27 — Scoring rules live on the edition (Catalog) and the score is computed in ExamEngine; the question keeps only its key — the epic's decision holds for this item — confirmed: docs/epics/exam-simulator.md

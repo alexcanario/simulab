@@ -67,6 +67,24 @@ public static class CatalogErrorCodes
     public const string ExamEditionNoticeDocumentTooLarge = "exam_edition.notice_document_too_large";
     public const string ExamEditionNoticeDocumentNotFound = "exam_edition.notice_document_not_found";
 
+    /// <summary>F-168 BR2: the duration is not a whole number of minutes from 15 to 480.</summary>
+    public const string ExamEditionDurationInvalid = "exam_edition.duration_invalid";
+
+    /// <summary>F-168 BR5: the objective cut-off is out of 0.01 to 1000.00 or has more than 2 decimal places.</summary>
+    public const string ExamEditionObjectiveCutOffInvalid = "exam_edition.objective_cut_off_invalid";
+
+    /// <summary>F-168 BR6: the essay maximum is out of 0.01 to 1000.00 or has more than 2 decimal places.</summary>
+    public const string ExamEditionEssayMaxScoreInvalid = "exam_edition.essay_max_score_invalid";
+
+    /// <summary>F-168 BR6: the essay cut-off is out of 0.01 to 1000.00 or has more than 2 decimal places.</summary>
+    public const string ExamEditionEssayCutOffInvalid = "exam_edition.essay_cut_off_invalid";
+
+    /// <summary>F-168 BR6: an essay cut-off was given with no essay maximum.</summary>
+    public const string ExamEditionEssayCutOffWithoutMax = "exam_edition.essay_cut_off_without_max";
+
+    /// <summary>F-168 BR6: the essay cut-off is above the essay maximum.</summary>
+    public const string ExamEditionEssayCutOffAboveMax = "exam_edition.essay_cut_off_above_max";
+
     public const string SubjectNotFound = "subject.not_found";
     public const string SubjectNameRequired = "subject.name_required";
     public const string SubjectNameTooLong = "subject.name_too_long";
@@ -112,6 +130,9 @@ public static class CatalogErrorCodes
     public const string NoticeSubjectGroupTooLong = "notice_subject.group_too_long";
     public const string NoticeSubjectQuestionCountInvalid = "notice_subject.question_count_invalid";
     public const string NoticeSubjectDuplicate = "notice_subject.duplicate";
+
+    /// <summary>F-168 BR3: the points per question are out of 0.01 to 100.00 or have more than 2 decimal places.</summary>
+    public const string NoticeSubjectPointsPerQuestionInvalid = "notice_subject.points_per_question_invalid";
 
     /// <summary>F-74 BR6: the row is first or last in its group, or the direction is not up or down.</summary>
     public const string NoticeSubjectMoveInvalid = "notice_subject.move_invalid";
