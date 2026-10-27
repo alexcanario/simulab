@@ -1,7 +1,7 @@
 ---
 bug: B-36
 feature: F-166
-status: idea
+status: refining
 board: 244
 severity: low
 epic: Exam Simulator
@@ -12,10 +12,10 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: idea (2026-10-26)
-- Stopped at: Captured from the F-166 review (finding 3); not refined.
-- Next action: Owner decides when to refine it (`/agile:refine B-36`).
-- Waiting on: F-166 merged, so the code is on the main branch.
+- Status: refining (2026-10-27)
+- Stopped at: Refinement started; cause reproduced on main (AttemptEndpoints.cs:104).
+- Next action: Owner answers the question round.
+- Waiting on: nothing
 
 ## What happens
 Saving an answer with a body above `AttemptLimits.SaveBodyMaxBytes` answers a bare `Results.StatusCode(413)`: no problem details and no stable `code`. `.claude/rules/agile/api-contracts.md` says errors are RFC 9457 problem details plus a stable code, with its texts in en, pt-BR and pt-PT, so the UI cannot localize this error.
@@ -33,7 +33,19 @@ Evidence (review of F-166, 2026-10-26): `src/Modules/ExamEngine/Simulab.ExamEngi
 An oversized save body answers 413 as problem details with a stable code (a new one, or `exam_attempt.answer_invalid` with the field `text_too_long`), and the texts of the code exist in en, pt-BR and pt-PT.
 
 ## Cause
-Not verified on the main branch: the code is not merged yet. Seen on `feature/F-166` at `AttemptEndpoints.cs:104`.
+Verified on the main branch (`bacc7d5`, F-166 and B-35 merged), 2026-10-27.
+
+- `src/Modules/ExamEngine/Simulab.ExamEngine.Api/AttemptEndpoints.cs:101-105`: `SaveAsync` calls `ReadBodyAsync` and, when it returns null, answers `Results.StatusCode(StatusCodes.Status413PayloadTooLarge)`, an empty 413 with no problem details and no `code`. Every other failure of the route goes through `ApiProblem.Problem` (`src/BuildingBlocks/Simulab.ApiResults/ApiProblem.cs:25`).
+- `AttemptEndpoints.cs:157-178`: `ReadBodyAsync` returns null in two places: a `Content-Length` above `AttemptLimits.SaveBodyMaxBytes` (1,500,000, `Simulab.ExamEngine.Contracts/AttemptLimits.cs:13`), and a chunked body that grows past it while read.
+- `ExamAttemptErrorCodes` (`Simulab.ExamEngine.Contracts/ExamAttemptErrorCodes.cs`) has no code for an oversized body, so the UI has no resource key for it.
+- The test of the limit (`tests/Modules/ExamEngine/Simulab.ExamEngine.Tests/SaveAnswerEndpointTests.cs:221-231`, AC17 of F-166) checks only a 4xx status and that nothing is stored: it does not fail today.
+
+Duplicates (the same rule, "a body above the limit of a route answers a problem details with a code"):
+- `src/Modules/QuestionBank/Simulab.QuestionBank.Api/QuestionImageEndpoints.cs:63-66`: already right, answers 400 `QuestionImageTooLarge`.
+- `src/Modules/Catalog/Simulab.Catalog.Api/NoticeDocumentEndpoints.cs:64`: already right, answers 400 `ExamEditionNoticeDocumentTooLarge` (asserted at `tests/Modules/Catalog/Simulab.Catalog.Tests/NoticeDocumentEndpointTests.cs:207-211`).
+- No other route of the solution answers a bare `Status413PayloadTooLarge` (grep of `src`). Kestrel's own server-wide limit (30 MB default, not changed in `src`) still answers a bare 413 on any route; that is outside the save route and out of scope.
+
+Callers: `ReadBodyAsync` is private and called only by `SaveAsync` (`AttemptEndpoints.cs:101`); no shared function changes.
 
 ## Fix
 To be written at `/agile:refine`.
