@@ -65,6 +65,9 @@ Verified on the main branch (F-166 merged, `1e83f94`), 2026-10-27.
 - none — no technical page describes the start's error codes; the F-166 contract lives in its item file and the OpenAPI document, which this code change updates by itself.
 
 ## Regression test
+
+Tests locked: 306bf239be2e042d9c935dbf2cb1d6e08d6f8a59 (1 file); unlocks: 0
+
 - `Start_WithNoEdition_Answers400WithEditionRequired` — `tests/Modules/ExamEngine/Simulab.ExamEngine.Tests` (`StartAttemptEndpointTests`, extends the F-166 AC14 test to assert `code` and the `errors` entry; fails today with `exam_attempt.edition_not_found`) — AC1.
 - `Start_WithEmptyEditionId_Answers400WithEditionRequired` — same class (fails today: 404) — AC2.
 - AC3 is covered by the existing F-166 AC4 test, kept unchanged.
