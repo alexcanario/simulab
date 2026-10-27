@@ -11,8 +11,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-27)
-- Stopped at: Plan steps 1-4 done (content, sections, pictures, Web client, primarySelected token); tests locked at d577569 and green.
-- Next action: Plan step 5: call the frontend agent (sonnet) for the three screens, then gate.js ship.
+- Stopped at: All six plan steps done; whole gate GREEN; techdocs GREEN; DocGen up to date; scan GREEN; validation script written.
+- Next action: Owner decides on /agile:review (the item opens a door), then status validating and the board body.
 - Waiting on: nothing
 
 ## Summary
@@ -364,6 +364,9 @@ Tests locked: d5775699db1a399ae36646e4a8eeb7f212a243c5 (5 files); unlocks: 0
 - 2026-10-27: plan — 1 content read, QuestionBank projection and owner-only ExamEngine route → AC2, AC13, AC14; 2 sections, edition and labels in the same read → AC3; 3 images through the attempt, Api route and Web proxy → AC12 (Api), AC15; 4 Web `ExamEngineApiClient` and the `primarySelected` token (theme, tokens, DESIGN.md, ADR-0007) → build, `IdentityTokensTests`, `ApprovedPaletteTests`; 5 the three screens by the `frontend` agent (start action, submitted page, simulator with `ExamSessionLayout`, `AppAnswerOptions`, `AppAnswerSheet`, save status and gallery; removes nothing; one fix round budgeted) → AC1, AC4–AC12, AC16, AC17, AC19, AC20; 6 OpenAPI document and the two flow pages → AC18, `DocGen --check`, `techdocs.js check`
 - 2026-10-27 — Test phase: the Web proxy test `Show_NotSignedIn_GoesToSignIn_AndWithoutTake_IsRefused_AndTheApiIsNotAsked` passed before the handler existed, because the route's `attempts.take` policy is declared where the skeleton maps it; kept, it guards T6 against a later change of the policy — Claude (technical)
 - 2026-10-27 — Frontend hand-off: `AppAnswerMode.Single` renamed `SingleChoice` (CA1720, the only new warning of the first gate run); the agent's key `Attempt.Submitted.MessageNoEdition` (the submitted page when the edition no longer exists) added to the key table; the submit dialog's two sentences are one paragraph, because `AppConfirmDialog` takes one message — accepted; the exam-session exception of `ui-project.md` gains the inline save status line (Decision of 2026-10-27) — Claude (technical)
+- 2026-10-27 — Screen check (app host from the worktree on its own database `simulab_f169`): anonymous `/attempts/{id}` and `/attempts/{id}/images/{imageId}` answer 302 to `/sign-in`; the gallery `/dev/ui` (dark) measured a marked option `#1A4583` fill, `#F2F5FB` text and a 1 px `#47A0EB` border plus a 1 px inset ring (2 px seen), an answered cell `#1A4583` with a 2 px `#47A0EB` border and the current one a 2 px ink border with `aria-current="step"`; the signed-in simulator, the phone drawer (focus, Esc, overlay, focus back) and the keyboard go to the validation script: Claude signs in to no account — Claude (technical)
+- 2026-10-27 — `## Start` "Needed to validate" said the guard sample edition of F-110 has a question of another type; it holds only single-choice questions (F-110 BR2). AC7 and AC9 are proved by their bUnit tests, not on screen; the validation script says so — Claude (technical)
+- 2026-10-27 — Security scan: `agile scan GREEN`; the two open medium findings (`unsafe-path-combine`, `tools/Simulab.DocGen/GeneratedDocs.cs:16`, `:47`) predate the item — Claude (technical)
 
 ## Out of scope
 - `Matching`, `FillInTheBlanks`, `ShortAnswer`, `OpenAnswer` and the essay with its line counter (F-178).
@@ -384,7 +387,75 @@ Tests locked: d5775699db1a399ae36646e4a8eeb7f212a243c5 (5 files); unlocks: 0
 - Re-approved by the owner: 2026-10-27 ("aprovo F-169").
 
 ## Validation script
-Written at the end of the build.
+### English
+Needed to validate: the app host running from this worktree on its own database `simulab_f169` (you start it in step 1; the migrations seed the Manaus 2026 edition: 60 single-choice questions, question 47 annulled, questions 1 to 8 with a base text, 16 and 17 with a picture), a `Student` account with a verified email in that database (step 2 creates one; the password is yours) and the seeded `admin@simulab.local` (its development password is in `src/Hosts/Simulab.Api/appsettings.Development.json`). The guard sample edition holds no true/false, multiple-answer or other-type question, so AC7 and AC9 are proved by the tests, not on screen.
+
+1. [ ] In a terminal, at the root of this worktree (`D:\wt\simulab\f-169-take-exam-edition`), start the app host on the item's own database and leave it open → the address of the Aspire dashboard (the page that lists the app's parts and their logs) is printed; `https://localhost:7125` answers.
+   ```bash
+   Database__Name=simulab_f169 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```powershell
+   $env:Database__Name = "simulab_f169"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Create the student (this database is new, so no account exists yet).
+   - [ ] 2.1 Open `https://localhost:7125/sign-up`, fill email, password and name, tick "I am 18 or older", the terms and the privacy policy, and send → the page says the account was created and a confirmation email was sent.
+   - [ ] 2.2 Open Mailpit (the local mailbox; its address is the `mailpit` entry in the Aspire dashboard's resource list), open the message to that email and click its link → the `verify-email` page says the email was confirmed. Sign in with it.
+3. Start the exam: sidebar (the left menu) > Study > Catalog > "Guarda Municipal de Manaus" (`/catalog/exams/{id}`).
+   - [ ] 3.1 Each published edition line ends with an outlined "Take this exam" button; click it on the 2026 edition → `/attempts/{id}` opens without the app menu: the bar shows the edition, "Leave and continue later", the theme and language switches; "Question 1" with "1 of 59", the section line "Questions 1 to 10" and, above the statement, the "Base text" box.
+   - [ ] 3.2 The answer sheet (the panel at the right) lists 59 numbers in nine groups, each heading with its range, "0 of 59 answered" and the legend Answered, Blank, Current; in the group that holds 46, the number after 46 is 48.
+4. Answer and move.
+   - [ ] 4.1 Click option B → it turns light blue with a 2 px border at once, "Answer saved" shows under the options, and cell 1 of the sheet gets the blue fill and a check mark; "1 of 59 answered".
+   - [ ] 4.2 Click C → C is marked and B is not; click C again → no option is marked, "Answer cleared", cell 1 is blank again.
+   - [ ] 4.3 Click Next twice → "Question 3"; Previous on question 1 and Next on question 60 are disabled. Click cell 17 in the sheet → "Question 17" with the climate chart picture; right-click the picture, open it in a new tab → its address is `/attempts/<id>/images/<imageId>`.
+5. Leave and come back.
+   - [ ] 5.1 Mark an answer on questions 1 and 2, then click "Leave and continue later" → the exam page opens.
+   - [ ] 5.2 Click "Take this exam" on the 2026 edition again → the same attempt opens on "Question 3" (the first blank), with 1 and 2 answered in the sheet.
+6. Keyboard, language and phone.
+   - [ ] 6.1 Using only the keyboard: Tab to the options, move with the arrow keys (nothing is marked), press Space → the focused option is marked and saved; Tab to Next, press Enter → the focus is on the heading "Question 4".
+   - [ ] 6.2 Switch the language in the bar to Português (Portugal) → the texts read "Questão 4", "Seguinte", "Folha de respostas", "Submeter prova"; the questions keep their own Portuguese.
+   - [ ] 6.3 Narrow the window below 960 px → the sheet leaves the side; the bar's answer-sheet button opens it as a drawer from the right; press Esc → it closes and the focus is back on that button; open it again, click a number → that question shows and the drawer closes.
+7. Submit.
+   - [ ] 7.1 Click "Submit exam" → the dialog says how many questions are blank and lists their numbers, then "After submitting you cannot change your answers."; click Cancel → nothing changes.
+   - [ ] 7.2 Click "Submit exam" again and confirm → `/attempts/{id}/submitted`: "Exam submitted", the edition, today's date and time in your time zone, Answered and Blank with the right counts, and "Back to the exam".
+   - [ ] 7.3 Open `/attempts/{id}` of the same attempt (the address without `/submitted`) → the submitted page opens again.
+8. Who may open it: copy the attempt's address, sign out, sign in as `admin@simulab.local`.
+   - [ ] 8.1 Open the copied `/attempts/{id}` and `/attempts/{id}/submitted` → both show the not-found page and nothing of the attempt.
+   - [ ] 8.2 Stop the app host with Ctrl+C in its terminal.
+
+### pt-BR
+Necessário para validar: o app host rodando a partir deste worktree no banco próprio `simulab_f169` (você o inicia no passo 1; as migrations semeiam a edição Manaus 2026: 60 questões de escolha única, a questão 47 anulada, as questões 1 a 8 com texto-base, a 16 e a 17 com imagem), uma conta `Student` com e-mail verificado nesse banco (o passo 2 cria uma; a senha é sua) e o `admin@simulab.local` do seed (a senha de desenvolvimento está em `src/Hosts/Simulab.Api/appsettings.Development.json`). A edição de amostra do guarda não tem questão certo/errado, de múltiplas respostas nem de outro tipo, então o AC7 e o AC9 são provados pelos testes, não na tela.
+
+1. [ ] Em um terminal, na raiz deste worktree (`D:\wt\simulab\f-169-take-exam-edition`), inicie o app host no banco próprio do item e deixe aberto → o endereço do dashboard do Aspire (a página que lista as partes do app e seus logs) aparece impresso; `https://localhost:7125` responde.
+   ```bash
+   Database__Name=simulab_f169 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   ```powershell
+   $env:Database__Name = "simulab_f169"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+2. Crie o aluno (este banco é novo, então ainda não há conta).
+   - [ ] 2.1 Abra `https://localhost:7125/sign-up`, preencha e-mail, senha e nome, marque "tenho 18 anos ou mais", os termos e a política de privacidade, e envie → a página diz que a conta foi criada e que um e-mail de confirmação foi enviado.
+   - [ ] 2.2 Abra o Mailpit (a caixa de e-mail local; o endereço é a entrada `mailpit` na lista de recursos do dashboard do Aspire), abra a mensagem desse e-mail e clique no link → a página `verify-email` diz que o e-mail foi confirmado. Entre com essa conta.
+3. Comece a prova: menu lateral esquerdo > Estudar > Catálogo > "Guarda Municipal de Manaus" (`/catalog/exams/{id}`).
+   - [ ] 3.1 Cada linha de edição publicada termina com o botão contornado "Fazer este simulado"; clique nele na edição de 2026 → `/attempts/{id}` abre sem o menu do app: a barra mostra a edição, "Sair e continuar depois", os seletores de tema e de idioma; "Questão 1" com "1 de 59", a linha da seção "Questões 1 a 10" e, acima do enunciado, a caixa "Texto-base".
+   - [ ] 3.2 O cartão-resposta (o painel à direita) lista 59 números em nove grupos, cada título com seu intervalo, "0 de 59 respondidas" e a legenda Respondida, Em branco, Atual; no grupo que tem o 46, o número depois do 46 é o 48.
+4. Responda e navegue.
+   - [ ] 4.1 Clique na alternativa B → ela fica azul-clara com borda de 2 px na hora, "Resposta salva" aparece abaixo das alternativas e a célula 1 do cartão ganha o fundo azul e um visto; "1 de 59 respondidas".
+   - [ ] 4.2 Clique em C → C fica marcada e B não; clique em C de novo → nenhuma fica marcada, "Resposta apagada", a célula 1 volta a ficar em branco.
+   - [ ] 4.3 Clique em Próxima duas vezes → "Questão 3"; Anterior na questão 1 e Próxima na questão 60 ficam desabilitados. Clique na célula 17 do cartão → "Questão 17" com a imagem do climograma; clique com o botão direito na imagem e abra em nova aba → o endereço é `/attempts/<id>/images/<imageId>`.
+5. Saia e volte.
+   - [ ] 5.1 Marque uma resposta nas questões 1 e 2 e clique em "Sair e continuar depois" → a página da prova abre.
+   - [ ] 5.2 Clique de novo em "Fazer este simulado" na edição de 2026 → a mesma tentativa abre na "Questão 3" (a primeira em branco), com 1 e 2 respondidas no cartão.
+6. Teclado, idioma e celular.
+   - [ ] 6.1 Só com o teclado: Tab até as alternativas, mova com as setas (nada é marcado), aperte Espaço → a alternativa em foco é marcada e salva; Tab até Próxima, Enter → o foco fica no título "Questão 4".
+   - [ ] 6.2 Troque o idioma na barra para Português (Portugal) → os textos ficam "Questão 4", "Seguinte", "Folha de respostas", "Submeter prova"; as questões mantêm o português delas.
+   - [ ] 6.3 Estreite a janela para menos de 960 px → o cartão sai da lateral; o botão do cartão-resposta na barra o abre como gaveta pela direita; aperte Esc → ela fecha e o foco volta para esse botão; abra de novo e clique num número → essa questão aparece e a gaveta fecha.
+7. Envie.
+   - [ ] 7.1 Clique em "Enviar prova" → o diálogo diz quantas questões estão em branco e lista os números, depois "Depois de enviar, você não pode mudar suas respostas."; clique em Cancelar → nada muda.
+   - [ ] 7.2 Clique em "Enviar prova" de novo e confirme → `/attempts/{id}/submitted`: "Prova enviada", a edição, a data e a hora de hoje no seu fuso, Respondidas e Em branco com as contagens certas e "Voltar à prova".
+   - [ ] 7.3 Abra `/attempts/{id}` da mesma tentativa (o endereço sem `/submitted`) → a página de prova enviada abre de novo.
+8. Quem pode abrir: copie o endereço da tentativa, saia e entre como `admin@simulab.local`.
+   - [ ] 8.1 Abra o `/attempts/{id}` e o `/attempts/{id}/submitted` copiados → os dois mostram a página de não encontrado e nada da tentativa.
+   - [ ] 8.2 Pare o app host com Ctrl+C no terminal dele.
 
 ## Events
 
