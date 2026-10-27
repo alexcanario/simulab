@@ -346,6 +346,7 @@ No new datum. The screen shows the student's own answers (stored by F-166, whose
 - 2026-10-27 — New kit components `ExamSessionLayout`, `AppAnswerOptions`, `AppAnswerSheet` and the save status, each in the gallery `/dev/ui`; new icons `AppIcons.StartAttempt` (PlayCircle) and `AppIcons.AnswerSheet` (GridView); theme and language switches stay in the session bar; a resumed attempt shows no extra notice — Claude (technical), shown to the owner
 - 2026-10-27 — Stitch offered — declined
 - 2026-10-27 — Approved by the owner ("aprovo F-169"), with the mockup
+- 2026-10-27 — Stitch offered again at the owner's request (a reference beside the approved mockup) — failed (generation of the simulator screen timed out; no new screen in project `Simulab` after 10 polls in 5 minutes; not retried)
 
 ## Out of scope
 - `Matching`, `FillInTheBlanks`, `ShortAnswer`, `OpenAnswer` and the essay with its line counter (F-178).
