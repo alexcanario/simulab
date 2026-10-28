@@ -346,22 +346,22 @@
             <div>
                 <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.TextKinds.TextArea"]</MudText>
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Empty"]</p>
-                <AppTextAreaField Id="gallery-text-area-empty" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                <AppTextAreaField Id="gallery-text-area-empty" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
                                   Value="@_textAreaEmpty" ValueChanged="@(value => _textAreaEmpty = value)" />
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Filled"]</p>
-                <AppTextAreaField Id="gallery-text-area-filled" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                <AppTextAreaField Id="gallery-text-area-filled" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
                                   Value="@_textAreaFilled" ValueChanged="@(value => _textAreaFilled = value)" />
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Error"]</p>
-                <AppTextAreaField Id="gallery-text-area-error" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                <AppTextAreaField Id="gallery-text-area-error" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
                                   Value="@TextKindSample" Error="@L["Gallery.TextKinds.SampleError"]" />
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Disabled"]</p>
-                <AppTextAreaField Id="gallery-text-area-disabled" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                <AppTextAreaField Id="gallery-text-area-disabled" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
                                   Value="@TextKindSample" Disabled="true" />
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.ReadOnly"]</p>
-                <AppTextAreaField Id="gallery-text-area-read-only" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                <AppTextAreaField Id="gallery-text-area-read-only" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
                                   Value="@TextKindSample" ReadOnly="true" />
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.LongValue"]</p>
-                <AppTextAreaField Id="gallery-text-area-long" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                <AppTextAreaField Id="gallery-text-area-long" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
                                   Value="@TextKindLongSample" />
             </div>
             <div>

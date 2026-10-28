@@ -1611,7 +1611,7 @@ code, kbd, pre, samp {
 }
 
 .app-field-has-end input {
-    padding-right: 2.5rem;
+    padding-right: var(--app-space-7);
 }
 
 .app-url-open {
@@ -1621,8 +1621,8 @@ code, kbd, pre, samp {
     transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
-    padding: 4px;
-    border-radius: 4px;
+    padding: var(--app-space-1);
+    border-radius: var(--app-radius-sm);
     color: var(--app-link);
 }
 

@@ -24,8 +24,7 @@ public class AiDiagnosticsPageTests : KitTestContext
     private void TypePrompt(IRenderedComponent<AiDiagnostics> page)
     {
         page.Find("#ai-prompt").Input("Say hello");
-        AdvanceDebounce(250);
-        page.WaitForAssertion(() => page.Find(".app-field-counter").TextContent.Trim().Should().StartWith("9/"));
+        WaitForAfterDebounce(page, () => page.Find(".app-field-counter").TextContent.Trim().Should().StartWith("9/"), 250);
     }
 
     private const string WebSessionId = "web-ai-1";
