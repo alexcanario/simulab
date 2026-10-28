@@ -144,6 +144,9 @@ Each kind of text has one named control in the kit, so a page stops repeating th
 - AC12 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en) and the missing-key test is green.
 
 ## Criterion → test
+
+Tests locked: 785b1b7d63a379e25de3bc296656b49a4206554f (4 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `AppEmailFieldTests.Leave_TrimsAndLowerCasesTheValue`, `Input_CarriesTheEmailAttributes`; `TextKindSignInTests.Email_IsTheEmailField` |
@@ -195,6 +198,10 @@ Each kind of text has one named control in the kit, so a page stops repeating th
 - 2026-10-28 — `AppTextAreaField` wraps the auto-grow `AppTextField` already has (F-33) rather than a new input — one place for the field look — technical
 - 2026-10-28 — Screens whose look does not change (a field swap with the same look) get no wireframe; the four that change are drawn — technical
 - 2026-10-28 — No new package — the controls are built on MudBlazor already referenced — technical
+- 2026-10-28 — Two tests of the test phase dropped before the lock (`Autocomplete_HasNoDefault`, `MaxLength_HasNoDefault`): they passed on the skeleton; the compiler's RZ2012 warning, which the gate refuses, already enforces `[EditorRequired]` — technical
+- 2026-10-28 — The `ai-prompt` text area counts to 4000 characters (`PromptMaxLength` on the page); the Api sets no limit on this development page — `AppTextAreaField` needs a limit for its counter — technical
+- 2026-10-28 — Existing tests changed for the approved behavior: `ExamEditionFormTests`, `OrganizersPageTests` and `IssuingAuthoritiesPageTests` now type an address with another scheme, since one with no scheme is completed with `https://` (BR6); the AI diagnostics tests type with `oninput`, since the text area's counter follows the typing (BR5); `UsersPageTests` finds the table box by one of its classes — technical
+- 2026-10-28 — `AppTextField` gains `Class`, `InputMode`, `Pattern`, `InputAttributes`, `MaxLines` and `EndContent`; MudBlazor writes `inputmode` and `pattern` itself, so they are its parameters, not raw attributes — technical
 - 2026-10-28: plan — 1 bUnit tests of the six controls and of the page fields → fail, locked; 2 `AppTextField` takes extra input attributes and end content, `AppTextAreaField`, `AppEmailField`, `AppCodeField` → their tests green; 3 `AppOtpField`, `AppUrlField`, `AppSearchField` inside `AppDataTable` → their tests and the table tests green; 4 identity pages (6 e-mail, 5 code fields) → Identity page tests green; 5 catalog, question and AI pages (3 URL, 6 multi-line) → their page tests green; 6 gallery "Text kinds", resources in three locales, flow page → parity and techdocs green; 7 app host screen check, gate, scan, validation script → gate GREEN
 
 ## Out of scope

@@ -1,9 +1,30 @@
-@* F-183 skeleton. *@
+@* F-183 BR5: long plain text (a description, a reason). It grows with what is typed, then scrolls, and always says how
+   much of the limit is used. *@
+
+<AppTextField TValue="string"
+              Id="@Id"
+              Label="@Label"
+              Class="app-text-area-field"
+              Value="@Value"
+              ValueChanged="ValueChanged"
+              Autocomplete="@Autocomplete"
+              Placeholder="@Placeholder"
+              Hint="@Hint"
+              Error="@Error"
+              Required="Required"
+              Disabled="Disabled"
+              ReadOnly="ReadOnly"
+              MaxLength="MaxLength"
+              Counter="true"
+              Lines="MinLines"
+              MaxLines="MaxLines" />
+
 @code {
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
 
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
 
+    /// <summary>The limit the counter shows. No default: the right one is the store's (rule: ui-project, B-5).</summary>
     [Parameter, EditorRequired] public int MaxLength { get; set; }
 
     [Parameter] public string? Value { get; set; }
@@ -24,7 +45,9 @@
 
     [Parameter] public string? Autocomplete { get; set; }
 
+    /// <summary>Lines shown while empty.</summary>
     [Parameter] public int MinLines { get; set; } = 3;
 
+    /// <summary>Lines it grows to before it scrolls.</summary>
     [Parameter] public int MaxLines { get; set; } = 10;
 }

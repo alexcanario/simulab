@@ -1333,13 +1333,11 @@ else
                    the Api refused the first click; the second click sends it. It sits above the buttons (F-126). *@
                 @if (!IsPublished && !IsAnnulled && !IsInReview && _publishReasonRequired)
                 {
-                    <AppTextField TValue="string"
-                                  Id="@PublishReasonId"
+                    <AppTextAreaField Id="@PublishReasonId"
                                   Label="@L["Questions.ChangeReason.Label"]"
                                   Hint="@L["Questions.ChangeReason.Hint"]"
-                                  Value="_publishReason"
+                                  Value="@_publishReason"
                                   ValueChanged="@((string? value) => OnPublishReasonChanged(value))"
-                                  Lines="3"
                                   MaxLength="QuestionLimits.ChangeReasonMaxLength"
                                   Required="true"
                                   Error="@_publishReasonError" />
@@ -1445,13 +1443,11 @@ else
 
     private RenderFragment ChangeReasonField =>
         @<div class="app-change-reason">
-            <AppTextField TValue="string"
-                          Id="@ChangeReasonId"
+            <AppTextAreaField Id="@ChangeReasonId"
                           Label="@L["Questions.ChangeReason.Label"]"
                           Hint="@L["Questions.ChangeReason.Hint"]"
-                          Value="_changeReason"
+                          Value="@_changeReason"
                           ValueChanged="@((string? value) => OnChangeReasonChanged(value))"
-                          Lines="3"
                           MaxLength="QuestionLimits.ChangeReasonMaxLength"
                           Required="true"
                           Error="@_changeReasonError" />

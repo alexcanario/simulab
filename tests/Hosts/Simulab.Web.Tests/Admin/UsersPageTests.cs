@@ -101,7 +101,9 @@ public sealed class UsersPageTests : AdminPageTestContext
         Api.Users = [];
 
         // As the kit's own table test does: the debounced field's value, without waiting for its timer.
-        var search = page.FindComponents<MudBlazor.MudTextField<string>>().Single(field => field.Instance.Class == "app-table-search");
+        // F-183: the table's box is the kit's search field, which adds its own class beside the table's.
+        var search = page.FindComponents<MudBlazor.MudTextField<string>>()
+            .Single(field => field.Instance.Class?.Split(' ').Contains("app-table-search") == true);
         page.InvokeAsync(() => search.Instance.ValueChanged.InvokeAsync("zeca"));
 
         page.WaitForAssertion(() => page.Find(".app-state-empty").TextContent.Should().Contain("No user matches \"zeca\"."));

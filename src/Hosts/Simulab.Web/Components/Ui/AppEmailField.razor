@@ -1,9 +1,36 @@
-@* F-183 skeleton. *@
+@* F-183 BR1: the one e-mail field. It trims and lower-cases what the user typed when they leave it, so no page
+   repeats that; the Api still normalizes and checks the address (BR9). *@
+
+<AppTextField TValue="string"
+              Id="@Id"
+              Label="@Label"
+              Class="app-email-field"
+              Value="@Value"
+              ValueChanged="OnValueChanged"
+              InputType="InputType.Email"
+              InputMode="InputMode.email"
+              InputAttributes="InputAttributes"
+              Autocomplete="@Autocomplete"
+              Placeholder="@Placeholder"
+              Hint="@Hint"
+              Error="@Error"
+              Required="Required"
+              Disabled="Disabled"
+              ReadOnly="ReadOnly"
+              MaxLength="MaxLength" />
+
 @code {
+    private static readonly IReadOnlyDictionary<string, object?> InputAttributes = new Dictionary<string, object?>
+    {
+        ["spellcheck"] = "false",
+        ["autocapitalize"] = "off"
+    };
+
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
 
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
 
+    /// <summary><c>username</c> where the address signs in, <c>email</c> elsewhere. No default (rule: ui-project, B-5).</summary>
     [Parameter, EditorRequired] public string Autocomplete { get; set; } = string.Empty;
 
     [Parameter] public string? Value { get; set; }
@@ -24,5 +51,12 @@
 
     [Parameter] public int? MaxLength { get; set; }
 
-    public static string? Normalize(string? value) => throw new NotImplementedException();
+    /// <summary>The address as kept: no spaces around it, lower case.</summary>
+    public static string? Normalize(string? value) => value?.Trim().ToLowerInvariant();
+
+    private Task OnValueChanged(string? value)
+    {
+        Value = Normalize(value);
+        return ValueChanged.InvokeAsync(Value);
+    }
 }

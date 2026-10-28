@@ -2,7 +2,7 @@
 @typeparam TValue
 @inject IStringLocalizer<SharedResources> L
 
-<div class="app-field @(HasError ? "app-field-error" : null)">
+<div class="app-field @Class @(HasError ? "app-field-error" : null) @(EndContent is null ? null : "app-field-has-end")">
     <label class="app-field-label" for="@Id">
         @Label
         @if (Required)
@@ -10,25 +10,18 @@
             <span class="app-field-required" aria-hidden="true">*</span>
         }
     </label>
-    <MudTextField T="TValue"
-                  Value="Value"
-                  ValueChanged="OnValueChanged"
-                  InputType="InputType"
-                  Placeholder="@Placeholder"
-                  Variant="Variant.Outlined"
-                  Margin="Margin.Dense"
-                  MaxLength="@(MaxLength ?? 524288)"
-                  Lines="@Lines"
-                  Immediate="@Counter"
-                  DebounceInterval="@(Counter ? CounterDebounceMilliseconds : 0)"
-                  Disabled="Disabled"
-                  ReadOnly="ReadOnly"
-                  Error="HasError"
-                  UserAttributes="@Attributes"
-                  Adornment="@(EffectiveAdornment)"
-                  AdornmentIcon="@(EffectiveAdornmentIcon)"
-                  AdornmentAriaLabel="@AdornmentAriaLabel"
-                  OnAdornmentClick="OnAdornmentClick" />
+    @if (EndContent is null)
+    {
+        @Input
+    }
+    else
+    {
+        @* F-183: an action over the end of the input (the URL field's "open link"). *@
+        <div class="app-field-control">
+            @Input
+            @EndContent
+        </div>
+    }
     <span id="@DescriptionId" class="app-field-description @(Counter ? "app-field-description-counter" : null)">
         @if (HasError)
         {
@@ -103,6 +96,50 @@
 
     [Parameter] public EventCallback<MouseEventArgs> OnAdornmentClick { get; set; }
 
+    /// <summary>F-183: a class on the field's root, so a kit control built on this field can be found and styled.</summary>
+    [Parameter] public string? Class { get; set; }
+
+    /// <summary>F-183: more attributes of the input (<c>inputmode</c>, <c>spellcheck</c>, <c>pattern</c>), set by a kit
+    /// control; they never replace the ones this field owns (id, description, invalid, required, autocomplete).</summary>
+    [Parameter] public IReadOnlyDictionary<string, object?>? InputAttributes { get; set; }
+
+    /// <summary>F-183: the keyboard a phone shows (MudBlazor writes the <c>inputmode</c> attribute itself).</summary>
+    [Parameter] public InputMode InputMode { get; set; } = InputMode.text;
+
+    /// <summary>F-183: the characters the input takes, as the <c>pattern</c> attribute (MudBlazor writes it itself).</summary>
+    [Parameter] public string? Pattern { get; set; }
+
+    /// <summary>F-183: with <see cref="Lines"/> above 1, the text area grows with its content up to this many lines,
+    /// then scrolls. 0 keeps the fixed height.</summary>
+    [Parameter] public int MaxLines { get; set; }
+
+    /// <summary>F-183: content placed over the end of the input, such as a link that opens the value.</summary>
+    [Parameter] public RenderFragment? EndContent { get; set; }
+
+    private RenderFragment Input => @<MudTextField T="TValue"
+                                                   Value="Value"
+                                                   ValueChanged="OnValueChanged"
+                                                   InputType="InputType"
+                                                   InputMode="InputMode"
+                                                   Pattern="@Pattern"
+                                                   Placeholder="@Placeholder"
+                                                   Variant="Variant.Outlined"
+                                                   Margin="Margin.Dense"
+                                                   MaxLength="@(MaxLength ?? 524288)"
+                                                   Lines="@Lines"
+                                                   Sizing="@(MaxLines > 0 ? InputSizing.Auto : InputSizing.Fixed)"
+                                                   MaxLines="@MaxLines"
+                                                   Immediate="@Counter"
+                                                   DebounceInterval="@(Counter ? CounterDebounceMilliseconds : 0)"
+                                                   Disabled="Disabled"
+                                                   ReadOnly="ReadOnly"
+                                                   Error="HasError"
+                                                   UserAttributes="@Attributes"
+                                                   Adornment="@(EffectiveAdornment)"
+                                                   AdornmentIcon="@(EffectiveAdornmentIcon)"
+                                                   AdornmentAriaLabel="@AdornmentAriaLabel"
+                                                   OnAdornmentClick="OnAdornmentClick" />;
+
     private bool HasError => !string.IsNullOrEmpty(Error);
 
     private bool ShowsLeadingIcon => LeadingIcon is not null && Adornment == Adornment.None;
@@ -123,14 +160,19 @@
     private string CounterSpokenText =>
         string.Format(CultureInfo.CurrentCulture, L["Common.Counter.Spoken"].Value, CounterLength, MaxLength);
 
-    private Dictionary<string, object?> Attributes => new()
+    private Dictionary<string, object?> Attributes
     {
-        ["id"] = Id,
-        ["aria-describedby"] = DescriptionId,
-        ["aria-invalid"] = HasError ? "true" : null,
-        ["aria-required"] = Required ? "true" : null,
-        ["autocomplete"] = Autocomplete
-    };
+        get
+        {
+            var attributes = new Dictionary<string, object?>(InputAttributes ?? new Dictionary<string, object?>());
+            attributes["id"] = Id;
+            attributes["aria-describedby"] = DescriptionId;
+            attributes["aria-invalid"] = HasError ? "true" : null;
+            attributes["aria-required"] = Required ? "true" : null;
+            attributes["autocomplete"] = Autocomplete;
+            return attributes;
+        }
+    }
 
     private Task OnValueChanged(TValue? value)
     {

@@ -20,6 +20,14 @@ namespace Simulab.Web.Tests.Dev;
 /// </summary>
 public class AiDiagnosticsPageTests : KitTestContext
 {
+    // F-183: the prompt is a text area with a counter, so it follows the typing (input) after the counter's pause.
+    private void TypePrompt(IRenderedComponent<AiDiagnostics> page)
+    {
+        page.Find("#ai-prompt").Input("Say hello");
+        AdvanceDebounce(250);
+        page.WaitForAssertion(() => page.Find(".app-field-counter").TextContent.Trim().Should().StartWith("9/"));
+    }
+
     private const string WebSessionId = "web-ai-1";
 
     private FakeAiApi Api { get; } = new();
@@ -69,7 +77,7 @@ public class AiDiagnosticsPageTests : KitTestContext
         Api.Answer = new AiDiagnosticsAnswer("Hello from the model", "claude-opus-5", 1000, 200, 0.01m, 1234);
 
         var page = Render<AiDiagnostics>();
-        page.Find("#ai-prompt").Change("Say hello");
+        TypePrompt(page);
         page.Find("button").Click();
 
         await page.WaitForAssertionAsync(() =>
@@ -91,7 +99,7 @@ public class AiDiagnosticsPageTests : KitTestContext
         Api.Failure = (HttpStatusCode.UnprocessableEntity, "ai.quota_exceeded");
 
         var page = Render<AiDiagnostics>();
-        page.Find("#ai-prompt").Change("Say hello");
+        TypePrompt(page);
         page.Find("button").Click();
 
         await page.WaitForAssertionAsync(() =>

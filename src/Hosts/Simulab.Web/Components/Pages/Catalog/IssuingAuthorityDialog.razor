@@ -25,8 +25,7 @@
                           Hint="@L["IssuingAuthorities.Field.Name.Help"]"
                           Error="@_nameError" />
 
-            <AppTextField TValue="string"
-                          Id="issuing-authority-website"
+            <AppUrlField Id="issuing-authority-website"
                           Label="@L["IssuingAuthorities.Field.Website"]"
                           Value="@_website"
                           ValueChanged="@((string? value) => OnWebsiteChanged(value))"
@@ -35,14 +34,12 @@
                           Hint="@L["IssuingAuthorities.Field.Website.Help"]"
                           Error="@_websiteError" />
 
-            <AppTextField TValue="string"
-                          Id="issuing-authority-description"
-                          Label="@L["IssuingAuthorities.Field.Description"]"
-                          Value="@_description"
-                          ValueChanged="@((string? value) => _description = value)"
-                          MaxLength="CatalogLimits.IssuingAuthorityDescriptionMaxLength"
-                          Autocomplete="off"
-                          Lines="3" />
+            <AppTextAreaField Id="issuing-authority-description"
+                              Label="@L["IssuingAuthorities.Field.Description"]"
+                              Value="@_description"
+                              ValueChanged="@((string? value) => _description = value)"
+                              MaxLength="CatalogLimits.IssuingAuthorityDescriptionMaxLength"
+                              Autocomplete="off" />
         </div>
     </DialogContent>
     <DialogActions>

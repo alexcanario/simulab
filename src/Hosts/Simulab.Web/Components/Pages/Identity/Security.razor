@@ -119,12 +119,9 @@ else
                     </li>
                     <li>@I["Security.Enrol.Step.Confirm"]</li>
                 </ol>
-                <AppTextField TValue="string"
-                              Id="security-enrol-code"
+                <AppOtpField Id="security-enrol-code"
                               Label="@I["Security.Code.Label"]"
                               Hint="@I["Security.Code.Hint"]"
-                              Autocomplete="one-time-code"
-                              MaxLength="AccountLimits.TotpCodeMaxLength"
                               Required="true"
                               Disabled="_busy"
                               Error="@_codeError"
@@ -169,8 +166,7 @@ else
 
                 @if (_regenerating)
                 {
-                    <AppTextField TValue="string"
-                                  Id="security-regenerate-code"
+                    <AppCodeField Id="security-regenerate-code"
                                   Label="@I["Security.Code.LabelOrRecovery"]"
                                   Hint="@I["Security.Code.HintOrRecovery"]"
                                   Autocomplete="one-time-code"
@@ -265,8 +261,7 @@ else
                                   Error="@_passwordError"
                                   Value="@_password"
                                   ValueChanged="@(value => { _password = value; _passwordError = null; })" />
-                <AppTextField TValue="string"
-                              Id="security-disable-code"
+                <AppCodeField Id="security-disable-code"
                               Label="@I["Security.Code.LabelOrRecovery"]"
                               Hint="@I["Security.Code.HintOrRecovery"]"
                               Autocomplete="one-time-code"

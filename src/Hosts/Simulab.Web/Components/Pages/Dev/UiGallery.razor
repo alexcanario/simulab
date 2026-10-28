@@ -337,6 +337,117 @@
     </MudPaper>
 </section>
 
+@* F-183 AC11: one control per kind of text, each in the states of the shared contract. *@
+<section id="gallery-text-kinds" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.TextKinds"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.TextKinds.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4">
+        <AppFormGrid Columns="3">
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.TextKinds.TextArea"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Empty"]</p>
+                <AppTextAreaField Id="gallery-text-area-empty" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                                  Value="@_textAreaEmpty" ValueChanged="@(value => _textAreaEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Filled"]</p>
+                <AppTextAreaField Id="gallery-text-area-filled" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                                  Value="@_textAreaFilled" ValueChanged="@(value => _textAreaFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Error"]</p>
+                <AppTextAreaField Id="gallery-text-area-error" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                                  Value="@TextKindSample" Error="@L["Gallery.TextKinds.SampleError"]" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Disabled"]</p>
+                <AppTextAreaField Id="gallery-text-area-disabled" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                                  Value="@TextKindSample" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.ReadOnly"]</p>
+                <AppTextAreaField Id="gallery-text-area-read-only" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                                  Value="@TextKindSample" ReadOnly="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.LongValue"]</p>
+                <AppTextAreaField Id="gallery-text-area-long" Label="@L["Gallery.TextKinds.Label.Description"]" MaxLength="500"
+                                  Value="@TextKindLongSample" />
+            </div>
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.TextKinds.Email"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Empty"]</p>
+                <AppEmailField Id="gallery-email-empty" Label="@L["Gallery.TextKinds.Label.Email"]" Autocomplete="off"
+                               Value="@_emailEmpty" ValueChanged="@(value => _emailEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Filled"]</p>
+                <AppEmailField Id="gallery-email-filled" Label="@L["Gallery.TextKinds.Label.Email"]" Autocomplete="off"
+                               Value="@_emailFilled" ValueChanged="@(value => _emailFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Error"]</p>
+                <AppEmailField Id="gallery-email-error" Label="@L["Gallery.TextKinds.Label.Email"]" Autocomplete="off"
+                               Value="@("ana@")" Error="@L["Gallery.TextKinds.SampleError"]" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Disabled"]</p>
+                <AppEmailField Id="gallery-email-disabled" Label="@L["Gallery.TextKinds.Label.Email"]" Autocomplete="off"
+                               Value="ana@exemplo.com" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.ReadOnly"]</p>
+                <AppEmailField Id="gallery-email-read-only" Label="@L["Gallery.TextKinds.Label.Email"]" Autocomplete="off"
+                               Value="ana@exemplo.com" ReadOnly="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.LongValue"]</p>
+                <AppEmailField Id="gallery-email-long" Label="@L["Gallery.TextKinds.Label.Email"]" Autocomplete="off"
+                               Value="ana.beatriz.de.oliveira.santos@secretaria-de-educacao.exemplo.gov.br" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.TextKinds.Url"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Empty"]</p>
+                <AppUrlField Id="gallery-url-empty" Label="@L["Gallery.TextKinds.Label.Website"]" Autocomplete="off"
+                             Value="@_urlEmpty" ValueChanged="@(value => _urlEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Filled"]</p>
+                <AppUrlField Id="gallery-url-filled" Label="@L["Gallery.TextKinds.Label.Website"]" Autocomplete="off"
+                             Value="@_urlFilled" ValueChanged="@(value => _urlFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Error"]</p>
+                <AppUrlField Id="gallery-url-error" Label="@L["Gallery.TextKinds.Label.Website"]" Autocomplete="off"
+                             Value="ftp://exemplo.gov.br" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Disabled"]</p>
+                <AppUrlField Id="gallery-url-disabled" Label="@L["Gallery.TextKinds.Label.Website"]" Autocomplete="off"
+                             Value="https://exemplo.gov.br" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.ReadOnly"]</p>
+                <AppUrlField Id="gallery-url-read-only" Label="@L["Gallery.TextKinds.Label.Website"]" Autocomplete="off"
+                             Value="https://exemplo.gov.br" ReadOnly="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.LongValue"]</p>
+                <AppUrlField Id="gallery-url-long" Label="@L["Gallery.TextKinds.Label.Website"]" Autocomplete="off"
+                             Value="https://www.secretaria-de-educacao.exemplo.gov.br/concursos/2026/edital-de-abertura-01.pdf" />
+            </div>
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.TextKinds.Code"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Empty"]</p>
+                <AppCodeField Id="gallery-code-empty" Label="@L["Gallery.TextKinds.Label.RecoveryCode"]" Autocomplete="off"
+                              Value="@_codeEmpty" ValueChanged="@(value => _codeEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Filled"]</p>
+                <AppCodeField Id="gallery-code-filled" Label="@L["Gallery.TextKinds.Label.RecoveryCode"]" Autocomplete="off"
+                              Value="@_codeFilled" ValueChanged="@(value => _codeFilled = value)" UpperCase="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Error"]</p>
+                <AppCodeField Id="gallery-code-error" Label="@L["Gallery.TextKinds.Label.RecoveryCode"]" Autocomplete="off"
+                              Value="ABCDE" Error="@L["Gallery.TextKinds.SampleError"]" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Disabled"]</p>
+                <AppCodeField Id="gallery-code-disabled" Label="@L["Gallery.TextKinds.Label.RecoveryCode"]" Autocomplete="off"
+                              Value="ABCDE-FGHJK" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.ReadOnly"]</p>
+                <AppCodeField Id="gallery-code-read-only" Label="@L["Gallery.TextKinds.Label.RecoveryCode"]" Autocomplete="off"
+                              Value="ABCDE-FGHJK" ReadOnly="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.LongValue"]</p>
+                <AppCodeField Id="gallery-code-long" Label="@L["Gallery.TextKinds.Label.RecoveryCode"]" Autocomplete="off"
+                              Value="SIMULAB-2026-ABCDEFGHJKLMNPQRSTUVWXYZ-0O1Il" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.TextKinds.Otp"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Empty"]</p>
+                <AppOtpField Id="gallery-otp-empty" Label="@L["Gallery.TextKinds.Label.Otp"]"
+                             Value="@_otpEmpty" ValueChanged="@(value => _otpEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Filled"]</p>
+                <AppOtpField Id="gallery-otp-filled" Label="@L["Gallery.TextKinds.Label.Otp"]" Value="123456" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Error"]</p>
+                <AppOtpField Id="gallery-otp-error" Label="@L["Gallery.TextKinds.Label.Otp"]" Value="123"
+                             Error="@L["Gallery.TextKinds.SampleError"]" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Disabled"]</p>
+                <AppOtpField Id="gallery-otp-disabled" Label="@L["Gallery.TextKinds.Label.Otp"]" Value="123456" Disabled="true" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.TextKinds.Search"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Empty"]</p>
+                <AppSearchField Value="@_searchEmpty" ValueChanged="@(value => _searchEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Filled"]</p>
+                <AppSearchField Value="@_searchFilled" ValueChanged="@(value => _searchFilled = value)" />
+            </div>
+        </AppFormGrid>
+    </MudPaper>
+</section>
+
 @* The section id never repeats a field id below it: two nodes with one id break every label and
    aria-describedby that points at it (found on screen, F-34). *@
 <section id="gallery-lookups" class="gallery-section">
@@ -1277,6 +1388,24 @@
     // choice of a filter (BR4) and the last is an option wider than the field, so its wrapping can be seen.
     private const string KindAreaLaw = "Law";
     private const string KindAreaLong = "Long";
+
+    // F-183: the text kinds. The samples are data, not interface text, so they stay in one language.
+    private const string TextKindSample = "Public body that issues the notice and runs the selection.";
+    private const string TextKindLongSample =
+        "Public body that issues the notice and runs the selection. It publishes the calendar, the syllabus and the results, "
+        + "answers the appeals and keeps the list of approved candidates for the period the notice sets. "
+        + "This text is long on purpose, so the area grows to its maximum and then scrolls.";
+    private string? _textAreaEmpty;
+    private string? _textAreaFilled = TextKindSample;
+    private string? _emailEmpty;
+    private string? _emailFilled = "ana@exemplo.com";
+    private string? _urlEmpty;
+    private string? _urlFilled = "https://exemplo.gov.br";
+    private string? _codeEmpty;
+    private string? _codeFilled = "ABCDE-FGHJK";
+    private string? _otpEmpty;
+    private string? _searchEmpty;
+    private string? _searchFilled = "Direito";
     private string? _kindSelectEmpty = string.Empty;
     private string? _kindSelectValue = "Mathematics";
     private string? _kindSelectOpen = string.Empty;

@@ -354,7 +354,9 @@ public sealed class ExamEditionFormTests : CatalogPageTestContext
 
     [Theory]
     [InlineData("ftp://exemplo.gov.br/edital", true)]
-    [InlineData("www.exemplo.gov.br/edital", true)]
+    // F-183 BR6: an address with no scheme is completed with https:// on leave, so it is no longer refused.
+    [InlineData("www.exemplo.gov.br/edital", false)]
+    [InlineData("mailto:edital@exemplo.gov.br", true)]
     [InlineData("http://exemplo.gov.br/edital", false)]
     [InlineData("https://exemplo.gov.br/edital", false)]
     public void NoticeUrl_LeavingTheField_MustBeAnAbsoluteHttpOrHttpsAddress(string typed, bool refused)

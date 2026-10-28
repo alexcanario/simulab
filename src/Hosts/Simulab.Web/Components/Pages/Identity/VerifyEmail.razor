@@ -58,11 +58,9 @@
 
     @if (_state == State.Expired)
     {
-        <AppTextField TValue="string"
-                      Id="verify-email-address"
+        <AppEmailField Id="verify-email-address"
                       Label="@I["SignUp.Email.Label"]"
                       Placeholder="@I["SignUp.Email.Placeholder"]"
-                      InputType="InputType.Email"
                       Autocomplete="username"
                       MaxLength="AccountLimits.EmailMaxLength"
                       Required="true"

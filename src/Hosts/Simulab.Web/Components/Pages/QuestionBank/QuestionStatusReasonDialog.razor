@@ -15,15 +15,12 @@
             <AppAlert Severity="Severity.Error" Text="@_error" Class="mb-4" />
         }
 
-        <AppTextField TValue="string"
-                      Id="question-status-reason"
+        <AppTextAreaField Id="question-status-reason"
                       Label="@(Label ?? L["Questions.StatusReason.Label"])"
                       Hint="@(Hint ?? L["Questions.StatusReason.Hint"])"
-                      Value="_reason"
+                      Value="@_reason"
                       ValueChanged="@((string? value) => OnReasonChanged(value))"
-                      Lines="3"
                       MaxLength="QuestionLimits.ChangeReasonMaxLength"
-                      Counter="true"
                       Required="Required"
                       Error="@_reasonError" />
     </DialogContent>
