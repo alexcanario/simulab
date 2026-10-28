@@ -2,7 +2,7 @@
 feature: F-183
 epic: Data type controls
 status: building
-Autopilot: approved (2026-10-28)
+Autopilot: built (2026-10-28)
 board: 253
 version: 1
 ---
@@ -12,8 +12,8 @@ Technical terms: [glossary](../glossary.md)
 
 ## Resume here
 - Status: building (2026-10-28)
-- Stopped at: Build started: plan recorded, tests first
-- Next action: Write and lock the tests of the six controls (Claude)
+- Stopped at: Built: controls, migrations, gallery, flow page; gate GREEN, screen checked; run stopped before the independent review (fresh context)
+- Next action: Resume with /agile:epic "data-type-controls" --autopilot: review, scan triage, validation script (Claude)
 - Waiting on: nothing
 
 ## Summary
@@ -223,6 +223,7 @@ Tests locked: 785b1b7d63a379e25de3bc296656b49a4206554f (4 files); unlocks: 0
 - 2026-10-28 question — asked 3, from context 5
 - 2026-10-28 override — Size: kept whole over split (6.3 vs 6.8)
 - 2026-10-28 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.403/Microsoft.Common.CurrentVersion.targets, 1 red
+- 2026-10-28 stop — fresh context before review
 
 ## Delivery
 - Branch: feature/F-183
