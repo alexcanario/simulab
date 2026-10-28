@@ -146,18 +146,18 @@ Each kind of text has one named control in the kit, so a page stops repeating th
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
+| AC1 | `AppEmailFieldTests.Leave_TrimsAndLowerCasesTheValue`, `Input_CarriesTheEmailAttributes`; `TextKindSignInTests.Email_IsTheEmailField` |
+| AC2 | `AppOtpFieldTests.LettersAndASeventhDigit_AreNotTaken`, `PastedCode_FillsTheFieldWhole`, `Input_AsksForDigitsAndTheOneTimeCode`; `TextKindSignInTests.Code_Typed_IsNotSentUntilTheButton`, `Code_PastedWithASpace_IsSentWhole` |
+| AC3 | `AppCodeFieldTests.Spaces_AreRemoved`, `UpperCase_On_RaisesTheLetters`, `Input_IsMonospaceWithNoSpellCheck` |
+| AC4 | `AppTextAreaFieldTests.Renders_ATextAreaOfTheMinimumLines`, `Grows_UpToTheMaximumLines`, `Counter_IsAlwaysOn` |
+| AC5 | `AppUrlFieldTests.Leave_TrimsAndAddsTheSchemeWhenMissing`, `ValidValue_ShowsTheOpenLinkInANewTab`, `OtherScheme_ShowsTheErrorAndKeepsTheText`, `PageError_WinsOverTheFieldsOwn`, `Input_AsksForAWebAddress`, `IsValid_TakesOnlyHttpAndHttps` |
+| AC6 | `AppSearchFieldTests.Renders_AMagnifierAndAClearButton`, `DataTable_SearchesWithTheSearchField`; the existing `AppDataTable*Tests` |
+| AC7 | `TextKindPageFieldsTests.Field_UsesTheControlOfItsKind` (18 fields), `SignInCode_IsAOneTimeCodeOrARecoveryCode`; `TextKindSignInTests.CodeStep_UsesTheOneTimeCodeField`, `RecoveryCodeMode_UsesTheCodeField`; `TextKindSecurityPageTests.*`; the existing page tests of each screen (Identity, Catalog, QuestionBank, Dev) |
+| AC8 | `TextKindSignInTests.Code_StaysOutOfTheAddressAndTheBrowserStorage`, `RecoveryCode_StaysOutOfTheAddressAndTheBrowserStorage` |
+| AC9 | existing: `SignInTotpTests.Code_Wrong_GoesBackToThePasswordWithTheReason`, `SecurityPageTests.Confirm_WrongCode_ShowsItOnTheField`, `TotpTests.CodeStep_FiveWrongCodes_LockTheAccountAndRefuseTheRightCodeWithTheSecondsLeft`, `TotpTests.Confirm_WrongCode_RefusesKeepsItOffAndCountsAFailure` (the Api does not change) |
+| AC10 | `TextKindSignInTests.Email_MixedCaseWithSpaces_IsKeptTrimmedAndLowerCase`; the lookup normalizes the e-mail (`UserDirectory`, `normalizer.NormalizeEmail`) |
+| AC11 | `UiGalleryTextKindsTests.*` |
+| AC12 | existing `ResourceParityTests` |
 
 ## Approved list
 ### 1. Code fields

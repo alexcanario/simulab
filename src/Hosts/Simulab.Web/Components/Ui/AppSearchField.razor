@@ -1,0 +1,14 @@
+@* F-183 skeleton. *@
+@code {
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter] public string? AriaDescribedBy { get; set; }
+
+    [Parameter] public int DebounceInterval { get; set; } = 300;
+
+    [Parameter] public string? Class { get; set; }
+}
