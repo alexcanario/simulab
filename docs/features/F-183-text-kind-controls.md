@@ -1,7 +1,7 @@
 ---
 feature: F-183
 epic: Data type controls
-status: approved
+status: building
 Autopilot: approved (2026-10-28)
 board: 253
 version: 1
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-28)
-- Stopped at: Approved by the owner at stop 1 of the epic run (kept whole)
-- Next action: Build in the worktree (epic run continues)
+- Status: building (2026-10-28)
+- Stopped at: Build started: plan recorded, tests first
+- Next action: Write and lock the tests of the six controls (Claude)
 - Waiting on: nothing
 
 ## Summary
@@ -195,6 +195,7 @@ Each kind of text has one named control in the kit, so a page stops repeating th
 - 2026-10-28 — `AppTextAreaField` wraps the auto-grow `AppTextField` already has (F-33) rather than a new input — one place for the field look — technical
 - 2026-10-28 — Screens whose look does not change (a field swap with the same look) get no wireframe; the four that change are drawn — technical
 - 2026-10-28 — No new package — the controls are built on MudBlazor already referenced — technical
+- 2026-10-28: plan — 1 bUnit tests of the six controls and of the page fields → fail, locked; 2 `AppTextField` takes extra input attributes and end content, `AppTextAreaField`, `AppEmailField`, `AppCodeField` → their tests green; 3 `AppOtpField`, `AppUrlField`, `AppSearchField` inside `AppDataTable` → their tests and the table tests green; 4 identity pages (6 e-mail, 5 code fields) → Identity page tests green; 5 catalog, question and AI pages (3 URL, 6 multi-line) → their page tests green; 6 gallery "Text kinds", resources in three locales, flow page → parity and techdocs green; 7 app host screen check, gate, scan, validation script → gate GREEN
 
 ## Out of scope
 - Screen composition of the identity and catalog forms: F-133, F-128, F-130.
