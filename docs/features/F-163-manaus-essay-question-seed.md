@@ -1,7 +1,7 @@
 ---
 feature: F-163
 epic: Question bank
-status: idea
+status: refining
 board: 229
 version: 1
 ---
