@@ -69,6 +69,24 @@ No new route, screen or endpoint. The essay appears in the questions back office
 - AC10 The seed adds no UI text; the three UI locales and the missing-key test are unchanged and green.
 - On screen only (validation script): the essay shows in the list of Manaus 2026 as question 61 of type Essay; its form shows the six criteria; the preview shows the three texts, the theme and "Between 20 and 30 lines"; the texts and the grid match the paper (UC1, UC2).
 
+## Criterion → test
+
+Tests locked: 415138c5f9a84b8a052d3de1752e3f6463d849f8 (2 files); unlocks: 0
+
+| Criterion | Test |
+|---|---|
+| AC1 | `SeedManausEssayTests.Migrate_EmptyDatabase_TheEditionHoldsTheEssayAsQuestion61_AndTheOtherSixtyAreUnchanged` |
+| AC2 | `SeedManausEssayTests.Migrate_EmptyDatabase_TheEssayIsWhatTheDomainAndTheSanitizerMake` |
+| AC3 | `SeedManausEssayTests.Migrate_EmptyDatabase_TheRubricIsTheSixCriteriaOfTheGrid_WithTheDeductionInTheDescription` |
+| AC4 | `SeedManausEssayTests.Migrate_EmptyDatabase_TheEssayHasOneVersionThatHoldsItsRubricAndBaseText_AndNoReviewEntry` |
+| AC5 | `SeedManausEssayTests.Migrate_EmptyDatabase_TheBaseTextHoldsTheThreeTextsWithTheirSources` |
+| AC6 | `SeedManausEssayMigrationTests.Migrate_ThePaperNumberIsTaken_SeedsNothingAndSucceeds` (live, deleted), `Migrate_TheFixedIdIsTaken_SeedsNothingAndSucceeds`, `Migrate_TheEditionIsDeleted_SeedsNothingAndSucceeds`, `Migrate_NoCatalogSchema_SeedsNothingAndSucceeds` |
+| AC7 | `SeedManausEssayMigrationTests.Migrate_TheTopicIsUnderAnotherId_TheEssayPointsAtIt`, `Migrate_TheTopicIsDeleted_SkipsTheEssayAndSucceeds` |
+| AC8 | `SeedManausEssayMigrationTests.Rollback_AnUntouchedEssay_LeavesWithItsRows_AndMigratingAgainWritesItOnce`, `Rollback_AnEditedEssay_Stays` |
+| AC9 | `SeedManausEssayTests.Migrate_ApiHost_ServesTheOpenApiDocument_AndHasNoPendingModelChange`; `Simulab.ArchitectureTests` (whole project) |
+| AC10 | `ResourceParityTests.Every_key_exists_in_every_language` (no resource changed) |
+| On screen only | validation steps 3 to 5 |
+
 ## Approved list
 Rubric of the essay (name — maximum points — kind):
 1. Content knowledge and understanding of the proposed theme and of the requested text genre — 4 — adds points.
