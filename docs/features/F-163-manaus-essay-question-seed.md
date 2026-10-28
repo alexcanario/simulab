@@ -14,7 +14,7 @@ Seed the essay question of the Manaus 2026 municipal guard paper (Instituto Cons
 
 ## Start
 - Depends on: F-109 (done), F-110.
-- Waits on (to start): the points of each macro-structural aspect, which the PDF text extraction lost — owner, from the paper.
+- Waits on (to start): nothing. The owner supplied the paper's markdown (2026-10-28); the grid reads: macro-structural 4.00 + 4.00 + 3.00 = 11; micro-structural 2.00 (syntax, 0.50 per error) + 3.00 (morphosyntax, 0.25) + 4.00 (deviations, 0.25) = 9; total 20.
 - Needed to validate: the local app host — owner.
 - Model: unknown — settled at `/agile:refine`
 - Suggested path: `/agile:refine` → `/agile:build`
