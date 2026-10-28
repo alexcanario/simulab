@@ -1,8 +1,7 @@
 ---
 feature: F-163
 epic: Question bank
-status: validating
-Autopilot: stop 2
+status: done
 board: 229
 version: 1
 ---
@@ -11,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-28)
-- Stopped at: Built and waiting for the owner's validation (stop 2); tests green, scan GREEN
-- Next action: Owner follows the validation script, then types validado and the merge of F-163
+- Status: done (2026-10-28)
+- Stopped at: Shipped: merged as e4edccdc on main, board #229 closed, app 1.27.0
+- Next action: nothing
 - Waiting on: nothing
 
 ## Summary
@@ -194,3 +193,13 @@ Necessário para validar: o app host local — o dono; não iniciado, o passo 1 
 
 - 2026-10-28 assumed — 9 answers
 - 2026-10-28 stop — stop 2 validation
+
+## Delivery
+
+Gate time: 4 passes, 36 min 41 s — turn 1 (54 s), ship 1 (22 min 8 s), scan 2 (13 min 39 s); 0 red
+Usage: 1933.2k weighted (estimate) — refine 15% · build 61% · ship 20% · other 4% — context per turn 151k → 299k — 1 session, 107 turns
+- Branch: `feature/F-163`, merged with `--no-ff` as e4edccdc (2026-10-28); app version 1.26.0 → 1.27.0.
+- Tests: full suite green (`gate.js ship --fresh`): QuestionBank 872, Catalog 706, Identity 583, Web 2873, ExamEngine 99, Api 83, AppHost 122, Architecture 310, others 100; scan GREEN. The suite took about 21 min against a 5 min budget (retro finding); an earlier ship run hung under load and passed on the rerun.
+- Manual pages: `docs/manual/pt-BR/questions.md`; technical page `docs/flows/open-answer-and-essay-questions.md`.
+- Validation evidence: the owner said in the conversation that the validation passed ("Validado, merge", 2026-10-28); the ticks of the widget were not recorded (0 of 11), so no step is recorded as ticked.
+- Not run by the build: the screen check on the app host (left to the owner's validation).
