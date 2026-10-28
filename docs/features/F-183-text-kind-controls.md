@@ -1,7 +1,8 @@
 ---
 feature: F-183
 epic: Data type controls
-status: idea
+status: refining
+Autopilot: refining (2026-10-28)
 board: 253
 version: 1
 ---
@@ -10,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: idea (2026-10-27)
-- Stopped at: Captured by the breakdown of the epic data-type-controls.
-- Next action: `/agile:refine F-183` (owner); it waits on nothing.
+- Status: refining (2026-10-28)
+- Stopped at: Refinement started by the epic run data-type-controls; premises being checked
+- Next action: Stop 1: answer the question round and approve F-183 (owner)
 - Waiting on: nothing
 
 ## Summary
