@@ -2,7 +2,7 @@
 feature: F-183
 epic: Data type controls
 status: refining
-Autopilot: refining (2026-10-28)
+Autopilot: stop 1 (2026-10-28)
 board: 253
 version: 1
 ---
