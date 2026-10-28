@@ -175,21 +175,22 @@ Necessário para validar: o app host local — o dono; não iniciado, o passo 1 
    $env:Database__Name = "simulab_f163"; dotnet run --project src/Hosts/Simulab.AppHost
    ```
    Esperado: a linha `Dashboard:` com um link; o site responde em https://localhost:7125. Para repetir, Ctrl+C e o mesmo comando.
-2. [ ] Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento do `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue".
+2. [x] Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento do `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue".
 3. A redação na lista:
-   - [ ] 3.1 No menu lateral esquerdo clique em Content > Questions. No filtro EDITION digite Guarda e escolha "CONSULPLAN · Guarda Municipal · 2026" (Técnico Municipal I - Guarda Municipal): a contagem sob a tabela diz "1-25 of 61".
-   - [ ] 3.2 Ache a linha "Question 61" (página 3 da tabela): o tipo diz Essay e o status Published.
+   - [x] 3.1 No menu lateral esquerdo clique em Content > Questions. No filtro EDITION digite Guarda e escolha "CONSULPLAN · Guarda Municipal · 2026" (Técnico Municipal I - Guarda Municipal): a contagem sob a tabela diz "1-25 of 61".
+   - [x] 3.2 Ache a linha "Question 61" (página 3 da tabela): o tipo diz Essay e o status Published.
 4. O formulário da redação:
-   - [ ] 4.1 Clique em Edit na linha da Question 61: o cartão Statement (o texto da questão) traz "Com base nos textos motivadores, redija uma redação sobre o tema:" e o tema "A ressignificação da Guarda Municipal: ...", como na prova.
-   - [ ] 4.2 O cartão Rubric (a lista de critérios que o corretor avalia, cada um com a pontuação máxima) lista seis critérios com 4, 4, 3, 2, 3 e 4 pontos ("Total: 20 points"); compare os nomes com a grade da página 23 da prova.
-   - [ ] 4.3 Abra as descrições dos três últimos critérios: cada uma começa com os pontos mantidos e o desconto por erro ("menos 0,50" no primeiro, "menos 0,25" nos outros dois).
-   - [ ] 4.4 O limite de tamanho diz Minimum lines 20 e Maximum lines 30, como as orientações da prova.
+   - [x] 4.1 Clique em Edit na linha da Question 61: o cartão Statement (o texto da questão) traz "Com base nos textos motivadores, redija uma redação sobre o tema:" e o tema "A ressignificação da Guarda Municipal: ...", como na prova.
+   - [x] 4.2 O cartão Rubric (a lista de critérios que o corretor avalia, cada um com a pontuação máxima) lista seis critérios com 4, 4, 3, 2, 3 e 4 pontos ("Total: 20 points"); compare os nomes com a grade da página 23 da prova.
+   - [x] 4.3 Abra as descrições dos três últimos critérios: cada uma começa com os pontos mantidos e o desconto por erro ("menos 0,50" no primeiro, "menos 0,25" nos outros dois).
+   - [x] 4.4 O limite de tamanho diz Minimum lines 20 e Maximum lines 30, como as orientações da prova.
 5. Textos e prévia:
-   - [ ] 5.1 No painel lateral Summary o Base text diz "Prova discursiva: textos motivadores"; abra o texto no cartão Base text e compare o Texto I, o Texto II (os 16 princípios) e o Texto III (cinco parágrafos) com as páginas 23 e 24 da prova.
-   - [ ] 5.2 No bloco Publication do painel clique em "Preview as a student": o diálogo mostra os textos, o tema, uma caixa de escrita "Your essay", "Write your essay." e "Between 20 and 30 lines."; clique em "Show answer" e a tabela do rubric aparece com total 20.
-6. [ ] Idioma: na barra superior clique no globo e escolha Português (Brasil): os rótulos do formulário mudam; os textos, o tema e os critérios ficam em português como na prova. Volte para English.
-7. [ ] Só teclado: em Content > Questions aperte Tab até a ação Edit da Question 61 e aperte Enter: a questão abre.
+   - [x] 5.1 No painel lateral Summary o Base text diz "Prova discursiva: textos motivadores"; abra o texto no cartão Base text e compare o Texto I, o Texto II (os 16 princípios) e o Texto III (cinco parágrafos) com as páginas 23 e 24 da prova.
+   - [x] 5.2 No bloco Publication do painel clique em "Preview as a student": o diálogo mostra os textos, o tema, uma caixa de escrita "Your essay", "Write your essay." e "Between 20 and 30 lines."; clique em "Show answer" e a tabela do rubric aparece com total 20.
+6. [x] Idioma: na barra superior clique no globo e escolha Português (Brasil): os rótulos do formulário mudam; os textos, o tema e os critérios ficam em português como na prova. Volte para English.
+7. [x] Só teclado: em Content > Questions aperte Tab até a ação Edit da Question 61 e aperte Enter: a questão abre.
 
 ## Events
 
 - 2026-10-28 assumed — 9 answers
+- 2026-10-28 stop — stop 2 validation
