@@ -2,7 +2,7 @@
 epic: data-type-controls
 status: agreed
 board: 250
-Autopilot: F-183 refining (2026-10-28)
+Autopilot: F-183 stop 1 (2026-10-28)
 ---
 # Data type controls
 
