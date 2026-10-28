@@ -155,7 +155,8 @@ public sealed class SeedManausGuardQuestionsMigrationTests
 
     private sealed class Database(QuestionBankModuleDbContext context, NpgsqlConnection connection) : IAsyncDisposable
     {
-        public Task MigrateQuestionBankAsync() => context.GetService<IMigrator>().MigrateAsync();
+        // F-163: these tests are about the F-110 seed, so they stop at it; the essay seed after it has its own tests.
+        public Task MigrateQuestionBankAsync() => context.GetService<IMigrator>().MigrateAsync("20261025190535_SeedManausGuardQuestions");
 
         public async Task<List<string>> AppliedAsync() => [.. await context.Database.GetAppliedMigrationsAsync()];
 
