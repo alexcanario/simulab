@@ -28,3 +28,7 @@ The kit gains `AppTextAreaField` (auto-grow, counter), `AppEmailField` (trim, lo
 
 ## Decisions
 - 2026-10-27 — Epic Data type controls — breakdown of the epic — owner
+
+## Events
+
+- 2026-10-28 question — asked 3, from context 5
