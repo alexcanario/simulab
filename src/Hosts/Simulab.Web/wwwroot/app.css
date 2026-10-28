@@ -1591,12 +1591,13 @@ code, kbd, pre, samp {
 
 /* F-183, the text kinds. A code and a one-time code are read character by character, so they are monospace; the six
    digits are spread so each one is seen apart. */
-.app-code-field input,
-.app-otp-field input {
+/* MudBlazor's ".mud-input > input.mud-input-root" sets font-family: inherit, so the rule names the same input. */
+.app-code-field .mud-input > input.mud-input-root {
     font-family: var(--app-font-mono);
 }
 
-.app-otp-field input {
+.app-otp-field .mud-input > input.mud-input-root {
+    font-family: var(--app-font-mono);
     letter-spacing: 0.4em;
     font-variant-numeric: tabular-nums;
 }
