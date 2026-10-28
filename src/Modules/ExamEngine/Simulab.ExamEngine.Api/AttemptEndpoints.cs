@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Simulab.ExamEngine.Application.Attempts;
 using Simulab.ExamEngine.Contracts;
+using Simulab.SharedKernel.Results;
 using Simulab.SharedKernel.Security;
 using Simulab.SharedKernel.Serialization;
 using static Simulab.ApiResults.ApiProblem;
@@ -156,7 +157,7 @@ internal static class AttemptEndpoints
         var body = await ReadBodyAsync(request, cancellationToken);
         if (body is null)
         {
-            return Results.StatusCode(StatusCodes.Status413PayloadTooLarge);
+            return Problem(new Error(ExamAttemptErrorCodes.AnswerTooLarge, ErrorKind.Validation), StatusCodes.Status413PayloadTooLarge);
         }
 
         var outcome = await handler.HandleAsync(studentId, id, questionId, ParseAnswer(body), cancellationToken);
