@@ -9,6 +9,7 @@ using Simulab.Web.Localization;
 using Simulab.Web.Services;
 using Simulab.Web.Services.Auth;
 using Simulab.Web.Services.Catalog;
+using Simulab.Web.Services.ExamEngine;
 using Simulab.Web.Services.QuestionBank;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +29,8 @@ builder.Services.AddHttpClient<IdentityApiClient>(client => client.BaseAddress =
 builder.Services.AddHttpClient<CatalogApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
 // F-95: the QuestionBank module's own typed client, same base address from service discovery.
 builder.Services.AddHttpClient<QuestionBankApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
+// F-169: the ExamEngine module's own typed client, same base address from service discovery.
+builder.Services.AddHttpClient<ExamEngineApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
 // F-41 (v2): the Development-only diagnostics route. The client is registered everywhere; the route it
 // calls is mapped only in Development, and the page that uses it renders only there (BR9).
 builder.Services.AddHttpClient<AiApiClient>(client => client.BaseAddress = new Uri("https+http://api"));
@@ -184,6 +187,7 @@ app.MapDefaultEndpoints();
 app.MapAccountEndpoints();
 app.MapNoticeDocumentEndpoints();
 app.MapQuestionImageEndpoints();
+app.MapAttemptImageEndpoints();
 if (google.Enabled)
 {
     app.MapGoogleAccountEndpoints();

@@ -106,6 +106,14 @@ public sealed class ApprovedPaletteTests
         SimulabTheme.DarkBrandName.Should().Be("#F2F5FB");
     }
 
+    /// <summary>F-169 AC6: the fill of a marked answer, ADR-0007 item 9.</summary>
+    [Fact]
+    public void PrimarySelected_HoldsTheApprovedValues()
+    {
+        SimulabTheme.LightPrimarySelected.Should().Be("#D1E4FE");
+        SimulabTheme.DarkPrimarySelected.Should().Be("#1A4583");
+    }
+
     /// <summary>16: the focus ring is the info blue, 3px, 2px away from the control.</summary>
     [Fact]
     public void FocusRing_IsTheInfoBlueThreePixelsWideTwoPixelsAway()

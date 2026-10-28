@@ -1,0 +1,143 @@
+@page "/attempts/{Id:guid}/submitted"
+@attribute [Authorize(Policy = PermissionPolicy.Prefix + ExamEnginePermissions.Take)]
+@layout MainLayout
+@using Simulab.ExamEngine.Contracts
+@inject ExamEngineApiClient Api
+@inject Simulab.Web.Services.Auth.WebSessionTokenAccessor Tokens
+@inject IStringLocalizer<SharedResources> L
+@inject NavigationManager Navigation
+@inject UserTimeZone TimeZone
+
+@* F-169, UC5 and BR10: what the student sees after submitting. The edition, when it was submitted in the user's time zone,
+   how many questions were answered and how many left blank, and the way back to the edition. F-171 replaces it with the
+   result. Only the owner opens it (BR11): another student's attempt looks exactly like an id that does not exist. The
+   page is MainLayout's: the session is over, so the menu and the switches return. *@
+@if (_notFound)
+{
+    <PageTitle>@L["NotFound.Title"]</PageTitle>
+    <NotFoundContent />
+}
+else if (_loading)
+{
+    <PageTitle>@L["Attempt.Submitted.Title"]</PageTitle>
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppLoadingState />
+    </MudPaper>
+}
+else if (_content is null || _content.SubmittedAt is null)
+{
+    <PageTitle>@L["Attempt.Submitted.Title"]</PageTitle>
+    <MudPaper Class="app-form-card" Elevation="0">
+        <AppErrorState Message="@L["Attempt.Submitted.LoadFailed"]" OnRetry="LoadAsync" />
+    </MudPaper>
+}
+else
+{
+    var content = _content!;
+    var local = TimeZone.ToLocal(content.SubmittedAt!.Value);
+    var answered = content.Questions.Count(question => AttemptAnswers.IsAnswered(question.Answer));
+    <PageTitle>@L["Attempt.Submitted.Title"]</PageTitle>
+    <AppPageState Icon="@AppIcons.Verified"
+                  IconColor="Color.Success"
+                  Title="@L["Attempt.Submitted.Title"]"
+                  Message="@Message(content, local)">
+        <ChildContent>
+            <dl class="app-attempt-summary">
+                <div class="app-attempt-summary-row">
+                    <dt>@L["Attempt.Submitted.Answered"]</dt>
+                    <dd id="attempt-submitted-answered">@answered.ToString("N0", CultureInfo.CurrentCulture)</dd>
+                </div>
+                <div class="app-attempt-summary-row">
+                    <dt>@L["Attempt.Submitted.Blank"]</dt>
+                    <dd id="attempt-submitted-blank">@((content.Questions.Count - answered).ToString("N0", CultureInfo.CurrentCulture))</dd>
+                </div>
+            </dl>
+        </ChildContent>
+        <Actions>
+            @* A link, not a button: it goes to another address (rule: ui). *@
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@AppIcons.Back"
+                       Href="@BackHref(content)">@L["Attempt.Submitted.BackToEdition"]</MudButton>
+        </Actions>
+    </AppPageState>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    [Parameter] public Guid Id { get; set; }
+
+    private AttemptContentResponse? _content;
+    private Guid? _loadedFor;
+    private bool _loading;
+    private bool _notFound;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedFor == Id)
+        {
+            return;
+        }
+
+        _loadedFor = Id;
+        await LoadAsync();
+    }
+
+    // F-31, BR5: the times need the browser's time zone, read only once this page is interactive; until then they show in UTC.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && TimeZone.Current == TimeZoneInfo.Utc && await TimeZone.ResolveAsync() != TimeZoneInfo.Utc)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _notFound = false;
+        _content = null;
+
+        var token = await TokenAsync();
+        var result = token is null ? null : await Api.ReadContentAsync(token, Id);
+
+        if (result is { IsSuccess: true, Value: { Status: AttemptStatus.InProgress } })
+        {
+            // Not submitted yet: what there is to see is the simulator. The loading state stays until it opens.
+            Navigation.NavigateTo($"/attempts/{Id}", replace: true);
+            return;
+        }
+
+        _loading = false;
+        if (result is { IsSuccess: true, Value: { } content })
+        {
+            _content = content;
+        }
+        else
+        {
+            _notFound = result?.ErrorCode == ExamAttemptErrorCodes.NotFound;
+        }
+    }
+
+    // The edition is gone: the message says when, without naming it, and the way back is the catalog.
+    private string Message(AttemptContentResponse content, DateTimeOffset local)
+    {
+        var date = local.ToString("d", CultureInfo.CurrentCulture);
+        var time = local.ToString("t", CultureInfo.CurrentCulture);
+
+        return AttemptText.EditionLabel(content.Edition) is { } label
+            ? L["Attempt.Submitted.Message", label, date, time].Value
+            : L["Attempt.Submitted.MessageNoEdition", date, time].Value;
+    }
+
+    private static string BackHref(AttemptContentResponse content) =>
+        content.Edition is { } edition ? $"/catalog/exams/{edition.ExamId}" : "/catalog";
+
+    // B-3: through the accessor, which refreshes the token; never from the cookie.
+    private async Task<string?> TokenAsync()
+    {
+        var user = AuthenticationState is null ? null : (await AuthenticationState).User;
+        return user is null ? null : await Tokens.GetAccessTokenAsync(user);
+    }
+}

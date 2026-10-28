@@ -40,8 +40,63 @@ internal static class AttemptEndpoints
         attempts.MapPost("/{id:guid}/submit", SubmitAsync)
             .RequireAuthorization(ExamEngineEndpoints.TakePolicy)
             .WithName("SubmitAttempt");
+        attempts.MapGet("/{id:guid}/content", ReadContentAsync)
+            .RequireAuthorization(ExamEngineEndpoints.TakePolicy)
+            .Produces<AttemptContentResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithName("ReadAttemptContent");
+        attempts.MapGet("/{id:guid}/images/{imageId:guid}", OpenImageAsync)
+            .RequireAuthorization(ExamEngineEndpoints.TakePolicy)
+            // The four formats an upload is admitted in (F-103 QuestionImageFormat); OpenAPI takes no wildcard.
+            .Produces<Stream>(StatusCodes.Status200OK, "image/png", "image/jpeg", "image/gif", "image/webp")
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithName("OpenAttemptImage");
 
         return group;
+    }
+
+    // F-169: the owner only; the Admin reading of F-166 stays on the route above.
+    private static async Task<IResult> ReadContentAsync(
+        Guid id,
+        ICurrentUser currentUser,
+        GetAttemptContentHandler handler,
+        CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } studentId)
+        {
+            return Results.Unauthorized();
+        }
+
+        var outcome = await handler.HandleAsync(studentId, id, cancellationToken);
+
+        return outcome.IsSuccess ? Results.Ok(outcome.Value) : Problem(outcome.Error!);
+    }
+
+    // F-169 BR12: the headers of F-103, so a stored file cannot act as a page of this origin.
+    private static async Task<IResult> OpenImageAsync(
+        Guid id,
+        Guid imageId,
+        HttpContext context,
+        ICurrentUser currentUser,
+        OpenAttemptImageHandler handler,
+        CancellationToken cancellationToken)
+    {
+        if (currentUser.UserId is not { } studentId)
+        {
+            return Results.Unauthorized();
+        }
+
+        var outcome = await handler.HandleAsync(studentId, id, imageId, cancellationToken);
+        if (outcome.IsFailure)
+        {
+            return Problem(outcome.Error!);
+        }
+
+        context.Response.Headers.XContentTypeOptions = "nosniff";
+        context.Response.Headers.ContentSecurityPolicy = "sandbox";
+        context.Response.Headers.CacheControl = "private";
+
+        return Results.Stream(outcome.Value.Content, outcome.Value.ContentType);
     }
 
     private static async Task<IResult> StartAsync(

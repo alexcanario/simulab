@@ -1,0 +1,86 @@
+@inject IStringLocalizer<SharedResources> L
+
+@* F-169, BR4: the answer sheet of an attempt. Every question of the attempt by its paper number, grouped by section, each
+   marked answered or blank, the current one marked as current. A cell is a button that moves between questions, so
+   the whole sheet is a navigation landmark named by its heading. Answered is told by a check and a fill, never colour
+   alone. The page puts it in a side panel; on a phone it sits in a drawer and passes OnClose. *@
+<nav class="app-answer-sheet" aria-labelledby="@TitleId">
+    <div class="app-answer-sheet-head">
+        <h2 id="@TitleId" class="app-answer-sheet-title">@L["Attempt.AnswerSheet.Title"]</h2>
+        @if (OnClose.HasDelegate)
+        {
+            <MudTooltip Text="@L["Attempt.AnswerSheet.Close"]">
+                <MudIconButton Icon="@AppIcons.Close"
+                               aria-label="@L["Attempt.AnswerSheet.Close"]"
+                               OnClick="() => OnClose.InvokeAsync()"
+                               Class="app-answer-sheet-close" />
+            </MudTooltip>
+        }
+    </div>
+    <p class="app-answer-sheet-progress">@L["Attempt.AnswerSheet.Progress", AnsweredCount, Total]</p>
+    <ul class="app-answer-legend">
+        <li><span class="app-answer-legend-swatch" aria-hidden="true"></span>@L["Attempt.AnswerSheet.Blank"]</li>
+        <li>
+            <span class="app-answer-legend-swatch app-answer-legend-answered" aria-hidden="true">
+                <MudIcon Icon="@AppIcons.Check" Size="Size.Small" />
+            </span>@L["Attempt.AnswerSheet.Answered"]
+        </li>
+        <li><span class="app-answer-legend-swatch app-answer-legend-current" aria-hidden="true"></span>@L["Attempt.AnswerSheet.Current"]</li>
+    </ul>
+    @foreach (var section in Sections)
+    {
+        <h3 class="app-answer-sheet-section">
+            <span class="app-answer-sheet-section-label" lang="@section.Lang">@section.Heading</span>
+            <span class="app-answer-sheet-range">@L["Attempt.AnswerSheet.SectionRange", section.First, section.Last]</span>
+        </h3>
+        <ul class="app-answer-cells">
+            @foreach (var cell in section.Cells)
+            {
+                var current = cell.Id == CurrentId;
+                <li>
+                    <button type="button"
+                            class="@CellClass(cell.Answered)"
+                            aria-current="@(current ? "step" : null)"
+                            aria-label="@CellName(cell)"
+                            @onclick="() => OnSelect.InvokeAsync(cell.Id)">
+                        <span aria-hidden="true">@cell.Number</span>
+                        @if (cell.Answered)
+                        {
+                            <MudIcon Icon="@AppIcons.Check" Size="Size.Small" Class="app-answer-cell-check" aria-hidden="true" />
+                        }
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+</nav>
+
+@code {
+    /// <summary>Prefix of the element ids; the heading is <c>{Id}-title</c>.</summary>
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public IReadOnlyList<AppAnswerSheetSection> Sections { get; set; } = [];
+
+    /// <summary>How many questions the attempt holds.</summary>
+    [Parameter, EditorRequired] public int Total { get; set; }
+
+    /// <summary>How many of them are answered.</summary>
+    [Parameter, EditorRequired] public int AnsweredCount { get; set; }
+
+    /// <summary>The question that is shown, marked as the current step.</summary>
+    [Parameter] public Guid? CurrentId { get; set; }
+
+    /// <summary>A click on a number: the id of the question to show.</summary>
+    [Parameter, EditorRequired] public EventCallback<Guid> OnSelect { get; set; }
+
+    /// <summary>With a handler, the heading row shows the close button (the phone's drawer).</summary>
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private string TitleId => $"{Id}-title";
+
+    private static string CellClass(bool answered) =>
+        answered ? "app-answer-cell app-answer-cell-answered" : "app-answer-cell";
+
+    private string CellName(AppAnswerSheetCell cell) =>
+        L["Attempt.AnswerSheet.CellName", cell.Number, cell.Answered ? L["Attempt.AnswerSheet.Answered"].Value : L["Attempt.AnswerSheet.Blank"].Value];
+}

@@ -35,6 +35,8 @@ internal static class IdentityTokensComparison
         // F-148: the two colours MudBlazor's palette has no slot for; SimulabThemeProvider writes them as CSS variables.
         colours["link"] = (Hex(SimulabTheme.LightLink), Hex(SimulabTheme.DarkLink));
         colours["brandName"] = (Hex(SimulabTheme.LightBrandName), Hex(SimulabTheme.DarkBrandName));
+        // F-169: the fill of a marked answer, by the same route.
+        colours["primarySelected"] = (Hex(SimulabTheme.LightPrimarySelected), Hex(SimulabTheme.DarkPrimarySelected));
 
         return colours;
     }

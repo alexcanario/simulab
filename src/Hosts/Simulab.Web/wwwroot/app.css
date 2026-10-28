@@ -2986,3 +2986,467 @@ code, kbd, pre, samp {
     margin: 0 0 var(--app-space-3);
     font-size: var(--app-font-sm);
 }
+
+/* ---------------------------------------------------------------------------
+   Exam session (F-169). Declared exception of the ui rule (ui-project): no app menu, no breadcrumb. The question card
+   and the answer sheet are the screen; every colour is a theme variable, and --app-primary-selected is the fill of a
+   marked answer (SimulabThemeProvider writes it).
+   --------------------------------------------------------------------------- */
+.app-session-title {
+    min-width: 0;
+    margin: 0;
+    font-size: var(--app-font-lg);
+    line-height: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.app-session-leave {
+    font-size: var(--app-font-md);
+    white-space: nowrap;
+}
+
+.app-session-body {
+    padding: var(--app-space-5);
+}
+
+/* From md up the answer sheet is a side panel of 300px beside the question; below it the sheet is a drawer. */
+.app-session-body-aside {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: var(--app-space-5);
+    align-items: start;
+}
+
+@media (max-width: 959.98px) {
+    .app-session-body {
+        padding: var(--app-space-3);
+    }
+}
+
+.app-session-main {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    outline: none;
+}
+
+.app-session-aside {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+}
+
+.app-session-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--app-space-1) var(--app-space-3);
+    margin: 0 0 var(--app-space-2);
+    font-size: var(--app-font-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--mud-palette-text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.app-session-section-range {
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+.app-session-question-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--app-space-3);
+    margin-bottom: var(--app-space-4);
+}
+
+/* 1.25rem is the ui-heading step of the type scale, which the three --app-font scales do not carry. */
+.app-session-question-title {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.app-session-question-position {
+    font-size: var(--app-font-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-session-caption {
+    margin: 0 0 var(--app-space-1);
+    font-size: var(--app-font-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-session-hint {
+    margin: var(--app-space-4) 0 var(--app-space-2);
+    font-size: var(--app-font-xs);
+    line-height: 1rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-session-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--app-space-3);
+    margin-top: var(--app-space-5);
+    padding-top: var(--app-space-4);
+    border-top: 1px solid var(--mud-palette-divider);
+}
+
+.app-session-submit {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--app-space-3);
+}
+
+.app-session-submit-progress,
+.app-edition-take-progress {
+    display: inline-flex;
+    margin-right: var(--app-space-2);
+}
+
+.app-session-submit-progress .mud-progress-circular,
+.app-edition-take-progress .mud-progress-circular {
+    width: 18px;
+    height: 18px;
+}
+
+@media (max-width: 599.98px) {
+    .app-session-nav .mud-button-root,
+    .app-session-submit .mud-button-root {
+        flex: 1;
+    }
+}
+
+.app-session-drawer.mud-drawer {
+    max-width: 86vw;
+}
+
+.app-session-drawer .app-answer-sheet {
+    min-height: 100%;
+    border: 0;
+    border-radius: 0;
+}
+
+/* The start action of an edition (F-169): at the end of the row, under the row's text when the row is narrow. */
+.app-edition-take {
+    margin-inline-start: auto;
+}
+
+@media (max-width: 599.98px) {
+    .app-edition-take {
+        width: 100%;
+    }
+}
+
+/* ---- Answer options (kit, F-169): rows of at least 44px; a marked row is fill, 2px border and indicator together. ---- */
+.app-answer-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-2);
+}
+
+.app-answer-options[aria-busy="true"] .app-answer-option {
+    cursor: progress;
+}
+
+.app-answer-option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--app-space-3);
+    width: 100%;
+    min-height: 44px;
+    padding: var(--app-space-2) var(--app-space-3);
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: var(--app-radius-md);
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.app-answer-option:hover {
+    background: var(--mud-palette-background);
+}
+
+/* The 2px border is a 1px border and a 1px ring, so a marked row does not move its neighbours. */
+.app-answer-option-selected,
+.app-answer-option-selected:hover {
+    border-color: var(--mud-palette-primary);
+    background: var(--app-primary-selected);
+    box-shadow: inset 0 0 0 1px var(--mud-palette-primary);
+}
+
+.app-answer-indicator {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    border: 2px solid var(--mud-palette-lines-inputs);
+}
+
+.app-answer-indicator-radio {
+    border-radius: 50%;
+}
+
+.app-answer-indicator-box {
+    border-radius: 4px;
+}
+
+.app-answer-indicator .mud-icon-root {
+    width: 16px;
+    height: 16px;
+}
+
+.app-answer-option-selected .app-answer-indicator {
+    border-color: var(--mud-palette-primary);
+}
+
+.app-answer-option-selected .app-answer-indicator-radio::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--mud-palette-primary);
+}
+
+.app-answer-option-selected .app-answer-indicator-box {
+    background: var(--mud-palette-primary);
+    color: var(--mud-palette-primary-text);
+}
+
+.app-answer-letter {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--app-radius-pill);
+    background: var(--mud-palette-primary-lighten);
+    color: var(--mud-palette-text-primary);
+    font-size: var(--app-font-sm);
+    font-weight: 800;
+}
+
+.app-answer-option-selected .app-answer-letter {
+    background: var(--mud-palette-surface);
+}
+
+.app-answer-text {
+    flex: 1;
+    min-width: 0;
+    padding-top: 1px;
+}
+
+/* ---- Answer sheet (kit, F-169): a nav of numbered cells grouped by section. ---- */
+.app-answer-sheet {
+    padding: var(--app-space-4);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: var(--app-radius-lg);
+    background: var(--mud-palette-surface);
+}
+
+.app-answer-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--app-space-2);
+}
+
+.app-answer-sheet-title {
+    margin: 0;
+    font-size: var(--app-font-lg);
+    line-height: 1.25rem;
+    font-weight: 800;
+}
+
+.app-answer-sheet-progress {
+    margin: var(--app-space-1) 0 var(--app-space-2);
+    font-size: var(--app-font-md);
+    font-variant-numeric: tabular-nums;
+}
+
+.app-answer-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--app-space-4);
+    margin: 0 0 var(--app-space-3);
+    padding: 0;
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+    list-style: none;
+}
+
+.app-answer-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-1);
+}
+
+.app-answer-legend-swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--mud-palette-lines-inputs);
+    border-radius: 4px;
+}
+
+.app-answer-legend-swatch .mud-icon-root {
+    width: 12px;
+    height: 12px;
+}
+
+.app-answer-legend-answered {
+    border-color: var(--mud-palette-primary);
+    background: var(--app-primary-selected);
+    color: var(--mud-palette-text-primary);
+}
+
+.app-answer-legend-current {
+    border-color: var(--mud-palette-text-primary);
+}
+
+.app-answer-sheet-section {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--app-space-2);
+    margin: var(--app-space-3) 0 var(--app-space-2);
+    font-size: var(--app-font-sm);
+    line-height: 1.125rem;
+    font-weight: 800;
+}
+
+.app-answer-sheet-section-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.app-answer-sheet-range {
+    flex: none;
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-xs);
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-answer-cells {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 40px);
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-answer-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    width: 100%;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--mud-palette-lines-inputs);
+    border-radius: 8px;
+    background: var(--mud-palette-surface);
+    color: var(--mud-palette-text-primary);
+    font-family: var(--app-font-mono);
+    font-size: var(--app-font-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.app-answer-cell:hover {
+    background: var(--mud-palette-background);
+}
+
+/* Answered: the fill and a 2px border, and a check beside the number, so it is never colour alone. */
+.app-answer-cell-answered,
+.app-answer-cell-answered:hover {
+    border: 2px solid var(--mud-palette-primary);
+    background: var(--app-primary-selected);
+}
+
+/* Current: a 2px ink border and bold; with the answered fill it reads as both. */
+.app-answer-cell[aria-current="step"] {
+    border: 2px solid var(--mud-palette-text-primary);
+    font-weight: 800;
+}
+
+.app-answer-cell-check.mud-icon-root {
+    width: 11px;
+    height: 11px;
+}
+
+/* ---- Save status (kit, F-169) ---- */
+.app-save-status {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    min-height: 24px;
+    margin-top: var(--app-space-2);
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-save-status .mud-icon-root {
+    width: 16px;
+    height: 16px;
+}
+
+.app-save-status-spinner {
+    display: inline-flex;
+}
+
+.app-save-status-spinner .mud-progress-circular {
+    width: 14px;
+    height: 14px;
+}
+
+/* ---- The submitted page (F-169): the two counts, number right after its label. ---- */
+.app-attempt-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-1);
+    margin: var(--app-space-2) 0 0;
+}
+
+.app-attempt-summary-row {
+    display: flex;
+    justify-content: center;
+    gap: var(--app-space-2);
+}
+
+.app-attempt-summary-row dt {
+    color: var(--mud-palette-text-secondary);
+}
+
+.app-attempt-summary-row dd {
+    margin: 0;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.gallery-answer-sheet-sample {
+    max-width: 300px;
+    margin-bottom: var(--app-space-4);
+}

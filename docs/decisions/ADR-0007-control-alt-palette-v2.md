@@ -24,6 +24,7 @@ ADR-0006 and F-125 brought the Control Alt Systems identity to Simulab. On 2026-
 6. **The action is a kit component**, `AppActionButton`: the shortcut (Ctrl, Alt, plus signs, the amber key) and a compact variant (the amber key alone). One element is clickable; Ctrl, Alt and the signs are decorative. Still one at most per screen, and no routed page uses it until its screen item picks it (F-125 BR5).
 7. **App bar and sidebar** keep ADR-0006's choices: a white bar (a raised surface in dark), a navy sidebar (the sunken surface in dark).
 8. **Brand files** are the design system's v2 logos; the dark symbol is derived from them by hand, since the design system ships one symbol only. **Emails** use the navy button with white text.
+9. **A marked answer** (F-169, 2026-10-27): `primarySelected`, `#D1E4FE` / `#1A4583`, the fill of a marked option and an answered answer-sheet cell, always with a 2 px `primary` border. Written by `SimulabThemeProvider` as `--app-primary-selected`, like the link role. Ink on it 13.4:1 (light), `#F2F5FB` on it 8.6:1 (dark).
 
 ## Consequences
 - `docs/design/identity.tokens.json` and `DESIGN.md` record palette v2, with `link` and `brandName` as tokens beside the palette's own; `IdentityTokensTests`, `ApprovedPaletteTests`, `ThemePaletteTests` and `KeycapContrastTests` hold it.

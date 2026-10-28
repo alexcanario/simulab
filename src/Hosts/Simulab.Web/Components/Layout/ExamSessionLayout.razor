@@ -1,0 +1,102 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject IStringLocalizer<SharedResources> L
+@inject ThemeState ThemeState
+
+@* Declared exception of the ui rule (ui-project), F-169: the exam session has no app menu, no breadcrumb and no page
+   header. Its bar holds the edition (the page's h1), the way out, the answer-sheet button on a phone and the theme and
+   language switches, which the candidate may need. What the page knows (the edition, the progress) reaches the bar
+   through ExamSessionBar. The page renders the main landmark, the skip link's target. *@
+
+<SimulabThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="ThemeState.IsDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<a class="app-skip-link" href="#main-content">@L["Layout.SkipToContent"]</a>
+
+<SessionEndedWatcher />
+
+<MudLayout Class="app-session">
+    <MudAppBar Elevation="0" Dense="false" Class="app-session-bar">
+        @if (_bar.Title is { } title)
+        {
+            <h1 class="app-session-title">
+                <AppTruncatedText Text="@title" Lang="@_bar.TitleLang" MaxWidth="min(40rem, 50vw)" />
+            </h1>
+        }
+        <MudSpacer />
+        @if (_bar.LeaveHref is { } leave)
+        {
+            if (_bar.Phone)
+            {
+                <MudTooltip Text="@L["Attempt.Leave"]">
+                    <MudIconButton Icon="@AppIcons.Back"
+                                   Href="@leave"
+                                   Color="Color.Inherit"
+                                   aria-label="@L["Attempt.Leave"]"
+                                   Class="app-session-leave-icon" />
+                </MudTooltip>
+            }
+            else
+            {
+                <AppLink Href="@leave" Class="app-session-leave">@L["Attempt.Leave"]</AppLink>
+            }
+        }
+        @if (_bar.Phone && _bar.SheetLabel is { } sheetLabel)
+        {
+            <MudTooltip Text="@sheetLabel">
+                <MudIconButton Icon="@AppIcons.AnswerSheet"
+                               Color="Color.Inherit"
+                               aria-label="@sheetLabel"
+                               OnClick="() => _bar.OnOpenSheet.InvokeAsync()"
+                               Class="app-session-sheet-button" />
+            </MudTooltip>
+        }
+        <ThemeSwitch />
+        <LanguageSwitch />
+    </MudAppBar>
+    <MudMainContent>
+        <CascadingValue Value="_bar" IsFixed="true">
+            @Body
+        </CascadingValue>
+    </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui" data-nosnippet>
+    @L["Layout.UnhandledError"]
+    <a href="." class="reload">@L["Layout.Reload"]</a>
+    <span class="dismiss" role="button" aria-label="@L["Layout.Dismiss"]">🗙</span>
+</div>
+
+@code {
+    private readonly MudTheme _theme = Theme.SimulabTheme.Create();
+    private readonly ExamSessionBar _bar = new();
+    private SimulabThemeProvider? _themeProvider;
+
+    [CascadingParameter] public ShellPreferences Preferences { get; set; } = ShellPreferences.Default;
+
+    protected override void OnInitialized()
+    {
+        if (Preferences.DarkMode is { } dark)
+            ThemeState.SetDarkMode(dark);
+        ThemeState.Changed += OnThemeChanged;
+        _bar.Changed += OnBarChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Preferences.DarkMode is null && _themeProvider is not null)
+            ThemeState.SetDarkMode(await _themeProvider.GetSystemDarkModeAsync());
+    }
+
+    private void OnThemeChanged() => InvokeAsync(StateHasChanged);
+
+    private void OnBarChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        ThemeState.Changed -= OnThemeChanged;
+        _bar.Changed -= OnBarChanged;
+    }
+}

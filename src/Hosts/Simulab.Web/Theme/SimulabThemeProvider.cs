@@ -29,6 +29,7 @@ public sealed class SimulabThemeProvider : MudThemeProvider
         themeStringBuilder.AppendLine(culture, $"--app-keycap-info-edge: {edges.Info};");
         themeStringBuilder.AppendLine(culture, $"--app-keycap-error-edge: {edges.Error};");
         themeStringBuilder.AppendLine(culture, $"--app-link: {(dark ? SimulabTheme.DarkLink : SimulabTheme.LightLink)};");
+        themeStringBuilder.AppendLine(culture, $"--app-primary-selected: {(dark ? SimulabTheme.DarkPrimarySelected : SimulabTheme.LightPrimarySelected)};");
         themeStringBuilder.AppendLine(culture, $"--app-brand-name: {(dark ? SimulabTheme.DarkBrandName : SimulabTheme.LightBrandName)};");
     }
 }

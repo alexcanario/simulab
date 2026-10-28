@@ -889,6 +889,52 @@
     </div>
 </section>
 
+@* F-169: the exam simulator's answer area, in each mode, busy, and with a text wider than the row. *@
+<section id="gallery-answer-options" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.AnswerOptions"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.AnswerOptions.Hint"]</MudText>
+    <p class="gallery-state-caption" id="gallery-answer-single-caption">@L["Gallery.AnswerOptions.Single"]</p>
+    <AppAnswerOptions Id="gallery-answer-single" Mode="AppAnswerMode.SingleChoice" Options="AnswerSamples(3)" Selected="_answerSingle"
+                      LabelledBy="gallery-answer-single-caption" OnChange="OnAnswerSingle" />
+    <p class="gallery-state-caption" id="gallery-answer-true-false-caption">@L["Gallery.AnswerOptions.TrueFalse"]</p>
+    <AppAnswerOptions Id="gallery-answer-true-false" Mode="AppAnswerMode.TrueFalse" Options="AnswerTrueFalse" Selected="_answerTrueFalse"
+                      LabelledBy="gallery-answer-true-false-caption" OnChange="OnAnswerTrueFalse" />
+    <p class="gallery-state-caption" id="gallery-answer-multiple-caption">@L["Gallery.AnswerOptions.Multiple"]</p>
+    <AppAnswerOptions Id="gallery-answer-multiple" Mode="AppAnswerMode.Multiple" Options="AnswerSamples(4)" Selected="_answerMultiple"
+                      LabelledBy="gallery-answer-multiple-caption" OnChange="OnAnswerMultiple" />
+    <p class="gallery-state-caption" id="gallery-answer-busy-caption">@L["Gallery.AnswerOptions.Busy"]</p>
+    <AppAnswerOptions Id="gallery-answer-busy" Mode="AppAnswerMode.SingleChoice" Options="AnswerSamples(3)" Selected="AnswerBusySelection" Busy="true"
+                      LabelledBy="gallery-answer-busy-caption" OnChange="OnAnswerSingle" />
+    <p class="gallery-state-caption" id="gallery-answer-long-caption">@L["Gallery.AnswerOptions.Long"]</p>
+    <AppAnswerOptions Id="gallery-answer-long" Mode="AppAnswerMode.SingleChoice" Options="AnswerLong" Selected="_answerLong"
+                      LabelledBy="gallery-answer-long-caption" OnChange="OnAnswerLong" />
+</section>
+
+@* F-169: the answer sheet: blank, answered and current cells, a numbering that jumps, a heading wider than the panel, and the
+   phone's drawer version with its close button. *@
+<section id="gallery-answer-sheet" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.AnswerSheet"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.AnswerSheet.Hint"]</MudText>
+    <div class="gallery-answer-sheet-sample">
+        <AppAnswerSheet Id="gallery-sheet" Sections="GallerySheetSections" Total="8" AnsweredCount="3"
+                        CurrentId="@_answerSheetCurrent" OnSelect="OnSheetSelect" />
+    </div>
+    <p class="gallery-state-caption">@L["Gallery.AnswerSheet.Drawer"]</p>
+    <div class="gallery-answer-sheet-sample">
+        <AppAnswerSheet Id="gallery-sheet-drawer" Sections="GallerySheetSections" Total="8" AnsweredCount="3"
+                        CurrentId="@_answerSheetCurrent" OnSelect="OnSheetSelect" OnClose="@(() => { })" />
+    </div>
+</section>
+
+@* F-169: the one line that tells a saved answer, in each state. *@
+<section id="gallery-save-status" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.SaveStatus"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.SaveStatus.Hint"]</MudText>
+    <AppSaveStatus State="AppSaveState.Saving" />
+    <AppSaveStatus State="AppSaveState.Saved" />
+    <AppSaveStatus State="AppSaveState.Cleared" />
+</section>
+
 @* F-125, UC3: the identity a screen item builds from. The page sets only Variant and Color; the look comes from the kit. *@
 <section id="gallery-buttons" class="gallery-section">
     <MudText Typo="Typo.h2">@L["Gallery.Section.Buttons"]</MudText>
@@ -1034,6 +1080,53 @@
     private static readonly IReadOnlyList<int> _richPositions = [0, 1, 2];
 
     private static string QuestionLetter(int position) => ((char)('A' + position)).ToString();
+
+    // F-169: the answer options, the answer sheet and the save status. Nothing is saved from the gallery: a click only moves the sample.
+    private static readonly Guid[] AnswerSheetCellIds =
+        [.. Enumerable.Range(1, 9).Select(number => Guid.Parse($"00000000-0000-0000-0001-{number:D12}"))];
+
+    private static readonly int[] AnswerBusySelection = [0];
+
+    private IReadOnlyList<int> _answerSingle = [1];
+    private IReadOnlyList<int> _answerTrueFalse = [];
+    private IReadOnlyList<int> _answerMultiple = [0, 2];
+    private IReadOnlyList<int> _answerLong = [];
+    private Guid _answerSheetCurrent = AnswerSheetCellIds[1];
+
+    private void OnAnswerSingle(IReadOnlyList<int> selection) => _answerSingle = selection;
+
+    private void OnAnswerTrueFalse(IReadOnlyList<int> selection) => _answerTrueFalse = selection;
+
+    private void OnAnswerMultiple(IReadOnlyList<int> selection) => _answerMultiple = selection;
+
+    private void OnAnswerLong(IReadOnlyList<int> selection) => _answerLong = selection;
+
+    private void OnSheetSelect(Guid questionId) => _answerSheetCurrent = questionId;
+
+    private IReadOnlyList<AppAnswerOption> AnswerSamples(int count) =>
+        [.. Enumerable.Range(0, count).Select(position => new AppAnswerOption(position, QuestionLetter(position), Text: L["Gallery.AnswerOptions.Sample", position + 1].Value))];
+
+    private IReadOnlyList<AppAnswerOption> AnswerTrueFalse =>
+    [
+        new(0, null, Text: L["Questions.TrueFalse.True"].Value),
+        new(1, null, Text: L["Questions.TrueFalse.False"].Value)
+    ];
+
+    private IReadOnlyList<AppAnswerOption> AnswerLong =>
+    [
+        new(0, QuestionLetter(0), Text: L["Gallery.AnswerOptions.Sample", 1].Value),
+        new(1, QuestionLetter(1), Text: L["Gallery.AnswerOptions.SampleLong"].Value)
+    ];
+
+    private static AppAnswerSheetCell GalleryCell(int number, bool answered) => new(AnswerSheetCellIds[number - 1], number, answered);
+
+    // Number 5 is left out, as an annulled question is: the numbering jumps, and the range still reads 6 to 8.
+    private IReadOnlyList<AppAnswerSheetSection> GallerySheetSections =>
+    [
+        new(L["Gallery.AnswerSheet.SampleSection", 1].Value, null, 1, 4, [GalleryCell(1, true), GalleryCell(2, true), GalleryCell(3, false), GalleryCell(4, false)]),
+        new(L["Gallery.AnswerSheet.SampleLongSection"].Value, null, 6, 8, [GalleryCell(6, true), GalleryCell(7, false), GalleryCell(8, false)]),
+        new(L["Attempt.Section.Other"].Value, null, 9, 9, [GalleryCell(9, false)])
+    ];
 
     private IReadOnlyList<AppRadioCardOption<string>> ScopeCards =>
     [

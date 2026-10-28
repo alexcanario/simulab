@@ -3756,6 +3756,112 @@
           }
         }
       }
+    },
+    "/api/v1/exam-engine/attempts/{id}/content": {
+      "get": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "ReadAttemptContent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptContentResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/exam-engine/attempts/{id}/images/{imageId}": {
+      "get": {
+        "tags": [
+          "ExamEngine"
+        ],
+        "operationId": "OpenAttemptImage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "imageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              },
+              "image/gif": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4013,6 +4119,204 @@
         },
         "description": "The body of an approval (F-105, BR5). The body is optional on the wire: a missing one is an approval with no\r\nnote."
       },
+      "AttemptContentResponse": {
+        "required": [
+          "id",
+          "examEditionId",
+          "status",
+          "startedAt",
+          "sections",
+          "questions"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "examEditionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AttemptStatus"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttemptSectionResponse"
+            }
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttemptQuestionContentResponse"
+            }
+          },
+          "edition": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AttemptEditionResponse"
+              }
+            ]
+          },
+          "submittedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        },
+        "description": "What the student reads to take an attempt (F-169, BR2, BR3): the questions at the versions the attempt fixed, in\r\npaper-number order, the sections they fall in and the edition. Only the owner reads it (BR11). It never carries an\r\nanswer key, an explanation or a rubric. `Edition` is null when the edition no longer exists; `SubmittedAt` is\r\nnull while the attempt is in progress."
+      },
+      "AttemptEditionResponse": {
+        "required": [
+          "examId",
+          "examName",
+          "organizerName",
+          "organizerAcronym",
+          "noticeYear"
+        ],
+        "type": "object",
+        "properties": {
+          "examId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "examName": {
+            "type": "string"
+          },
+          "organizerName": {
+            "type": "string"
+          },
+          "organizerAcronym": {
+            "type": "string"
+          },
+          "noticeYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "position": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "contentLanguage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "The edition an attempt belongs to, as the simulator's bar names it. `ContentLanguage` is the exam's, or the first\r\nquestion's when the exam is no longer published; null when neither is known."
+      },
+      "AttemptOptionResponse": {
+        "required": [
+          "position",
+          "textHtml"
+        ],
+        "type": "object",
+        "properties": {
+          "position": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "textHtml": {
+            "type": "string"
+          }
+        },
+        "description": "One option of a question version: its position, counted from 0 as an answer names it, and its text."
+      },
+      "AttemptQuestionContentResponse": {
+        "required": [
+          "questionId",
+          "paperNumber",
+          "versionNumber",
+          "type",
+          "contentLanguage",
+          "statementHtml",
+          "options"
+        ],
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paperNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "versionNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AttemptQuestionType"
+          },
+          "contentLanguage": {
+            "type": "string"
+          },
+          "statementHtml": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttemptOptionResponse"
+            }
+          },
+          "baseTextHtml": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "noticeSubjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "answer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AnswerPayload"
+              }
+            ]
+          }
+        },
+        "description": "One question of an attempt as the student reads it, at the version fixed at the start (F-169, BR2). The HTML is the\r\nsanitized text as stored, with its picture addresses pointing at the attempt. `Answer` is null while it is blank."
+      },
       "AttemptQuestionResponse": {
         "required": [
           "questionId",
@@ -4070,6 +4374,60 @@
           "Essay"
         ],
         "description": "How a question of an attempt is answered. A copy of the question bank's own list, because a contracts project\r\nreads the shared kernel only; a test keeps the two lists equal (F-166, BR5)."
+      },
+      "AttemptSectionResponse": {
+        "required": [
+          "firstPaperNumber",
+          "lastPaperNumber",
+          "questionIds"
+        ],
+        "type": "object",
+        "properties": {
+          "firstPaperNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "lastPaperNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "noticeSubjectId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "label": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "A section of the paper (F-169, BR3): the questions of one notice subject, in paper-number order, with the lowest and\r\nhighest paper number among them. A null `NoticeSubjectId` is the last section, of the questions with none."
+      },
+      "AttemptStatus": {
+        "enum": [
+          "InProgress",
+          "Submitted"
+        ],
+        "description": "Where an attempt is (F-166, BR6). Pause, abandoned and automatic submit arrive with the timer."
       },
       "BlankTextPayload": {
         "type": "object",
@@ -4268,6 +4626,44 @@
           }
         },
         "description": "Asks whether a reset link still works, without using it (F-7, decision: the page checks on load)."
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       },
       "PublishQuestionRequest": {
         "type": "object",
@@ -5152,6 +5548,10 @@
           }
         },
         "description": "What starts an attempt (F-166, UC1): the published edition to take."
+      },
+      "Stream": {
+        "type": "string",
+        "format": "binary"
       },
       "SystemInfoResponse": {
         "required": [

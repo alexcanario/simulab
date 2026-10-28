@@ -810,6 +810,67 @@
   <data name="exam_attempt.text_too_long" xml:space="preserve"><value>O texto excede o limite da questão.</value></data>
   <data name="exam_attempt.answer_empty" xml:space="preserve"><value>Escreva ou escolha uma resposta.</value></data>
   <data name="exam_attempt.entry_repeated" xml:space="preserve"><value>Um item ou uma lacuna foi respondido duas vezes. Mantenha uma resposta para cada.</value></data>
+  <data name="Catalog.Editions.Take" xml:space="preserve"><value>Fazer esta simulação</value></data>
+  <data name="Catalog.Editions.Take.Name" xml:space="preserve"><value>Fazer esta simulação: {0}</value></data>
+  <data name="Catalog.Editions.TakeFailed" xml:space="preserve"><value>Não foi possível iniciar a simulação. Tente novamente.</value></data>
+  <data name="Attempt.Leave" xml:space="preserve"><value>Sair e continuar mais tarde</value></data>
+  <data name="Attempt.PageTitle" xml:space="preserve"><value>Questão {0} · {1}</value></data>
+  <data name="Attempt.Section.Range" xml:space="preserve"><value>Questões {0} a {1}</value></data>
+  <data name="Attempt.Section.Other" xml:space="preserve"><value>Outras</value></data>
+  <data name="Attempt.Question.Title" xml:space="preserve"><value>Questão {0}</value></data>
+  <data name="Attempt.Question.Position" xml:space="preserve"><value>{0} de {1}</value></data>
+  <data name="Attempt.Question.BaseText" xml:space="preserve"><value>Texto-base</value></data>
+  <data name="Attempt.Question.SingleHint" xml:space="preserve"><value>Marque uma alternativa. Clique nela novamente para a limpar.</value></data>
+  <data name="Attempt.Question.TrueFalseHint" xml:space="preserve"><value>Julgue a afirmação. Clique novamente na sua escolha para a limpar.</value></data>
+  <data name="Attempt.Question.MultipleHint" xml:space="preserve"><value>Assinale todas as alternativas corretas. Desmarque-as todas para limpar a resposta.</value></data>
+  <data name="Attempt.Question.NotYetSupported" xml:space="preserve"><value>Este tipo de resposta ainda não está no simulador. A questão fica em branco e conta como em branco.</value></data>
+  <data name="Attempt.Save.Saving" xml:space="preserve"><value>A guardar…</value></data>
+  <data name="Attempt.Save.Saved" xml:space="preserve"><value>Resposta guardada</value></data>
+  <data name="Attempt.Save.Cleared" xml:space="preserve"><value>Resposta apagada</value></data>
+  <data name="Attempt.Save.Failed" xml:space="preserve"><value>A sua resposta não foi guardada. A questão voltou ao que estava; marque novamente.</value></data>
+  <data name="Attempt.Nav.Previous" xml:space="preserve"><value>Anterior</value></data>
+  <data name="Attempt.Nav.Next" xml:space="preserve"><value>Seguinte</value></data>
+  <data name="Attempt.AnswerSheet.Title" xml:space="preserve"><value>Folha de respostas</value></data>
+  <data name="Attempt.AnswerSheet.Open" xml:space="preserve"><value>Folha de respostas ({0} de {1} respondidas)</value></data>
+  <data name="Attempt.AnswerSheet.Close" xml:space="preserve"><value>Fechar a folha de respostas</value></data>
+  <data name="Attempt.AnswerSheet.Progress" xml:space="preserve"><value>{0} de {1} respondidas</value></data>
+  <data name="Attempt.AnswerSheet.Answered" xml:space="preserve"><value>Respondida</value></data>
+  <data name="Attempt.AnswerSheet.Blank" xml:space="preserve"><value>Em branco</value></data>
+  <data name="Attempt.AnswerSheet.Current" xml:space="preserve"><value>Atual</value></data>
+  <data name="Attempt.AnswerSheet.SectionRange" xml:space="preserve"><value>{0}–{1}</value></data>
+  <data name="Attempt.AnswerSheet.CellName" xml:space="preserve"><value>Questão {0}: {1}</value></data>
+  <data name="Attempt.Submit.Action" xml:space="preserve"><value>Submeter prova</value></data>
+  <data name="Attempt.Submit.Title" xml:space="preserve"><value>Submeter a prova?</value></data>
+  <data name="Attempt.Submit.Blanks" xml:space="preserve"><value>{0} questões estão em branco: {1}.</value></data>
+  <data name="Attempt.Submit.OneBlank" xml:space="preserve"><value>1 questão está em branco: {0}.</value></data>
+  <data name="Attempt.Submit.NoBlank" xml:space="preserve"><value>Nenhuma questão está em branco.</value></data>
+  <data name="Attempt.Submit.Final" xml:space="preserve"><value>Depois de submeter, não pode alterar as suas respostas.</value></data>
+  <data name="Attempt.Submit.Submitting" xml:space="preserve"><value>A submeter…</value></data>
+  <data name="Attempt.Submit.Failed" xml:space="preserve"><value>A prova não foi submetida. As suas respostas continuam guardadas; tente novamente.</value></data>
+  <data name="Attempt.Load.Failed" xml:space="preserve"><value>Não foi possível carregar a prova.</value></data>
+  <data name="Attempt.Submitted.Title" xml:space="preserve"><value>Prova submetida</value></data>
+  <data name="Attempt.Submitted.Message" xml:space="preserve"><value>As suas respostas de {0} foram submetidas em {1} às {2}.</value></data>
+  <data name="Attempt.Submitted.MessageNoEdition" xml:space="preserve"><value>As suas respostas foram submetidas em {0} às {1}.</value></data>
+  <data name="Attempt.Submitted.Answered" xml:space="preserve"><value>Respondidas</value></data>
+  <data name="Attempt.Submitted.Blank" xml:space="preserve"><value>Em branco</value></data>
+  <data name="Attempt.Submitted.BackToEdition" xml:space="preserve"><value>Voltar à prova</value></data>
+  <data name="Attempt.Submitted.LoadFailed" xml:space="preserve"><value>Não foi possível carregar a prova submetida.</value></data>
+  <data name="Gallery.Section.AnswerOptions" xml:space="preserve"><value>Alternativas de resposta</value></data>
+  <data name="Gallery.AnswerOptions.Hint" xml:space="preserve"><value>A área de resposta de uma questão de alternativas: uma de uma lista, certo ou errado, ou qualquer quantidade. Assinalar guarda; clique novamente numa linha assinalada para a limpar.</value></data>
+  <data name="Gallery.AnswerOptions.Single" xml:space="preserve"><value>Uma alternativa</value></data>
+  <data name="Gallery.AnswerOptions.TrueFalse" xml:space="preserve"><value>Certo ou errado</value></data>
+  <data name="Gallery.AnswerOptions.Multiple" xml:space="preserve"><value>Várias alternativas</value></data>
+  <data name="Gallery.AnswerOptions.Busy" xml:space="preserve"><value>A guardar (o grupo fica ocupado e ignora cliques)</value></data>
+  <data name="Gallery.AnswerOptions.Long" xml:space="preserve"><value>Um texto longo de alternativa quebra a linha</value></data>
+  <data name="Gallery.AnswerOptions.Sample" xml:space="preserve"><value>Alternativa de exemplo {0}</value></data>
+  <data name="Gallery.AnswerOptions.SampleLong" xml:space="preserve"><value>Um texto de alternativa muito longo que não cabe numa linha e tem de quebrar dentro da linha sem cortar as palavras nem alargar a página além da coluna, mesmo quando há uma palavra muito comprida: pneumoultramicroscopicossilicovulcanoconiose.</value></data>
+  <data name="Gallery.Section.AnswerSheet" xml:space="preserve"><value>Folha de respostas</value></data>
+  <data name="Gallery.AnswerSheet.Hint" xml:space="preserve"><value>Os números de uma tentativa agrupados por secção. Uma célula está em branco, respondida ou é a atual. No telemóvel aparece numa gaveta, com botão de fechar.</value></data>
+  <data name="Gallery.AnswerSheet.Drawer" xml:space="preserve"><value>Com botão de fechar (a gaveta do telemóvel)</value></data>
+  <data name="Gallery.AnswerSheet.SampleSection" xml:space="preserve"><value>Secção de exemplo {0}</value></data>
+  <data name="Gallery.AnswerSheet.SampleLongSection" xml:space="preserve"><value>Um título de secção tão longo que tem de quebrar para uma segunda linha no painel estreito da folha de respostas</value></data>
+  <data name="Gallery.Section.SaveStatus" xml:space="preserve"><value>Estado da gravação</value></data>
+  <data name="Gallery.SaveStatus.Hint" xml:space="preserve"><value>Uma linha discreta sob a resposta: a guardar, guardada, apagada. Sem snackbar a cada gravação.</value></data>
   <data name="question.topic_not_found" xml:space="preserve"><value>O tópico já não existe. Escolha outro.</value></data>
   <data name="question.statement_required" xml:space="preserve"><value>Escreva o enunciado.</value></data>
   <data name="question.statement_too_long" xml:space="preserve"><value>O enunciado excede 10 000 caracteres.</value></data>

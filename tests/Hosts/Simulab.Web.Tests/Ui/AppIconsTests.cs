@@ -65,6 +65,15 @@ public class AppIconsTests
         AppIcons.Link.Should().Be(Icons.Material.Outlined.Link, "the link button reuses the existing constant");
     }
 
+    // F-169: the start action of an edition, the answer sheet and the check of an answered cell.
+    [Fact]
+    public void AppIcons_ExamSimulator_AreTheOutlinedIconsTheItemNames()
+    {
+        AppIcons.StartAttempt.Should().Be(Icons.Material.Outlined.PlayCircle);
+        AppIcons.AnswerSheet.Should().Be(Icons.Material.Outlined.GridView);
+        AppIcons.Check.Should().Be(Icons.Material.Outlined.Check);
+    }
+
     [Fact]
     public void AppIcons_SemanticNames_CoverTheKitActions()
     {

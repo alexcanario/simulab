@@ -40,6 +40,8 @@ public static class ExamEngineModule
         services.AddScoped<SaveAnswerHandler>();
         services.AddScoped<ClearAnswerHandler>();
         services.AddScoped<SubmitAttemptHandler>();
+        services.AddScoped<GetAttemptContentHandler>();
+        services.AddScoped<OpenAttemptImageHandler>();
 
         // F-167: the module's part of an account erasure and of the file a user downloads.
         services.AddScoped<EraseStudentTextsHandler>();

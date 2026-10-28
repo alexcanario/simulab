@@ -1,0 +1,26 @@
+@inject IStringLocalizer<SharedResources> L
+
+@* F-169: the one line that tells a saved answer. A polite live region that is in the page from the start, empty: only its
+   content changes, so a screen reader hears "Saving…", then "Answer saved". No snackbar per save. *@
+<div class="app-save-status" role="status">
+    @switch (State)
+    {
+        case AppSaveState.Saving:
+            @* The library's progress renders an unnamed progressbar: hidden, the words beside it say it all. *@
+            <span class="app-save-status-spinner" aria-hidden="true"><MudProgressCircular Size="Size.Small" Indeterminate="true" /></span>
+            <span>@L["Attempt.Save.Saving"]</span>
+            break;
+        case AppSaveState.Saved:
+            <MudIcon Icon="@AppIcons.Check" Size="Size.Small" Color="Color.Success" aria-hidden="true" />
+            <span>@L["Attempt.Save.Saved"]</span>
+            break;
+        case AppSaveState.Cleared:
+            <MudIcon Icon="@AppIcons.Check" Size="Size.Small" Color="Color.Success" aria-hidden="true" />
+            <span>@L["Attempt.Save.Cleared"]</span>
+            break;
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public AppSaveState State { get; set; }
+}

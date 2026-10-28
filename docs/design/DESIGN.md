@@ -143,6 +143,9 @@ color:
   link:
     light: "#1D64A8"
     dark: "#8CC4F5"
+  primarySelected:
+    light: "#D1E4FE"
+    dark: "#1A4583"
   brandName:
     light: "#0F3266"
     dark: "#F2F5FB"
@@ -208,7 +211,7 @@ Keys on a calm page. A pale grey page with white cards (light) or a deep navy pa
 ## Colors by role
 The token names are the MudBlazor palette property names in camelCase. Every pair was measured by `ThemePaletteTests`, `ThemeContrastTests` and `KeycapContrastTests`: text at 4.5:1 or more; icons, field borders, the fill of a filled button against the page and the surface, and the focus ring at 3:1 or more.
 
-- **Primary** (`primary`, `primaryContrastText`, `primaryDarken`, `primaryLighten`): the brand navy `#0F3266` in light, the blue `#47A0EB` in dark (navy reads 1.26:1 on the dark page). The filled primary button, the selected item. White text in light, ink in dark. It is a fill, not a text colour: text in blue is the link role. `primaryLighten` is the tint blue of informative highlights.
+- **Primary** (`primary`, `primaryContrastText`, `primaryDarken`, `primaryLighten`): the brand navy `#0F3266` in light, the blue `#47A0EB` in dark (navy reads 1.26:1 on the dark page). The filled primary button, the selected item. White text in light, ink in dark. It is a fill, not a text colour: text in blue is the link role. `primaryLighten` is the tint blue of informative highlights. `primarySelected` (`#D1E4FE` / `#1A4583`) is the fill of a marked answer: always with a 2 px `primary` border, so the state is never colour alone; `SimulabThemeProvider` writes it as `--app-primary-selected`.
 - **Info** (`info`, `infoContrastText`, `infoDarken`): the brand blue of the Alt key, `#2478C5` / `#47A0EB`. The focus ring and informational alerts.
 - **Link** (`link`): `#1D64A8` / `#8CC4F5`, the text button and every link. MudBlazor's palette has no slot for it, so `SimulabThemeProvider` writes it as `--app-link`.
 - **Secondary and success** (`secondary*`, `success*`): the brand teal `#1A9E8C` of the Ctrl key, in both themes. Text on it is ink, never white (white reads 3.3:1).

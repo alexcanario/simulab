@@ -4,14 +4,14 @@ using System.Text.Json;
 namespace Simulab.ExamEngine.Tests;
 
 /// <summary>
-/// F-166 AC21: the OpenAPI document lists the five routes and answers 200 (a struct default in a contract makes it
-/// answer 500).
+/// F-166 AC21 and F-169 AC18: the OpenAPI document lists the seven routes and answers 200 (a struct default in a contract
+/// makes it answer 500).
 /// </summary>
 public sealed class ExamEngineContractTests : ExamEngineApiTests
 {
-    // AC21
+    // F-166 AC21, F-169 AC18
     [Fact]
-    public async Task TheOpenApiDocument_Answers200_AndListsTheFiveAttemptRoutes()
+    public async Task TheOpenApiDocument_Answers200_AndListsTheSevenAttemptRoutes()
     {
         var response = await Client().GetAsync("/openapi/v1.json");
 
@@ -27,7 +27,9 @@ public sealed class ExamEngineContractTests : ExamEngineApiTests
             "GET /api/v1/exam-engine/attempts/{id}",
             "PUT /api/v1/exam-engine/attempts/{id}/answers/{questionId}",
             "DELETE /api/v1/exam-engine/attempts/{id}/answers/{questionId}",
-            "POST /api/v1/exam-engine/attempts/{id}/submit"
+            "POST /api/v1/exam-engine/attempts/{id}/submit",
+            "GET /api/v1/exam-engine/attempts/{id}/content",
+            "GET /api/v1/exam-engine/attempts/{id}/images/{imageId}"
         ]);
     }
 }

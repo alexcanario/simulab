@@ -21,6 +21,11 @@ public static class SimulabTheme
 
     public static string DarkLink => "#8CC4F5";
 
+    /// <summary>The fill of a marked answer (F-169): <see cref="SimulabThemeProvider"/> writes it as <c>--app-primary-selected</c>.</summary>
+    public static string LightPrimarySelected => "#D1E4FE";
+
+    public static string DarkPrimarySelected => "#1A4583";
+
     /// <summary>The brand name in the app bar, also the plus signs of the action shortcut: navy in light, ink in dark (BR9).</summary>
     public static string LightBrandName => "#0F3266";
 
