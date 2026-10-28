@@ -222,6 +222,7 @@ Tests locked: 785b1b7d63a379e25de3bc296656b49a4206554f (4 files); unlocks: 0
 
 - 2026-10-28 question — asked 3, from context 5
 - 2026-10-28 override — Size: kept whole over split (6.3 vs 6.8)
+- 2026-10-28 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.403/Microsoft.Common.CurrentVersion.targets, 1 red
 
 ## Delivery
 - Branch: feature/F-183
