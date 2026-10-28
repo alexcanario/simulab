@@ -51,8 +51,13 @@ Um banco novo já traz as 60 questões de múltipla escolha da prova de 2026 da 
 (Instituto Consulplan, caderno tipo 1, gabarito definitivo), na edição **CONSULPLAN · Guarda Municipal · 2026**,
 numeradas como na prova e com tópico, disciplina do edital e gabarito. As questões 01 a 08 usam o texto-base
 "Calma, gente", as questões 16 e 17 trazem as imagens da prova, e a questão 47 vem anulada, como a banca fez.
-A redação da prova não vem junto. Essas questões são como as outras: dá para alterar, despublicar, anular ou
-excluir, e a mudança fica. Quando a edição já tinha alguma questão, ou foi excluída, nada é trazido.
+A redação da prova vem como a questão 61, do tipo Essay (redação): publicada, com os três textos motivadores como
+texto-base, o tema no enunciado, limite de 20 a 30 linhas e a grade da banca como rubric (critérios de correção,
+20 pontos no total). Nos três últimos critérios (estrutura sintática, morfossintaxe e desvios) a pontuação é a que
+se mantém quando não há erro, e a descrição diz quanto se desconta por erro: 0,50 na estrutura sintática e 0,25 nos
+outros dois. Essas questões são como as outras: dá para alterar, despublicar, anular ou excluir, e a mudança fica.
+Quando a edição já tinha alguma questão, ou foi excluída, nada é trazido; a redação só deixa de vir se o número 61
+já estiver em uso.
 
 ### Escrever uma questão
 1. Escolha **Adicionar**. O primeiro campo, **Tipo de questão**, oferece **Múltipla escolha** (o padrão),
