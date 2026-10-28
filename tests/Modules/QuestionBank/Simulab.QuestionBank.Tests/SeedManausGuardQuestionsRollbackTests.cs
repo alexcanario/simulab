@@ -42,7 +42,7 @@ public sealed class SeedManausGuardQuestionsRollbackTests : QuestionBankApiTests
 
         await migrator.MigrateAsync();
 
-        (await CountAsync($"SELECT count(*) FROM question_bank.questions WHERE exam_edition_id = '{SeedManausGuardQuestionsTests.Manaus}'"))
+        (await CountAsync($"SELECT count(*) FROM question_bank.questions WHERE exam_edition_id = '{SeedManausGuardQuestionsTests.Manaus}' AND type <> 'Essay'"))
             .Should().Be(SeedManausGuardQuestionsTests.Expected.Length);
         (await GetAsync(curator, edited)).StatementHtml.Should().Be(EditedStatement);
 
