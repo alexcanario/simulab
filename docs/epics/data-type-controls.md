@@ -2,7 +2,7 @@
 epic: data-type-controls
 status: agreed
 board: 250
-Autopilot: F-183 stop 1 (2026-10-28)
+Autopilot: F-183 approved (2026-10-28)
 ---
 # Data type controls
 
@@ -26,7 +26,7 @@ Every data type has one input control, one display formatter and one table colum
 |---|---|---|---|---|---|---|---|---|
 | F-181 | Number controls: integer, decimal, score and year | Points, cut-offs, counts and years are typed as numbers in the user's culture | Must | L | F-168 | - | no | idea |
 | F-182 | Duration and numeric range controls | Exam duration is one field; answer size is one range | Must | M | F-181, F-168 | - | no | idea |
-| F-183 | Text kind controls: text area, e-mail, URL, code, one-time code, search | Identity and catalog fields stop repeating their setup page by page | Must | L | - | - | no | refining |
+| F-183 | Text kind controls: text area, e-mail, URL, code, one-time code, search | Identity and catalog fields stop repeating their setup page by page | Must | L | - | - | no | approved |
 | F-184 | Choice controls: switch, segmented, yes/no, level, language | Difficulty shows as a level, settings apply at once, yes/no/unset is one control | Must | L | - | - | yes | idea |
 | F-185 | Date range and relative time | Period filters take a custom range; audit lists say "3 days ago" | Should | M | - | - | no | idea |
 | F-186 | Data type controls enforced by the build | A page cannot go back to `InputType.Number` or a raw MudBlazor picker | Must | S | F-181, F-182, F-183, F-184, F-185 | - | no | idea |
