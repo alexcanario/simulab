@@ -1,7 +1,7 @@
 ---
 feature: F-169
 epic: Exam Simulator
-status: validating
+status: done
 board: 235
 version: 2
 ---
@@ -10,9 +10,9 @@ version: 2
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-27)
-- Stopped at: Review fixed (3fba187); scan GREEN after the fixes; status validating; owner ticked steps 1, 2.1, 2.2
-- Next action: Owner follows the validation script from step 3 and says it passed; then /agile:ship F-169
+- Status: done (2026-10-28)
+- Stopped at: Shipped: merged as 78e3ae8c, version 1.26.0, board closed
+- Next action: Nothing: done
 - Waiting on: nothing
 
 ## Summary
@@ -473,3 +473,39 @@ Necessário para validar: o app host rodando a partir deste worktree no banco pr
 - 2026-10-27 rework — review 3: unused `QuestionVersionContent.Type` removed
 
 ## Delivery
+Gate time: 12 passes, 56 min 55 s — turn 3 (2 min 29 s), ship 5 (37 min 41 s), scan 4 (16 min 45 s); 2 red
+Usage: 21358.7k weighted (estimate) — refine 24% · build 48% · review 8% · ship 9% · other 11% — agents 28% — context per turn 230k → 244k — 4 sessions, 484 turns
+- Branch: `feature/F-169`, merged with `--no-ff` as `78e3ae8c` (2026-10-28), version 1.26.0.
+- Tests: `gate.js ship` GREEN on the merged tree, 5745 tests in 15 projects, 0 failures, 0 new warnings, 42 s build and 533 s test run (over the 5 min budget). `agile scan GREEN`; tests lock unchanged (0 unlocks); `Criterion → test`: 20 rows, 43 named tests, all found.
+- Manual: new page `docs/manual/pt-BR/take-exam.md` (frozen copies in `pt-PT` and `en`); `catalog.md` and `index.md` updated.
+- Validated by the owner in the conversation ("validado", 2026-10-28).
+- Validation evidence:
+```
+1. [x] (2026-10-27) Em um terminal, na raiz deste worktree (`D:\wt\simulab\f-169-take-exam-edition`), inicie o app host no banco próprio do item e deixe aberto → o endereço do dashboard do Aspire (a página que lista as partes do app e seus logs) aparece impresso; `https://localhost:7125` responde.
+2. Crie o aluno (este banco é novo, então ainda não há conta).
+   [x] 2.1 (2026-10-27) Abra `https://localhost:7125/sign-up`, preencha e-mail, senha e nome, marque "tenho 18 anos ou mais", os termos e a política de privacidade, e envie → a página diz que a conta foi criada e que um e-mail de confirmação foi enviado.
+   [x] 2.2 (2026-10-27) Abra o Mailpit (a caixa de e-mail local; o endereço é a entrada `mailpit` na lista de recursos do dashboard do Aspire), abra a mensagem desse e-mail e clique no link → a página `verify-email` diz que o e-mail foi confirmado. Entre com essa conta.
+3. Comece a prova: menu lateral esquerdo > Estudar > Catálogo > "Guarda Municipal de Manaus" (`/catalog/exams/{id}`).
+   [ ] 3.1 not tested
+   [ ] 3.2 not tested
+4. Responda e navegue.
+   [ ] 4.1 not tested
+   [ ] 4.2 not tested
+   [ ] 4.3 not tested
+5. Saia e volte.
+   [ ] 5.1 not tested
+   [ ] 5.2 not tested
+6. Teclado, idioma e celular.
+   [ ] 6.1 not tested
+   [ ] 6.2 not tested
+   [ ] 6.3 not tested
+7. Envie.
+   [ ] 7.1 not tested
+   [ ] 7.2 not tested
+   [ ] 7.3 not tested
+8. Quem pode abrir: copie o endereço da tentativa, saia e entre como `admin@simulab.local`.
+   [ ] 8.1 not tested
+   [ ] 8.2 not tested
+Evidence: 3 of 18 tested
+```
+(The untested paths keep their text in `## Validation script`.)
