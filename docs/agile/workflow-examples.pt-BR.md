@@ -4466,7 +4466,7 @@ Você usa o Copilot CLI e quer o ciclo nele. A seção "Usar no Copilot CLI" do 
 O check confere que a tabela e o repositório contam o mesmo. Esta é a saída real dele, sobre os arquivos do plugin desta versão:
 
 ```
-ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (41)
+ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (42)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (8)
 ok   AC5: the report states the skills (26) and the agents (8)
@@ -7722,3 +7722,144 @@ Resultado
 O texto do arquivo não é gravado nem vai para o log: só o tema guardado, com as cores que passaram, vai para o `localStorage`, na chave `appearance.themes`. "Night Owl" entra na lista de temas claros sem recarregar. Importado de novo, vira `night-owl-2`, "Night Owl (2)". Escolhido como preferido, pinta desde a primeira pintura, até numa página estática, pela cópia `appearance.css` e pelo `appearance.js`, que não mudou.
 
 Duas abas não perdem a mudança uma da outra, porque cada gravação relê a chave. Se alguém editar `appearance.themes` pelas ferramentas do navegador e puser uma cor `red`, a próxima carga descarta o que a importação recusaria e mostra um aviso com o número descartado.
+
+### 14.205 Uma rodada do `/agile:refine` com uma decisão tirada das regras, uma assumida e um cartão só
+
+O app web da acme-shop (`Profile: web-app`) tem em `.claude/rules/agile/project.md` a regra "Só o gerente cria e edita preços e cupons". O item "Desconto por cupom" precisa de três respostas: quem cria um cupom, a ordem dos campos do formulário e o desconto máximo de um cupom.
+
+A primeira resposta está na regra: é aplicada, sem pergunta. As outras duas ganham um id do catálogo e passam pelo script:
+
+```
+autonomy.js check field-order
+DELEGATED field-order (profile web-app)
+autonomy.js check business-limit
+RESERVED business-limit (unknown)
+```
+
+A primeira mensagem da rodada traz as duas listas, fora de qualquer bloco de pergunta, antes do cartão:
+
+```
+Taken from rules: só o gerente cria e edita cupons (.claude/rules/agile/project.md)
+Assumed, not asked: código, desconto, validade, nessa ordem (field-order)
+```
+
+e um cartão só, com a pergunta reservada:
+
+```
+Desconto máximo de um cupom?
+  1. 30% (Recommended) — a margem média do catálogo é 35%
+  2. 50%
+  3. Sem limite
+```
+
+Você responde 1. No resumo da aprovação as duas listas aparecem de novo; você escreve "a ordem é desconto, código, validade; aprovo F-31". A ordem muda e as linhas de `## Decisions` ficam:
+
+```
+- 2026-10-27: Só o gerente cria e edita cupons — confirmed: .claude/rules/agile/project.md
+- 2026-10-27: Os campos vêm na ordem desconto, código, validade — asked
+- 2026-10-27: O desconto máximo de um cupom é 30% — asked
+```
+
+A rodada escreve o evento `question` `asked 1, from context 1` e o `assumed` `1 answers`; um `override` registra a ordem que você mudou.
+
+### 14.206 O `/agile:sync` aplica as cópias e as notas sem perguntar e faz um cartão só da mesclagem do perfil
+
+O acme-shop é um app do perfil `web-app`, sincronizado pela última vez na 0.190.0; o plugin está na 0.196.0. Você digita `/agile:sync`. Antes de montar a tabela, o sync pergunta à política quem decide as duas categorias que ele usa (a saída do script na pasta do acme-shop, sem a linha `- Autonomy:`):
+
+```
+DELEGATED plugin-copy (base)
+DELEGATED docs-commit (base)
+```
+
+As duas são do Claude. O plano acha um arquivo `update` (`.claude/rules/agile/git.md`, que você nunca editou), um `new` (`.claude/rules/agile/autonomy.md`), uma nota ⏳ do `retro-log.md` que o plugin já entregou e o `docs/agile/profile.md`, que você editou e cuja versão do plugin mudou. O sync copia os dois arquivos, marca a nota com ✅ e mostra, antes de qualquer cartão e fora de um bloco de pergunta:
+
+```
+Applied, not asked
+| # | What | Category | Where |
+|---|------|----------|-------|
+| 1 | update: .claude/rules/agile/git.md | plugin-copy | .claude/rules/agile/git.md |
+| 2 | new: .claude/rules/agile/autonomy.md | plugin-copy | .claude/rules/agile/autonomy.md |
+| 3 | nota ⏳ entregue marcada ✅ (agile-canary#318, 0.190.2) | plugin-copy | docs/agile/retro-log.md |
+```
+
+A tabela vem antes de qualquer cartão. Sobra uma decisão que a política guarda com você, a mesclagem do perfil que você editou:
+
+> ❓ **Pergunta**
+> O `docs/agile/profile.md` é seu e o plugin mudou a seção `## Autonomy` dele. Mesclo a seção nova mantendo as suas linhas?
+> a) Sim, mesclar e mostrar o resultado antes de gravar
+> b) Deixar como está
+> **Recomendação:** a). **Motivo:** a mesclagem é de um arquivo que você editou e fica com você; a seção nova só soma linhas.
+
+Você responde a). O sync mescla e grava; só então vem o commit `chore: sync with agile@canary 0.196.0` na `main`, sem pergunta (digitar o comando autoriza; sem push). A linha final fecha a tabela:
+
+```
+Committed 3f9a1c2; git revert 3f9a1c2 undoes it.
+```
+
+O retro-log do acme-shop recebe a entrada do sync com cada linha aplicada no formato `<o quê> — assumed: plugin-copy (base)`. Se você quiser o cartão de volta para as cópias, escreva no `CLAUDE.md`, sob `## Profile`, a linha `- Autonomy: reserve plugin-copy`: o sync passa a perguntar por linha, como antes, e as outras categorias seguem do Claude.
+
+### 14.207 O `/agile:epic` com mais de 5 features: o padrão repetido vira uma feature e o cartão agrupa o resto
+
+O épico "Controles por tipo de dado" do acme-lab já tem F-40 "Tipo texto", `done`. O texto pede 8 controles de entrada do mesmo padrão (número, data, hora, moeda, percentual, CEP, telefone, e-mail) e mais "Validação no servidor", "Máscara por idioma", "Importar valores", "Histórico de alterações" e "Exportar valores".
+
+Você digita `/agile:epic "Controles por tipo de dado"`. Os 8 controles viram uma feature só, "Controles de entrada por tipo": repetição não é tamanho. Com F-40, a tabela teria 7 linhas, mais que o limite de 5. Antes do seu acordo vem um cartão:
+
+> ❓ **Pergunta**
+> São 7 features e o épico comporta 5, contando F-40. Como seguimos?
+> a) Agrupar mais: a máscara entra nos controles; importar e exportar viram "Importar e exportar valores"
+> b) Mover o resto para um épico seguinte: histórico e exportar vão para um épico `draft` novo, sem número
+> **Recomendação:** a). **Motivo:** cada junção é do mesmo padrão ou do mesmo arquivo, e nenhuma passa de L.
+
+Você responde a). A tabela fica com 5 linhas: F-40, "Controles de entrada por tipo", "Validação no servidor", "Importar e exportar valores" e "Histórico de alterações". As duas features agrupadas levam no `## Start` a linha:
+
+```
+- Grouped at breakdown (2026-10-27)
+```
+
+No `/agile:refine` de "Controles de entrada por tipo", se o Claude julgar a feature L, o cartão de tamanho recomenda **Manter inteiro**, porque o agrupamento foi escolha sua. Se você tivesse respondido b), o arquivo `docs/epics/controles-por-tipo-de-dado-2.md` nasceria `draft`, com as duas linhas sem id; o `/agile:epic` dele as registra depois.
+
+### 14.208 O estado do run de um `/agile:resolve`: as etapas na lista de tarefas e o debrief
+
+O acme-shop roda `/agile:resolve acme/shop#41`, a issue em que você pediu a exportação de pedidos. A execução cria o estado do run logo depois de ler a issue, e a sessão mostra as oito etapas como lista de tarefas; Breakdown e Foundation já entram como puladas, porque a issue é um item só:
+
+```
+☑ Briefing
+☑ Breakdown (skipped)
+☑ Foundation (skipped)
+☑ Slices
+▶ Hardening
+☐ Docs
+☐ Handover
+☐ Debrief
+```
+
+Você pergunta onde o run está, e o Claude lê o estado em vez de lembrar:
+
+```
+acme/shop#41 (item)
+    Briefing (done)
+    Breakdown (skipped)
+    Foundation (skipped)
+    Slices (done)
+  > Hardening (current)
+    Docs (pending)
+    Handover (pending)
+    Debrief (pending)
+  activity: F-12 build, test phase
+  F-12 built, attempts 1 [feature/F-12]
+  run file: none
+agile resolve-state SHOW: acme/shop#41 stage Hardening, 1 features, 0 events, 0 sessions
+```
+
+A linha `Autopilot:` do item, na worktree da F-12, é reescrita a partir do estado (`Autopilot: built`). Na parada 2 chega a notificação `acme/shop#41: validar a F-12`, depois do comentário de validação na issue. Depois do seu `validado e autorizo o merge de F-12` e do ship, o debrief aparece no chat e no comentário de entrega:
+
+```
+**Debrief do run**
+- Tentativas por feature: F-12 1 (reviewer 1, vermelhos do gate 1)
+- Escalações: 0
+- Tokens por papel: desconhecido
+- Perguntas: 2 feitas, 5 respondidas pelo contexto
+agile resolve-state DEBRIEF: acme/shop#41 1 features, 0 escalations, tokens unknown
+```
+
+Os tokens saem `desconhecido` quando a transcrição da sessão não está na máquina; nada é estimado. Duas perguntas feitas contra cinco respondidas pelo contexto mostram quanto o projeto já responde sozinho.

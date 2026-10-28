@@ -94,7 +94,7 @@ Technical terms: [glossary](../glossary.md)
 <!-- test-lock.js lock (the test phase of /agile:build) writes `Tests locked: <sha> (<n> files); unlocks: <n>` itself, right under the heading of this section. -->
 
 ## Decisions
-<!-- date — decision — reason — source. Technical decisions made by Claude are recorded here too. The source: `asked`, `confirmed: <path or item id>` or `changed: <old rule> (<where>)` (references/decisions.md in the plugin). -->
+<!-- date — decision — reason — source. Technical decisions made by Claude are recorded here too. The source: `asked`, `confirmed: <path or item id>`, `changed: <old rule> (<where>)` or `assumed: <id> (<source>)` (references/decisions.md in the plugin). -->
 - <YYYY-MM-DD> — <decision> — <reason> — asked
 
 ## Out of scope
