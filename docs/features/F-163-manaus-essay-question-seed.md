@@ -1,8 +1,8 @@
 ---
 feature: F-163
 epic: Question bank
-status: building
-Autopilot: built-pending
+status: validating
+Autopilot: stop 2
 board: 229
 version: 1
 ---
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-28)
-- Stopped at: Approved by autopilot --assume (2026-10-28); build next
-- Next action: Build the seed migration and its tests in this worktree
+- Status: validating (2026-10-28)
+- Stopped at: Built and waiting for the owner's validation (stop 2); tests green, scan GREEN
+- Next action: Owner follows the validation script, then types validado and the merge of F-163
 - Waiting on: nothing
 
 ## Summary
@@ -112,6 +112,9 @@ The names and descriptions are written in Portuguese in the migration, from the 
 - 2026-10-28 — Build: the design passes of step 4b are skipped: no project, API contract, message between modules or schema change (a data migration).
 - 2026-10-28 — Reuse: the F-110 seed pattern and its helpers (`Id`, `Quote`, the guard block, the topic lookup, `Down`); `QuestionHtmlSanitizer` and `ComparableText` as the oracle of the frozen literals.
 - 2026-10-28 — Shortcuts: none.
+- 2026-10-28 — Reuse: the F-110 seed pattern (`SeedManausGuardQuestions`: guard block, topic lookup, version JSON, `Down`), its Designer (the model is unchanged) and the helpers of its tests; `QuestionHtmlSanitizer` and `ComparableText` as the oracle.
+- 2026-10-28 — Build: plan — 1 red tests for the seed and its guards → AC1 to AC8; 2 migration with the frozen literals, rubric, version and `Down` → the same tests green; 3 F-110 tests kept on their subject (they stop at the F-110 migration, filter out the essay) → no regression; 4 flow page → techdocs GREEN.
+- 2026-10-28 — Build: the screen check of step 12 was not run by the build (the app host needs the owner's data and Docker); the validation script covers it.
 
 ## Out of scope
 - A model answer, an explanation and a difficulty for the essay.
@@ -128,6 +131,64 @@ The names and descriptions are written in Portuguese in the migration, from the 
 
 ## Change notes
 (none)
+
+## Validation script
+
+### English
+Needed to validate: the local app host — the owner; not started, step 1 starts it from this worktree on its own database. The paper to compare with is in OneDrive `Simulab/Guarda Municipal/Manaus/2026`, pages 23 to 25 of the paper file.
+
+1. Stop any app host you have open (other worktrees use the same ports), then start this worktree's app host on its own database `simulab_f163` (the seed lands only there), from the worktree folder `D:\wt\simulab\f-163-manaus-essay`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f163 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f163"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Expected: the line `Dashboard:` with a link; the site answers at https://localhost:7125. To repeat, press Ctrl+C and run the same command.
+2. [ ] Open https://localhost:7125 and sign in as `admin@simulab.local` (the development password of `appsettings.Development.json`); if the page "Our documents changed" appears, click "Accept and continue".
+3. The essay in the list:
+   - [ ] 3.1 In the sidebar (menu lateral esquerdo) click Content > Questions. In the filter EDITION type Guarda and pick "CONSULPLAN · Guarda Municipal · 2026" (Técnico Municipal I - Guarda Municipal): the count under the table reads "1-25 of 61".
+   - [ ] 3.2 Find the row "Question 61" (page 3 of the table): its type reads Essay and its status Published.
+4. The form of the essay:
+   - [ ] 4.1 Click Edit on the row of Question 61: the Statement card (the question text) holds "Com base nos textos motivadores, redija uma redação sobre o tema:" and the theme "A ressignificação da Guarda Municipal: ...", as in the paper.
+   - [ ] 4.2 The Rubric card (the list of criteria a grader scores, each with its maximum points) lists six criteria with 4, 4, 3, 2, 3 and 4 points ("Total: 20 points"); compare their names with the grid on page 23 of the paper.
+   - [ ] 4.3 Open the descriptions of the last three criteria: each starts with the points kept and the deduction per error ("minus 0,50" for the first, "minus 0,25" for the other two).
+   - [ ] 4.4 The size limit reads Minimum lines 20 and Maximum lines 30, as the paper's orientations say.
+5. Texts and preview:
+   - [ ] 5.1 In the Summary aside (painel lateral) the Base text reads "Prova discursiva: textos motivadores"; open the text in the Base text card and compare Texto I, Texto II (the 16 principles) and Texto III (five paragraphs) with pages 23 and 24 of the paper.
+   - [ ] 5.2 In the Publication block of the aside click "Preview as a student": the dialog shows the texts, the theme, a writing box "Your essay", "Write your essay." and "Between 20 and 30 lines."; click "Show answer" and the rubric table appears with a total of 20.
+6. [ ] Language: in the app bar (barra superior) click the globe and pick Português (Brasil): the labels of the form change; the texts, the theme and the criteria stay in Portuguese as in the paper. Switch back to English.
+7. [ ] Keyboard only: on Content > Questions press Tab until the Edit action of Question 61 and press Enter: the question opens.
+
+### pt-BR
+Necessário para validar: o app host local — o dono; não iniciado, o passo 1 sobe a partir deste worktree no banco próprio. A prova para comparar está no OneDrive `Simulab/Guarda Municipal/Manaus/2026`, páginas 23 a 25 do arquivo da prova.
+
+1. Pare qualquer app host aberto (outros worktrees usam as mesmas portas) e suba o app host deste worktree no banco próprio `simulab_f163` (o seed cai só nele), a partir da pasta do worktree `D:\wt\simulab\f-163-manaus-essay`:
+   Git Bash:
+   ```bash
+   Database__Name=simulab_f163 dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   PowerShell 7:
+   ```powershell
+   $env:Database__Name = "simulab_f163"; dotnet run --project src/Hosts/Simulab.AppHost
+   ```
+   Esperado: a linha `Dashboard:` com um link; o site responde em https://localhost:7125. Para repetir, Ctrl+C e o mesmo comando.
+2. [ ] Abra https://localhost:7125 e entre como `admin@simulab.local` (a senha de desenvolvimento do `appsettings.Development.json`); se aparecer a página "Our documents changed", clique em "Accept and continue".
+3. A redação na lista:
+   - [ ] 3.1 No menu lateral esquerdo clique em Content > Questions. No filtro EDITION digite Guarda e escolha "CONSULPLAN · Guarda Municipal · 2026" (Técnico Municipal I - Guarda Municipal): a contagem sob a tabela diz "1-25 of 61".
+   - [ ] 3.2 Ache a linha "Question 61" (página 3 da tabela): o tipo diz Essay e o status Published.
+4. O formulário da redação:
+   - [ ] 4.1 Clique em Edit na linha da Question 61: o cartão Statement (o texto da questão) traz "Com base nos textos motivadores, redija uma redação sobre o tema:" e o tema "A ressignificação da Guarda Municipal: ...", como na prova.
+   - [ ] 4.2 O cartão Rubric (a lista de critérios que o corretor avalia, cada um com a pontuação máxima) lista seis critérios com 4, 4, 3, 2, 3 e 4 pontos ("Total: 20 points"); compare os nomes com a grade da página 23 da prova.
+   - [ ] 4.3 Abra as descrições dos três últimos critérios: cada uma começa com os pontos mantidos e o desconto por erro ("menos 0,50" no primeiro, "menos 0,25" nos outros dois).
+   - [ ] 4.4 O limite de tamanho diz Minimum lines 20 e Maximum lines 30, como as orientações da prova.
+5. Textos e prévia:
+   - [ ] 5.1 No painel lateral Summary o Base text diz "Prova discursiva: textos motivadores"; abra o texto no cartão Base text e compare o Texto I, o Texto II (os 16 princípios) e o Texto III (cinco parágrafos) com as páginas 23 e 24 da prova.
+   - [ ] 5.2 No bloco Publication do painel clique em "Preview as a student": o diálogo mostra os textos, o tema, uma caixa de escrita "Your essay", "Write your essay." e "Between 20 and 30 lines."; clique em "Show answer" e a tabela do rubric aparece com total 20.
+6. [ ] Idioma: na barra superior clique no globo e escolha Português (Brasil): os rótulos do formulário mudam; os textos, o tema e os critérios ficam em português como na prova. Volte para English.
+7. [ ] Só teclado: em Content > Questions aperte Tab até a ação Edit da Question 61 e aperte Enter: a questão abre.
 
 ## Events
 
