@@ -1,7 +1,8 @@
 ---
 feature: F-189
 epic: Data type controls
-status: building
+status: validating
+Autopilot: stop 2
 board: 259
 version: 1
 ---
@@ -10,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-29)
-- Stopped at: Approved by --assume; build not started
-- Next action: Build: write the tests
+- Status: validating (2026-10-29)
+- Stopped at: Built; validation script written (stop 2)
+- Next action: Owner: follow the validation script, then validate and authorize the merge
 - Waiting on: nothing
 
 ## Summary
@@ -23,6 +24,7 @@ Technical terms: [glossary](../glossary.md)
 - Waits on (to start): nothing.
 - Needed to validate: nothing.
 - Model: opus (lane assignment of the lanes run; no door).
+- Risk: medium (no signal; code or rules changed (.claude/agile/sync.json))
 - Suggested path: `/agile:autopilot F-189`.
 - Parallel with: F-190.
 
@@ -69,7 +71,7 @@ Tests locked: 1ecfb7d33d5453ccbff959baf2a01eb31c631378 (1 file); unlocks: 2
 | AC2 | `UiGalleryStateMatrixTests.Problems_Development_KindWithSixStatesHoldsEachOfThem` |
 | AC3 | `UiGalleryStateMatrixTests.Problems_Development_SearchHoldsEmptyFilledAndLongValue` |
 | AC4 | `UiGalleryStateMatrixTests.Problems_CaptionRemovedFromOneKind_NamesTheKindAndTheState`, `Problems_ControlOfAnotherKindUnderACaption_NamesTheKindAndTheState`, `Problems_ExpectedKindWithNoBlock_NamesTheKind` |
-| AC5 | validation step 1 |
+| AC5 | n/a — no UI text added (Verificado pelo Claude in `## Validation script`) |
 
 ## Decisions
 - 2026-10-29 — New test file `UiGalleryStateMatrixTests`; the locked `UiGalleryTextKindsTests` is left as it is, no unlock — the item allows it and a lock keeps shipped tests stable — assumed: new-file-over-unlock (item summary)
@@ -79,6 +81,8 @@ Tests locked: 1ecfb7d33d5453ccbff959baf2a01eb31c631378 (1 file); unlocks: 2
 - 2026-10-29: tests unlocked (helper skeleton `GalleryStateMatrix.cs` locked by mistake with the tests; owner answered "continue" in the olinda session); relocked with `UiGalleryStateMatrixTests.cs` alone, the test unchanged.
 - 2026-10-29: tests unlocked (`Problems_Development_SearchHoldsEmptyFilledAndLongValue` rendered the section twice and bUnit refused the second service registration; owner answered "Yes, unlock" in the olinda session); the section is rendered once, the assertions unchanged.
 - 2026-10-29 — The session ran on Sonnet 5.5 up to the first lock, then on Opus 5.5 (owner's `/model`); the lane asked opus — confirmed: lane-run.js WORK line
+- 2026-10-29 — Reuse: the gallery render of `UiGalleryTextKindsTests` (`KitTestContext`, `FakeHostEnvironment`, `SourceDelay`) and AngleSharp's DOM; nothing else found for reading a section by structure (searched `tests/Hosts/Simulab.Web.Tests/Ui`).
+- 2026-10-29 — Shortcuts: none.
 
 ## Out of scope
 - Adding error, disabled or read-only states to the search control.
@@ -88,6 +92,29 @@ Tests locked: 1ecfb7d33d5453ccbff959baf2a01eb31c631378 (1 file); unlocks: 2
 - (none)
 
 ## Change notes
+
+## Validation script
+
+### pt-BR
+
+#### Verificado pelo Claude
+- AC1 a AC4: `UiGalleryStateMatrixTests` passa no Git Bash e no PowerShell 7: `Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10` (em 2c6edd58).
+- Teste de falha real: com a legenda e o controle "Read-only" do código de uso único apagados de `UiGallery.razor`, 3 testes falham e a mensagem diz `One-time code (AppOtpField): missing state Read-only`; o arquivo foi restaurado com `git checkout` (em 2c6edd58).
+- Gate do build: `agile gate GREEN`; varredura de segurança: `agile scan GREEN` (em 2c6edd58).
+- AC5: o item não adiciona texto de interface; nenhum arquivo de recursos mudou (em 2c6edd58).
+
+#### Só você
+1. [ ] Passo 1 de 1 (cerca de 3 min): rode os testes da matriz no worktree `D:\wt\simulab\f-189-gallery-state-mat`.
+
+   Git Bash:
+   ```bash
+   cd /d/wt/simulab/f-189-gallery-state-mat && dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~UiGalleryStateMatrixTests"
+   ```
+   PowerShell 7:
+   ```powershell
+   Set-Location D:\wt\simulab\f-189-gallery-state-mat; dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~UiGalleryStateMatrixTests"
+   ```
+   Esperado: a última linha é `Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10`; para repetir, rode o mesmo comando.
 
 ## Events
 
