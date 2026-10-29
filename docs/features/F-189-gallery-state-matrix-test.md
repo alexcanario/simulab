@@ -1,7 +1,7 @@
 ---
 feature: F-189
 epic: Data type controls
-status: approved
+status: building
 board: 259
 version: 1
 ---
@@ -62,10 +62,10 @@ None. Test only; the gallery markup is not changed.
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
+| AC1 | `UiGalleryStateMatrixTests.Read_Development_EachKindHasABlockStartedByItsOwnTitle` |
+| AC2 | `UiGalleryStateMatrixTests.Problems_Development_KindWithSixStatesHoldsEachOfThem` |
+| AC3 | `UiGalleryStateMatrixTests.Problems_Development_SearchHoldsEmptyFilledAndLongValue` |
+| AC4 | `UiGalleryStateMatrixTests.Problems_CaptionRemovedFromOneKind_NamesTheKindAndTheState`, `Problems_ControlOfAnotherKindUnderACaption_NamesTheKindAndTheState`, `Problems_ExpectedKindWithNoBlock_NamesTheKind` |
 | AC5 | validation step 1 |
 
 ## Decisions
