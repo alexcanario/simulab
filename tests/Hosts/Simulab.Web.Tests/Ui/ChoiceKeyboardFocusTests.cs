@@ -11,8 +11,11 @@ public sealed class ChoiceKeyboardFocusTests : KitTestContext
 {
     private static readonly IReadOnlyList<string> Names = ["Very easy", "Easy", "Medium", "Hard", "Very hard"];
 
-    private string? LastFocusedId() =>
-        JSInterop.Invocations["simulabShell.focusOption"].Last().Arguments[0] as string;
+    private string? LastFocusedId()
+    {
+        var calls = JSInterop.Invocations["simulabShell.focusOption"];
+        return calls[calls.Count - 1].Arguments[0] as string;
+    }
 
     [Fact]
     public void LevelField_AnArrowKey_MovesTheFocusToTheNewDot()
