@@ -61,7 +61,7 @@ None. Test only; the gallery markup is not changed.
 
 ## Criterion → test
 
-Tests locked: ea261bd259ff66ca5606e6b9d569c1bbe5e3cabc (1 file); unlocks: 1
+Tests locked: 1ecfb7d33d5453ccbff959baf2a01eb31c631378 (1 file); unlocks: 2
 
 | Criterion | Test |
 | --- | --- |
