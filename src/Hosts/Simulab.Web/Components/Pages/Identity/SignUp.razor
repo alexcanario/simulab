@@ -30,11 +30,9 @@
         <AppAlert Severity="Severity.Warning" Text="@I["Legal.DraftNotice"]" />
     }
 
-    <AppTextField TValue="string"
-                  Id="sign-up-email"
+    <AppEmailField Id="sign-up-email"
                   Label="@I["SignUp.Email.Label"]"
                   Placeholder="@I["SignUp.Email.Placeholder"]"
-                  InputType="InputType.Email"
                   Autocomplete="username"
                   MaxLength="AccountLimits.EmailMaxLength"
                   Required="true"

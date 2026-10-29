@@ -190,12 +190,10 @@ else
                                   Hint="@L["ExamEditions.Field.NoticeReference.Hint"]"
                                   Error="@_noticeReferenceError" />
 
-                    <AppTextField TValue="string"
-                                  Id="edition-notice-url"
+                    <AppUrlField Id="edition-notice-url"
                                   Label="@L["ExamEditions.Field.NoticeUrl"]"
                                   Value="@_noticeUrl"
                                   ValueChanged="@((string? value) => OnNoticeUrlChanged(value))"
-                                  InputType="InputType.Url"
                                   MaxLength="CatalogLimits.ExamEditionNoticeUrlMaxLength"
                                   Autocomplete="off"
                                   LeadingIcon="@AppIcons.Link"

@@ -78,17 +78,31 @@
     else if (_challenge is not null)
     {
         @* F-11 UC3, UC4: the second step. The challenge lives in this page's state, never in the URL. *@
-        <AppTextField TValue="string"
-                      Id="sign-in-code"
-                      Label="@(_useRecoveryCode ? I["SignIn.RecoveryCode.Label"] : I["SignIn.Code.Label"])"
-                      Hint="@(_useRecoveryCode ? I["SignIn.RecoveryCode.Hint"] : I["SignIn.Code.Hint"])"
-                      Autocomplete="one-time-code"
-                      MaxLength="AccountLimits.TotpCodeMaxLength"
-                      Required="true"
-                      Disabled="_submitting"
-                      Error="@_codeError"
-                      Value="@_code"
-                      ValueChanged="@(value => { _code = value; _codeError = null; })" />
+        @* F-183 BR4: the authenticator's six digits, or a recovery code, which is not six digits. *@
+        @if (_useRecoveryCode)
+        {
+            <AppCodeField Id="sign-in-code"
+                          Label="@I["SignIn.RecoveryCode.Label"]"
+                          Hint="@I["SignIn.RecoveryCode.Hint"]"
+                          Autocomplete="one-time-code"
+                          MaxLength="AccountLimits.TotpCodeMaxLength"
+                          Required="true"
+                          Disabled="_submitting"
+                          Error="@_codeError"
+                          Value="@_code"
+                          ValueChanged="@(value => { _code = value; _codeError = null; })" />
+        }
+        else
+        {
+            <AppOtpField Id="sign-in-code"
+                         Label="@I["SignIn.Code.Label"]"
+                         Hint="@I["SignIn.Code.Hint"]"
+                         Required="true"
+                         Disabled="_submitting"
+                         Error="@_codeError"
+                         Value="@_code"
+                         ValueChanged="@(value => { _code = value; _codeError = null; })" />
+        }
 
         <p class="app-sign-in-forgot">
             <MudButton Variant="Variant.Text" Size="Size.Small" Disabled="_submitting" OnClick="ToggleRecoveryCode" Class="app-sign-in-code-mode">
@@ -165,11 +179,9 @@
         <AppAlert Severity="Severity.Info" Text="@I["SignIn.AccountErased"]" />
     }
 
-    <AppTextField TValue="string"
-                  Id="sign-in-email"
+    <AppEmailField Id="sign-in-email"
                   Label="@I["SignIn.Email.Label"]"
                   Placeholder="@I["SignIn.Email.Placeholder"]"
-                  InputType="InputType.Email"
                   Autocomplete="username"
                   MaxLength="AccountLimits.EmailMaxLength"
                   Required="true"

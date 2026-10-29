@@ -17,18 +17,11 @@
     <ToolBarContent>
         @if (Searchable)
         {
-            <MudTextField T="string"
-                          Value="_search"
-                          ValueChanged="OnSearchChangedAsync"
-                          Placeholder="@(SearchPlaceholder ?? L["Common.Search"])"
-                          aria-label="@L["Common.Search"]"
-                          aria-describedby="@(HasSearchHint ? _hintId : null)"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@AppIcons.Search"
-                          Immediate="true"
-                          DebounceInterval="300"
-                          Clearable="true"
-                          Class="app-table-search" />
+            <AppSearchField Value="@_search"
+                            ValueChanged="OnSearchChangedAsync"
+                            Placeholder="@SearchPlaceholder"
+                            AriaDescribedBy="@(HasSearchHint ? _hintId : null)"
+                            Class="app-table-search" />
         }
         <MudSpacer />
         @ToolBarContent

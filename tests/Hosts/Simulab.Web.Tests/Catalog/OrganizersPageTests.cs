@@ -165,7 +165,8 @@ public sealed class OrganizersPageTests : CatalogPageTestContext
         dialogs.WaitForAssertion(() => dialogs.FindAll("#organizer-name").Should().ContainSingle());
         dialogs.Find("#organizer-name").Change("Vunesp");
         dialogs.Find("#organizer-acronym").Change("VNSP");
-        dialogs.Find("#organizer-website").Change("vunesp.com.br");
+        // F-183 BR6: "vunesp.com.br" is now completed with https://; another scheme is still refused.
+        dialogs.Find("#organizer-website").Change("ftp://vunesp.com.br");
         dialogs.Find("button.app-form-save").Click();
 
         dialogs.WaitForAssertion(() => dialogs.Markup.Should().Contain("Type a full address, starting with http:// or https://"));

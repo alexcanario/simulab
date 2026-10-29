@@ -1,0 +1,113 @@
+@* F-183 BR6: a web address. It adds https:// when the scheme is missing, takes only http and https, and offers to
+   open a valid address in a new tab. The page's own error wins; the Api still checks the address (BR9). *@
+@inject IStringLocalizer<SharedResources> L
+
+<AppTextField TValue="string"
+              Id="@Id"
+              Label="@Label"
+              Class="app-url-field"
+              Value="@Value"
+              ValueChanged="OnValueChanged"
+              InputType="InputType.Url"
+              InputMode="InputMode.url"
+              InputAttributes="InputAttributes"
+              Autocomplete="@Autocomplete"
+              Placeholder="@Placeholder"
+              Hint="@Hint"
+              Error="@ShownError"
+              Required="Required"
+              Disabled="Disabled"
+              ReadOnly="ReadOnly"
+              MaxLength="MaxLength"
+              LeadingIcon="@LeadingIcon"
+              EndContent="@OpenLink" />
+
+@code {
+    private static readonly IReadOnlyDictionary<string, object?> InputAttributes = new Dictionary<string, object?>
+    {
+        ["spellcheck"] = "false",
+        ["autocapitalize"] = "off"
+    };
+
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary><c>url</c> for a site the browser may suggest, <c>off</c> for a one-off document link. No default
+    /// (rule: ui-project, B-5).</summary>
+    [Parameter, EditorRequired] public string Autocomplete { get; set; } = string.Empty;
+
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The page's message; while it is set it replaces the field's own.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool ReadOnly { get; set; }
+
+    [Parameter] public int? MaxLength { get; set; }
+
+    /// <summary>A decorative <see cref="AppIcons"/> constant at the start, as on <see cref="AppTextField{TValue}"/>.</summary>
+    [Parameter] public string? LeadingIcon { get; set; }
+
+    /// <summary>The address as kept: no spaces around it, <c>https://</c> in front when it names no scheme.</summary>
+    public static string? Normalize(string? value)
+    {
+        var trimmed = value?.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            return trimmed;
+        }
+
+        return NamesAScheme(trimmed) ? trimmed : "https://" + trimmed;
+    }
+
+    // "https://x", "ftp://x" and "mailto:x" name one (and stay, to be judged by IsValid); "x.gov.br" and "x.gov.br:8080" do not.
+    private static bool NamesAScheme(string value)
+    {
+        if (value.Contains("://", StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        var colon = value.IndexOf(':', StringComparison.Ordinal);
+        return colon > 0
+            && char.IsAsciiLetter(value[0])
+            && value[..colon].All(character => char.IsAsciiLetterOrDigit(character) || character is '+' or '-')
+            && !value[(colon + 1)..].All(char.IsAsciiDigit);
+    }
+
+    /// <summary>An absolute http or https address with a host.</summary>
+    public static bool IsValid(string? value) =>
+        Uri.TryCreate(value, UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+        && !string.IsNullOrEmpty(uri.Host);
+
+    private bool HasValue => !string.IsNullOrWhiteSpace(Value);
+
+    private string? ShownError =>
+        !string.IsNullOrEmpty(Error) ? Error
+        : HasValue && !IsValid(Value) ? L["Common.Url.Invalid"].Value
+        : null;
+
+    private RenderFragment? OpenLink => HasValue && IsValid(Value)
+        ? @<a class="app-url-open" href="@Value" target="_blank" rel="noopener noreferrer" aria-label="@L["Common.Url.Open"]" title="@L["Common.Url.Open"]">
+              <MudIcon Icon="@AppIcons.OpenInNew" Size="Size.Small" />
+          </a>
+        : null;
+
+    private Task OnValueChanged(string? value)
+    {
+        Value = Normalize(value);
+        return ValueChanged.InvokeAsync(Value);
+    }
+}

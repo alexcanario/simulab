@@ -1,8 +1,8 @@
 ---
 page: sign-in-and-sign-out
 locale: pt-BR
-features: [F-5, B-3, F-7, F-11, F-53]
-updated: 2026-10-06
+features: [F-5, B-3, F-7, F-11, F-53, F-183]
+updated: 2026-10-29
 ---
 # Entrar e sair
 
@@ -28,7 +28,7 @@ Abrir **Entrar** enquanto você já está conectado leva direto para a página i
 ## Campos
 | Campo | O que é | Regras |
 |---|---|---|
-| E-mail | O endereço com o qual você se cadastrou | Obrigatório |
+| E-mail | O endereço com o qual você se cadastrou | Obrigatório. Ao sair do campo, os espaços das pontas somem e as letras viram minúsculas; maiúsculas não mudam a conta |
 | Senha | A senha da sua conta | Obrigatória |
 
 ## Mensagens

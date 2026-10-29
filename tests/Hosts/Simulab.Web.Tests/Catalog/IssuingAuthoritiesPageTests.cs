@@ -129,7 +129,8 @@ public sealed class IssuingAuthoritiesPageTests : CatalogPageTestContext
         page.Find(".app-page-header button").Click();
         providers.Dialogs.WaitForAssertion(() => providers.Dialogs.Find("#issuing-authority-name"));
         providers.Dialogs.Find("#issuing-authority-name").Change("Prefeitura de Sao Paulo");
-        providers.Dialogs.Find("#issuing-authority-website").Change("prefeitura.sp.gov.br");
+        // F-183 BR6: "prefeitura.sp.gov.br" is now completed with https://; another scheme is still refused.
+        providers.Dialogs.Find("#issuing-authority-website").Change("ftp://prefeitura.sp.gov.br");
         providers.Dialogs.Find(".app-form-save").Click();
 
         providers.Dialogs.WaitForAssertion(() =>

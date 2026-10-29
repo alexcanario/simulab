@@ -1,0 +1,60 @@
+@* F-183 BR2: the six digits of an authenticator app. Anything else is dropped, so a code pasted with a space or a
+   hyphen fills the field whole; the form is sent by its button only, never on the sixth digit. *@
+
+<AppTextField TValue="string"
+              Id="@Id"
+              Label="@Label"
+              Class="app-otp-field"
+              Value="@Value"
+              ValueChanged="OnValueChanged"
+              InputMode="InputMode.numeric"
+              Pattern="[0-9]*"
+              InputAttributes="InputAttributes"
+              Autocomplete="one-time-code"
+              Hint="@Hint"
+              Error="@Error"
+              Required="Required"
+              Disabled="Disabled"
+              ReadOnly="ReadOnly"
+              MaxLength="PastedLength" />
+
+@code {
+    /// <summary>Digits of a TOTP code (RFC 6238, as the Identity module issues it).</summary>
+    public const int TotpLength = 6;
+
+    // Room for "123 456" or "123-456" as pasted; the separator is dropped when the user leaves the field.
+    private const int PastedLength = TotpLength * 2;
+
+    private static readonly IReadOnlyDictionary<string, object?> InputAttributes = new Dictionary<string, object?>
+    {
+        ["spellcheck"] = "false"
+    };
+
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool ReadOnly { get; set; }
+
+    /// <summary>The code as kept: its first six digits, nothing else.</summary>
+    public static string? Normalize(string? value) =>
+        value is null ? null : new string(value.Where(char.IsAsciiDigit).Take(TotpLength).ToArray());
+
+    private Task OnValueChanged(string? value)
+    {
+        Value = Normalize(value);
+        return ValueChanged.InvokeAsync(Value);
+    }
+}

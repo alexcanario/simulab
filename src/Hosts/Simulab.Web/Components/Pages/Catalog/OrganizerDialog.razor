@@ -48,8 +48,7 @@
                             LeadingIcon="@AppIcons.AssessmentType"
                             Required="true" />
 
-            <AppTextField TValue="string"
-                          Id="organizer-website"
+            <AppUrlField Id="organizer-website"
                           Label="@L["Organizers.Field.Website"]"
                           Value="@_website"
                           ValueChanged="@((string? value) => OnWebsiteChanged(value))"
@@ -58,14 +57,12 @@
                           Hint="@L["Organizers.Field.Website.Help"]"
                           Error="@_websiteError" />
 
-            <AppTextField TValue="string"
-                          Id="organizer-description"
-                          Label="@L["Organizers.Field.Description"]"
-                          Value="@_description"
-                          ValueChanged="@((string? value) => _description = value)"
-                          MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
-                          Autocomplete="off"
-                          Lines="3" />
+            <AppTextAreaField Id="organizer-description"
+                              Label="@L["Organizers.Field.Description"]"
+                              Value="@_description"
+                              ValueChanged="@((string? value) => _description = value)"
+                              MaxLength="CatalogLimits.OrganizerDescriptionMaxLength"
+                              Autocomplete="off" />
         </div>
     </DialogContent>
     <DialogActions>

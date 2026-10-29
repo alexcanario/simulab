@@ -1,0 +1,33 @@
+@* F-183 BR7: the one search box: a magnifier, a pause after the last key, a clear button. The table's search is this
+   field, so a search outside a table looks the same. *@
+@inject IStringLocalizer<SharedResources> L
+
+<MudTextField T="string"
+              Value="Value"
+              ValueChanged="ValueChanged"
+              Placeholder="@(Placeholder ?? L["Common.Search"])"
+              aria-label="@L["Common.Search"]"
+              aria-describedby="@AriaDescribedBy"
+              Adornment="Adornment.Start"
+              AdornmentIcon="@AppIcons.Search"
+              Immediate="true"
+              DebounceInterval="DebounceInterval"
+              Clearable="true"
+              Class="@($"app-search-field {Class}".TrimEnd())" />
+
+@code {
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    /// <summary>What the box says when empty; the kit's "Search" by default.</summary>
+    [Parameter] public string? Placeholder { get; set; }
+
+    /// <summary>The id of a hint that says more than the box's name.</summary>
+    [Parameter] public string? AriaDescribedBy { get; set; }
+
+    /// <summary>The pause after the last key before the search runs.</summary>
+    [Parameter] public int DebounceInterval { get; set; } = 300;
+
+    [Parameter] public string? Class { get; set; }
+}

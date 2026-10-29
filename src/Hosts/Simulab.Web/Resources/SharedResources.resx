@@ -444,6 +444,28 @@
   <data name="Gallery.FieldKinds.State.Error" xml:space="preserve"><value>Error</value></data>
   <data name="Gallery.FieldKinds.State.LongText" xml:space="preserve"><value>Long text</value></data>
   <data name="Gallery.FieldKinds.State.Counter" xml:space="preserve"><value>With a counter: empty, typing, at the limit, over the limit</value></data>
+  <data name="Common.Url.Invalid" xml:space="preserve"><value>Enter a web address that starts with http:// or https://.</value></data>
+  <data name="Common.Url.Open" xml:space="preserve"><value>Open the link in a new tab</value></data>
+  <data name="Gallery.Section.TextKinds" xml:space="preserve"><value>Text kinds</value></data>
+  <data name="Gallery.TextKinds.Hint" xml:space="preserve"><value>One control per kind of text: pick it by what the value is, never by habit (docs/design/data-type-controls.md, 2.1).</value></data>
+  <data name="Gallery.TextKinds.TextArea" xml:space="preserve"><value>Text area (AppTextAreaField)</value></data>
+  <data name="Gallery.TextKinds.Email" xml:space="preserve"><value>E-mail (AppEmailField)</value></data>
+  <data name="Gallery.TextKinds.Url" xml:space="preserve"><value>Web address (AppUrlField)</value></data>
+  <data name="Gallery.TextKinds.Code" xml:space="preserve"><value>Code (AppCodeField)</value></data>
+  <data name="Gallery.TextKinds.Otp" xml:space="preserve"><value>One-time code (AppOtpField)</value></data>
+  <data name="Gallery.TextKinds.Search" xml:space="preserve"><value>Search (AppSearchField)</value></data>
+  <data name="Gallery.TextKinds.State.Empty" xml:space="preserve"><value>Empty</value></data>
+  <data name="Gallery.TextKinds.State.Filled" xml:space="preserve"><value>Filled</value></data>
+  <data name="Gallery.TextKinds.State.Error" xml:space="preserve"><value>Error</value></data>
+  <data name="Gallery.TextKinds.State.Disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="Gallery.TextKinds.State.ReadOnly" xml:space="preserve"><value>Read-only</value></data>
+  <data name="Gallery.TextKinds.State.LongValue" xml:space="preserve"><value>Long value</value></data>
+  <data name="Gallery.TextKinds.Label.Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Gallery.TextKinds.Label.Email" xml:space="preserve"><value>E-mail</value></data>
+  <data name="Gallery.TextKinds.Label.Website" xml:space="preserve"><value>Website</value></data>
+  <data name="Gallery.TextKinds.Label.RecoveryCode" xml:space="preserve"><value>Recovery code</value></data>
+  <data name="Gallery.TextKinds.Label.Otp" xml:space="preserve"><value>Authentication code</value></data>
+  <data name="Gallery.TextKinds.SampleError" xml:space="preserve"><value>Check this value.</value></data>
   <data name="Gallery.FieldKinds.State.Loading" xml:space="preserve"><value>Loading</value></data>
   <data name="Gallery.FieldKinds.State.Open" xml:space="preserve"><value>Open list</value></data>
   <data name="Gallery.FieldKinds.State.NoResults" xml:space="preserve"><value>No results</value></data>

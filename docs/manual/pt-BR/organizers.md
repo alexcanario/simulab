@@ -1,8 +1,8 @@
 ---
 page: organizers
 locale: pt-BR
-features: [F-33, F-34, F-35]
-updated: 2026-09-29
+features: [F-33, F-34, F-35, F-183]
+updated: 2026-10-29
 ---
 # Bancas
 
@@ -43,8 +43,8 @@ Só uma conta com a permissão "Gerenciar o catálogo" — o papel Administrador
 | Nome | Como a banca aparece em todo lugar | Obrigatório, de 2 a 150 caracteres, não pode repetir o nome de outra banca, inclusive de uma excluída. Maiúscula e acento não fazem um nome diferente |
 | Sigla | O nome curto (CEBRASPE, FGV) | Obrigatória, de 2 a 20 caracteres, salva em maiúsculas, única do mesmo jeito que o nome |
 | Tipo | Banca examinadora, certificadora ou universidade | Obrigatório |
-| Site oficial | Onde ler sobre a banca | Opcional, no máximo 300 caracteres, endereço completo começando com `http://` ou `https://` |
-| Descrição | Texto livre sobre a banca | Opcional, no máximo 500 caracteres |
+| Site oficial | Onde ler sobre a banca | Opcional, no máximo 300 caracteres, endereço completo começando com `http://` ou `https://`. Sem o começo, o `https://` é acrescentado ao sair do campo; com um endereço válido aparece um botão que abre o site em outra aba |
+| Descrição | Texto livre sobre a banca | Opcional, no máximo 500 caracteres. O campo cresce com o texto, até 10 linhas, e o contador mostra quanto resta |
 
 ## Mensagens
 | Mensagem | O que significa | O que fazer |

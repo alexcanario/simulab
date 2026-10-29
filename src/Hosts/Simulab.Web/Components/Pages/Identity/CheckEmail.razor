@@ -35,11 +35,9 @@
 
     @if (_email is null)
     {
-        <AppTextField TValue="string"
-                      Id="check-email-address"
+        <AppEmailField Id="check-email-address"
                       Label="@I["SignUp.Email.Label"]"
                       Placeholder="@I["SignUp.Email.Placeholder"]"
-                      InputType="InputType.Email"
                       Autocomplete="username"
                       MaxLength="AccountLimits.EmailMaxLength"
                       Required="true"

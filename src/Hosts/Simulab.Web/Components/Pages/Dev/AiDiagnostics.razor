@@ -26,15 +26,15 @@
 
 @* F-134, BR7: the question and, after a call, the answer are two cards. "Send" stays primary: it restarts nothing. *@
 <AppSectionCard Id="ai-question" Title="@L["AiDiagnostics.Question"]" Icon="@AppIcons.Questions">
-    <AppTextField TValue="string"
-                  Id="ai-prompt"
-                  Label="@L["AiDiagnostics.Prompt.Label"]"
-                  Hint="@L["AiDiagnostics.Prompt.Hint"]"
-                  Value="@_prompt"
-                  ValueChanged="@((string? value) => _prompt = value ?? string.Empty)"
-                  Lines="5"
-                  Required="true"
-                  Disabled="@_sending" />
+    <AppTextAreaField Id="ai-prompt"
+                      Label="@L["AiDiagnostics.Prompt.Label"]"
+                      Hint="@L["AiDiagnostics.Prompt.Hint"]"
+                      Value="@_prompt"
+                      ValueChanged="@((string? value) => _prompt = value ?? string.Empty)"
+                      MaxLength="PromptMaxLength"
+                      MinLines="5"
+                      Required="true"
+                      Disabled="@_sending" />
 
     <div class="app-form-actions">
         <MudButton Variant="Variant.Filled"
@@ -73,6 +73,9 @@
 }
 
 @code {
+    // F-183: the text area shows a limit; the Api sets none for this development page, so the counter has its own.
+    private const int PromptMaxLength = 4000;
+
     private bool _allowed;
     private bool _sending;
     private string _prompt = string.Empty;
