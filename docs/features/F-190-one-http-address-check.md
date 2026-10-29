@@ -1,7 +1,7 @@
 ---
 feature: F-190
 epic: Data type controls
-status: validating
+status: done
 board: 260
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-29)
-- Stopped at: Built; gate and scan GREEN; waiting for the owner's validation.
-- Next action: Owner follows the validation script (3 steps).
+- Status: done (2026-10-29)
+- Stopped at: Shipped: merged into main at 4f5deae1 (app version 1.30.0).
+- Next action: Nothing; the item is done.
 - Waiting on: nothing
 
 ## Summary
@@ -125,3 +125,16 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
    Esperado: o campo mostra a mensagem de endereço inválido e o texto digitado fica.
    - [ ] 3.2 Troque por `https://banca.gov.br/edital` e saia do campo.
    Esperado: a mensagem some e aparece o ícone de abrir o endereço em nova aba.
+
+## Delivery
+
+Gate time: 6 passes, 28 min 20 s — turn 2 (37 s), ship 2 (21 min 45 s), scan 2 (5 min 58 s); 0 red
+Usage: 1239.5k weighted (estimate) — other 100% — context per turn 169k — 1 session, 85 turns
+- Branch: `feature/F-190`, merged into `main` at `4f5deae1` (app version 1.30.0).
+- Tests: full suite green at ship (`agile gate GREEN`): Web 2956, Identity 589, Catalog 706, QuestionBank 872, ExamEngine 99, Api 83, Jobs 25; `WebAddressRuleTests` 2/2 (red before the change, locked at `a573b4f0`). `agile scan GREEN`, `agile docs GREEN`.
+- Manual pages: none (internal cleanup, no visible behaviour).
+- Glossary: nothing missing.
+- Validation evidence: validated by the owner's relayed words ("validado e autorizo o merge de F-189 e F-190", round 1); the screen steps were not ticked, so each is `not tested`.
+  - [verified] AC4: `WebAddressRuleTests` red before, green after (at 934a41d3).
+  - [verified] AC1 to AC3, AC5: existing page tests and `ResourceParityTests` green (at 934a41d3).
+  - 2.1 to 3.2 [ ] not tested (validated by the owner's relayed words, no tick recorded).
