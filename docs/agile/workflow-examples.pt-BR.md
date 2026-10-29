@@ -8415,3 +8415,45 @@ question (round 1): - #1 (jussara) validation: #1 is ready: do you validate it a
 the owner, verbatim: "Valido o #1 e autorizo o merge; pode dividir o #3 — "como proposto""
 - 2026-10-29: validated by the owner — Valido o #1 e autorizo o merge; pode dividir o #3 — "como proposto" (relayed by the orchestrator, round 1: "- #1 (jussara) validation: #1 is ready: do you validate it and authorize its merge?")
 ```
+
+### 14.232 O resolve retoma as faixas depois de uma queda
+
+A sessão que coordenava as faixas fechou no meio da execução. Você abre uma sessão nova e digita:
+
+```
+/agile:resolve --resume
+```
+
+O Claude lê o que ficou no disco e mostra cada faixa:
+
+```
+LANE jussara waiting owner F-1 session s1 queue 1 stops 1/1/0: reconnect
+LANE olinda planned - session - queue 1 stops 0/0/1: open, relay
+LANE nanda stopped - session - queue 0 stops 0/0/0: done
+ROUND 2 unanswered:
+Round 2: 1 stops
+#9 Shop
+- F-1 (jussara) validation: validation of F-1
+Answer for each item, in your own words.
+agile resume PLAN: 3 lanes, 1 to reconnect, 1 to open
+```
+
+A sessão da jussara ainda existe, e o Claude manda nela a ordem de seguir. A olinda não tem sessão: abre uma nova com o nome dela, que primeiro recebe a resposta que você já deu e depois segue a fila. A nanda terminou. A pergunta da rodada 2 volta para você como estava, sem rodada nova.
+
+### 14.233 Uma autorização para o épico inteiro
+
+Você vai deixar o épico #379 andando sozinho. Na sessão que faz o merge, você digita só isto:
+
+```
+Delego a validacao do epico #379
+```
+
+Sem acento ou com acento, a frase é a mesma; as suas palavras ficam guardadas como você as digitou. O `/agile:status` passa a mostrar:
+
+```
+[agile] branch main
+In progress: nothing
+Delegation: epic #379 — "Delego a validacao do epico #379" (2026-10-29)
+```
+
+Quando o épico fechar, ou quando você digitar `revogo a delegação`, a linha some, e o próximo item volta a parar na sua validação.
