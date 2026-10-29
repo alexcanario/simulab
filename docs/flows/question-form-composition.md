@@ -1,7 +1,7 @@
 ---
 title: Question form composition
 summary: How the question form is framed — six numbered sections, one aside that holds the state and every publication action, and Publish as the screen's single amber action.
-items: [F-126]
+items: [F-126, F-184]
 ---
 # Question form composition
 
@@ -17,7 +17,8 @@ A curator with `questions.manage` opens `/admin/questions/new`, `/admin/question
 2. Beside the form the aside (`AppFormAside`, sticky, 20rem) holds the summary rows, the "Before publishing" checklist and, after them, the publication block: the `section#question-section-publication` drawn by the aside's content slot. Below 1280px the aside is neither sticky nor capped and stacks under the form card, before the history cards.
 3. The block shows, in this order: the publication error alert, the status chip and text, the annulment date and reason, the rejection alert, the change-reason field (when the Api asked for it), the buttons of the state, then the visible reason.
 4. **Publish** is the one amber action: the compact `AppActionButton`, only for a saved draft. Disabled (unsaved changes, then incomplete checklist) it is a real `disabled` button with `aria-describedby="question-publication-reason"`; running, it is disabled and shows progress in place of the icon. Every other button is outlined (Annul keeps the error colour).
-5. Save stays the only navy primary at the bottom right of the form card; a frozen question (in review, annulled) has none. In transcription mode there is no publication block and no amber action.
+5. Since F-184 the Classification section's difficulty is an `AppLevelField` (five dots and the level name, [choice controls](choice-controls.md)), the content language an `AppLanguageField`, and the True/false key an `AppYesNoField` with the words "True" and "False".
+6. Save stays the only navy primary at the bottom right of the form card; a frozen question (in review, annulled) has none. In transcription mode there is no publication block and no amber action.
 
 ## Rules
 - Save never publishes and Publish never saves (F-95 BR12); unsaved changes block Publish.
