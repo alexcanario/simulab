@@ -1,7 +1,7 @@
 ---
 feature: F-190
 epic: Data type controls
-status: building
+status: validating
 board: 260
 version: 1
 ---
@@ -10,9 +10,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-29)
-- Stopped at: Approved by autopilot --assume (2026-10-29).
-- Next action: Build it (autopilot, lane nanda).
+- Status: validating (2026-10-29)
+- Stopped at: Built; gate and scan GREEN; waiting for the owner's validation.
+- Next action: Owner follows the validation script (3 steps).
 - Waiting on: nothing
 
 ## Summary
@@ -23,6 +23,7 @@ The rule "only `http` and `https`, with a host" now lives in four places: `AppUr
 - Waits on (to start): nothing.
 - Needed to validate: nothing.
 - Model: opus (lane assignment of the lanes run; the change is small).
+- Risk: medium (no signal; code or rules changed (.claude/agile/sync.json))
 - Suggested path: `/agile:autopilot F-190` (small and clear).
 - Parallel with: F-189.
 
@@ -70,6 +71,9 @@ Tests locked: a573b4f0274fbc8c71d9c17e18019879caa81caa (1 file); unlocks: 0
 - 2026-10-29 — The exam edition form keeps its length check before calling `IsValid` — it is a separate rule (`ExamEditionNoticeUrlMaxLength`) — assumed: scope
 - 2026-10-29 — AC4 is a source-scan test in `Simulab.Web.Tests`, so the single copy cannot come back — the cheapest way to hold "one copy" — assumed: tests
 - 2026-10-29: plan — 1 `WebAddressRuleTests` red on the three pages → run it; 2 the three pages call `AppUrlField.IsValid` → the new test and the Catalog page tests green; 3 gate, coverage, validation script → `agile gate GREEN`
+- 2026-10-29: Reuse: `AppUrlField.IsValid` (Components/Ui/AppUrlField.razor) reused by the three pages
+- 2026-10-29: Shortcuts: none
+- 2026-10-29: model — item asked for opus, the lane session ran on Sonnet 5.5 (could not switch itself)
 - 2026-10-29 — No question reached the owner: no package, permission, schema, money or screen change — assumed by autopilot (`--assume`) as lane nanda of the lanes run
 
 ## Out of scope
@@ -84,3 +88,40 @@ Tests locked: a573b4f0274fbc8c71d9c17e18019879caa81caa (1 file); unlocks: 0
 ## Events
 
 - 2026-10-29 assumed — 4 answers
+
+## Validation script
+
+### pt-BR
+Necessário para validar: o app host local com o administrador da carga inicial `admin@simulab.local` (senha em `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`) — você fornece; já existe na carga inicial.
+
+#### Verificado pelo Claude
+- AC4: o teste `WebAddressRuleTests.Pages_DoNotTestTheHttpSchemeThemselves` falhou antes da mudança (apontava `ExamEditionForm.razor`) e passa agora; as 312 provas de arquitetura estão verdes (em 934a41d3).
+- AC1 a AC3: os testes existentes das três telas continuam verdes (Web.Tests, 1234 nos filtros de Catalog, campos de texto e recursos) e AC5: nenhum texto novo (em 934a41d3).
+- O gate completo: `agile gate GREEN`, nenhum aviso novo, baseline com 0 entradas; Web 2946, Identity 589, Catalog 706, QuestionBank 872, ExamEngine 99 testes verdes (em 934a41d3).
+- O scan de segurança: `agile scan GREEN` (16 falsos positivos, 13 corrigidos, 1 fechado pelo Claude) (em 934a41d3).
+
+#### Só você
+1. Passo 1 de 3 (cerca de 4 min): suba o app no banco próprio do item. Feche antes o Visual Studio ou qualquer app host rodando desta pasta.
+Git Bash:
+```bash
+cd /d/wt/simulab/f-190-one-http-address && Database__Name=simulab_f190 dotnet run --project src/Hosts/Simulab.AppHost
+```
+PowerShell 7:
+```powershell
+cd D:\wt\simulab\f-190-one-http-address; $env:Database__Name = 'simulab_f190'; dotnet run --project src/Hosts/Simulab.AppHost
+```
+Esperado: o endereço do painel do Aspire aparece e o Web responde em https://localhost:7125; entre em /sign-in como `admin@simulab.local`.
+
+2. Passo 2 de 3 (cerca de 5 min): confira o site no organizador e na autoridade emissora.
+   - [ ] 2.1 No menu lateral abra Conteúdo > Organizadores (/admin/organizers), clique em "Adicionar", preencha o nome e a sigla e digite `ftp://banca.gov.br` no campo do site; clique em Salvar.
+   Esperado: o campo mostra a mensagem de endereço inválido e nada é salvo.
+   - [ ] 2.2 Troque o site para `banca.gov.br` e salve.
+   Esperado: salva e o site fica `https://banca.gov.br`.
+   - [ ] 2.3 Repita o 2.1 e o 2.2 em Conteúdo > Autoridades emissoras (/admin/issuing-authorities).
+   Esperado: o mesmo resultado, com a mensagem da própria tela.
+
+3. Passo 3 de 3 (cerca de 4 min): confira o endereço do edital na edição de um exame.
+   - [ ] 3.1 Em Conteúdo > Exames abra um exame, na seção "Edições" abra uma edição e, no cartão "Edital e inscrição", digite `mailto:edital@banca.gov.br` no campo do endereço do edital e saia do campo.
+   Esperado: o campo mostra a mensagem de endereço inválido e o texto digitado fica.
+   - [ ] 3.2 Troque por `https://banca.gov.br/edital` e saia do campo.
+   Esperado: a mensagem some e aparece o ícone de abrir o endereço em nova aba.
