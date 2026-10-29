@@ -1687,3 +1687,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Baseline: present. Docs command: already declared (DocGen). Plugin notes marked: none. Removed copies: none.
 - Missing capabilities, not installed and not captured: release pipeline (0.64.0), Cloud accounts check in `agile-deploy.js` (0.2.0).
 - Glossary (5g): column and link lines already present; no proposals. Ran with F-183 building in its worktree; main checkout clean.
+
+## 2026-10-29 - Sync with agile@canary 0.226.0
+- From 0.220.0 to 0.226.0 (6 minor versions). Copied: `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md` — assumed: plugin-copy (base autonomy policy).
+- Merged: none (the `edited` copies had no upstream change). Manual build files: no upstream change.
+- Baseline: present. Docs command: already declared (DocGen). Plugin notes marked: none. Removed copies: none.
+- Missing capabilities, not installed and not captured: release pipeline (0.64.0), Cloud accounts check in `agile-deploy.js` (0.2.0).
+- Glossary (5g): not run.

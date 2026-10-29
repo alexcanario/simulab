@@ -8231,3 +8231,187 @@ Você abre uma sessão em `opus` e digita `/agile:build F-40`. Mesmo com o mesmo
 Claude: Model: item suggests opus, effort high, session is opus
 
 Você digita `/effort high` e a construção continua. No passo 4b, as chamadas de `system-design` e `architect` vão em `opus` com `effort: high`, e o mesmo vale depois para o `reviewer` do `/agile:review`. Na lista do `/agile:order` a coluna `Model` da F-40 continua `opus`.
+
+### 14.226 As faixas de um plano
+
+Sete itens estão abertos. F-1 e F-2 mexem no mesmo arquivo, F-3 espera o F-2, F-4 espera um item que não está no plano, F-5 já está em validação, F-6 não nomeia nenhum arquivo do repositório e o branch do F-7 só mudou um arquivo. O plano das faixas, com `--used 40`, fica assim:
+
+```
+SKIPPED F-5 (validating)
+SKIPPED F-4 (waits on F-9)
+NOFILES F-6
+LANE jussara: F-1 (opus), F-2 (opus), F-3 (sonnet) | files: 3
+LANE olinda: F-6 (opus) | files: 0
+LANE nanda: F-7 (opus) | files: 1
+agile dispatch LANES: 5 items in 3 lanes
+agile dispatch BUDGET: the week used 40%: ok (step down at 70%, ask at 80%)
+```
+
+A semana já usou 40% da sua cota: não há limite até 80%.
+
+São três faixas: a bruna nem existe. Com `--write`, cada faixa vira uma linha de `lanes.json` no estado `planned`. Quando a nanda termina o F-7, a fila dela fica vazia e ela pega o F-6 da olinda:
+
+```
+STOLE F-6 from olinda
+```
+
+Os itens da jussara não saem dela enquanto dividem arquivos ou um espera o outro.
+
+### 14.227 Um resolve de várias issues: as faixas abrem suas sessões
+
+Você tem três issues prontas e digita:
+
+```
+/agile:resolve #41 #42 #43
+```
+
+O Claude captura as três como itens, F-1, F-2 e F-3, e planeja as faixas. A jussara fica com F-1 e F-2, que mexem nos mesmos arquivos; a olinda, com F-3. No app abrem duas sessões novas, com os nomes jussara e olinda. A nanda e a bruna não abrem: não têm item.
+
+Na sessão da jussara, o primeiro passo pergunta o item:
+
+```
+WORK F-1 (sonnet)
+```
+
+Quando F-1 chega a `validating`, a faixa pede o próximo e segue com F-2. A olinda termina F-3 primeiro e fica com a fila vazia. Ela não pega F-2, que divide arquivos com F-1, e para:
+
+```
+IDLE olinda
+```
+
+Você valida F-1 e autoriza o merge na sessão da jussara. Antes do ship, a faixa pede a vaga do lote:
+
+```
+SLOT jussara F-1: yours
+```
+
+Se a olinda pedir a vaga ao mesmo tempo, ela espera a vez:
+
+```
+WAIT olinda F-3: 1 ahead
+```
+
+### 14.228 O painel ao vivo: o que espera por você, as lanes e a hora dos ships
+
+Você deixa três lanes construindo e quer ver, sem perguntar a cada sessão, o que depende de você agora. Digita no chat:
+
+```
+/agile:status --dashboard --watch
+```
+
+A sessão inicia o painel em segundo plano e abre a página no painel do navegador do app. A página se reescreve a cada 30 segundos e recarrega sozinha. Os quatro blocos também saem em texto com `--text --all`:
+
+```
+O que espera por você
+  #12 Cadastro de banca examinadora — validação e merge — diga: autorizo o merge de 12
+  #15 Corrigir o arredondamento da média — aprovação — diga: aprovo 15
+  lane nanda · #12 · aguardando você
+Sessões
+  orçamento: a semana usou 40% (reduz o modelo em 70%, pergunta em 80%) · ok
+  jussara · opus · #14 · trabalhando · 12 min · US$ 2.25
+  olinda · sonnet · #15 · trabalhando · 3 h · US$ 0.50 · tirado de bruna
+  nanda · sonnet · #12 · aguardando você · 40 min · US$ 1.00
+Itens em andamento (gerado 2026-10-28 12:00)
+Item                                    Etapa                 Worktree                                    Espera por                      Última checagem  Na etapa  Próxima ação
+#12 Cadastro de banca examinadora       aguardando validação  f-12-exam-board · limpo · 24 h atrás        você (o dono)                   —                1 d       rodar o roteiro e dizer validado ou o defeito
+#14 Exportar notas em CSV               construindo           f-14-export-csv · 4 sem commit · 2 h atrás  nenhum                          —                0 d       critério 4, a tela de exportação
+#15 Corrigir o arredondamento da média  aprovado              —                                           o dono precisa aprovar o corte  —                2 d       construir
+0 ideias no backlog
+Tempo e progresso
+  ships (180 s):
+    2026-10-28 09:10 UTC · 170 s · dentro
+    2026-10-27 16:40 UTC · 410 s · acima
+    2026-10-27 10:05 UTC · 95 s · dentro
+  hoje: 1 lote, 2 itens
+  por dia: 2026-10-28 2 · 2026-10-27 1
+  noturno: VERDE · 8 h · 997 s
+```
+
+No topo está o que só você destrava: o item 12 pede a sua validação (a frase para copiar vem na mesma linha) e o 15 pede a aprovação do corte. Em Sessões, a olinda trabalha no 15 com um item tirado da bruna, e a nanda aguarda você. Em Tempo e progresso, o ship de 410 s ficou acima da meta de 180 s.
+
+Nada sai da máquina, e fechar o painel não muda nada no ciclo.
+
+### 14.229 A cota da semana chega a 80% numa execução em faixas
+
+Duas faixas trabalham: a jussara em F-1 e F-2, a olinda em F-3. A sua cota semanal passa de 70%, e o próximo item da jussara começa um degrau mais barato:
+
+```
+WORK F-2 (sonnet, stepped down from opus: the week used 72%)
+```
+
+A faixa anota essa linha no `## Decisions` do F-2. Mais tarde a semana chega a 81%. Ao terminar F-3, a olinda não começa outro passo:
+
+```
+HOLD olinda: the week used 81% of a 80% ceiling: wait for the owner
+```
+
+Com as duas faixas paradas, o Claude faz uma pergunta só: a semana em 81%, o teto em 80% e os itens que faltam. Você responde "sim, até 90%". Cada faixa, no próximo passo, mostra a sua resposta antes do item e a anota no item:
+
+```
+AUTHORIZED 90%: "sim, até 90%"
+```
+
+Se você responder "não", as faixas param com um commit wip e a fila fica para depois.
+
+### 14.230 Um arquivo, um dono: a olinda pede, a jussara concorda e a correção é copiada
+
+A olinda precisa de `scripts/check-kit.js`, que a jussara está usando. Ela não pega o arquivo: pede.
+
+```
+dispatch.js ask olinda scripts/check-kit.js
+ASKED scripts/check-kit.js from jussara
+```
+
+O pedido fica registrado e o arquivo continua com a jussara. Qualquer faixa vê a fila de pedidos:
+
+```
+dispatch.js asks
+olinda asks scripts/check-kit.js from jussara
+```
+
+Quando a jussara termina o que fazia no arquivo, ela concorda e solta:
+
+```
+dispatch.js release jussara scripts/check-kit.js
+GRANTED scripts/check-kit.js to olinda (released by jussara)
+```
+
+Mais tarde as duas esbarram no mesmo defeito. A jussara corrige primeiro e registra a correção:
+
+```
+dispatch.js fix register <commit> --lane jussara --defect trim
+REGISTERED trim by jussara (0159dc4) fix(F-5): trim the input
+```
+
+A olinda não refaz: com o worktree limpo, roda `fix copy`, que aplica o commit da jussara, confere que cada arquivo ficou igual ao dela e commita com a mesma mensagem:
+
+```
+dispatch.js fix copy trim
+COPIED trim from jussara (0159dc4) byte for byte
+```
+
+Os dois ramos têm a mesma correção, e juntá-los não dá conflito.
+
+### 14.231 As paradas das faixas numa pergunta só
+
+Três faixas param ao mesmo tempo: a jussara tem o #1 pronto para validar, a olinda quer dividir o #3 e a nanda precisa destravar um teste do #4. Nenhuma delas pergunta nada na própria sessão. O orquestrador junta as três numa pergunta só:
+
+```
+Round 1: 3 stops
+#50 Shop:
+- #1 (jussara) validation: #1 is ready: do you validate it and authorize its merge?
+#60 Billing:
+- #3 (olinda) split: split #3 in two parts?
+no epic:
+- #4 (nanda) unlock: unlock the AC2 test of #4?
+Answer for each item, in your own words.
+```
+
+Você responde só sobre o #1 e o #3. O #4 fica para a rodada seguinte. A jussara recebe a sua resposta com a pergunta que ela respondeu e a linha que escreve no item:
+
+```
+RELAY #1 validation
+question (round 1): - #1 (jussara) validation: #1 is ready: do you validate it and authorize its merge?
+the owner, verbatim: "Valido o #1 e autorizo o merge; pode dividir o #3 — "como proposto""
+- 2026-10-29: validated by the owner — Valido o #1 e autorizo o merge; pode dividir o #3 — "como proposto" (relayed by the orchestrator, round 1: "- #1 (jussara) validation: #1 is ready: do you validate it and authorize its merge?")
+```
