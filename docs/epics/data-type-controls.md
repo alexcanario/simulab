@@ -76,6 +76,10 @@ F-181, F-182, F-183, F-184, F-185, F-186
 - F-183: lesson: `gate.js ship --fresh` runs about 21 minutes and the shell tool stops a foreground command at 10 minutes, so the skill's "foreground, never background" cannot hold for this project's suite.
 - F-183: item decision: the search box keeps its aria-label and has no visible label, hint or error (BR7).
 - F-183: item decision: code and one-time code fields clean the value on leave, not on each key (Blazor Server rewrites the value under the caret).
+- F-189: lesson: the test phase locked the helper skeleton together with the tests, so implementing it needed an owner unlock; `test-lock.js lock` should name only the test files, never the skeleton the code fills.
+- F-189: lesson: the full suite went red twice on tests outside the item (Catalog, ExamEngine) while other lanes ran their own suites on the same machine, and green on the next run; parallel lanes share the CPU and the containers the slow tests wait on.
+- F-189: item decision: the matrix check reads the gallery by structure (title, caption, control class), not by control ids.
+- F-189: item decision: the search box shows three states only (no error, disabled or read-only parameter).
 
 ## Related
 - Catalog: [data-type-controls.md](../design/data-type-controls.md)

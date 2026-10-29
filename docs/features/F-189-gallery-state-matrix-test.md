@@ -1,7 +1,8 @@
 ---
 feature: F-189
 epic: Data type controls
-status: idea
+status: done
+Autopilot: shipping
 board: 259
 version: 1
 ---
@@ -10,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: idea (2026-10-29)
-- Stopped at: Captured from the independent review of F-183 (finding 6).
-- Next action: Refine it (owner).
+- Status: done (2026-10-29)
+- Stopped at: Shipped: merged into main at e18e3468
+- Next action: Nothing: the item is delivered
 - Waiting on: nothing
 
 ## Summary
@@ -22,5 +23,118 @@ Technical terms: [glossary](../glossary.md)
 - Depends on: nothing (F-183 is done).
 - Waits on (to start): nothing.
 - Needed to validate: nothing.
-- Suggested path: `/agile:refine` → `/agile:build`.
+- Model: opus (lane assignment of the lanes run; no door).
+- Risk: medium (no signal; code or rules changed (.claude/agile/sync.json))
+- Suggested path: `/agile:autopilot F-189`.
 - Parallel with: F-190.
+
+## Goal
+A kit control that loses a state in the gallery fails a test, instead of passing because another control still shows that state.
+
+## What already exists
+- `UiGallery.razor` section `#gallery-text-kinds` (`src/Hosts/Simulab.Web/Components/Pages/Dev/UiGallery.razor`): three `div` columns; inside, each control kind has an `h3.gallery-kind-title` followed by pairs of `p.gallery-state-caption` and the control.
+- Text area, e-mail, web address, code and one-time code each show six states (Empty, Filled, Error, Disabled, Read-only, Long value); search shows three (Empty, Filled, Long value), because `AppSearchField` has no error, disabled or read-only parameter.
+- `UiGalleryTextKindsTests` (F-183, locked) only checks that each caption is somewhere in the section.
+- `KitTestContext` and `FakeHostEnvironment` render the gallery in Development.
+
+## Users and use cases
+- UC1 A developer drops a state from one kit control in the gallery and a test names the control and the state that is missing.
+
+## Business rules
+- BR1 The matrix is per control: for each control kind the gallery section lists the states that apply to it, and each caption is followed by that kind's own control.
+- BR2 Applicable states: the six states for text area, e-mail, web address, code and one-time code; Empty, Filled and Long value for search.
+- BR3 A state caption that follows a kind's title belongs to that kind only; a caption of another kind never counts for it.
+
+## Screens and API
+None. Test only; the gallery markup is not changed.
+
+## Docs
+- none — a test-only item; no behaviour, contract or module changes.
+
+## Risks
+- none — adds one test file and changes no production code.
+
+## Acceptance criteria
+- AC1 Given the gallery in Development, when the section "Text kinds" is read, then each of the six kinds has a block started by its own title.
+- AC2 Given the block of text area, e-mail, web address, code or one-time code, then it holds the captions Empty, Filled, Error, Disabled, Read-only and Long value, each followed by that kind's control.
+- AC3 Given the block of search, then it holds Empty, Filled and Long value, each followed by the search control.
+- AC4 Given a copy of the section where one kind lacks a state its block must hold, when the matrix is checked, then the check reports the kind and the state that is missing.
+- AC5 All new texts appear in every locale of `UI locales:` (none are added: the test has no UI text).
+
+## Criterion → test
+
+Tests locked: 1ecfb7d33d5453ccbff959baf2a01eb31c631378 (1 file); unlocks: 2
+
+| Criterion | Test |
+| --- | --- |
+| AC1 | `UiGalleryStateMatrixTests.Read_Development_EachKindHasABlockStartedByItsOwnTitle` |
+| AC2 | `UiGalleryStateMatrixTests.Problems_Development_KindWithSixStatesHoldsEachOfThem` |
+| AC3 | `UiGalleryStateMatrixTests.Problems_Development_SearchHoldsEmptyFilledAndLongValue` |
+| AC4 | `UiGalleryStateMatrixTests.Problems_CaptionRemovedFromOneKind_NamesTheKindAndTheState`, `Problems_ControlOfAnotherKindUnderACaption_NamesTheKindAndTheState`, `Problems_ExpectedKindWithNoBlock_NamesTheKind` |
+| AC5 | n/a — no UI text added (Verificado pelo Claude in `## Validation script`) |
+
+## Decisions
+- 2026-10-29 — New test file `UiGalleryStateMatrixTests`; the locked `UiGalleryTextKindsTests` is left as it is, no unlock — the item allows it and a lock keeps shipped tests stable — assumed: new-file-over-unlock (item summary)
+- 2026-10-29 — The test reads the rendered DOM by structure (title, caption, control class), not by control ids — an id rename must not break it, a dropped state must — assumed: technical choice
+- 2026-10-29 — Search is expected to show three states only — `AppSearchField` has no error, disabled or read-only parameter — assumed: verified in the code
+- 2026-10-29 — The matrix check is a pure function over the section's DOM so AC4 can be proved on a copy with a caption removed, with no change to the gallery — assumed: technical choice
+- 2026-10-29: tests unlocked (helper skeleton `GalleryStateMatrix.cs` locked by mistake with the tests; owner answered "continue" in the olinda session); relocked with `UiGalleryStateMatrixTests.cs` alone, the test unchanged.
+- 2026-10-29: tests unlocked (`Problems_Development_SearchHoldsEmptyFilledAndLongValue` rendered the section twice and bUnit refused the second service registration; owner answered "Yes, unlock" in the olinda session); the section is rendered once, the assertions unchanged.
+- 2026-10-29 — The session ran on Sonnet 5.5 up to the first lock, then on Opus 5.5 (owner's `/model`); the lane asked opus — confirmed: lane-run.js WORK line
+- 2026-10-29 — Reuse: the gallery render of `UiGalleryTextKindsTests` (`KitTestContext`, `FakeHostEnvironment`, `SourceDelay`) and AngleSharp's DOM; nothing else found for reading a section by structure (searched `tests/Hosts/Simulab.Web.Tests/Ui`).
+- 2026-10-29 — Shortcuts: none.
+- 2026-10-29: validated by the owner — validado e autorizo o merge de F-189 e F-190 (relayed by the orchestrator, round 1: "- F-189 (olinda) validation: F-189 is ready: do you validate it and authorize its merge?")
+
+## Out of scope
+- Adding error, disabled or read-only states to the search control.
+- Other gallery sections (field kinds, lookups): they have their own tests.
+
+## Open questions
+- (none)
+
+## Change notes
+
+## Validation script
+
+### pt-BR
+
+#### Verificado pelo Claude
+- AC1 a AC4: `UiGalleryStateMatrixTests` passa no Git Bash e no PowerShell 7: `Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10` (em 2c6edd58).
+- Teste de falha real: com a legenda e o controle "Read-only" do código de uso único apagados de `UiGallery.razor`, 3 testes falham e a mensagem diz `One-time code (AppOtpField): missing state Read-only`; o arquivo foi restaurado com `git checkout` (em 2c6edd58).
+- Gate do build: `agile gate GREEN`; varredura de segurança: `agile scan GREEN` (em 2c6edd58).
+- AC5: o item não adiciona texto de interface; nenhum arquivo de recursos mudou (em 2c6edd58).
+
+#### Só você
+1. [ ] Passo 1 de 1 (cerca de 3 min): rode os testes da matriz no worktree `D:\wt\simulab\f-189-gallery-state-mat`.
+
+   Git Bash:
+   ```bash
+   cd /d/wt/simulab/f-189-gallery-state-mat && dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~UiGalleryStateMatrixTests"
+   ```
+   PowerShell 7:
+   ```powershell
+   Set-Location D:\wt\simulab\f-189-gallery-state-mat; dotnet test tests/Hosts/Simulab.Web.Tests --filter "FullyQualifiedName~UiGalleryStateMatrixTests"
+   ```
+   Esperado: a última linha é `Passed!  - Failed:     0, Passed:    10, Skipped:     0, Total:    10`; para repetir, rode o mesmo comando.
+
+## Events
+
+- 2026-10-29 assumed — 5 answers
+- 2026-10-29 blocked — test wrong: helper skeleton GalleryStateMatrix.cs locked by mistake with the tests; owner answered 'continue' in the olinda session (2026-10-29)
+- 2026-10-29 blocked — test wrong: Problems_Development_SearchHoldsEmptyFilledAndLongValue rendered the section twice and bUnit refused the second service registration; owner answered 'Yes, unlock' in the olinda session ...
+- 2026-10-29 test-fail — tests failed (Simulab.slnx): Simulab.Catalog.Tests.NoticeSubjectMappingEndpointTests.Taxonomy_ReturnsLiveSubjectsAndTopi, 2 reds
+
+## Delivery
+
+Gate time: 9 passes, 54 min 16 s — turn 4 (57 s), ship 4 (49 min 39 s), scan 1 (3 min 40 s), sealed 1 (3 min 40 s saved); 2 red
+Usage: 2725.1k weighted (estimate) — ship 45% · other 55% — context per turn 223k — 1 session, 101 turns
+- Branch: `feature/F-189`, merged into `main` at `e18e3468` (app version 1.29.0); the branch was never pushed.
+- Tests: full suite green at ship (`agile gate GREEN`); `UiGalleryStateMatrixTests` 10/10. Two earlier ship runs were red on tests outside the item (`NoticeSubjectMappingEndpointTests.Taxonomy_ReturnsLiveSubjectsAndTopicsAlphabetically_AccentsIgnored_NoDeletedItem`, `AttemptContentEndpointTests.Content_NeverCarriesAnAnswerKeyATrueFalseKeyAnExplanationOrARubric`); the next run was green.
+- Manual pages: none (test-only item, no visible behaviour).
+- Glossary: 2 rows added (AngleSharp, DOM).
+- Validation evidence:
+  - [verified] AC1 to AC4: `UiGalleryStateMatrixTests` 10/10 in Git Bash and PowerShell 7 (at 2c6edd58).
+  - [verified] Real failure: the one-time code "Read-only" state removed from `UiGallery.razor` makes 3 tests fail naming it (at 2c6edd58).
+  - [verified] Gate GREEN and scan GREEN (at 2c6edd58).
+  - [verified] AC5: no UI text added (at 2c6edd58).
+  - 1. [ ] not tested — step 1 (validated by the owner's relayed words, no tick recorded).
