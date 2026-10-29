@@ -8457,3 +8457,140 @@ Delegation: epic #379 — "Delego a validacao do epico #379" (2026-10-29)
 ```
 
 Quando o épico fechar, ou quando você digitar `revogo a delegação`, a linha some, e o próximo item volta a parar na sua validação.
+
+### 14.234 O sync mostra quanto o contexto pesa
+
+Depois de atualizar o plugin, você digita `/agile:sync` num projeto com o `CLAUDE.md` de 2.900 palavras. Ao gravar o registro, o Claude repete a linha de contexto que o `sync.js` imprimiu:
+
+```
+context: 2903 of 3461 words (no earlier measure)
+```
+
+Em português: 2.903 de 3.461 palavras, e nenhuma medida anterior para comparar. Três semanas depois o `CLAUDE.md` tem 3.300 palavras, e o próximo sync mostra:
+
+```
+⚠ context: 3303 of 3461 words (+400 since the last sync) — run /agile:doctor
+```
+
+O aviso diz que passou de 95% do teto e cresceu mais de 150 palavras. O sync não abre card nenhum; o `/agile:doctor` continua sendo seu para digitar. Quando você digita, a primeira linha do relatório avisa quanto sobra:
+
+```
+agile doctor WARNING: always-loaded context at 95% of the cap (3303 of 3461 words, room 158): run the cuts first
+```
+
+### 14.235 Sob a delegação, o médio passa e o alto para
+
+Você delegou o épico #378. Dois itens dele chegam à validação. O primeiro é de risco médio, com todos os passos marcados e sem achado grave; o Claude confere e ele segue sozinho para o ship:
+
+```
+agile delegation ELIGIBLE: F-71 under epic #378 — "delego a validação do épico #378" (2026-10-29)
+```
+
+O outro é de risco alto. Ele para na validação, como sempre, e o relatório diz por quê:
+
+```
+agile delegation STOP: F-74: risk high
+```
+
+### 14.236 O --delegate: um épico inteiro sem paradas
+
+Você quer o épico #378 rodando até o fim sem precisar de você em cada item. Em vez de digitar a frase, você põe a delegação no próprio comando:
+
+```
+/agile:epic #378 --autopilot --delegate
+```
+
+A delegação fica registrada com o comando que você digitou:
+
+```
+agile delegation: epic #378 — "/agile:epic #378 --autopilot --delegate" (2026-10-29)
+```
+
+Cada item que chega à validação seguro o bastante passa sozinho. Um item de risco alto, um check vermelho, um achado grave, um corte de tamanho L ou os 80% da sua cota semanal ainda param em você. Sem o `--delegate`, o mesmo comando para em cada validação, como antes.
+### 14.237 O painel de um projeto mostra o que o projeto tem
+
+Você abre o painel de um projeto com três itens prontos e uma faixa trabalhando. Em vez de "histórico de ships indisponível", o bloco mostra o que existe:
+
+```
+Tempo e progresso
+  hoje: 2 itens
+  por dia: 2026-10-29 2 · 2026-10-28 1
+  lane jussara: 2 de 4 itens prontos
+```
+
+Dois itens ficaram prontos hoje e um ontem. A faixa jussara recebeu quatro itens e já entregou dois.
+### 14.238 O resolve abre o painel
+
+Você digita `/agile:resolve` com três issues. Depois de abrir as faixas, o Claude mostra o painel. Na CLI ele inicia o painel em segundo plano; a primeira linha dele é:
+
+```
+agile dashboard WATCH: every 30 s -> D:/dev/_icontrol/agile-canary/.git/agile/dashboard.html
+```
+
+No app não há nada para iniciar: o painel agile do Code desktop abre sozinho quando uma faixa começa a trabalhar (exemplo 14.239). Na CLI, a página se recarrega sozinha a cada 30 segundos e o Claude escreve `Dashboard: D:/dev/_icontrol/agile-canary/.git/agile/dashboard.html` e você abre o arquivo onde quiser. Quando as faixas terminam, o Claude para o painel.
+
+### 14.239 O painel agile no Code desktop
+
+Três faixas trabalham e uma espera por você. Acima do prompt do Code desktop aparece a faixa:
+
+```
+⚠ 2 espera você · jussara F-5 aguardando você · olinda F-6 trabalhando · semana 40%
+```
+
+O painel abre sozinho quando a primeira faixa começa a trabalhar. Se você o fechar, digite `dashboard` para abri-lo de novo. Ele mostra os quatro blocos:
+
+```
+O que espera por você
+  F-5 Cinco — validação e merge — diga: autorizo o merge de F-5
+  lane jussara · F-5 · aguardando você
+Sessões
+  orçamento: a semana usou 40% (reduz o modelo em 70%, pergunta em 80%) · ok
+  jussara · opus · F-5 · aguardando você · 1 h · US$ 1.50
+  olinda · sonnet · F-6 · trabalhando · 30 min · US$ 0.50
+Itens em andamento
+  F-5 Cinco — aguardando validação · você (o dono) · o dono valida
+Tempo e progresso
+  hoje: 0 itens
+  por dia: —
+  lane jussara: 0 de 1 itens prontos
+  lane olinda: 0 de 1 itens prontos
+```
+
+Nenhuma página é aberta e nada é gravado: o painel só lê os arquivos do repositório.
+
+No app, a página abre no painel do navegador e se recarrega sozinha a cada 30 segundos. Na CLI, o Claude escreve `Dashboard: D:/dev/_icontrol/agile-canary/.git/agile/dashboard.html` e você abre o arquivo onde quiser. Quando as faixas terminam, o Claude para o painel.
+
+### 14.240 Uma faixa abre num modelo abaixo do plano e o Claude a troca
+
+O plano dá opus para o item da jussara, mas a sessão que coordena roda em sonnet, e o app abre a faixa em sonnet. O Claude confere cada faixa:
+
+```
+MODEL jussara s1 wants opus
+MODEL olinda s2 wants haiku
+```
+
+A sessão da jussara está em sonnet, abaixo do que o item pede. O Claude troca o modelo dela para opus, e o app pede o seu sim, porque o opus custa mais. Você aceita, e a jussara segue em opus a partir da próxima resposta. Se você recusar, ela segue em sonnet, e o item anota isso nas suas decisões.
+
+### 14.241 O board do épico atrasado, acertado antes da fila
+
+Você roda `/agile:epic data-type-controls --autopilot`. O arquivo do épico tem as features F-189 e F-190 e a F-183 entregue, mas a issue do épico no board ficou para trás. Antes da primeira feature, a execução mostra:
+
+```
+MISSING F-189: in the file, not on the board
+MISSING F-190: in the file, not on the board
+STATUS F-183: file done, board idea
+AUTOPILOT: the header names F-183, which is done
+agile epic-mirror DRIFT: 4 differences
+```
+
+Nada disso é pergunta sua: o Claude acerta a linha `Autopilot:` para a primeira feature da fila, manda o corpo do épico de novo a partir do arquivo, confere, e a fila começa. Só uma linha a mais no board, que o arquivo não tem, para e pergunta.
+
+### 14.242 O gasto de uma faixa visível, tirado da própria sessão
+
+A jussara termina o F-1 e anota o gasto da sessão até ali:
+
+```
+agile lane jussara: US$ 0.02 spent (estimated from session aaaaaaaa-1111-2222-3333-444444444444)
+```
+
+O valor é uma estimativa pelo preço de cada modelo, lida da transcrição da própria sessão. No item seguinte o total cresce e substitui o anterior; ele nunca soma de novo o que já tinha contado. O painel e a cota da semana passam a ver esse gasto.
