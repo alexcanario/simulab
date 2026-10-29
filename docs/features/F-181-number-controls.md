@@ -1,7 +1,7 @@
 ---
 feature: F-181
 epic: Data type controls
-status: approved
+status: building
 Autopilot: approved
 board: 251
 version: 1
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-29)
-- Stopped at: Refined and approved by autopilot (`--assume`); the build has not started.
-- Next action: Build it in the worktree (autopilot).
+- Status: building (2026-10-29)
+- Stopped at: Build started in the worktree (autopilot)
+- Next action: Write the failing tests, then the number controls (Claude)
 - Waiting on: nothing
 
 ## Summary
@@ -120,19 +120,19 @@ Each kind of number has one named control, one formatter and one column in the k
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
-| AC13 | pending |
+| AC1 | `AppNumberFormatTests` (all) |
+| AC2 | `AppIntegerFieldTests.Input_IsTextWithTheNumericKeyboard_AndShowsTheUnit`, `Leave_AWholeNumber_IsTheValue`, `Leave_Blank_IsNoValue`, `Leave_NotAWholeNumber_KeepsTheTextShowsTheErrorAndDoesNotChangeTheValue`, `Stepper_PlusAndMinus_MoveTheValue` |
+| AC3 | `AppDecimalFieldTests` (all) |
+| AC4 | `AppScoreFieldTests.Score_BehavesAsTheDecimalFieldAndShowsThePointsUnit` |
+| AC5 | `AppYearFieldTests` (all) |
+| AC6 | `AppIntegerFieldTests.Leave_NotAWholeNumber_KeepsTheTextShowsTheErrorAndDoesNotChangeTheValue`, `Error_ThePagesOwnMessage_WinsOverTheFields`, `Leave_AfterAnError_ValidTextClearsIt`, `Description_IsWhatTheInputPointsAt`; `AppDecimalFieldTests.Leave_TheOtherSeparator_IsAParseErrorAndKeepsTheText` |
+| AC7 | `NumberTextTests` (all) |
+| AC8 | `AppScoreColumnTests.Column_RightAlignsTheCellAndFormatsWithItsDecimals` |
+| AC9 | `UiGalleryNumbersTests` (all) |
+| AC10 | `NoticeSubjectPointsTests.Dialog_TheTwoFields_AreTypedNumberControls`, `Dialog_ATextThatIsNotANumber_IsRefusedAndNothingIsSent`, `Dialog_Add_SendsThePointsPerQuestion`; `NoticeSubjectsSectionTests` (dialog fields) |
+| AC11 | `ExamRulesFormTests.Edit_TheScoreFieldsAndTheYear_AreTypedNumberControls`, `Edit_ATextThatIsNotANumber_BlocksTheSave`, `Save_Add_SendsTheDurationInMinutesAndTheThreeScores`; `ExamEditionFormTests` (year) |
+| AC12 | `NumberPageFieldsTests.Field_UsesTheControlOfItsKind`, `Form_HasNoNumberInputAndNoTextFieldHoldingANumber` |
+| AC13 | `NumberResourcesTests.Key_HasATextInTheLanguage` |
 
 ## Decisions
 - 2026-10-27 — Epic Data type controls — breakdown of the epic — owner
@@ -145,6 +145,7 @@ Each kind of number has one named control, one formatter and one column in the k
 - 2026-10-29 — Typed fields are built on `AppTextField<string>` and keep the raw text; they do not use `MudNumericField` — the catalog refuses it (section 4) and it breaks the pt-BR comma — confirmed: docs/design/data-type-controls.md
 - 2026-10-29 — `AppNumberText` and `AppScoreText` are components (the unit "pts" is localized) with static `Format` helpers in `AppNumberFormat` for code; `AppScoreColumn` extends `AppNumberColumn` and takes `Decimals` — assumed: technical
 - 2026-10-29 — No new package: everything uses MudBlazor and the framework already in the solution — assumed: packages
+- 2026-10-29 — plan — 1 AppNumberFormat + tests → format tests green; 2 AppIntegerField, AppDecimalField, AppScoreField, AppYearField → control tests green; 3 AppNumberText, AppScoreText, AppScoreColumn → display tests green; 4 resx in three locales + gallery section "Numbers" + styles → gallery and resource tests green; 5 NoticeSubjectDialog moves to the controls → NoticeSubjectPointsTests green; 6 ExamEditionForm moves to the controls → ExamRulesFormTests and ExamEditionFormTests green; 7 flow page, catalog update and manual page (pt-BR) → techdocs check; 8 gate, review, scan, validation script — assumed: technical
 
 ## Out of scope
 - Duration and range controls (F-182); percent and money (F-187); the slider (F-191); the enforcement architecture tests (F-186).

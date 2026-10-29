@@ -1,0 +1,8 @@
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public int Decimals { get; set; }
+    [Parameter] public decimal? Value { get; set; }
+    [Parameter] public EventCallback<decimal?> ValueChanged { get; set; }
+    [Parameter] public EventCallback<bool> InvalidChanged { get; set; }
+}

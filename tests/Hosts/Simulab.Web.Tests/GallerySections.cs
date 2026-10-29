@@ -32,5 +32,7 @@ internal static class GallerySections
         "gallery-buttons", "gallery-type", "gallery-palette",
         // F-169: the exam simulator's answer area, answer sheet and save status.
         "gallery-answer-options", "gallery-answer-sheet", "gallery-save-status",
+        // F-181: the number controls and their texts.
+        "gallery-numbers",
     ];
 }

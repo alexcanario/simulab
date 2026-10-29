@@ -466,7 +466,8 @@ public sealed class NoticeSubjectsSectionTests : CatalogPageTestContext
         dialogs.Find("#notice-subject-label").GetAttribute("maxlength").Should().Be("200");
         dialogs.Find("#notice-subject-label").GetAttribute("aria-required").Should().Be("true");
         dialogs.Find("#notice-subject-group").GetAttribute("aria-required").Should().BeNull("the group is optional");
-        dialogs.Find("#notice-subject-question-count").GetAttribute("type").Should().Be("number");
+        dialogs.Find("#notice-subject-question-count").GetAttribute("type").Should().Be("text");
+        dialogs.Find("#notice-subject-question-count").GetAttribute("inputmode").Should().Be("numeric");
         var text = Flat(dialogs.Markup);
         text.Should().Contain("How the notice groups its subjects.")
             .And.Contain("As the notice names it. From 2 to 200 characters.")

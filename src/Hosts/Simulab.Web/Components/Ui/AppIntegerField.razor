@@ -1,0 +1,10 @@
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+    [Parameter] public int? Value { get; set; }
+    [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+    [Parameter] public EventCallback<bool> InvalidChanged { get; set; }
+    [Parameter] public string? Unit { get; set; }
+    [Parameter] public bool Stepper { get; set; }
+    [Parameter] public string? Error { get; set; }
+}
