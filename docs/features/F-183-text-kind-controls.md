@@ -1,8 +1,8 @@
 ---
 feature: F-183
 epic: Data type controls
-status: building
-Autopilot: built (2026-10-28)
+status: validating
+Autopilot: stop 2
 board: 253
 version: 1
 ---
@@ -24,6 +24,7 @@ The kit gains `AppTextAreaField` (auto-grow, counter), `AppEmailField` (trim, lo
 - Waits on (to start): nothing.
 - Needed to validate: an account with two-factor sign-in on, in the worktree's app host (created during the validation; the validation script says how).
 - Model: opus (a door: the sign-in and two-factor screens change their fields).
+- Risk: high (door: src/Hosts/Simulab.Web/Components/Pages/Identity/CheckEmail.razor; reserved: docs/features/F-183-text-kind-controls.md: ## Security)
 - Suggested path: `/agile:refine` → `/agile:build`.
 - Parallel with: F-184.
 
@@ -224,6 +225,73 @@ Tests locked: 785b1b7d63a379e25de3bc296656b49a4206554f (4 files); unlocks: 0
 ## Change notes
 
 ## Validation script
+
+### pt-BR
+Necessário para validar: o app host local com o administrador da carga inicial `admin@simulab.local` (senha em `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`) e um app autenticador no seu celular (Google Authenticator, Authy ou similar) — você fornece. A conta com verificação em dois fatores é criada no passo 2.
+
+#### Verificado pelo Claude
+- Os 6 controles novos, os 18 campos das telas e a galeria: 2946 testes do projeto Web verdes na suíte completa, 79 deles nos controles, nas telas de campos e na galeria (em ca819b9).
+- AC9 e AC10 na Api: código de 3, 5 e 7 dígitos ou com letra é recusado como `TotpCodeInvalid` e conta uma falha; entrar e pedir redefinição com o e-mail em minúsculas chega à conta criada com maiúsculas; 6 testes de `TextKindApiReachTests` verdes (em ca819b9).
+- O gate completo: `agile gate GREEN`, nenhum aviso novo, baseline com 0 entradas; Identity 589, Catalog 706, QuestionBank 857 e ExamEngine 99 testes verdes (em ca819b9).
+- O scan de segurança: `agile scan GREEN` (16 falsos positivos, 13 corrigidos, 1 fechado pelo Claude) (em ca819b9).
+- A revisão independente: 7 achados, 3 corrigidos, 1 aceito com decisão, 1 mantido (normaliza ao sair do campo) e 2 viram ideias; veja `## Decisions` (em ca819b9).
+- A conferência de tela da galeria e das páginas de entrada feita na construção, que achou e corrigiu a fonte monoespaçada dos campos de código (em 6b14a4e).
+
+#### Só você
+1. Passo 1 de 6 (cerca de 4 min): suba o app no banco próprio do item. Feche antes o Visual Studio ou qualquer app host rodando desta pasta.
+Git Bash:
+```bash
+cd /d/wt/simulab/f-183-text-kind-controls && Database__Name=simulab_f183 dotnet run --project src/Hosts/Simulab.AppHost
+```
+PowerShell 7:
+```powershell
+cd D:\wt\simulab\f-183-text-kind-controls; $env:Database__Name = 'simulab_f183'; dotnet run --project src/Hosts/Simulab.AppHost
+```
+Esperado: o endereço do painel do Aspire aparece e o Web responde em https://localhost:7125.
+
+2. Passo 2 de 6 (cerca de 6 min): crie a conta e confira o e-mail limpo.
+   - [ ] 2.1 Abra https://localhost:7125/sign-up e, no campo de e-mail, digite ` Ana.F183@Exemplo.COM ` (com espaços e maiúsculas) e saia do campo.
+   Esperado: o campo mostra `ana.f183@exemplo.com`, sem espaços.
+   - [ ] 2.2 Conclua o cadastro, abra o Mailpit pelo painel do Aspire e clique no link de verificação.
+   Esperado: a página de verificação confirma o e-mail.
+   - [ ] 2.3 Em https://localhost:7125/sign-in entre com `ANA.F183@exemplo.com ` (maiúsculas e um espaço no fim) e a senha.
+   Esperado: o campo limpa o e-mail e a entrada funciona, na mesma conta.
+
+3. Passo 3 de 6 (cerca de 6 min): ligue a verificação em dois fatores com o campo de código.
+   - [ ] 3.1 No menu do usuário (canto superior direito da barra superior) abra Conta e clique no link "Segurança".
+   Esperado: aparecem o QR code e o campo "Código" de seis dígitos.
+   - [ ] 3.2 Leia o QR code no app autenticador, digite no campo `12a3456` e saia do campo.
+   Esperado: ficam só dígitos, no máximo seis (`123456`), nunca letras; nada é enviado sozinho ao chegar no sexto dígito.
+   - [ ] 3.3 Apague, digite o código real do app e clique em "Ativar".
+   Esperado: os dois fatores ligam e a lista de códigos de recuperação aparece; guarde um deles.
+
+4. Passo 4 de 6 (cerca de 6 min): entre com os dois fatores.
+   - [ ] 4.1 Saia da conta e entre de novo no /sign-in com e-mail e senha.
+   Esperado: aparece o segundo passo com o campo "Código de autenticação".
+   - [ ] 4.2 Cole `123 456` (com espaço) no campo.
+   Esperado: o campo fica com `123456`; o formulário só é enviado pelo botão Entrar, e um código errado volta ao passo da senha com o aviso.
+   - [ ] 4.3 Clique em "Usar um código de recuperação" e digite o código guardado com um espaço no meio.
+   Esperado: o campo está em letra monoespaçada, o espaço some ao sair do campo e a entrada funciona.
+   - [ ] 4.4 Em Segurança, no campo "Código ou código de recuperação", digite um código inválido e clique em "Gerar novos códigos".
+   Esperado: o aviso aparece no campo e o texto digitado continua lá.
+
+5. Passo 5 de 6 (cerca de 6 min): endereço e texto longo no catálogo, como `admin@simulab.local`.
+   - [ ] 5.1 No menu lateral esquerdo abra Conteúdo > Órgãos emissores > Adicionar; em "Site oficial" digite `exemplo.gov.br` e saia do campo.
+   Esperado: o campo mostra `https://exemplo.gov.br` e um botão de abrir o link aparece na ponta direita; clicar abre uma nova aba.
+   - [ ] 5.2 Troque o endereço por `ftp://x`.
+   Esperado: o erro de endereço aparece e o texto continua no campo.
+   - [ ] 5.3 No campo "Descrição" digite várias linhas.
+   Esperado: o campo cresce até 10 linhas e depois rola; o contador abaixo mostra o tamanho e o limite.
+   - [ ] 5.4 Repita 5.1 em Conteúdo > Organizadores > Adicionar e, no formulário de uma edição, no campo do endereço do edital (veja o mapa em `docs/agile/ui-map.md`).
+   Esperado: o mesmo comportamento.
+
+6. Passo 6 de 6 (cerca de 5 min): galeria, idiomas e teclado.
+   - [ ] 6.1 No menu lateral esquerdo abra Desenvolvimento > UI kit e role até "Text kinds".
+   Esperado: cada controle aparece em vazio, preenchido, erro, desabilitado, somente leitura e valor longo (a busca só em vazio, preenchido e valor longo), nos temas claro e escuro (botão de tema da barra superior).
+   - [ ] 6.2 Troque o idioma pelo globo da barra superior para English e Português (Portugal).
+   Esperado: rótulos, dicas e erros dos controles mudam, sem chave crua.
+   - [ ] 6.3 Só com o teclado, refaça a entrada do passo 4 (Tab, digitar, Enter no botão).
+   Esperado: o foco anda na ordem da tela e fica visível.
 
 ## Events
 
