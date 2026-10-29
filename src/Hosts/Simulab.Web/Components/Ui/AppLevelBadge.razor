@@ -1,0 +1,4 @@
+@code {
+    [Parameter] public int? Value { get; set; }
+    [Parameter, EditorRequired] public IReadOnlyList<string> Names { get; set; } = [];
+}

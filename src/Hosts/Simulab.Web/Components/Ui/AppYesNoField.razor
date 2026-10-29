@@ -1,0 +1,9 @@
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+    [Parameter] public string? TrueText { get; set; }
+    [Parameter] public string? FalseText { get; set; }
+    [Parameter] public string? NotSetText { get; set; }
+    [Parameter] public bool? Value { get; set; }
+    [Parameter] public EventCallback<bool?> ValueChanged { get; set; }
+}

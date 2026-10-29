@@ -31,6 +31,11 @@ public sealed class QuestionFormTests : QuestionPageTestContext
         page.InvokeAsync(() => page.FindComponents<AppLookupField>()
             .Single(component => component.Instance.Id == id).Instance.ValueChanged.InvokeAsync(option));
 
+    // F-184 AC9: the difficulty is a level control, not a select.
+    private static Task SetLevelAsync(IRenderedComponent<QuestionForm> page, int? level) =>
+        page.InvokeAsync(() => page.FindComponents<AppLevelField>()
+            .Single(component => component.Instance.Id == "question-difficulty").Instance.ValueChanged.InvokeAsync(level));
+
     private static Task SetAsync<T>(IRenderedComponent<QuestionForm> page, string id, T? value) =>
         page.InvokeAsync(() => page.FindComponents<AppSelectField<T>>()
             .Single(component => component.Instance.Id == id).Instance.ValueChanged.InvokeAsync(value));
@@ -219,7 +224,7 @@ public sealed class QuestionFormTests : QuestionPageTestContext
         var providers = RenderProviders();
         var page = RenderAdd();
         await FillValidDraftAsync(page, options: 3, correct: 1);
-        await SetAsync<int?>(page, "question-difficulty", 4);
+        await SetLevelAsync(page, 4);
 
         page.Find(".app-form-save").Click();
 
@@ -480,7 +485,7 @@ public sealed class QuestionFormTests : QuestionPageTestContext
         var page = RenderAdd();
         await PickAsync(page, "question-subject", new AppLookupOption(Portuguese.Id, Portuguese.Name));
         await PickAsync(page, "question-topic", new AppLookupOption(Crase.Id, Crase.Name));
-        await SetAsync<int?>(page, "question-difficulty", 2);
+        await SetLevelAsync(page, 2);
         AddOptions(page, 2);
 
         page.WaitForAssertion(() =>

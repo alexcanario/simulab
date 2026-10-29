@@ -1,7 +1,7 @@
 ---
 feature: F-184
 epic: Data type controls
-status: approved
+status: building
 Autopilot: approved
 board: 254
 version: 1
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-29)
-- Stopped at: Refined and approved by autopilot (`--assume`); the build has not started.
-- Next action: Build it in the worktree (autopilot).
+- Status: building (2026-10-29)
+- Stopped at: Build started; tests written and locked
+- Next action: Write the controls and move the screens (Claude)
 - Waiting on: nothing
 
 ## Summary
@@ -121,18 +121,18 @@ Each kind of choice has one named control, one text and one column in the kit, s
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
-| AC11 | pending |
-| AC12 | pending |
+| AC1 | `AppSwitchTests` (all) |
+| AC2 | `AppSegmentedFieldTests` (all) |
+| AC3 | `AppYesNoFieldTests` (all) |
+| AC4 | `AppLevelFieldTests` (all) |
+| AC5 | `AppLevelFilterFieldTests` (all) |
+| AC6 | `ChoiceDisplayTests` (all), `AppBoolColumnTests.Column_ShowsTheWordsOfEachRow_WithAnIcon` |
+| AC7 | `AppLanguageFieldTests.Render_IsASelectFieldOfTheSupportedLanguages` |
+| AC8 | `UiGalleryChoicesTests` (all) |
+| AC9 | `ChoicePageFieldsTests.Field_UsesTheControlOfItsKind` (difficulty, key), `QuestionFormTests` (difficulty saved), `TrueFalseQuestionFormTests` (the key) |
+| AC10 | `QuestionsFilterPageTests.Filter_DifficultyNotSetAndFive_AreSentAsNoneAndFive`, `Address_WithFilters_IsAppliedAndShownInThePickers`; `ChoicePageFieldsTests.QuestionsTable_ShowsTheDifficultyWithTheBadge` |
+| AC11 | `ChoicePageFieldsTests.Field_UsesTheControlOfItsKind` (languages), `BaseTextsFilter_UsesTheLanguageField` |
+| AC12 | `ChoiceResourcesTests.Key_HasATextInTheLanguage` |
 
 ## Decisions
 - 2026-10-27 — Epic Data type controls — breakdown of the epic — owner
@@ -146,6 +146,7 @@ Each kind of choice has one named control, one text and one column in the kit, s
 - 2026-10-29 — Screen design reuses the mockup drawn for F-191 (the dots and the name, the badge, the filter chips) and the text wireframes; no new mockup — assumed: screen-design
 - 2026-10-29 — No new package: everything uses MudBlazor and the framework already in the solution — assumed: packages
 - 2026-10-29 — This run is on Sonnet 5.5, not on the lane's opus: a session cannot switch its own model — lane jussara — assumed: model-choice
+- 2026-10-29 — plan — 1 kit tests and skeletons, locked; 2 AppSwitch, AppSegmentedField, AppYesNoField → their tests green; 3 AppLevelField, AppLevelFilterField, AppLevelBadge → level tests green; 4 AppBoolText, AppBoolColumn, AppLanguageField → display tests green; 5 resx in three locales, gallery "Choices", styles → gallery and resource tests green; 6 QuestionForm (difficulty, key, language) → QuestionBank tests green; 7 Questions filter and column, BaseTextForm, BaseTexts, ExamForm, Account → page tests green; 8 flow page, manual page, gate, scan, validation script — assumed: technical
 
 ## Out of scope
 - The colour ramp, the gauge and the slider (F-191); the enforcement tests (F-186); `AppRadioCards` stays for choices that need a description.

@@ -140,13 +140,16 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
         var page = RenderPage();
         WaitForRows(page, 3);
 
-        Pick(page, "questions-filter-difficulty", "none");
-        Pick(page, "questions-filter-difficulty", "5");
+        // F-184 AC10: the difficulty filter is a row of level chips (toggle buttons), not a picker.
+        page.WaitForAssertion(() => page.FindAll("#questions-filter-difficulty-none").Should().ContainSingle());
+        page.Find("#questions-filter-difficulty-none").Click();
+        page.WaitForAssertion(() => page.Find("#questions-filter-difficulty-5").Should().NotBeNull());
+        page.Find("#questions-filter-difficulty-5").Click();
 
         page.WaitForAssertion(() => LastListQuery().Should().Contain("difficulty=none").And.Contain("difficulty=5"));
         WaitForRows(page, 1); // only the published question has difficulty 5; none of the three has no difficulty
-        page.Find("#questions-filter-difficulty").Click();
-        page.Find("#questions-filter-difficulty-option-none .app-mp-option-name").TextContent.Should().Be("Not set");
+        page.Find("#questions-filter-difficulty-none").TextContent.Should().Contain("Not set");
+        page.Find("#questions-filter-difficulty-5").GetAttribute("aria-pressed").Should().Be("true");
     }
 
     // AC1: a topic of the taxonomy is sent by its id.
@@ -260,7 +263,7 @@ public sealed class QuestionsFilterPageTests : QuestionPageTestContext
             ChipsOf(page, "questions-filter-status").Should().Contain("Published");
             ChipsOf(page, "questions-filter-type").Should().Contain("True/false");
             ChipsOf(page, "questions-filter-organizer").Should().Contain("CEBRASPE");
-            ChipsOf(page, "questions-filter-difficulty").Should().Contain("Not set");
+            page.Find("#questions-filter-difficulty-none").GetAttribute("aria-pressed").Should().Be("true");
         });
         page.Find(".app-table-search input").GetAttribute("value").Should().Be("guarda");
     }
