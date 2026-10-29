@@ -301,6 +301,7 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
 - 2026-10-28 stop — fresh context before review
 - 2026-10-29 rework — review #1: gallery states of OTP and search
 - 2026-10-29 rework — review #3/#4: AC10 and AC9 API tests
+- 2026-10-29 stop — stop 2 (validation)
 
 ## Delivery
 - Branch: feature/F-183
