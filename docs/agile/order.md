@@ -33,7 +33,7 @@
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
 |---|---|---|---|---|---|---|---|---|
 | 12 | F-181 | Number controls: integer, decimal, score and year | idea | - | Data type controls | - | F-182, F-186, F-187 | in cut data-type-controls; level 1; feature; Must; size L |
-| 13 | F-183 | Text kind controls: text area, e-mail, URL, code, one-time code, search | idea | - | Data type controls | - | F-186, F-188 | in cut data-type-controls; level 1; feature; Must; size L |
+| 13 | F-183 | Text kind controls: text area, e-mail, URL, code, one-time code, search | building | opus | Data type controls | - | F-186, F-188 | in cut data-type-controls; level 1; feature; Must; size L |
 | 14 | F-184 | Choice controls: switch, segmented, yes/no, level, language | idea | - | Data type controls | - | F-186 | in cut data-type-controls; level 1; feature; Must; size L |
 | 15 | F-185 | Date range and relative time | idea | - | Data type controls | - | F-186 | in cut data-type-controls; level 1; feature; Should; size M |
 | 16 | F-182 | Duration and numeric range controls | idea | - | Data type controls | F-181 | F-186 | in cut data-type-controls; level 2: waits on F-181; feature; Must; size M |
@@ -95,20 +95,19 @@
 | 57 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
 | 58 | F-161 | Keep only the Manaus 2026 edition in the guard catalog seed | idea | - | assessment-catalog | - | - | level 1; feature |
 | 59 | F-162 | Tenant-scoped visibility for curators and graders | idea | - | Partner tenants | - | - | level 1; feature |
-| 60 | F-163 | Seed the essay question of the Manaus 2026 paper | idea | - | Question bank | - | - | level 1; feature |
-| 61 | F-164 | Text alignment in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
-| 62 | F-165 | Stable error code for an unreadable request body | idea | - | Foundation and identity | - | - | level 1; feature |
-| 63 | F-179 | Flag a question for review | idea | - | Exam Simulator | - | - | level 1; feature |
-| 64 | F-173 | My exam attempts | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size S |
-| 65 | F-172 | Answer review after an attempt | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size M |
-| 66 | F-174 | Wrong-answer penalty and other scoring models | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size M |
-| 67 | F-187 | Reserve controls: money, percentage, time, date-time, month | idea | - | Data type controls | F-181 | - | level 2: waits on F-181; feature; Should; size L |
-| 68 | F-188 | Reserve controls: phone, tax id, color, tree pick, slider, image, user | idea | - | Data type controls | F-183 | - | level 2: waits on F-183; feature; Should; size L |
-| 69 | F-175 | Essay grade in the result | idea | - | Exam Simulator | F-171, F-151 | - | level 2: waits on F-171, F-151; feature; Could; size S |
-| 70 | F-176 | End-to-end test of a timed exam | idea | - | Exam Simulator | F-170, F-171 | - | level 2: waits on F-170, F-171; feature; Could; size S |
-| 71 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 2: waits on F-151; feature; Could; size M |
-| 72 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
-| 73 | F-180 | Minimum score per notice subject | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature |
+| 60 | F-164 | Text alignment in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
+| 61 | F-165 | Stable error code for an unreadable request body | idea | - | Foundation and identity | - | - | level 1; feature |
+| 62 | F-179 | Flag a question for review | idea | - | Exam Simulator | - | - | level 1; feature |
+| 63 | F-173 | My exam attempts | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size S |
+| 64 | F-172 | Answer review after an attempt | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size M |
+| 65 | F-174 | Wrong-answer penalty and other scoring models | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size M |
+| 66 | F-187 | Reserve controls: money, percentage, time, date-time, month | idea | - | Data type controls | F-181 | - | level 2: waits on F-181; feature; Should; size L |
+| 67 | F-188 | Reserve controls: phone, tax id, color, tree pick, slider, image, user | idea | - | Data type controls | F-183 | - | level 2: waits on F-183; feature; Should; size L |
+| 68 | F-175 | Essay grade in the result | idea | - | Exam Simulator | F-171, F-151 | - | level 2: waits on F-171, F-151; feature; Could; size S |
+| 69 | F-176 | End-to-end test of a timed exam | idea | - | Exam Simulator | F-170, F-171 | - | level 2: waits on F-170, F-171; feature; Could; size S |
+| 70 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 2: waits on F-151; feature; Could; size M |
+| 71 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
+| 72 | F-180 | Minimum score per notice subject | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature |
 
 ## Checklist
 
@@ -135,7 +134,7 @@
 ### MVP: data-type-controls
 
 - [ ] 12. F-181 — Number controls: integer, decimal, score and year [idea] — unlocks F-182, F-186, F-187 — why in cut data-type-controls; level 1; feature; Must; size L
-- [ ] 13. F-183 — Text kind controls: text area, e-mail, URL, code, one-time code, search [idea] — unlocks F-186, F-188 — why in cut data-type-controls; level 1; feature; Must; size L
+- [ ] 13. F-183 — Text kind controls: text area, e-mail, URL, code, one-time code, search [building] — model opus — unlocks F-186, F-188 — why in cut data-type-controls; level 1; feature; Must; size L
 - [ ] 14. F-184 — Choice controls: switch, segmented, yes/no, level, language [idea] — unlocks F-186 — why in cut data-type-controls; level 1; feature; Must; size L
 - [ ] 15. F-185 — Date range and relative time [idea] — unlocks F-186 — why in cut data-type-controls; level 1; feature; Should; size M
 - [ ] 16. F-182 — Duration and numeric range controls [idea] — waits on F-181 — unlocks F-186 — why in cut data-type-controls; level 2: waits on F-181; feature; Must; size M
@@ -191,24 +190,23 @@
 - [ ] 57. F-146 — Acceptance history on the account page [idea] — why level 1; feature
 - [ ] 58. F-161 — Keep only the Manaus 2026 edition in the guard catalog seed [idea] — why level 1; feature
 - [ ] 59. F-162 — Tenant-scoped visibility for curators and graders [idea] — why level 1; feature
-- [ ] 60. F-163 — Seed the essay question of the Manaus 2026 paper [idea] — why level 1; feature
-- [ ] 61. F-164 — Text alignment in the rich text editor [idea] — why level 1; feature
-- [ ] 62. F-165 — Stable error code for an unreadable request body [idea] — why level 1; feature
-- [ ] 63. F-179 — Flag a question for review [idea] — why level 1; feature
-- [ ] 64. F-173 — My exam attempts [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size S
-- [ ] 65. F-172 — Answer review after an attempt [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size M
-- [ ] 66. F-174 — Wrong-answer penalty and other scoring models [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size M
-- [ ] 67. F-187 — Reserve controls: money, percentage, time, date-time, month [idea] — waits on F-181 — why level 2: waits on F-181; feature; Should; size L
-- [ ] 68. F-188 — Reserve controls: phone, tax id, color, tree pick, slider, image, user [idea] — waits on F-183 — why level 2: waits on F-183; feature; Should; size L
-- [ ] 69. F-175 — Essay grade in the result [idea] — waits on F-171, F-151 — why level 2: waits on F-171, F-151; feature; Could; size S
-- [ ] 70. F-176 — End-to-end test of a timed exam [idea] — waits on F-170, F-171 — why level 2: waits on F-170, F-171; feature; Could; size S
-- [ ] 71. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 2: waits on F-151; feature; Could; size M
-- [ ] 72. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
-- [ ] 73. F-180 — Minimum score per notice subject [idea] — waits on F-171 — why level 2: waits on F-171; feature
+- [ ] 60. F-164 — Text alignment in the rich text editor [idea] — why level 1; feature
+- [ ] 61. F-165 — Stable error code for an unreadable request body [idea] — why level 1; feature
+- [ ] 62. F-179 — Flag a question for review [idea] — why level 1; feature
+- [ ] 63. F-173 — My exam attempts [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size S
+- [ ] 64. F-172 — Answer review after an attempt [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size M
+- [ ] 65. F-174 — Wrong-answer penalty and other scoring models [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size M
+- [ ] 66. F-187 — Reserve controls: money, percentage, time, date-time, month [idea] — waits on F-181 — why level 2: waits on F-181; feature; Should; size L
+- [ ] 67. F-188 — Reserve controls: phone, tax id, color, tree pick, slider, image, user [idea] — waits on F-183 — why level 2: waits on F-183; feature; Should; size L
+- [ ] 68. F-175 — Essay grade in the result [idea] — waits on F-171, F-151 — why level 2: waits on F-171, F-151; feature; Could; size S
+- [ ] 69. F-176 — End-to-end test of a timed exam [idea] — waits on F-170, F-171 — why level 2: waits on F-170, F-171; feature; Could; size S
+- [ ] 70. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 2: waits on F-151; feature; Could; size M
+- [ ] 71. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
+- [ ] 72. F-180 — Minimum score per notice subject [idea] — waits on F-171 — why level 2: waits on F-171; feature
 
 ## Summary
 
-- Delivered: 146
+- Delivered: 147
 - MVP mockup-stitch-1-formulario: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-2-navegacao: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-3-barra-app: 3 open (3 in the cuts, 0 their dependencies)

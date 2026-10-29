@@ -1,7 +1,7 @@
 ---
 title: Open-answer and essay questions
 summary: How a curator authors, publishes, versions and previews an open-answer or essay question, what a rubric is, why its points only split the question's grade, and what is left to the correction items F-150 to F-152.
-items: [F-109]
+items: [F-109, F-163]
 ---
 # Open-answer and essay questions
 
@@ -29,6 +29,9 @@ A curator with `questions.manage` picks the "Open answer" or "Essay" card on `/a
 - A rubric or a size limit on any other type is refused; options, a true/false key, left items or blanks on these two types are refused with the existing codes.
 - A grade names the rubric that graded it by the question's version number and the criterion's position (a version keeps no criterion id). F-151 decides whether that is enough.
 - Not here: grading, a grader role, the correction queue and the suggested grade (F-150, F-151, F-152); a student's attempt; performance levels per criterion.
+
+## Seeded essay (F-163)
+The data migration `SeedManausEssayQuestion` writes the essay of the Manaus 2026 municipal guard paper (Instituto Consulplan, booklet type 1) as question 61 of that edition: `Published`, version 1, topic "Produção Textual › Redação (nível superior)", size 20 to 30 lines, the three supporting texts as one base text and the six criteria of the exam board's grid (4, 4, 3, 2, 3 and 4 points, total 20). The rubric only adds a maximum per criterion, so the three micro-structural criteria hold the points kept when no error is made and their description states the deduction (minus 0.50 per syntactic error, minus 0.25 per morphosyntax or deviation error, never below 0); a grader applies it by hand and F-151 and F-152 show the description. The migration is skipped when the catalog schema, the edition or the topic is missing or deleted, or when paper number 61 or the fixed essay id is already held; `Down` removes only an essay nobody changed.
 
 ## Wireframe
 ```text

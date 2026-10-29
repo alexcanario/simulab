@@ -1666,3 +1666,24 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Seen again, no new row: `cleanup.js run` read the prose of the `Worktrees:` line as the root (rows F-107 and B-35).
 - Decisions: 45 item decisions stay in the item. Shortcuts: 1 (`PublishedQuestionDirectory.cs:91`, LIKE scan, trigger hundreds of thousands of `question_versions` rows), not captured by the owner. Glossary: 5 rows.
 - Process note, not a lesson: the full suite took 944 s, then 533 s on the merged tree, over the 5 min budget; F-177 holds the budget work.
+
+## 2026-10-28 - Sync with agile@canary 0.200.0
+- From 0.195.0 to 0.200.0 (5 minor versions). Copied: `.claude/rules/agile/workflow.md`, `docs/agile/templates/bug.md`, `docs/agile/templates/feature.md`, `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md` — assumed: plugin-copy (base autonomy policy).
+- Merged: none (the `edited` copies had no upstream change). Manual build files: no upstream change.
+- Baseline: present. Docs command: already declared (DocGen). Plugin notes marked: none.
+- Missing capabilities, not installed and not captured: release pipeline (0.64.0), Cloud accounts check in `agile-deploy.js` (0.2.0).
+- Glossary (5g): not run.
+
+## 2026-10-29 - Sync with agile@canary 0.213.0
+- From 0.200.0 to 0.213.0 (13 minor versions). Copied: `.claude/rules/agile/workflow.md`, `docs/agile/templates/bug.md`, `docs/agile/templates/feature.md`, `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md`, `docs/agile/profile-sections/runtime-themes-mudblazor.md` — assumed: plugin-copy (base autonomy policy).
+- Merged: none (the `edited` copies had no upstream change). Manual build files: no upstream change.
+- Baseline: present. Docs command: already declared (DocGen). Plugin notes marked: none. Removed copies: none.
+- Missing capabilities, not installed and not captured: release pipeline (0.64.0), Cloud accounts check in `agile-deploy.js` (0.2.0).
+- Glossary (5g): not run. Ran with F-183 building in its worktree (owner said yes).
+
+## 2026-10-29 - Sync with agile@canary 0.220.0
+- From 0.213.0 to 0.220.0 (7 minor versions). Copied: `docs/agile/templates/bug.md`, `docs/agile/templates/feature.md`, `docs/agile/templates/project-claude.md`, `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md` — assumed: plugin-copy (base autonomy policy).
+- Merged: none (the `edited` copies had no upstream change). Manual build files: no upstream change.
+- Baseline: present. Docs command: already declared (DocGen). Plugin notes marked: none. Removed copies: none.
+- Missing capabilities, not installed and not captured: release pipeline (0.64.0), Cloud accounts check in `agile-deploy.js` (0.2.0).
+- Glossary (5g): column and link lines already present; no proposals. Ran with F-183 building in its worktree; main checkout clean.

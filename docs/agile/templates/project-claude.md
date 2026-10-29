@@ -51,7 +51,7 @@ A named model is for complex tasks (`references/model-choice.md`, see the manual
 - Design and architecture passes (`/agile:build`, agents `system-design` and `architect`): <strongest available model>, passed on the call.
 - Screen design (`/agile:screen`, agent `ux-designer`): <strongest available model>, passed on the call.
 - Screen implementation (`/agile:build`, agent `frontend`): <mid model>, passed on the call.
-- Main session (quiz, refinement, build): the session model, chosen by the owner.
+- Main session (quiz, refinement, build): the session model, chosen by the owner; effort `high` only on an extreme item, with the owner's yes at approval.
 - Code searches and sweeps (the `worker` agent): <small fast model>. Bulk mechanical work verified by tests: <mid model>.
 
 ## Board

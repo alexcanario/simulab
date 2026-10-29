@@ -228,7 +228,7 @@ public sealed class SeedManausGuardQuestionsTests : QuestionReviewApiTests
             $"""
             SELECT id, paper_number, topic_id, notice_subject_id, exam_edition_id, base_text_id, tenant_id, type,
                    content_language, statement_html, statement_text, normalized_statement
-            FROM question_bank.questions WHERE exam_edition_id = '{Manaus}' ORDER BY paper_number
+            FROM question_bank.questions WHERE exam_edition_id = '{Manaus}' AND type <> 'Essay' ORDER BY paper_number
             """,
             reader => new QuestionRow(
                 reader.GetGuid(0),
