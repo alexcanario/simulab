@@ -4469,7 +4469,7 @@ O check confere que a tabela e o repositório contam o mesmo. Esta é a saída r
 ok   AC5: the report states the files that use CLAUDE_PLUGIN_ROOT (42)
 ok   AC5: the report states the files that use AskUserQuestion (1)
 ok   AC5: the report states the hook events (8)
-ok   AC5: the report states the skills (26) and the agents (8)
+ok   AC5: the report states the skills (27) and the agents (11)
 ```
 
 Se um item futuro usar a variável em mais um arquivo, a linha `CLAUDE_PLUGIN_ROOT` fica vermelha até alguém atualizar o número da tabela, depois de reler a linha.
@@ -7863,3 +7863,296 @@ agile resolve-state DEBRIEF: acme/shop#41 1 features, 0 escalations, tokens unkn
 ```
 
 Os tokens saem `desconhecido` quando a transcrição da sessão não está na máquina; nada é estimado. Duas perguntas feitas contra cinco respondidas pelo contexto mostram quanto o projeto já responde sozinho.
+
+### 14.209 Os agentes especialistas de um `/agile:resolve`: um teste errado devolvido e uma fatia que para na terceira tentativa
+
+O acme-shop roda `/agile:resolve acme/acme-shop#52`, a issue do desconto por cupom. No build, o Claude não escreve teste nem código: o `test-writer` escreve os testes de aceitação, o Claude os roda, mostra os cinco vermelhos pelo comportamento que falta e os trava. A fatia 1 (o desconto no domínio) vai ao `backend`; o Claude roda os testes ele mesmo e anota o ciclo:
+
+```
+agile resolve-state CYCLE: acme/acme-shop#52 F-12 slice 1 closed, 2/5 passing, 0 of 5 cycles without progress
+```
+
+Na fatia 2, o `backend` termina com `BLOCKED: TEST WRONG PedidoTests.Total — asserts 110, AC3 says 100 with the discount`. O Claude lê o teste contra o critério AC3, confirma, e o estado manda devolver ao `test-writer` uma vez:
+
+```
+agile resolve-state RESEND: acme/acme-shop#52 F-12 test-writer once more, after test-lock.js unlock with the reason — PedidoTests.Total: asserts 110, AC3 says 100 with the discount
+```
+
+O Claude destrava com o motivo, registra em `## Decisions` `tests unlocked (...) — assumed by resolve`, o `test-writer` reescreve só esse teste e ele é travado de novo; isso não conta como tentativa. A tela da fatia 3 iria ao `ui-kit` (o controle de cupom que o kit não tem) e depois ao `frontend`, mas a fatia 2 continua vermelha: uma execução vermelha, um retrabalho pedido pela revisão, outra vermelha:
+
+```
+agile resolve-state CYCLE: acme/acme-shop#52 F-12 slice 2 attempt 1 of 3, 3/5 passing, 0 of 5 cycles without progress
+agile resolve-state CYCLE: acme/acme-shop#52 F-12 slice 2 attempt 2 of 3, 4/5 passing, 0 of 5 cycles without progress
+agile resolve-state STOP: attempts: acme/acme-shop#52 F-12 slice 2 red after 3 attempts, 4/5 acceptance tests passing
+```
+
+A terceira tentativa é a parada grave `attempts`: o comentário de parada vai à issue com o debrief parcial, chega a notificação e o guarda deixa só leituras até o seu `run-guard.js end 52`. Um segundo teste errado na mesma feature pararia do mesmo jeito (`STOP: test wrong`), e cinco ciclos seguidos sem nenhum teste a mais passando também (`STOP: no progress`).
+
+### 14.210 O app segue o alto contraste do sistema: a chave, as duas listas e o tema que não existe mais
+
+No acme-shop (MudBlazor, com `docs/design/themes/`), a pessoa liga um tema de contraste do Windows. Na página `/appearance` a chave "Seguir o alto contraste do sistema" já está ligada e as listas "Tema de alto contraste (claro)" e "Tema de alto contraste (escuro)" mostram só os temas `hc-*` de cada variante, pelo nome.
+
+Ela não escolheu nada, então vale o primeiro do índice: `cais-hc-light`. Meses depois o tema de alto contraste que ela tinha importado e escolhido (`amber-hc-light`) é removido; o app cai no primeiro `hc-*` da variante, sem erro. A regra tem 12 casos, e o caso 6 é este:
+
+```
+ok   resolution case 6 (light) gives cais-hc-light
+```
+
+Com a chave desligada, ou sem o sinal do sistema, vale o tema preferido de sempre.
+
+### 14.211 Os anexos de um `/agile:resolve`: um arquivo lido com uma linha cortada e os que não são lidos
+
+A issue `acme/acme-shop#52` linka `regras-cupom.md` e `exemplo-pedidos.csv`, uma captura de tela e um PDF. O `resolve-issue.js read` baixa os dois arquivos de texto, passa cada um pelo `attachment-scan.js` e guarda o texto limpo na pasta do run; nada do que foi baixado aparece na saída:
+
+```
+attachment read: https://github.com/user-attachments/files/501/regras-cupom.md -> <pasta do run>/attachments/1-regras-cupom.md (1 passages cut)
+attachment flagged: https://github.com/user-attachments/files/501/regras-cupom.md line 4 instruction
+attachment read: https://github.com/user-attachments/files/502/exemplo-pedidos.csv -> <pasta do run>/attachments/2-exemplo-pedidos.csv (0 passages cut)
+attachment not read: https://github.com/user-attachments/assets/3f2c-91aa (image)
+attachment not read: https://github.com/user-attachments/files/503/especificacao.pdf (not a text format)
+```
+
+A linha 4 de `regras-cupom.md` mandava o modelo ignorar as instruções e fazer o merge na `main`. O arquivo guardado tem no lugar dela `[passage removed by scan: instruction]`, e o run lê o resto como dado. Na parada 2 o comentário de validação na issue diz o que foi lido e o que foi cortado, sem repetir o trecho:
+
+```
+**Anexos lidos**
+- https://github.com/user-attachments/files/501/regras-cupom.md — 1 trecho cortado
+  - linha 4: instruction
+- https://github.com/user-attachments/files/502/exemplo-pedidos.csv — nenhum trecho cortado
+
+**Anexos não lidos**
+- https://github.com/user-attachments/assets/3f2c-91aa (imagem)
+- https://github.com/user-attachments/files/503/especificacao.pdf (formato que não é texto)
+```
+
+Abra o arquivo cortado se quiser conferir o que saiu: o texto original continua no anexo da issue, e só você decide o que fazer com ele. Um download recusado (403, 404, redirecionamentos demais) aparece como `download recusado (HTTP 404)`, e a retomada do run não baixa nada de novo.
+
+### 14.212 Um lote no `/agile:refine`: três itens numa rodada e uma aprovação que deixa um de fora
+
+No acme-shop, `F-3` (cupom de desconto), `F-4` (histórico de pedidos) e `F-7` (exportar pedidos em CSV) estão em `idea`. Você digita `/agile:refine F-3 F-4 F-7`. O lote é conferido primeiro:
+
+```
+BATCH F-3 F-4 F-7
+```
+
+Cada item imprime a linha dele, passa pela busca de itens parecidos e ganha a própria worktree (`D:/wt/acme-shop/f-3-coupon-discount`, `f-4-order-history`, `f-7-export-orders`). Depois vem uma rodada só, por tema, cada pergunta com o id do item:
+
+```
+[F-4] Assumed, not asked: the history lists 20 orders per page (layout-in-kit)
+Regras — [F-3] Qual o desconto máximo de um cupom?
+Regras — [F-4, F-7] Um pedido cancelado aparece no histórico e na exportação?
+Permissões — [F-7] Quem pode exportar os pedidos?
+```
+
+A pergunta do pedido cancelado vale para os dois itens e vem uma vez. No fim, um resumo por item e a linha `Approve the batch with one reply naming each id: Aprovo F-3, F-4, F-7`. Você responde `Aprovo F-3 e F-7`, e a resposta é lida pelo script:
+
+```
+APPROVED F-3 F-7
+NOT NAMED F-4
+```
+
+`F-3` e `F-7` vão para `approved`; `F-4` segue `refining` na worktree dele, e um `aprovo F-4` depois o aprova. O próximo passo é `/agile:build F-3`, com `F-7` esperando na ordem do lote.
+
+### 14.213 O nível de risco que o build grava: um item só de documentação e um que toca o login
+
+O item F-31 mudou só uma página do manual e um teste. Antes de pôr o item em `validating`, o build roda o `risk.js` na worktree:
+
+```
+agile risk LOW: docs and tests only
+```
+
+Depois o mesmo item ganhou `src/Modules/Identity/LoginEndpoint.cs`, num módulo que a `main` não tinha. O mesmo comando agora lista cada sinal com o caminho que o deu:
+
+```
+signal: door (src/Modules/Identity/LoginEndpoint.cs)
+signal: new-module (src/Modules/Identity)
+agile risk HIGH: door: src/Modules/Identity/LoginEndpoint.cs; new-module: src/Modules/Identity
+```
+
+O `write` grava a linha em `## Start`, logo abaixo de `- Model:`:
+
+```
+- Risk: high (door: src/Modules/Identity/LoginEndpoint.cs; new-module: src/Modules/Identity)
+```
+
+Se você achar que um item `low` merece mais cuidado, troque a linha por `- Risk: high (owner)`: o próximo `write` a mantém. Um `- Risk: low (owner)` num item com porta volta a `high`, e a linha diz de onde veio.
+
+### 14.214 Um roteiro em passos numerados, e o que o conferidor diz quando falta o esperado
+
+O build do F-12 (exportar pedidos) entrega o roteiro com o rótulo e o tempo em cada passo, e o resultado esperado numa linha só dele:
+
+```
+1. [ ] Passo 1 de 2 (cerca de 2 min): No menu lateral clique em Pedidos e depois no botão Exportar, acima da lista.
+   Esperado: um arquivo `orders.csv` é baixado.
+2. Passo 2 de 2 (cerca de 3 min): Abra o arquivo.
+   - [ ] 2.1 Conte as linhas.
+     Esperado: uma linha por pedido da lista, mais o cabeçalho.
+   - [ ] 2.2 Leia a coluna Total.
+     Esperado: os valores têm duas casas decimais.
+```
+
+Você sabe quantos passos faltam e quanto tempo reservar antes de começar; o `Esperado:` diz o que comparar sem reler a ação. O conferidor, rodado com `--file` no arquivo do item, responde `OK`. Num rascunho em que o passo 1 perdeu a linha `Esperado:` e o passo 2 do pt-BR perdeu o rótulo, ele nomeia cada defeito:
+
+```
+step 1 has no Expected: line
+step 2 has no "Step 2 of 2 (about <k> min):" label
+```
+
+Um roteiro escrito antes do #347, sem rótulo no passo 1, continua valendo como está.
+
+### 14.215 Um roteiro em duas partes: o que o Claude já verificou e o que só você pode julgar
+
+O build do F-12 (exportar pedidos) rodou os testes e abriu a tela de pedidos no navegador embutido antes de escrever o roteiro. O que ele já conferiu vai, com a evidência e o commit, para a primeira parte; a segunda fica só com o que pede os seus olhos:
+
+```
+#### Verificado pelo Claude
+- AC1-AC3: `node --test tests/Orders.Tests` imprimiu `14 passed` (em 3f2a9c1).
+- O botão Exportar baixa `orders.csv` com uma linha por pedido: captura `docs/agile/evidence/F-12-export.png` (em 3f2a9c1).
+
+#### Só você
+1. [ ] Passo 1 de 1 (cerca de 3 min): Abra o `orders.csv` no Excel da sua máquina.
+   Esperado: a coluna Total mostra duas casas decimais e os acentos dos nomes estão certos.
+```
+
+Você lê a primeira parte como relatório e só executa o passo 1. Se um rascunho tira o commit das duas linhas verificadas do pt-BR, o conferidor recusa e diz o que falta:
+
+```
+verified entry count differs: English 2, pt-BR 0
+a verified entry with no "(at <commit>)": "AC1-AC3: `node --test tests/Orders.Tests` imprimiu `14 passe"
+a verified entry with no "(at <commit>)": "O botão Exportar baixa `orders.csv` com uma linha por pedido"
+```
+
+### 14.216 A parada 2 de um item de risco baixo: só a autorização do merge
+
+O F-14 só mudou a página de ajuda e um teste, e o build gravou `- Risk: low (docs and tests only)`. O roteiro dele tem a parte verificada e, na sua parte, uma linha só:
+
+```
+#### Verificado pelo Claude
+- AC1-AC2: `node --test tests/Help.Tests` imprimiu `6 passed` (em 8c41d07).
+
+#### Só você
+Nada: o item só mudou texto e testes, e os dois rodaram aqui.
+```
+
+A parada 2 mostra essa evidência e pede uma resposta: `autorizo o merge de F-14`, que vale como validação e autorização. Se o mesmo roteiro tivesse um passo na sua parte, o conferidor recusaria:
+
+```
+a low-risk item's script is in two parts with one "Nothing:" line for the owner: the owner only authorizes the merge (#344)
+```
+
+Num item `medium` você segue só os passos de `#### Só você`; num `high`, segue esses passos e lê cada linha verificada. Para olhar mais de perto um item `low`, troque a linha por `- Risk: high (owner)` e peça o roteiro de novo.
+
+### 14.217 A revisão do dia: três itens, um aprovado, um devolvido, um só autorizado
+
+No fim do dia três itens estão em `validating`. `/agile:script --inbox` lista cada um com o nível de risco, o que o Claude verificou e o que fica com você, e manda a página HTML com os mesmos três cartões:
+
+```
+F-13 — Customer notes [risk medium]
+   changed: A customer gets a free-text notes field on their page.
+   verified: AC1-AC2: `dotnet test` imprimiu `9 passed` (em 77b0e21).
+   yours: 1. Passo 1 de 1 (cerca de 2 min): Digite uma nota de três linhas num cliente e salve. — as três linhas voltam como digitadas.
+   finding: 2026-10-28: review 1 found 1 major: the note is saved without a length limit — fixed with a 2,000-character limit.
+   answer: validado e autorizo o merge de F-13  |  devolvo F-13: <nota>
+```
+
+O F-14 é `low`: a parte dele diz que não há nada para você fazer. Você clica nos botões da página e cola o texto que ela monta:
+
+```
+validado e autorizo o merge de F-12
+devolvo F-13: a nota com acento some depois de salvar
+autorizo o merge de F-14
+```
+
+O Claude passa a resposta pelo `review-inbox.js answer`:
+
+```
+approved: F-12
+approved: F-14
+sent back: F-13 — a nota com acento some depois de salvar
+next: /agile:ship F-12, /agile:ship F-14
+agile inbox ANSWER: 2 approved, 1 sent back
+```
+
+O F-13 continua em `validating` com a sua nota em `## Decisions`, à espera da correção. Uma linha como `aprovado` ou `autorizo todos`, que não nomeia um item, não aprova nada.
+
+### 14.218 O rigor de um item de risco baixo
+
+O F-14 só mudou uma página do manual. Antes da revisão, o build pergunta ao `risk.js rigor` quanto verificar:
+
+```
+level: low (computed)
+review: no (the owner may still ask: /agile:review)
+live run: no
+ship gate: gate.js ship (a sealed result counts)
+measures: only the numbers a criterion asserts
+agile rigor LOW: docs and tests only
+```
+
+O build pula a revisão e segue para a parada 2. Se você escrever `- Risk: high (owner)` no `## Start`, a mesma chamada imprime `agile rigor HIGH: the item's high`, e a revisão e o gate `--fresh` voltam.
+
+### 14.219 Os riscos de uma mudança: o que você ouve antes de validar
+
+A revisão do F-21 achou dois riscos fora do diff e o Claude os escreveu em `## Risks`:
+
+```
+- The migration drops the old Notes column — its data is copied first (0007_Notes.cs:12) — not proven — high impact — one-way door
+- The customer list sorts by name — the sort is the query's ORDER BY (Customers.cs:40) — proven — low impact — two-way door
+```
+
+Na parada 2, antes dos passos, o Claude roda `risks.js check` e diz o risco que ninguém provou:
+
+```
+say first: - The migration drops the old Notes column — its data is copied first (0007_Notes.cs:12) — not proven — high impact — one-way door
+agile risks OK: 2 risks, 1 one-way door, 1 to say before the validation
+```
+
+Você decide se valida assim ou se pede um teste que prove a cópia antes. O corpo do PR traz as duas linhas, a porta de mão única primeiro.
+
+### 14.220 O painel de itens: três itens em andamento, o que espera por você primeiro
+
+Você tem uma feature esperando a sua validação, outra sendo construída em outra sessão e um bug aprovado que depende dela. Em vez de perguntar a cada sessão, você pede o painel no chat:
+
+```
+/agile:status --dashboard
+```
+
+A sessão gera a página, envia o arquivo e o app abre no painel lateral. A tabela tem o mesmo conteúdo da versão em texto, que você obtém com `--text`:
+
+```
+Itens em andamento (gerado 2026-10-28 12:00)
+Item                                    Etapa                 Worktree                                    Espera por     Última checagem  Na etapa  Próxima ação
+#12 Cadastro de banca examinadora       aguardando validação  f-12-exam-board · limpo · 24 h atrás        você (o dono)  —                1 d       rodar o roteiro e dizer validado ou o defeito
+#14 Exportar notas em CSV               construindo           f-14-export-csv · 4 sem commit · 2 h atrás  nenhum         —                0 d       critério 4, a tela de exportação
+#15 Corrigir o arredondamento da média  aprovado              —                                           #14            —                2 d       —
+0 ideias no backlog
+check-all rodando: pid 18420
+```
+
+O item 12 espera por você e vem primeiro, com o worktree limpo e o último commit de ontem. O item 14 está sendo construído, com quatro arquivos sem commit. O item 15 está aprovado e espera pelo 14, na coluna "Espera por".
+
+A linha `check-all rodando` aparece quando uma checagem completa está em andamento, para você não disparar outra por cima. Um `—` é uma informação que ainda não existe, como a última checagem de um item que nunca rodou uma.
+
+O painel só lê: nada do ciclo muda ao abri-lo, e para atualizar basta digitar o comando de novo.
+
+### 14.221 Três itens construídos ao mesmo tempo com `/agile:build F-3 F-4 F-7`
+
+Você aprovou F-3, F-4 e F-7 e vai sair. Digita `/agile:build --approved --max 2`. O Claude mostra o plano: F-8 espera o F-3 e fica de fora.
+
+```
+START F-3
+START F-4
+QUEUED F-7
+SKIPPED F-8 (waits on F-3)
+agile dispatch PLAN: 3 items, 2 at once
+```
+
+Duas sessões começam, cada uma na worktree do seu item; o F-7 entra quando uma delas termina. Nada é perguntado. Quando você volta, as linhas chegaram uma por item, na ordem em que cada um terminou:
+
+```
+F-4 STOPPED (building): Stopped: the schema change is not in the item file (owner-reserved stop).
+F-3 READY (validating) in 4 s
+F-7 READY (validating) in 3 s
+agile dispatch DONE: 2 ready, 1 stopped, 0 failed in 6 s
+```
+
+O F-3 e o F-7 esperam a sua validação: `/agile:autopilot F-3` mostra o roteiro. O F-4 parou numa parada sua; resolvida a causa, `/agile:autopilot F-4` continua. Nenhum dos três foi mesclado.

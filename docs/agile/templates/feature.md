@@ -36,6 +36,7 @@ Technical terms: [glossary](../glossary.md)
 - Waits on (to start): <what stops the work from starting and is not an item: an owner decision, a person or team, an access, an environment — who provides it — or "nothing">
 - Needed to validate: <what only the validation needs (a real clone, an environment, a person or device) — who provides it — or "nothing"; never blocks a start or an approval>
 - Model: <opus|sonnet> (<signal>|no signal|doubt|project line: always <model>) — written by the refinement, see references/model-choice.md "Main session"
+- Risk: <low|medium|high> (<reason>) — written by the build, see references/risk-level.md
 - Suggested path: <`/agile:refine` → `/agile:build` | `/agile:autopilot <id>` (small and clear) | `/agile:discuss` first (open direction) | `/agile:screen` during refinement>
 - Parallel with: <ids that can run at the same time in a worktree — or "none">
 
@@ -73,6 +74,9 @@ Technical terms: [glossary](../glossary.md)
 <!-- Only when the item handles personal data; the retention comes from the answer to question 9b when the project has one. -->
 | Datum | Lives in | Read by | Kept for | Legal basis |
 | --- | --- | --- | --- | --- |
+
+## Risks
+<!-- What can break outside the diff, one line each, checked by `risks.js check`: `- <what can break> — <the fact that makes it safe> — proven|not proven — high|low impact — one-way|two-way door`. A one-way door cannot be undone (a migration that drops data, a message other systems already read). `- none — <reason>` when there is none. -->
 
 ## Docs
 <!-- Written at refinement (references/tech-pages.md): one line per technical page the item touches, or `- none — <reason>`. Kinds: flow (behavior added or changed), how-to (a way of working), reference (a contract or a setting), architecture (a module or an external dependency). The build writes the pages with the code; the ship checks each one and refreshes the index of each theme. -->
@@ -117,14 +121,26 @@ Technical terms: [glossary](../glossary.md)
 ## Validation script
 <!-- Written at the end of build, in two subsections with the same steps and the same code blocks (`scripts/validation-script.check.js`). At most 8 steps the product owner follows on screen. Each step names the way to the screen (entry point, list, row, control) from docs/agile/ui-map.md. -->
 ### English
-1. <Step> → <expected result>
-   - [ ] 1.1 <Sub-step> → <expected result>
-2. [ ] <Step with one unit, its own box> → <expected result>
+#### Verified by Claude
+- <what Claude ran>: <the evidence> (at abc1234)
+
+#### Only you
+1. Step 1 of 2 (about <k> min): <the action>
+   - [ ] 1.1 <Sub-step>
+     Expected: <result>
+2. [ ] Step 2 of 2 (about <k> min): <the action, one unit, its own box>
+   Expected: <result>
 
 ### pt-BR
-1. <Passo> → <resultado esperado>
-   - [ ] 1.1 <Subpasso> → <resultado esperado>
-2. [ ] <Passo de uma unidade, caixa própria> → <resultado esperado>
+#### Verificado pelo Claude
+- <o que o Claude rodou>: <a evidência> (em abc1234)
+
+#### Só você
+1. Passo 1 de 2 (cerca de <k> min): <a ação>
+   - [ ] 1.1 <Subpasso>
+     Esperado: <resultado>
+2. [ ] Passo 2 de 2 (cerca de <k> min): <a ação, uma unidade, caixa própria>
+   Esperado: <resultado>
 
 ## Events
 <!-- Written only by events.js (`add`; the gate and the test lock write theirs): one line per event, `- <date> <kind> — <note>`. Kinds: override, question, assumed, rework, test-fail, blocked, change, correction, stop. -->
