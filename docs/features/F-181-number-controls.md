@@ -1,8 +1,8 @@
 ---
 feature: F-181
 epic: Data type controls
-status: validating
-Autopilot: stop 2
+status: done
+Autopilot: shipping
 board: 251
 version: 1
 ---
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-29)
-- Stopped at: Built; waiting for the owner's validation on screen
-- Next action: Follow the validation script and say if it passes (Owner)
+- Status: done (2026-10-29)
+- Stopped at: Shipped: merge 873827fc on main, board 251 closed
+- Next action: Nothing: the item is done
 - Waiting on: nothing
 
 ## Summary
@@ -223,3 +223,16 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
 ## Events
 
 - 2026-10-29 assumed — 9 answers
+- 2026-10-29 override — the owner's "autorizo o merge de F-181" (no "validado", item not Risk: low) taken as validation and merge authorization, after the rule was told
+
+## Delivery
+
+Gate time: 5 passes, 15 min 21 s — turn 2 (50 s), ship 1 (8 min 21 s), scan 2 (6 min 10 s); 0 red
+Usage: 2822.6k weighted (estimate) — other 100% — agents 2% — context per turn 264k — 1 session, 130 turns
+- Branch: feature/F-181
+- Merge: 873827fc (`Merge feature/F-181`, no fast-forward, on main after F-190)
+- Tests: full suite green on the merged tree — Web 3102, Catalog 706, Identity 589, QuestionBank 872, ExamEngine 99, AppHost 122, Api 83, Persistence 25, Jobs 25, Ai 10; architecture tests green; `agile gate GREEN` (ship run 8 min 21 s), `agile scan GREEN`
+- Manual pages: docs/manual/pt-BR/exam-editions.md
+- Technical pages: docs/flows/number-controls.md (new), docs/flows/edition-exam-rules.md (updated)
+- App version: 1.30.0 -> 1.31.0
+- Validation evidence: the owner typed "autorizo o merge de F-181" in chat, after being told the rule (feature-ship precondition 1) asks for the validation words on an item that is not `Risk: low`; it was taken as the validation and the merge authorization. The screen steps of the script were not ticked, so each is recorded `not tested`; the checks Claude ran are the `Verificado pelo Claude` list.
