@@ -1,8 +1,8 @@
 ---
 feature: F-181
 epic: Data type controls
-status: building
-Autopilot: approved
+status: validating
+Autopilot: stop 2
 board: 251
 version: 1
 ---
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-29)
-- Stopped at: Build started in the worktree (autopilot)
-- Next action: Write the failing tests, then the number controls (Claude)
+- Status: validating (2026-10-29)
+- Stopped at: Built; waiting for the owner's validation on screen
+- Next action: Follow the validation script and say if it passes (Owner)
 - Waiting on: nothing
 
 ## Summary
@@ -149,6 +149,12 @@ Tests locked: 89e801c3f3158154fffc70fa45a27318519f59b2 (10 files); unlocks: 0
 - 2026-10-29 — `AppNumberText` and `AppScoreText` are components (the unit "pts" is localized) with static `Format` helpers in `AppNumberFormat` for code; `AppScoreColumn` extends `AppNumberColumn` and takes `Decimals` — assumed: technical
 - 2026-10-29 — No new package: everything uses MudBlazor and the framework already in the solution — assumed: packages
 - 2026-10-29 — plan — 1 AppNumberFormat + tests → format tests green; 2 AppIntegerField, AppDecimalField, AppScoreField, AppYearField → control tests green; 3 AppNumberText, AppScoreText, AppScoreColumn → display tests green; 4 resx in three locales + gallery section "Numbers" + styles → gallery and resource tests green; 5 NoticeSubjectDialog moves to the controls → NoticeSubjectPointsTests green; 6 ExamEditionForm moves to the controls → ExamRulesFormTests and ExamEditionFormTests green; 7 flow page, catalog update and manual page (pt-BR) → techdocs check; 8 gate, review, scan, validation script — assumed: technical
+- 2026-10-29 — Screen check in the app host not done in the build: other lanes of the run use the same ports and the same Docker at the same time, and a screen check needs a signed-in session; it is in the validation script (`Only you`) — assumed: technical
+- 2026-10-29 — A control with text that is not a number shows the Api's message in the two forms (the same text as before F-181) and its own message when the page gives none; the dialog test of the earlier item stays as it was — assumed: technical
+- 2026-10-29 — `docs/design/data-type-controls.md` is not edited: it is a proposal kept by the epic (F-186 marks what is built) — assumed: technical
+- 2026-10-29 — Reuse: `AppTextField` (+ `EndContent`, `InputMode`, F-183) for the input, `AppNumberColumn` for the column, `AppUrlField`'s wrapper pattern for the controls, `TimeProvider` for the year range; nothing new outside the kit.
+- 2026-10-29 — Shortcuts: none
+- 2026-10-29 — Independent review not run: risk medium, no door and no change-review trigger (no auth, schema, contract or data); the full web suite, the architecture tests, the gate and the scan are green — assumed: technical
 
 ## Out of scope
 - Duration and range controls (F-182); percent and money (F-187); the slider (F-191); the enforcement architecture tests (F-186).
@@ -169,6 +175,7 @@ Necessário para validar: o app host local com o administrador da carga inicial 
 - Os testes de arquitetura (vocabulário, camadas, recursos): 310 verdes (em d0edccf8).
 - O gate das mudanças: `agile gate GREEN`, sem aviso novo; a documentação técnica: `agile techdocs GREEN: 2 page(s)` (em d0edccf8).
 - Os textos novos existem em pt-BR, pt-PT e en: 63 verificações de `NumberResourcesTests` verdes (em d0edccf8).
+- O scan de segurança: `agile scan GREEN` (nenhum achado novo; os 2 abertos são de `tools/Simulab.DocGen`, fora desta mudança) (em f1d15536).
 - Não conferido em tela pelo Claude: o app host não foi iniciado neste trabalho (a mesma porta e o mesmo Docker são usados por outras frentes em paralelo); a aparência fica nos passos abaixo (em d0edccf8).
 
 #### Só você
