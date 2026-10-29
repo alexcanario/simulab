@@ -181,6 +181,8 @@ Terms used in documents, reports, reviews and item files. They are not identifie
 | lockout | bloqueio da conta | The per-account refusal after too many wrong passwords or codes (5 in 15 minutes). | A recusa por conta após muitas senhas ou códigos errados (5 em 15 minutos). |
 | merge base | base do merge | The commit where the item branch left `main`; a review compares from it. | O commit em que a branch do item saiu da `main`; a revisão compara a partir dele. |
 | bUnit | bUnit | Library that tests Blazor components without a browser. | Biblioteca que testa componentes Blazor sem navegador. |
+| AngleSharp | AngleSharp | The HTML parser bUnit uses; a test reads the rendered markup through its elements (F-189 walks the gallery with it). | O leitor de HTML que o bUnit usa; um teste lê o HTML renderizado pelos elementos dele (o F-189 percorre a galeria com ele). |
+| DOM (Document Object Model) | DOM (árvore de elementos da página) | The tree of elements a rendered page is made of; a test can walk it by element and class. | A árvore de elementos de que uma página renderizada é feita; um teste pode percorrê-la por elemento e classe. |
 | WebApplicationFactory | WebApplicationFactory | Starts the Api or the Web inside a test so it is called through real HTTP. | Sobe a Api ou a Web dentro de um teste para ser chamada por HTTP de verdade. |
 | coverage gap | lacuna de cobertura | A criterion with no test through the path a user reaches. | Um critério sem teste pelo caminho que o usuário percorre. |
 | validation script | roteiro de validação | At most 8 steps the owner follows on screen before the merge. | No máximo 8 passos que o dono segue na tela antes do merge. |
