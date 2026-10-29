@@ -1701,3 +1701,10 @@ Events: override 1, question 1 (asked 4, from context 2), assumed 0, rework 0, t
 - Baseline: present. Docs command: already declared (DocGen). Plugin notes marked: none. Removed copies: none.
 - Missing capabilities, not installed and not captured: release pipeline (0.64.0), Cloud accounts check in `agile-deploy.js` (0.2.0).
 - Glossary (5g): not run.
+
+## 2026-10-29 - Sync with agile@canary 0.234.0
+- From 0.229.0 to 0.234.0 (5 minor versions). Copied: `.claude/rules/agile/definition-of-done.md`, `docs/agile/workflow.pt-BR.md`, `docs/agile/workflow-examples.pt-BR.md` — assumed: plugin-copy (base autonomy policy).
+- Merged: none (the `edited` copies had no upstream change). Manual build files: no upstream change.
+- Baseline: present. Docs command: already declared (DocGen). Plugin notes marked: none. Removed copies: none.
+- Missing capabilities, not installed and not captured: release pipeline (0.64.0), Cloud accounts check in `agile-deploy.js` (0.2.0).
+- Glossary (5g): not run. Context: 2765 of 3461 words (no earlier measure). Ran with F-181, F-184, F-185 validating in their worktrees; main checkout clean.

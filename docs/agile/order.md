@@ -32,9 +32,9 @@
 
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
 |---|---|---|---|---|---|---|---|---|
-| 12 | F-181 | Number controls: integer, decimal, score and year | idea | - | Data type controls | - | F-182, F-186, F-187 | in cut data-type-controls; level 1; feature; Must; size L |
-| 13 | F-184 | Choice controls: switch, segmented, yes/no, level, language | idea | - | Data type controls | - | F-186 | in cut data-type-controls; level 1; feature; Must; size L |
-| 14 | F-185 | Date range and relative time | idea | - | Data type controls | - | F-186 | in cut data-type-controls; level 1; feature; Should; size M |
+| 12 | F-181 | Number controls: integer, decimal, score and year | validating | opus | Data type controls | - | F-182, F-186, F-187 | in cut data-type-controls; level 1; feature; Must; size L |
+| 13 | F-184 | Choice controls: switch, segmented, yes/no, level, language | validating | opus | Data type controls | - | F-186, F-191 | in cut data-type-controls; level 1; feature; Must; size L |
+| 14 | F-185 | Date range and relative time | validating | opus | Data type controls | - | F-186 | in cut data-type-controls; level 1; feature; Should; size M |
 | 15 | F-182 | Duration and numeric range controls | idea | - | Data type controls | F-181 | F-186 | in cut data-type-controls; level 2: waits on F-181; feature; Must; size M |
 | 16 | F-186 | Data type controls enforced by the build | idea | - | Data type controls | F-181, F-182, F-184, F-185 | - | in cut data-type-controls; level 3: waits on F-181, F-182, F-184, F-185; feature; Must; size S |
 
@@ -105,8 +105,9 @@
 | 67 | F-175 | Essay grade in the result | idea | - | Exam Simulator | F-171, F-151 | - | level 2: waits on F-171, F-151; feature; Could; size S |
 | 68 | F-176 | End-to-end test of a timed exam | idea | - | Exam Simulator | F-170, F-171 | - | level 2: waits on F-170, F-171; feature; Could; size S |
 | 69 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 2: waits on F-151; feature; Could; size M |
-| 70 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
-| 71 | F-180 | Minimum score per notice subject | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature |
+| 70 | F-191 | Level colour ramp, gauge and slider | idea | - | Data type controls | F-184 | - | level 2: waits on F-184; feature; Could; size M |
+| 71 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
+| 72 | F-180 | Minimum score per notice subject | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature |
 
 ## Checklist
 
@@ -132,9 +133,9 @@
 
 ### MVP: data-type-controls
 
-- [ ] 12. F-181 — Number controls: integer, decimal, score and year [idea] — unlocks F-182, F-186, F-187 — why in cut data-type-controls; level 1; feature; Must; size L
-- [ ] 13. F-184 — Choice controls: switch, segmented, yes/no, level, language [idea] — unlocks F-186 — why in cut data-type-controls; level 1; feature; Must; size L
-- [ ] 14. F-185 — Date range and relative time [idea] — unlocks F-186 — why in cut data-type-controls; level 1; feature; Should; size M
+- [ ] 12. F-181 — Number controls: integer, decimal, score and year [validating] — model opus — unlocks F-182, F-186, F-187 — why in cut data-type-controls; level 1; feature; Must; size L
+- [ ] 13. F-184 — Choice controls: switch, segmented, yes/no, level, language [validating] — model opus — unlocks F-186, F-191 — why in cut data-type-controls; level 1; feature; Must; size L
+- [ ] 14. F-185 — Date range and relative time [validating] — model opus — unlocks F-186 — why in cut data-type-controls; level 1; feature; Should; size M
 - [ ] 15. F-182 — Duration and numeric range controls [idea] — waits on F-181 — unlocks F-186 — why in cut data-type-controls; level 2: waits on F-181; feature; Must; size M
 - [ ] 16. F-186 — Data type controls enforced by the build [idea] — waits on F-181, F-182, F-184, F-185 — why in cut data-type-controls; level 3: waits on F-181, F-182, F-184, F-185; feature; Must; size S
 
@@ -199,12 +200,13 @@
 - [ ] 67. F-175 — Essay grade in the result [idea] — waits on F-171, F-151 — why level 2: waits on F-171, F-151; feature; Could; size S
 - [ ] 68. F-176 — End-to-end test of a timed exam [idea] — waits on F-170, F-171 — why level 2: waits on F-170, F-171; feature; Could; size S
 - [ ] 69. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 2: waits on F-151; feature; Could; size M
-- [ ] 70. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
-- [ ] 71. F-180 — Minimum score per notice subject [idea] — waits on F-171 — why level 2: waits on F-171; feature
+- [ ] 70. F-191 — Level colour ramp, gauge and slider [idea] — waits on F-184 — why level 2: waits on F-184; feature; Could; size M
+- [ ] 71. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
+- [ ] 72. F-180 — Minimum score per notice subject [idea] — waits on F-171 — why level 2: waits on F-171; feature
 
 ## Summary
 
-- Delivered: 148
+- Delivered: 150
 - MVP mockup-stitch-1-formulario: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-2-navegacao: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-3-barra-app: 3 open (3 in the cuts, 0 their dependencies)
