@@ -60,6 +60,9 @@ None. Test only; the gallery markup is not changed.
 - AC5 All new texts appear in every locale of `UI locales:` (none are added: the test has no UI text).
 
 ## Criterion → test
+
+Tests locked: ea261bd259ff66ca5606e6b9d569c1bbe5e3cabc (1 file); unlocks: 1
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `UiGalleryStateMatrixTests.Read_Development_EachKindHasABlockStartedByItsOwnTitle` |
@@ -73,6 +76,8 @@ None. Test only; the gallery markup is not changed.
 - 2026-10-29 — The test reads the rendered DOM by structure (title, caption, control class), not by control ids — an id rename must not break it, a dropped state must — assumed: technical choice
 - 2026-10-29 — Search is expected to show three states only — `AppSearchField` has no error, disabled or read-only parameter — assumed: verified in the code
 - 2026-10-29 — The matrix check is a pure function over the section's DOM so AC4 can be proved on a copy with a caption removed, with no change to the gallery — assumed: technical choice
+- 2026-10-29: tests unlocked (helper skeleton `GalleryStateMatrix.cs` locked by mistake with the tests; owner answered "continue" in the olinda session); relocked with `UiGalleryStateMatrixTests.cs` alone, the test unchanged.
+- 2026-10-29 — The session ran on Sonnet 5.5 up to the first lock, then on Opus 5.5 (owner's `/model`); the lane asked opus — confirmed: lane-run.js WORK line
 
 ## Out of scope
 - Adding error, disabled or read-only states to the search control.
@@ -86,3 +91,4 @@ None. Test only; the gallery markup is not changed.
 ## Events
 
 - 2026-10-29 assumed — 5 answers
+- 2026-10-29 blocked — test wrong: helper skeleton GalleryStateMatrix.cs locked by mistake with the tests; owner answered 'continue' in the olinda session (2026-10-29)

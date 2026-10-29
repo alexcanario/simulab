@@ -14,14 +14,61 @@ internal static class GalleryStateMatrix
     /// <summary>The expected shape of one kind: the title, the class of its control and the states that apply to it.</summary>
     internal sealed record Expectation(string Title, string ControlClass, IReadOnlyList<string> States);
 
+    /// <summary>Walks each title's siblings up to the next title: a caption of one kind never counts for another (BR3).</summary>
     internal static IReadOnlyList<Block> Read(IElement section)
     {
-        throw new NotImplementedException();
+        var blocks = new List<Block>();
+
+        foreach (var title in section.QuerySelectorAll(".gallery-kind-title"))
+        {
+            var cells = new List<Cell>();
+
+            for (var node = title.NextElementSibling;
+                 node is not null && !node.ClassList.Contains("gallery-kind-title");
+                 node = node.NextElementSibling)
+            {
+                if (node.ClassList.Contains("gallery-state-caption"))
+                {
+                    var control = node.NextElementSibling;
+                    cells.Add(new Cell(node.TextContent.Trim(), control?.ClassList.ToList() ?? []));
+                }
+            }
+
+            blocks.Add(new Block(title.TextContent.Trim(), cells));
+        }
+
+        return blocks;
     }
 
     /// <summary>One line per problem, <c>&lt;kind&gt;: &lt;what is wrong&gt;</c>; empty when every expected kind holds every state.</summary>
     internal static IReadOnlyList<string> Problems(IElement section, IReadOnlyList<Expectation> expected)
     {
-        throw new NotImplementedException();
+        var blocks = Read(section);
+        var problems = new List<string>();
+
+        foreach (var kind in expected)
+        {
+            var block = blocks.FirstOrDefault(candidate => candidate.Title == kind.Title);
+            if (block is null)
+            {
+                problems.Add($"{kind.Title}: no block with that title");
+                continue;
+            }
+
+            foreach (var state in kind.States)
+            {
+                var cell = block.Cells.FirstOrDefault(candidate => candidate.Caption == state);
+                if (cell is null)
+                {
+                    problems.Add($"{kind.Title}: missing state {state}");
+                }
+                else if (!cell.ControlClasses.Contains(kind.ControlClass))
+                {
+                    problems.Add($"{kind.Title}: state {state} is not followed by an {kind.ControlClass}");
+                }
+            }
+        }
+
+        return problems;
     }
 }
