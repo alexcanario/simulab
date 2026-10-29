@@ -1542,4 +1542,36 @@
   <data name="exam_edition.essay_cut_off_without_max" xml:space="preserve"><value>Preencha a nota máxima da redação antes da nota mínima.</value></data>
   <data name="exam_edition.essay_cut_off_above_max" xml:space="preserve"><value>A nota mínima da redação não pode ficar acima da nota máxima.</value></data>
   <data name="notice_subject.points_per_question_invalid" xml:space="preserve"><value>Escreva um número de 0,01 a 100 com no máximo duas casas decimais, ou deixe vazio.</value></data>
+  <data name="Choice.Yes" xml:space="preserve"><value>Sim</value></data>
+  <data name="Choice.No" xml:space="preserve"><value>Não</value></data>
+  <data name="Choice.NotSet" xml:space="preserve"><value>Não definido</value></data>
+  <data name="Level.Clear" xml:space="preserve"><value>Limpar o nível</value></data>
+  <data name="Level.DotName" xml:space="preserve"><value>{0} — {1}</value></data>
+  <data name="Questions.Difficulty.Level.1" xml:space="preserve"><value>Muito fácil</value></data>
+  <data name="Questions.Difficulty.Level.2" xml:space="preserve"><value>Fácil</value></data>
+  <data name="Questions.Difficulty.Level.3" xml:space="preserve"><value>Média</value></data>
+  <data name="Questions.Difficulty.Level.4" xml:space="preserve"><value>Difícil</value></data>
+  <data name="Questions.Difficulty.Level.5" xml:space="preserve"><value>Muito difícil</value></data>
+  <data name="Gallery.Section.Choices" xml:space="preserve"><value>Escolhas</value></data>
+  <data name="Gallery.Choices.Hint" xml:space="preserve"><value>Um controlo por tipo de escolha, escolhido pelo número de opções e por o efeito ser imediato ou não (docs/design/data-type-controls.md, 2.4).</value></data>
+  <data name="Gallery.Choices.Switch" xml:space="preserve"><value>Interruptor (AppSwitch)</value></data>
+  <data name="Gallery.Choices.Segmented" xml:space="preserve"><value>Segmentado (AppSegmentedField)</value></data>
+  <data name="Gallery.Choices.YesNo" xml:space="preserve"><value>Sim / não (AppYesNoField)</value></data>
+  <data name="Gallery.Choices.Level" xml:space="preserve"><value>Nível (AppLevelField)</value></data>
+  <data name="Gallery.Choices.LevelFilter" xml:space="preserve"><value>Filtro de nível (AppLevelFilterField)</value></data>
+  <data name="Gallery.Choices.Text" xml:space="preserve"><value>Nível e sim / não como texto (AppLevelBadge, AppBoolText)</value></data>
+  <data name="Gallery.Choices.Language" xml:space="preserve"><value>Idioma (AppLanguageField)</value></data>
+  <data name="Gallery.Choices.State.Empty" xml:space="preserve"><value>Vazio</value></data>
+  <data name="Gallery.Choices.State.Filled" xml:space="preserve"><value>Preenchido</value></data>
+  <data name="Gallery.Choices.State.Error" xml:space="preserve"><value>Erro</value></data>
+  <data name="Gallery.Choices.State.Disabled" xml:space="preserve"><value>Desativado</value></data>
+  <data name="Gallery.Choices.State.ReadOnly" xml:space="preserve"><value>Só de leitura</value></data>
+  <data name="Gallery.Choices.Label.Reminders" xml:space="preserve"><value>Receber lembretes</value></data>
+  <data name="Gallery.Choices.Label.Period" xml:space="preserve"><value>Período</value></data>
+  <data name="Gallery.Choices.Label.Key" xml:space="preserve"><value>Resposta correta</value></data>
+  <data name="Gallery.Choices.Label.Difficulty" xml:space="preserve"><value>Dificuldade</value></data>
+  <data name="Gallery.Choices.Label.Language" xml:space="preserve"><value>Idioma do conteúdo</value></data>
+  <data name="Gallery.Choices.Option.Day" xml:space="preserve"><value>Dia</value></data>
+  <data name="Gallery.Choices.Option.Week" xml:space="preserve"><value>Semana</value></data>
+  <data name="Gallery.Choices.Option.Month" xml:space="preserve"><value>Mês</value></data>
 </root>

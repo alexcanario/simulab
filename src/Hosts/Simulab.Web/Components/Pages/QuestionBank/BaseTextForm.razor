@@ -64,15 +64,12 @@ else
                               Error="@_titleError" />
 
                 @* BR3: a language that questions use cannot change, so the select is locked and says why. *@
-                <AppSelectField TValue="string"
-                                Id="base-text-content-language"
+                <AppLanguageField Id="base-text-content-language"
                                 Label="@L["BaseTexts.Field.ContentLanguage"]"
-                                Value="_language"
+                                Value="@_language"
                                 ValueChanged="@((string? value) => OnLanguageChanged(value))"
-                                Options="LanguageOptions"
                                 Required="true"
                                 Disabled="IsLocked"
-                                LeadingIcon="@AppIcons.Language"
                                 Hint="@(IsLocked ? L["BaseTexts.Field.ContentLanguage.Locked", _saved!.QuestionCount].Value : L["BaseTexts.Field.ContentLanguage.Hint"].Value)"
                                 Error="@_languageError" />
             </AppFormGrid>
@@ -224,11 +221,6 @@ else
     private bool IsLocked => _saved is { QuestionCount: > 0 };
 
     private string Title => IsEdit || Id is not null ? L["BaseTexts.Form.EditTitle"] : L["BaseTexts.Form.AddTitle"];
-
-    // A language is shown in its own name: it does not depend on the reader's UI language.
-    private static IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
-        [.. SupportedCultures.All.Select(culture =>
-            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
 
     private IReadOnlyList<AppErrorSummaryItem> ErrorSummaryItems
     {

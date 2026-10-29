@@ -119,6 +119,9 @@ Each kind of choice has one named control, one text and one column in the kit, s
 - AC12 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en).
 
 ## Criterion → test
+
+Tests locked: a267338379abbf0fd32ea4f7b6559bd718b12136 (5 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `AppSwitchTests` (all) |

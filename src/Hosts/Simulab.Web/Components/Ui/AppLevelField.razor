@@ -1,9 +1,117 @@
+@* F-184 BR4: a level (the difficulty of a question) as dots with its name, never colour alone: the chosen dot and those
+   below it are filled, the name is on screen and each dot is named "n — name". A real radiogroup with one tab stop;
+   arrows, Home and End move the level. The page gives the names, since they depend on what is measured. *@
+@inject IStringLocalizer<SharedResources> L
+
+<div class="app-field app-level-field @Class @(HasError ? "app-field-error" : null)">
+    <span class="app-field-label" id="@LabelId">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </span>
+    <div class="app-level-control">
+        <div class="app-level-dots"
+             id="@Id"
+             role="radiogroup"
+             aria-labelledby="@LabelId"
+             aria-describedby="@DescriptionId"
+             aria-required="@(Required ? "true" : null)"
+             aria-invalid="@(HasError ? "true" : null)"
+             aria-disabled="@(Disabled || ReadOnly ? "true" : null)">
+            @for (var level = Min; level <= Max; level++)
+            {
+                var current = level;
+                <button type="button"
+                        class="@($"app-level-dot {(Value >= current ? "app-level-dot-on" : null)}")"
+                        role="radio"
+                        aria-label="@L["Level.DotName", current, NameOf(current)]"
+                        aria-checked="@(Value == current ? "true" : "false")"
+                        tabindex="@TabIndexOf(current)"
+                        disabled="@(Disabled || ReadOnly)"
+                        @onclick="() => SetAsync(current)"
+                        @onkeydown="args => OnKeyDownAsync(args, current)"></button>
+            }
+        </div>
+        <span class="app-level-name">@(Value is { } chosen ? NameOf(chosen) : L["Choice.NotSet"].Value)</span>
+        @if (Value is not null && !Required && !Disabled && !ReadOnly)
+        {
+            <button type="button" id="@($"{Id}-clear")" class="app-level-clear" aria-label="@L["Level.Clear"]" title="@L["Level.Clear"]"
+                    @onclick="() => SetAsync(null)">
+                <MudIcon Icon="@AppIcons.Close" Size="Size.Small" />
+            </button>
+        }
+    </div>
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+</div>
+
 @code {
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>One name per level, from the first level up ("Very easy" … "Very hard").</summary>
     [Parameter, EditorRequired] public IReadOnlyList<string> Names { get; set; } = [];
+
+    /// <summary>The first level (1 when not set); the last is <c>Min + Names.Count - 1</c>.</summary>
+    [Parameter] public int Min { get; set; } = 1;
+
     [Parameter] public int? Value { get; set; }
+
     [Parameter] public EventCallback<int?> ValueChanged { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    [Parameter] public string? Error { get; set; }
+
     [Parameter] public bool Required { get; set; }
+
     [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool ReadOnly { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+
+    private int Max => Min + Names.Count - 1;
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string LabelId => $"{Id}-label";
+
+    private string DescriptionId => $"{Id}-description";
+
+    private string NameOf(int level) => level >= Min && level <= Max ? Names[level - Min] : string.Empty;
+
+    private string TabIndexOf(int level) => Value is { } chosen ? (chosen == level ? "0" : "-1") : (level == Min ? "0" : "-1");
+
+    private Task SetAsync(int? level)
+    {
+        if (Disabled || ReadOnly)
+        {
+            return Task.CompletedTask;
+        }
+
+        Value = level;
+        return ValueChanged.InvokeAsync(level);
+    }
+
+    private Task OnKeyDownAsync(KeyboardEventArgs args, int level) => args.Key switch
+    {
+        "ArrowRight" or "ArrowUp" => SetAsync(Math.Min(level + 1, Max)),
+        "ArrowLeft" or "ArrowDown" => SetAsync(Math.Max(level - 1, Min)),
+        "Home" => SetAsync(Min),
+        "End" => SetAsync(Max),
+        " " or "Enter" => SetAsync(level),
+        _ => Task.CompletedTask
+    };
 }
