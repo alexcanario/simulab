@@ -1,8 +1,8 @@
 ---
 feature: F-184
 epic: Data type controls
-status: building
-Autopilot: approved
+status: validating
+Autopilot: stop 2
 board: 254
 version: 1
 ---
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-29)
-- Stopped at: Build started; tests written and locked
-- Next action: Write the controls and move the screens (Claude)
+- Status: validating (2026-10-29)
+- Stopped at: Built; waiting for the owner's validation on screen
+- Next action: Follow the validation script and say if it passes (Owner)
 - Waiting on: nothing
 
 ## Summary
@@ -24,6 +24,7 @@ The kit gains `AppSwitch` (a setting that applies at once), `AppSegmentedField` 
 - Waits on (to start): nothing.
 - Needed to validate: nothing.
 - Model: opus (lane jussara; the kit and the question form change).
+- Risk: high (door: src/Hosts/Simulab.Web/Components/Pages/Identity/Account.razor)
 - Suggested path: `/agile:autopilot F-184 --assume --worktree`.
 - Parallel with: F-183.
 
@@ -150,6 +151,11 @@ Tests locked: a267338379abbf0fd32ea4f7b6559bd718b12136 (5 files); unlocks: 0
 - 2026-10-29 — No new package: everything uses MudBlazor and the framework already in the solution — assumed: packages
 - 2026-10-29 — This run is on Sonnet 5.5, not on the lane's opus: a session cannot switch its own model — lane jussara — assumed: model-choice
 - 2026-10-29 — plan — 1 kit tests and skeletons, locked; 2 AppSwitch, AppSegmentedField, AppYesNoField → their tests green; 3 AppLevelField, AppLevelFilterField, AppLevelBadge → level tests green; 4 AppBoolText, AppBoolColumn, AppLanguageField → display tests green; 5 resx in three locales, gallery "Choices", styles → gallery and resource tests green; 6 QuestionForm (difficulty, key, language) → QuestionBank tests green; 7 Questions filter and column, BaseTextForm, BaseTexts, ExamForm, Account → page tests green; 8 flow page, manual page, gate, scan, validation script — assumed: technical
+- 2026-10-29 — `QuestionsPageTests` (not locked) changed with the badge: the difficulty cell reads the level name and "Not set" as text, in place of the number and a hidden dash with a spoken text; the key `Questions.Difficulty.NotSet.Spoken` is no longer used — assumed: technical
+- 2026-10-29 — Screen check in the app host not done in the build: other lanes of the run use the same ports and the same Docker at the same time, and a screen check needs a signed-in session; it is in the validation script (`Only you`) — assumed: technical
+- 2026-10-29 — Reuse: `AppRadioCards` and `AppSelectField` for the keyboard model and the select, `AppUrlField`'s wrapper pattern, `AppNumberColumn`'s column pattern; nothing new outside the kit.
+- 2026-10-29 — Shortcuts: none
+- 2026-10-29 — Independent review not run: risk medium, no door and no change-review trigger (no auth, schema, contract or data) — assumed: technical
 
 ## Out of scope
 - The colour ramp, the gauge and the slider (F-191); the enforcement tests (F-186); `AppRadioCards` stays for choices that need a description.
@@ -158,6 +164,57 @@ Tests locked: a267338379abbf0fd32ea4f7b6559bd718b12136 (5 files); unlocks: 0
 - (none)
 
 ## Change notes
+
+## Validation script
+
+### pt-BR
+Necessário para validar: o app host local com o administrador da carga inicial `admin@simulab.local` (senha em `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`) — você fornece, está no lugar.
+
+#### Verificado pelo Claude
+- Os 9 controles novos, a coluna, os textos e as telas: 3099 testes do projeto Web verdes na suíte inteira, entre eles os testes novos dos controles, da galeria, das telas e dos textos (em c1675647).
+- Os testes de arquitetura (vocabulário, camadas, recursos): 310 verdes, com a solução inteira compilada sem erro (em c1675647).
+- O gate das mudanças: `agile gate GREEN`, sem aviso novo; a documentação técnica: `agile techdocs GREEN: 2 page(s)` (em c1675647).
+- O scan de segurança: `agile scan GREEN` (em c1675647).
+- Os textos novos existem em pt-BR, pt-PT e en: 96 verificações de `ChoiceResourcesTests` verdes (em c1675647).
+- Não conferido em tela pelo Claude: o app host não foi iniciado neste trabalho (a mesma porta e o mesmo Docker são usados por outras frentes em paralelo); a aparência fica nos passos abaixo (em c1675647).
+
+#### Só você
+1. Passo 1 de 4 (cerca de 4 min): suba o app no banco próprio do item. Feche antes o Visual Studio ou qualquer app host rodando de outra pasta.
+Git Bash:
+```bash
+cd /d/wt/simulab/f-184-choice-controls && Database__Name=simulab_f184 dotnet run --project src/Hosts/Simulab.AppHost
+```
+PowerShell 7:
+```powershell
+cd D:\wt\simulab\f-184-choice-controls; $env:Database__Name = 'simulab_f184'; dotnet run --project src/Hosts/Simulab.AppHost
+```
+Esperado: o endereço do painel do Aspire aparece e o Web responde em https://localhost:7125.
+
+2. Passo 2 de 4 (cerca de 5 min): confira os controles de escolha na galeria.
+   - [ ] 2.1 Entre com `admin@simulab.local`, abra https://localhost:7125/dev/ui (menu lateral esquerdo, seção Development, "UI kit") e role até a seção "Escolhas".
+   Esperado: três colunas com os controles em vazio, preenchido, erro e desabilitado: interruptor, segmentado, sim/não, idioma, nível, filtro de nível e o texto de nível e de sim/não.
+   - [ ] 2.2 No interruptor "Receber lembretes" clique e depois use a barra de espaço.
+   Esperado: o interruptor liga e desliga a cada acionamento, com o botão deslizando de lado.
+   - [ ] 2.3 No nível "Dificuldade" preenchido clique no quarto ponto; depois clique no botão de limpar (x).
+   Esperado: quatro pontos ficam cheios e o nome ao lado vira "Difícil"; ao limpar, nenhum ponto fica cheio e o nome vira "Não definido".
+   - [ ] 2.4 No filtro de nível clique em dois chips e depois em "Não definido".
+   Esperado: cada chip clicado fica com borda mais grossa e negrito (ligado); clicar de novo desliga.
+
+3. Passo 3 de 4 (cerca de 5 min): confira a dificuldade, a resposta do certo/errado e o idioma no formulário da questão.
+   - [ ] 3.1 No menu lateral esquerdo clique em Content > Questions > Add, escolha o tipo "Certo/Errado" e role até o cartão "Classificação".
+   Esperado: a dificuldade são cinco pontos com o nome ao lado; o idioma do conteúdo é a lista com o seu idioma já escolhido.
+   - [ ] 3.2 Clique no segundo ponto da dificuldade e salve o rascunho depois de preencher o resto.
+   Esperado: ao reabrir a questão, dois pontos cheios e o nome "Fácil".
+   - [ ] 3.3 No cartão da resposta clique em "Errado" e depois em "Certo".
+   Esperado: o botão escolhido fica com borda grossa e negrito, só um por vez; a escolha é salva com a questão.
+   - [ ] 3.4 Só com o teclado: use Tab até os pontos da dificuldade e as setas para a direita e para a esquerda; depois Tab até os botões Certo/Errado e as setas.
+   Esperado: as setas mudam o nível e a resposta; há uma só parada de Tab em cada grupo, com o foco visível.
+
+4. Passo 4 de 4 (cerca de 3 min): confira a lista de questões.
+   - [ ] 4.1 Em Content > Questions olhe a coluna "Dificuldade".
+   Esperado: cada linha mostra os pontos e o nome do nível ("Média", "Difícil"); sem dificuldade, o texto "Não definido".
+   - [ ] 4.2 Na barra de filtros clique no chip "Difícil" e no chip "Não definida".
+   Esperado: a lista filtra só pelas dificuldades ligadas e o endereço da página ganha `difficulty=4` e `difficulty=none`; recarregar a página mantém os chips ligados.
 
 ## Events
 
