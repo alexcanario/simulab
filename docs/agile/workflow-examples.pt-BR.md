@@ -8156,3 +8156,78 @@ agile dispatch DONE: 2 ready, 1 stopped, 0 failed in 6 s
 ```
 
 O F-3 e o F-7 esperam a sua validação: `/agile:autopilot F-3` mostra o roteiro. O F-4 parou numa parada sua; resolvida a causa, `/agile:autopilot F-4` continua. Nenhum dos três foi mesclado.
+
+### 14.222 O quadro em dois momentos: o que o board mostra ao longo de um item
+
+Você acompanha um item de `/agile:refine` até `/agile:ship`. O campo Status do board só muda duas vezes: quando você aprova e quando o ship fecha. Nos outros passos o plugin não escreve nada no board (e não gasta o envio do corpo inteiro); a etapa está no arquivo do item.
+
+```
+refining: quadro não escrito
+approved: quadro escrito
+building: quadro não escrito
+validating: quadro não escrito
+done: quadro escrito
+```
+
+Se você abrir o board no meio do build, o item aparece em Ready: não é divergência. O `/agile:status` compara o board com os arquivos só em `approved` e `done`.
+
+### 14.223 A retro uma vez por lote: três ships, uma retro
+
+Você shippa o F-21 (filtro por data). No passo da retro o ship não pergunta nada: guarda as notas do item e segue.
+
+```
+Retro: notas de F-21 guardadas em docs/agile/retro-notes.md (1 item); a retro roda com 3.
+```
+
+No dia seguinte você shippa o F-22 e o B-7; as notas chegam a 3 itens, e o ship do B-7 roda a retro uma vez para os três: as contagens de eventos somadas, no máximo 3 lições, cada uma com as duas notas.
+
+```
+Events (3 items): rework 2, correction 1, test-fail 3
+1. score 6/7 — os testes de data falham perto da meia-noite UTC: fixe o relógio do teste (F-21, B-7)
+Retro notes: 3 itens lidos e removidos de docs/agile/retro-notes.md
+```
+
+Para fechar a retro antes do terceiro item, digite `/agile:retro notes`.
+
+### 14.224 O roteiro numa língua só: só o `### pt-BR`
+
+O build do F-31 (filtro de pedidos por data) termina e escreve o roteiro uma vez, na sua língua. No arquivo do item a seção fica assim:
+
+```
+## Validation script
+### pt-BR
+#### Verificado pelo Claude
+- Os testes do filtro: `14 passed` (em 3f2a9c1)
+
+#### Só você
+1. Passo 1 de 1 (cerca de 2 min): Abra a lista de pedidos e filtre por ontem.
+   - [ ] 1.1 Só os pedidos de ontem aparecem.
+     Esperado: 3 pedidos.
+```
+
+O conferidor aceita o roteiro como está. Se um rascunho vier só com `### English`, ele recusa e diz:
+
+```
+missing ### pt-BR subsection (the owner's language, #388)
+```
+
+### 14.225 Opus com effort `high` num item extremo, só com o seu sim
+
+No acme-shop você refina a F-40, "Refund a paid order through the payment webhook". O item tem três sinais: uma porta (dinheiro e webhook), uma mudança de esquema que não é só adição (a coluna `Status` do pedido ganha `refunded` e as linhas antigas migram) e três módulos tocados. Dois ou mais sinais fazem o item extremo, e o resumo da aprovação traz a proposta:
+
+Claude: Modelo sugerido para construir a F-40: opus (porta: dinheiro e webhook; esquema não aditivo; três módulos). O item é extremo: proponho effort `high` na construção e nas passagens de desenho e revisão. Para aceitar, responda `aprovo F-40 effort high`; um `aprovo F-40` simples aprova sem effort.
+
+Você responde `aprovo F-40 effort high`, e a linha fica no `## Start`:
+
+```
+- Needed to validate: a test key of the payment provider
+- Model: opus, effort high (door: money, webhook; schema not additive; 3 modules; owner's yes)
+```
+
+Se você tivesse respondido só `aprovo F-40`, a linha seria `- Model: opus (door: money, webhook; schema not additive; 3 modules)`. Na F-41, "Show the refund date in the order list", sem nenhum sinal, o resumo não propõe effort nenhum.
+
+Você abre uma sessão em `opus` e digita `/agile:build F-40`. Mesmo com o mesmo modelo, o Claude diz uma linha e segue, sem perguntar:
+
+Claude: Model: item suggests opus, effort high, session is opus
+
+Você digita `/effort high` e a construção continua. No passo 4b, as chamadas de `system-design` e `architect` vão em `opus` com `effort: high`, e o mesmo vale depois para o `reviewer` do `/agile:review`. Na lista do `/agile:order` a coluna `Model` da F-40 continua `opus`.

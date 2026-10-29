@@ -35,7 +35,7 @@ Technical terms: [glossary](../glossary.md)
 - Depends on: <items that must be done first: F-/B- ids, an epic, an item in another repository as `<owner>/<repo>#<n>`; while an id is not delivered, the approved item is blocked by itself and released when it ships — or "nothing">
 - Waits on (to start): <what stops the work from starting and is not an item: an owner decision, a person or team, an access, an environment — who provides it — or "nothing">
 - Needed to validate: <what only the validation needs (a real clone, an environment, a person or device) — who provides it — or "nothing"; never blocks a start or an approval>
-- Model: <opus|sonnet> (<signal>|no signal|doubt|project line: always <model>) — written by the refinement, see references/model-choice.md "Main session"
+- Model: <opus|sonnet>[, effort high] (<signal>|no signal|doubt|project line: always <model>) — written by the refinement, see references/model-choice.md "Main session"
 - Risk: <low|medium|high> (<reason>) — written by the build, see references/risk-level.md
 - Suggested path: <`/agile:refine` → `/agile:build` | `/agile:autopilot <id>` (small and clear) | `/agile:discuss` first (open direction) | `/agile:screen` during refinement>
 - Parallel with: <ids that can run at the same time in a worktree — or "none">
@@ -119,18 +119,7 @@ Technical terms: [glossary](../glossary.md)
 -->
 
 ## Validation script
-<!-- Written at the end of build, in two subsections with the same steps and the same code blocks (`scripts/validation-script.check.js`). At most 8 steps the product owner follows on screen. Each step names the way to the screen (entry point, list, row, control) from docs/agile/ui-map.md. -->
-### English
-#### Verified by Claude
-- <what Claude ran>: <the evidence> (at abc1234)
-
-#### Only you
-1. Step 1 of 2 (about <k> min): <the action>
-   - [ ] 1.1 <Sub-step>
-     Expected: <result>
-2. [ ] Step 2 of 2 (about <k> min): <the action, one unit, its own box>
-   Expected: <result>
-
+<!-- Written at the end of build, in the owner's language only, one subsection `### pt-BR` (`scripts/validation-script.check.js`). At most 8 steps the product owner follows on screen. Each step names the way to the screen (entry point, list, row, control) from docs/agile/ui-map.md. -->
 ### pt-BR
 #### Verificado pelo Claude
 - <o que o Claude rodou>: <a evidência> (em abc1234)
