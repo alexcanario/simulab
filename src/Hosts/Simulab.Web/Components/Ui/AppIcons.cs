@@ -9,6 +9,7 @@ namespace Simulab.Web.Components.Ui;
 public static class AppIcons
 {
     public const string Add = Icons.Material.Outlined.Add;
+    public const string Remove = Icons.Material.Outlined.Remove;
     public const string Edit = Icons.Material.Outlined.Edit;
     public const string Delete = Icons.Material.Outlined.Delete;
     public const string Search = Icons.Material.Outlined.Search;

@@ -1,4 +1,10 @@
+@* F-181 BR7: a number as text in the culture of the user, with a fixed number of decimals; a dash for none. *@
+<span class="app-number-text">@AppNumberFormat.Format(Value, Decimals)</span>
+
 @code {
+    /// <summary>An <c>int?</c> or <c>decimal?</c> (an int converts without loss).</summary>
     [Parameter] public decimal? Value { get; set; }
+
+    /// <summary>Decimal places shown; 0 for a count.</summary>
     [Parameter] public int Decimals { get; set; }
 }

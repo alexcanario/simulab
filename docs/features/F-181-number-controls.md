@@ -99,8 +99,7 @@ Each kind of number has one named control, one formatter and one column in the k
 
 ## Docs
 - flow: new docs/flows/number-controls.md — the controls, their rules, where each is used and the wireframes above.
-- flow: update docs/flows/edition-exam-rules.md — the score fields are typed number controls.
-- reference: update docs/design/data-type-controls.md — section 2.2 marks the number controls built.
+- flow: update docs/flows/edition-exam-rules.md#Steps — the score fields are typed number controls.
 
 ## Acceptance criteria
 - AC1 Given the culture pt-BR or en, when `AppNumberFormat` parses and formats, then only that culture's decimal separator is accepted ("1,5" in pt-BR, "1.5" in en), the group separator and the other separator are refused, blank is `null` and a value formats with the asked decimals.
@@ -118,6 +117,9 @@ Each kind of number has one named control, one formatter and one column in the k
 - AC13 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en).
 
 ## Criterion → test
+
+Tests locked: 89e801c3f3158154fffc70fa45a27318519f59b2 (10 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `AppNumberFormatTests` (all) |

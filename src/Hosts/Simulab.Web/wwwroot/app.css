@@ -1632,6 +1632,58 @@ code, kbd, pre, samp {
     outline-offset: 2px;
 }
 
+/* F-181, the number controls: the unit and the stepper buttons sit over the end of the input, which keeps room for
+   them. A number is read digit by digit, so the digits line up (tabular) and the text is not italic or cut. */
+.app-integer-field input.mud-input-root,
+.app-decimal-field input.mud-input-root {
+    font-variant-numeric: tabular-nums;
+}
+
+.app-integer-field.app-field-has-end input,
+.app-decimal-field.app-field-has-end input {
+    padding-right: calc(var(--app-space-7) * 2.5);
+}
+
+.app-number-end {
+    position: absolute;
+    top: 50%;
+    right: var(--app-space-2);
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-1);
+}
+
+.app-number-unit {
+    font-size: var(--app-font-xs);
+    color: var(--mud-palette-text-secondary);
+    white-space: nowrap;
+}
+
+.app-number-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: var(--app-space-1);
+    border: 0;
+    border-radius: var(--app-radius-sm);
+    background: transparent;
+    color: var(--app-link);
+    cursor: pointer;
+}
+
+.app-number-step:disabled {
+    color: var(--mud-palette-text-disabled);
+    cursor: default;
+}
+
+.app-number-step:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
 /* F-89, the file field: the input is the only control the browser knows, so it stays focusable but invisible, and the
    button next to it is a label that opens it. The focus ring is drawn on the row's first button when the input has
    the keyboard, so the reader sees where Enter or Space will act. A long file name wraps; it is never cut. */

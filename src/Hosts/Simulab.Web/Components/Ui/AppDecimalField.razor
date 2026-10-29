@@ -1,8 +1,68 @@
+@* F-181 BR3: a decimal number. `Decimals` is required because the meaning decides it (points have 2, a weight may
+   have 1). Only the decimal separator of the culture is accepted; the text is rounded and shown with the decimals when
+   the user leaves the field, never while typing. *@
+
+<AppNumberInput Id="@Id"
+                Label="@Label"
+                Class="@("app-decimal-field " + Class)"
+                Value="@Value"
+                ValueChanged="OnValueChanged"
+                InvalidChanged="InvalidChanged"
+                Decimals="Decimals"
+                Min="@Min"
+                Max="@Max"
+                Unit="@Unit"
+                Placeholder="@Placeholder"
+                Hint="@Hint"
+                Error="@Error"
+                Required="Required"
+                Disabled="Disabled"
+                ReadOnly="ReadOnly"
+                MaxLength="MaxLength" />
+
 @code {
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
     [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>Decimal places kept and shown (at least 1; a whole number is <see cref="AppIntegerField"/>).</summary>
     [Parameter, EditorRequired] public int Decimals { get; set; }
+
+    /// <summary>A class on the field's root, so a kit control built on this one can be found and styled.</summary>
+    [Parameter] public string? Class { get; set; }
+
     [Parameter] public decimal? Value { get; set; }
+
     [Parameter] public EventCallback<decimal?> ValueChanged { get; set; }
+
+    /// <summary>True while the text does not parse or is out of range: the page treats it as blocking.</summary>
     [Parameter] public EventCallback<bool> InvalidChanged { get; set; }
+
+    [Parameter] public decimal? Min { get; set; }
+
+    [Parameter] public decimal? Max { get; set; }
+
+    /// <summary>A suffix after the number ("pts"), localized by the page.</summary>
+    [Parameter] public string? Unit { get; set; }
+
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The page's message; while it is set it replaces the field's own.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool ReadOnly { get; set; }
+
+    [Parameter] public int? MaxLength { get; set; } = 18;
+
+    private Task OnValueChanged(decimal? value)
+    {
+        Value = value;
+        return ValueChanged.InvokeAsync(value);
+    }
 }
