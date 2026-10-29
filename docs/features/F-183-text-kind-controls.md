@@ -250,25 +250,25 @@ cd D:\wt\simulab\f-183-text-kind-controls; $env:Database__Name = 'simulab_f183';
 Esperado: o endereço do painel do Aspire aparece e o Web responde em https://localhost:7125.
 
 2. Passo 2 de 6 (cerca de 6 min): crie a conta e confira o e-mail limpo.
-   - [ ] 2.1 Abra https://localhost:7125/sign-up e, no campo de e-mail, digite ` Ana.F183@Exemplo.COM ` (com espaços e maiúsculas) e saia do campo.
+   - [x] 2.1 Abra https://localhost:7125/sign-up e, no campo de e-mail, digite ` Ana.F183@Exemplo.COM ` (com espaços e maiúsculas) e saia do campo.
    Esperado: o campo mostra `ana.f183@exemplo.com`, sem espaços.
-   - [ ] 2.2 Conclua o cadastro, abra o Mailpit pelo painel do Aspire e clique no link de verificação.
+   - [x] 2.2 Conclua o cadastro, abra o Mailpit pelo painel do Aspire e clique no link de verificação.
    Esperado: a página de verificação confirma o e-mail.
-   - [ ] 2.3 Em https://localhost:7125/sign-in entre com `ANA.F183@exemplo.com ` (maiúsculas e um espaço no fim) e a senha.
+   - [x] 2.3 Em https://localhost:7125/sign-in entre com `ANA.F183@exemplo.com ` (maiúsculas e um espaço no fim) e a senha.
    Esperado: o campo limpa o e-mail e a entrada funciona, na mesma conta.
 
 3. Passo 3 de 6 (cerca de 6 min): ligue a verificação em dois fatores com o campo de código.
-   - [ ] 3.1 No menu do usuário (canto superior direito da barra superior) abra Conta e clique no link "Segurança".
+   - [x] 3.1 No menu do usuário (canto superior direito da barra superior) abra Conta e clique no link "Segurança".
    Esperado: aparecem o QR code e o campo "Código" de seis dígitos.
-   - [ ] 3.2 Leia o QR code no app autenticador, digite no campo `12a3456` e saia do campo.
+   - [x] 3.2 Leia o QR code no app autenticador, digite no campo `12a3456` e saia do campo.
    Esperado: ficam só dígitos, no máximo seis (`123456`), nunca letras; nada é enviado sozinho ao chegar no sexto dígito.
-   - [ ] 3.3 Apague, digite o código real do app e clique em "Ativar".
+   - [x] 3.3 Apague, digite o código real do app e clique em "Ativar".
    Esperado: os dois fatores ligam e a lista de códigos de recuperação aparece; guarde um deles.
 
 4. Passo 4 de 6 (cerca de 6 min): entre com os dois fatores.
-   - [ ] 4.1 Saia da conta e entre de novo no /sign-in com e-mail e senha.
+   - [x] 4.1 Saia da conta e entre de novo no /sign-in com e-mail e senha.
    Esperado: aparece o segundo passo com o campo "Código de autenticação".
-   - [ ] 4.2 Cole `123 456` (com espaço) no campo.
+   - [x] 4.2 Cole `123 456` (com espaço) no campo.
    Esperado: o campo fica com `123456`; o formulário só é enviado pelo botão Entrar, e um código errado volta ao passo da senha com o aviso.
    - [ ] 4.3 Clique em "Usar um código de recuperação" e digite o código guardado com um espaço no meio.
    Esperado: o campo está em letra monoespaçada, o espaço some ao sair do campo e a entrada funciona.
