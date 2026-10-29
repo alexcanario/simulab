@@ -1,8 +1,8 @@
 ---
 feature: F-189
 epic: Data type controls
-status: validating
-Autopilot: stop 2
+status: done
+Autopilot: shipping
 board: 259
 version: 1
 ---
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-29)
-- Stopped at: Built; validation script written (stop 2)
-- Next action: Owner: follow the validation script, then validate and authorize the merge
+- Status: done (2026-10-29)
+- Stopped at: Shipped: merged into main at e18e3468
+- Next action: Nothing: the item is delivered
 - Waiting on: nothing
 
 ## Summary
@@ -123,3 +123,18 @@ Tests locked: 1ecfb7d33d5453ccbff959baf2a01eb31c631378 (1 file); unlocks: 2
 - 2026-10-29 blocked — test wrong: helper skeleton GalleryStateMatrix.cs locked by mistake with the tests; owner answered 'continue' in the olinda session (2026-10-29)
 - 2026-10-29 blocked — test wrong: Problems_Development_SearchHoldsEmptyFilledAndLongValue rendered the section twice and bUnit refused the second service registration; owner answered 'Yes, unlock' in the olinda session ...
 - 2026-10-29 test-fail — tests failed (Simulab.slnx): Simulab.Catalog.Tests.NoticeSubjectMappingEndpointTests.Taxonomy_ReturnsLiveSubjectsAndTopi, 2 reds
+
+## Delivery
+
+Gate time: 9 passes, 54 min 16 s — turn 4 (57 s), ship 4 (49 min 39 s), scan 1 (3 min 40 s), sealed 1 (3 min 40 s saved); 2 red
+Usage: 2725.1k weighted (estimate) — ship 45% · other 55% — context per turn 223k — 1 session, 101 turns
+- Branch: `feature/F-189`, merged into `main` at `e18e3468` (app version 1.29.0); the branch was never pushed.
+- Tests: full suite green at ship (`agile gate GREEN`); `UiGalleryStateMatrixTests` 10/10. Two earlier ship runs were red on tests outside the item (`NoticeSubjectMappingEndpointTests.Taxonomy_ReturnsLiveSubjectsAndTopicsAlphabetically_AccentsIgnored_NoDeletedItem`, `AttemptContentEndpointTests.Content_NeverCarriesAnAnswerKeyATrueFalseKeyAnExplanationOrARubric`); the next run was green.
+- Manual pages: none (test-only item, no visible behaviour).
+- Glossary: 2 rows added (AngleSharp, DOM).
+- Validation evidence:
+  - [verified] AC1 to AC4: `UiGalleryStateMatrixTests` 10/10 in Git Bash and PowerShell 7 (at 2c6edd58).
+  - [verified] Real failure: the one-time code "Read-only" state removed from `UiGallery.razor` makes 3 tests fail naming it (at 2c6edd58).
+  - [verified] Gate GREEN and scan GREEN (at 2c6edd58).
+  - [verified] AC5: no UI text added (at 2c6edd58).
+  - 1. [ ] not tested — step 1 (validated by the owner's relayed words, no tick recorded).
