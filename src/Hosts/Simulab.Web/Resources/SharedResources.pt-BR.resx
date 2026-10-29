@@ -976,7 +976,6 @@
   <data name="Questions.Filter.Limit" xml:space="preserve"><value>Dá para escolher até 100 disciplinas, tópicos e bancas ao todo.</value></data>
   <data name="Questions.Empty.Search" xml:space="preserve"><value>Nenhuma questão corresponde a "{0}".</value></data>
   <data name="Questions.Difficulty.NotSet" xml:space="preserve"><value>Não definida</value></data>
-  <data name="Questions.Difficulty.NotSet.Spoken" xml:space="preserve"><value>Dificuldade não definida</value></data>
   <data name="Questions.Row.Name" xml:space="preserve"><value>questão "{0}"</value></data>
   <data name="Questions.Action.Publish" xml:space="preserve"><value>Publicar</value></data>
   <data name="Questions.Action.Unpublish" xml:space="preserve"><value>Despublicar</value></data>
@@ -1553,7 +1552,7 @@
   <data name="Questions.Difficulty.Level.4" xml:space="preserve"><value>Difícil</value></data>
   <data name="Questions.Difficulty.Level.5" xml:space="preserve"><value>Muito difícil</value></data>
   <data name="Gallery.Section.Choices" xml:space="preserve"><value>Escolhas</value></data>
-  <data name="Gallery.Choices.Hint" xml:space="preserve"><value>Um controle por tipo de escolha, escolhido pelo número de opções e por o efeito ser imediato ou não (docs/design/data-type-controls.md, 2.4).</value></data>
+  <data name="Gallery.Choices.Hint" xml:space="preserve"><value>Um controle por tipo de escolha, escolhido pelo número de opções e pelo efeito ser imediato ou não (docs/design/data-type-controls.md, 2.4).</value></data>
   <data name="Gallery.Choices.Switch" xml:space="preserve"><value>Interruptor (AppSwitch)</value></data>
   <data name="Gallery.Choices.Segmented" xml:space="preserve"><value>Segmentado (AppSegmentedField)</value></data>
   <data name="Gallery.Choices.YesNo" xml:space="preserve"><value>Sim / não (AppYesNoField)</value></data>

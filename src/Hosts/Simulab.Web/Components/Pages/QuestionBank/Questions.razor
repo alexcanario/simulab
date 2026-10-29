@@ -192,7 +192,8 @@
                          Title="@L["Questions.Column.Difficulty"]" Sortable="false">
             <CellTemplate>
                 @* F-184 UC3: the dots and the level name as text; a question with no difficulty reads "Not set". *@
-                <AppLevelBadge Value="@context.Item.Difficulty" Names="@DifficultyNames" Min="QuestionLimits.DifficultyMin" />
+                <AppLevelBadge Value="@context.Item.Difficulty" Names="@DifficultyNames" Min="QuestionLimits.DifficultyMin"
+                                NotSetText="@L["Questions.Difficulty.NotSet"].Value" />
             </CellTemplate>
         </AppNumberColumn>
         <PropertyColumn T="QuestionListItemResponse" TProperty="string" Property="row => row.ContentLanguage"

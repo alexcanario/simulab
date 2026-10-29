@@ -976,7 +976,6 @@
   <data name="Questions.Filter.Limit" xml:space="preserve"><value>Up to 100 subjects, topics and organizers can be picked together.</value></data>
   <data name="Questions.Empty.Search" xml:space="preserve"><value>No question matches "{0}".</value></data>
   <data name="Questions.Difficulty.NotSet" xml:space="preserve"><value>Not set</value></data>
-  <data name="Questions.Difficulty.NotSet.Spoken" xml:space="preserve"><value>No difficulty set</value></data>
   <data name="Questions.Row.Name" xml:space="preserve"><value>question "{0}"</value></data>
   <data name="Questions.Action.Publish" xml:space="preserve"><value>Publish</value></data>
   <data name="Questions.Action.Unpublish" xml:space="preserve"><value>Unpublish</value></data>

@@ -2,6 +2,7 @@
    below it are filled, the name is on screen and each dot is named "n — name". A real radiogroup with one tab stop;
    arrows, Home and End move the level. The page gives the names, since they depend on what is measured. *@
 @inject IStringLocalizer<SharedResources> L
+@inject IJSRuntime JS
 
 <div class="app-field app-level-field @Class @(HasError ? "app-field-error" : null)">
     <span class="app-field-label" id="@LabelId">
@@ -24,6 +25,7 @@
             {
                 var current = level;
                 <button type="button"
+                        id="@DotId(current)"
                         class="@($"app-level-dot {(Value >= current ? "app-level-dot-on" : null)}")"
                         role="radio"
                         aria-label="@L["Level.DotName", current, NameOf(current)]"
@@ -34,7 +36,7 @@
                         @onkeydown="args => OnKeyDownAsync(args, current)"></button>
             }
         </div>
-        <span class="app-level-name">@(Value is { } chosen ? NameOf(chosen) : L["Choice.NotSet"].Value)</span>
+        <span class="app-level-name">@(Value is { } chosen ? NameOf(chosen) : NotSetText ?? L["Choice.NotSet"].Value)</span>
         @if (Value is not null && !Required && !Disabled && !ReadOnly)
         {
             <button type="button" id="@($"{Id}-clear")" class="app-level-clear" aria-label="@L["Level.Clear"]" title="@L["Level.Clear"]"
@@ -72,6 +74,9 @@
 
     [Parameter] public string? Hint { get; set; }
 
+    /// <summary>The word for no level, in the gender of what is measured ("Não definida"); "Not set" when not set.</summary>
+    [Parameter] public string? NotSetText { get; set; }
+
     [Parameter] public string? Error { get; set; }
 
     [Parameter] public bool Required { get; set; }
@@ -105,13 +110,31 @@
         return ValueChanged.InvokeAsync(level);
     }
 
-    private Task OnKeyDownAsync(KeyboardEventArgs args, int level) => args.Key switch
+    private async Task OnKeyDownAsync(KeyboardEventArgs args, int level)
     {
-        "ArrowRight" or "ArrowUp" => SetAsync(Math.Min(level + 1, Max)),
-        "ArrowLeft" or "ArrowDown" => SetAsync(Math.Max(level - 1, Min)),
-        "Home" => SetAsync(Min),
-        "End" => SetAsync(Max),
-        " " or "Enter" => SetAsync(level),
-        _ => Task.CompletedTask
-    };
+        int? target = args.Key switch
+        {
+            "ArrowRight" or "ArrowUp" => Math.Min(level + 1, Max),
+            "ArrowLeft" or "ArrowDown" => Math.Max(level - 1, Min),
+            "Home" => Min,
+            "End" => Max,
+            " " or "Enter" => level,
+            _ => null
+        };
+        if (target is null)
+        {
+            return;
+        }
+
+        await SetAsync(target);
+
+        // The focus follows the choice (a radio group), so the next key starts from the new level and a screen reader
+        // announces it; the dot keeps its place in the tab order through the roving tabindex.
+        if (!Disabled && !ReadOnly)
+        {
+            await JS.InvokeVoidAsync("simulabShell.focusOption", DotId(target.Value));
+        }
+    }
+
+    private string DotId(int level) => $"{Id}-{level}";
 }

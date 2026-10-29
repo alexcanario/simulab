@@ -160,6 +160,7 @@ else
                     <AppLevelField Id="question-difficulty"
                                    Label="@L["Questions.Field.Difficulty"]"
                                    Names="DifficultyNames"
+                                   NotSetText="@L["Questions.Difficulty.NotSet"].Value"
                                    Min="QuestionLimits.DifficultyMin"
                                    Value="_difficulty"
                                    ValueChanged="@((int? value) => OnDifficultyChanged(value))"

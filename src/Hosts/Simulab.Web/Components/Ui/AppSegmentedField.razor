@@ -2,6 +2,7 @@
    Space and Enter choose (rule: ui). The group carries the field's id: the label points at it and the error summary
    jumps to it. Options that need a sentence are AppRadioCards. *@
 @typeparam TValue
+@inject IJSRuntime JS
 
 <div class="app-field app-segmented-field @Class @(HasError ? "app-field-error" : null)">
     <span class="app-field-label" id="@LabelId">
@@ -100,13 +101,29 @@
         return ValueChanged.InvokeAsync(option.Value);
     }
 
-    private Task OnKeyDownAsync(KeyboardEventArgs args, AppSegmentOption<TValue> option) => args.Key switch
+    private async Task OnKeyDownAsync(KeyboardEventArgs args, AppSegmentOption<TValue> option)
     {
-        " " or "Enter" => SelectAsync(option),
-        "ArrowRight" or "ArrowDown" => SelectAsync(Neighbour(option, 1)),
-        "ArrowLeft" or "ArrowUp" => SelectAsync(Neighbour(option, -1)),
-        _ => Task.CompletedTask
-    };
+        var target = args.Key switch
+        {
+            " " or "Enter" => option,
+            "ArrowRight" or "ArrowDown" => Neighbour(option, 1),
+            "ArrowLeft" or "ArrowUp" => Neighbour(option, -1),
+            _ => null
+        };
+        if (target is null)
+        {
+            return;
+        }
+
+        await SelectAsync(target);
+
+        // The focus follows the choice (a radio group): the next key starts from the new option and a screen reader
+        // announces it. The roving tabindex keeps one tab stop.
+        if (!Disabled)
+        {
+            await JS.InvokeVoidAsync("simulabShell.focusOption", OptionId(target));
+        }
+    }
 
     private AppSegmentOption<TValue> Neighbour(AppSegmentOption<TValue> option, int step)
     {
