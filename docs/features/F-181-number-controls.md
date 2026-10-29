@@ -24,6 +24,7 @@ The kit gains `AppNumberFormat` (parse and format in the user's culture, only th
 - Waits on (to start): nothing.
 - Needed to validate: nothing.
 - Model: opus (lane jussara; the kit and two catalog forms change).
+- Risk: medium (no signal; code or rules changed (.claude/agile/sync.json))
 - Suggested path: `/agile:autopilot F-181 --assume --worktree`.
 - Parallel with: F-185.
 
@@ -157,6 +158,60 @@ Tests locked: 89e801c3f3158154fffc70fa45a27318519f59b2 (10 files); unlocks: 0
 - (none)
 
 ## Change notes
+
+## Validation script
+
+### pt-BR
+Necessário para validar: o app host local com o administrador da carga inicial `admin@simulab.local` (senha em `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`) — você fornece, está no lugar.
+
+#### Verificado pelo Claude
+- Os 4 controles, os formatadores, a coluna de nota e as duas telas: 3092 testes do projeto Web verdes na suíte inteira, entre eles os testes novos dos controles, da galeria, das duas telas e dos textos (em d0edccf8).
+- Os testes de arquitetura (vocabulário, camadas, recursos): 310 verdes (em d0edccf8).
+- O gate das mudanças: `agile gate GREEN`, sem aviso novo; a documentação técnica: `agile techdocs GREEN: 2 page(s)` (em d0edccf8).
+- Os textos novos existem em pt-BR, pt-PT e en: 63 verificações de `NumberResourcesTests` verdes (em d0edccf8).
+- Não conferido em tela pelo Claude: o app host não foi iniciado neste trabalho (a mesma porta e o mesmo Docker são usados por outras frentes em paralelo); a aparência fica nos passos abaixo (em d0edccf8).
+
+#### Só você
+1. Passo 1 de 4 (cerca de 4 min): suba o app no banco próprio do item. Feche antes o Visual Studio ou qualquer app host rodando de outra pasta.
+Git Bash:
+```bash
+cd /d/wt/simulab/f-181-number-controls && Database__Name=simulab_f181 dotnet run --project src/Hosts/Simulab.AppHost
+```
+PowerShell 7:
+```powershell
+cd D:\wt\simulab\f-181-number-controls; $env:Database__Name = 'simulab_f181'; dotnet run --project src/Hosts/Simulab.AppHost
+```
+Esperado: o endereço do painel do Aspire aparece e o Web responde em https://localhost:7125.
+
+2. Passo 2 de 4 (cerca de 5 min): confira os controles de número na galeria.
+   - [ ] 2.1 Entre com `admin@simulab.local`, abra https://localhost:7125/dev/ui (menu lateral esquerdo, seção Development, "UI kit") e role até a seção "Números".
+   Esperado: três colunas (inteiro, decimal, nota e ano), cada uma com os estados vazio, preenchido, erro, desabilitado e somente leitura.
+   - [ ] 2.2 No campo inteiro "Número de questões" digite `20,5` e saia do campo.
+   Esperado: o aviso "Informe um número inteiro, sem separadores." aparece embaixo, o texto `20,5` continua no campo.
+   - [ ] 2.3 No campo decimal "Peso da matéria" digite `2.5` (com ponto) e saia; depois digite `2,5` e saia.
+   Esperado: com o ponto, o aviso pede o separador `,`; com a vírgula, o aviso some e o campo mostra `2,5`.
+   - [ ] 2.4 No campo de nota "Pontos por questão" digite `1,5` e saia; no campo de ano digite `2.026` e saia.
+   Esperado: a nota vira `1,50` com "pts" no fim do campo; o ano com ponto mostra o aviso de intervalo (de 1950 ao ano atual + 2).
+   - [ ] 2.5 No campo "Com botões de passo" clique em `+` e em `−`.
+   Esperado: o número sobe e desce de um em um, os botões ficam desabilitados em 1 e em 500.
+
+3. Passo 3 de 4 (cerca de 6 min): confira as notas e o ano no formulário da edição.
+   - [ ] 3.1 No menu lateral esquerdo clique em Content > Exams, abra o exame de guarda municipal e, em "Editions", clique em Editar na edição Manaus 2026.
+   Esperado: o cartão "Regras da prova" mostra a nota de corte `60,00 pts`, a redação `20,00 pts` e o corte `10,00 pts`.
+   - [ ] 3.2 Em "Nota de corte da objetiva" digite `60.5` (com ponto) e clique em Salvar.
+   Esperado: o campo mostra o aviso da nota de corte, o painel de erros no topo lista o campo e nada é salvo.
+   - [ ] 3.3 Corrija para `60,5`, saia do campo e clique em Salvar.
+   Esperado: o campo mostra `60,50`, a edição é salva e o resumo à direita mostra a nota de corte `60,5`.
+   - [ ] 3.4 Em "Ano do edital" digite `20x6` e clique em Salvar.
+   Esperado: o aviso do ano aparece, o texto continua no campo e nada é salvo; com `2026` salva normalmente.
+
+4. Passo 4 de 4 (cerca de 4 min): confira o diálogo da disciplina do edital e o teclado.
+   - [ ] 4.1 Na mesma edição, no cartão "Disciplinas do edital", clique em "Adicionar disciplina", digite um nome, `abc` em "Número de questões" e `1,5` em "Pontos por questão" e clique em Salvar.
+   Esperado: o número de questões mostra o aviso de 1 a 500, nada é enviado, e os pontos viram `1,50` com "pts".
+   - [ ] 4.2 Corrija o número para `10`, e clique em Salvar.
+   Esperado: a disciplina entra na lista com "1,50 pt" ao lado das 10 questões.
+   - [ ] 4.3 Só com o teclado: abra o diálogo de novo, use Tab para passar pelos campos e digite os números.
+   Esperado: o foco passa pelos dois campos de número na ordem do formulário, sem armadilha, e o teclado do celular (se testar) é o numérico.
 
 ## Events
 
