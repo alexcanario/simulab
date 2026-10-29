@@ -15,6 +15,7 @@
               Error="@Error"
               Required="Required"
               Disabled="Disabled"
+              ReadOnly="ReadOnly"
               MaxLength="PastedLength" />
 
 @code {
@@ -44,6 +45,8 @@
     [Parameter] public bool Required { get; set; }
 
     [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool ReadOnly { get; set; }
 
     /// <summary>The code as kept: its first six digits, nothing else.</summary>
     public static string? Normalize(string? value) =>

@@ -437,12 +437,18 @@
                              Error="@L["Gallery.TextKinds.SampleError"]" />
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Disabled"]</p>
                 <AppOtpField Id="gallery-otp-disabled" Label="@L["Gallery.TextKinds.Label.Otp"]" Value="123456" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.ReadOnly"]</p>
+                <AppOtpField Id="gallery-otp-read-only" Label="@L["Gallery.TextKinds.Label.Otp"]" Value="123456" ReadOnly="true" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.LongValue"]</p>
+                <AppOtpField Id="gallery-otp-long" Label="@L["Gallery.TextKinds.Label.Otp"]" Value="123 456 789 012" />
 
                 <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.TextKinds.Search"]</MudText>
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Empty"]</p>
                 <AppSearchField Value="@_searchEmpty" ValueChanged="@(value => _searchEmpty = value)" />
                 <p class="gallery-state-caption">@L["Gallery.TextKinds.State.Filled"]</p>
                 <AppSearchField Value="@_searchFilled" ValueChanged="@(value => _searchFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.TextKinds.State.LongValue"]</p>
+                <AppSearchField Value="simulado de língua portuguesa e raciocínio lógico da secretaria de educação" />
             </div>
         </AppFormGrid>
     </MudPaper>

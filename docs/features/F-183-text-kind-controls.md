@@ -203,6 +203,13 @@ Tests locked: 785b1b7d63a379e25de3bc296656b49a4206554f (4 files); unlocks: 0
 - 2026-10-28 — Existing tests changed for the approved behavior: `ExamEditionFormTests`, `OrganizersPageTests` and `IssuingAuthoritiesPageTests` now type an address with another scheme, since one with no scheme is completed with `https://` (BR6); the AI diagnostics tests type with `oninput`, since the text area's counter follows the typing (BR5); `UsersPageTests` finds the table box by one of its classes — technical
 - 2026-10-28 — `AppTextField` gains `Class`, `InputMode`, `Pattern`, `InputAttributes`, `MaxLines` and `EndContent`; MudBlazor writes `inputmode` and `pattern` itself, so they are its parameters, not raw attributes — technical
 - 2026-10-28: plan — 1 bUnit tests of the six controls and of the page fields → fail, locked; 2 `AppTextField` takes extra input attributes and end content, `AppTextAreaField`, `AppEmailField`, `AppCodeField` → their tests green; 3 `AppOtpField`, `AppUrlField`, `AppSearchField` inside `AppDataTable` → their tests and the table tests green; 4 identity pages (6 e-mail, 5 code fields) → Identity page tests green; 5 catalog, question and AI pages (3 URL, 6 multi-line) → their page tests green; 6 gallery "Text kinds", resources in three locales, flow page → parity and techdocs green; 7 app host screen check, gate, scan, validation script → gate GREEN
+- 2026-10-29: review #1 (gallery states) — confirmed, fixed: `AppOtpField` gained `ReadOnly`; the gallery shows read-only and long value for it, and long value for the search box. Error, disabled and read-only do not apply to the search box (it has no label, hint or error by BR7) — autopilot
+- 2026-10-29: review #2 (search box and contract item 1) — confirmed, accepted: `AppSearchField` keeps its `aria-label` and has no visible label, hint or error; BR7 asks for the table's look, and a search is not a form field. Exempt from item 1 of `docs/design/data-type-controls.md` section 3 — assumed by autopilot
+- 2026-10-29: review #3 and #4 (AC10 and AC9 tests) — confirmed, fixed: `TextKindApiReachTests` (Identity.Tests, new file, the lock stays untouched) signs in and asks a reset with the lower-cased address of an account created with capitals, and sends 3, 5, 7-digit and lettered codes to the code step: refused as `TotpCodeInvalid`, one failure counted (6 tests green)
+- 2026-10-29: review #5 (normalize on leave, not on each key) — confirmed, kept as built: normalizing on each key would rewrite the value under the caret on every key in Blazor Server; the field cleans on leave and `MaxLength` limits the paste. Listed at stop 2 for the owner — assumed by autopilot
+- 2026-10-29: review #6 (gallery state test is loose) and #7 (four copies of the http(s) check) — minor, not applied: #6 touches a locked file, #7 changes three pages beyond the item; both become ideas — autopilot
+- 2026-10-29: review coverage — checked and fine: security (code kept in page state and request body, no logger, JS interop or storage in the new controls, `javascript:` refused, `rel="noopener noreferrer"`, lockout untouched), data (no migration), contracts (no route or API change), localization (22 keys in three locales), locks (diff of the 4 locked paths empty), rules (icons, `[EditorRequired]`, no Portuguese identifiers). Read: 40 changed files
+- 2026-10-29: traps — T1 each wrapper re-declares the `AppTextField` parameters: a later parameter is copied five times; T2 `TotpLength` of the kit repeats `TotpDigits` of Identity: a change on one side cuts the code silently; T3 new accounts keep a lower-case e-mail and old ones the typed case: an exact match on `Email` (not `NormalizedEmail`) would split them
 
 ## Out of scope
 - Screen composition of the identity and catalog forms: F-133, F-128, F-130.
@@ -224,6 +231,8 @@ Tests locked: 785b1b7d63a379e25de3bc296656b49a4206554f (4 files); unlocks: 0
 - 2026-10-28 override — Size: kept whole over split (6.3 vs 6.8)
 - 2026-10-28 test-fail — 1 new warning(s): MSB3061 in C:/Program Files/dotnet/sdk/10.0.403/Microsoft.Common.CurrentVersion.targets, 1 red
 - 2026-10-28 stop — fresh context before review
+- 2026-10-29 rework — review #1: gallery states of OTP and search
+- 2026-10-29 rework — review #3/#4: AC10 and AC9 API tests
 
 ## Delivery
 - Branch: feature/F-183
