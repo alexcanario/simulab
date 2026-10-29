@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AppTimeField mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Tokens: docs/design/DESIGN.md only. */
+:root, [data-theme="light"] {
+  --primary: #0F3266; --primary-contrast: #FFFFFF; --primary-darken: #10366E; --primary-selected: #D1E4FE;
+  --keycap-primary-edge: #6B7C91;
+  --info: #2478C5; --link: #1D64A8;
+  --error: #B83232;
+  --text-primary: #0B1B2E; --text-secondary: #52647A;
+  --disabled-bg: #E6ECF5;
+  --background: #F2F5FB; --surface: #FFFFFF; --background-gray: #E6ECF5;
+  --lines-default: #D9E1EE; --lines-inputs: #6B7C91;
+}
+[data-theme="dark"] {
+  --primary: #47A0EB; --primary-contrast: #0B1B2E; --primary-darken: #4DADFE; --primary-selected: #1A4583;
+  --keycap-primary-edge: #1F6FB5;
+  --info: #47A0EB; --link: #8CC4F5;
+  --error: #FF9C94;
+  --text-primary: #F2F5FB; --text-secondary: #B8C4D2;
+  --disabled-bg: #081938;
+  --background: #0B2149; --surface: #12386F; --background-gray: #081938;
+  --lines-default: #24497F; --lines-inputs: #7F9BC0;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 500; }
+.mono { font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; }
+
+.boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.board { background: var(--background); color: var(--text-primary); padding: 32px 16px 48px; }
+.board-inner { max-width: 440px; margin: 0 auto; }
+.board h1 { font-size: 1.75rem; line-height: 2rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 4px; }
+.board > .board-inner > p { font-size: 0.875rem; color: var(--text-secondary); margin: 0 0 24px; }
+
+.card { background: var(--surface); border: 1px solid var(--lines-default); border-radius: 20px; padding: 20px; margin-bottom: 16px; }
+.card h2 { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary); margin: 0 0 14px; }
+
+/* Field anatomy of AppTextField / AppDateField. */
+.app-field { position: relative; margin-bottom: 4px; }
+.app-field-label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-hint { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; line-height: 1.45; }
+.app-field-error-text { display: block; font-size: 0.75rem; font-weight: 600; color: var(--error); margin-top: 5px; }
+
+.time-input { display: flex; align-items: center; height: 44px; width: 168px; padding: 0 4px 0 14px;
+  border: 1px solid var(--lines-inputs); border-radius: 12px; background: var(--surface); }
+.time-input input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text-primary);
+  font: 500 0.9375rem/1.375rem "JetBrains Mono", ui-monospace, Consolas, monospace; letter-spacing: 0.02em; outline: none; }
+.time-input input::placeholder { color: var(--text-secondary); }
+.time-input:focus-within { border: 2px solid var(--primary); padding-left: 13px; padding-right: 3px; }
+.is-focus .time-input { border: 2px solid var(--primary); padding-left: 13px; padding-right: 3px; }
+.app-field-error .time-input { border: 2px solid var(--error); padding-left: 13px; padding-right: 3px; }
+.is-disabled .time-input { background: var(--disabled-bg); border-color: transparent; }
+.is-disabled input { color: var(--text-secondary); }
+
+.icon-btn { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--text-secondary); cursor: pointer; }
+.icon-btn:hover { background: var(--background-gray); }
+.icon-btn:focus-visible, .slot:focus-visible, .btn:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+.icon-btn svg { width: 20px; height: 20px; }
+.is-disabled .icon-btn { cursor: default; }
+.is-disabled .icon-btn:hover { background: transparent; }
+
+/* Popover: a surface with a 1px line, no shadow. */
+.popover { margin-top: 8px; width: 248px; background: var(--surface); border: 1px solid var(--lines-default);
+  border-radius: 20px; padding: 12px; }
+.popover[hidden] { display: none; }
+.popover-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 4px 10px; border-bottom: 1px solid var(--lines-default); }
+.popover-head .readout { font-size: 1.75rem; line-height: 2rem; font-weight: 700; }
+.popover-head .caption { font-size: 0.75rem; color: var(--text-secondary); }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 10px; }
+.column-label { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary); text-align: center; margin-bottom: 6px; }
+.column { height: 196px; overflow-y: auto; scrollbar-width: thin; display: flex; flex-direction: column; gap: 4px; padding: 2px; }
+.slot { flex: none; height: 36px; border: 2px solid transparent; border-radius: 10px; background: transparent; color: var(--text-primary);
+  font: 500 0.8125rem/1.25rem "JetBrains Mono", ui-monospace, Consolas, monospace; cursor: pointer; }
+.slot:hover { background: var(--background-gray); }
+.slot[aria-selected="true"] { background: var(--primary-selected); border-color: var(--primary); font-weight: 700; }
+.popover-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--lines-default); }
+
+/* Keycap buttons. */
+.btn { min-height: 36px; padding: 0 16px; border-radius: 12px; font: 800 0.875rem/1.25rem "Bricolage Grotesque", system-ui, sans-serif; cursor: pointer; }
+.btn-primary { background: var(--primary); color: var(--primary-contrast); border: 0; box-shadow: 0 3px 0 var(--keycap-primary-edge); }
+.btn-primary:hover { background: var(--primary-darken); }
+.btn-primary:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--keycap-primary-edge); }
+.btn-text { background: none; border: 0; color: var(--link); text-decoration: underline; padding: 0 8px; }
+
+.states { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 16px; }
+.theme-switch { position: fixed; top: 12px; right: 12px; z-index: 2; }
+@media (prefers-reduced-motion: reduce) { .btn-primary:active { transform: none; } }
+</style>
+</head>
+<body>
+
+<div class="boards">
+<section class="board" data-theme="light"><div class="board-inner" data-slot></div></section>
+<section class="board" data-theme="dark"><div class="board-inner" data-slot></div></section>
+</div>
+
+<template id="board">
+  <h1>AppTimeField</h1>
+  <p>Hora do dia (<span class="mono">TimeOnly</span>). Digita-se no formato da cultura; o seletor é uma ajuda, nunca o único caminho.</p>
+
+  <div class="card">
+    <h2>Interativo</h2>
+    <div class="app-field" data-live>
+      <label class="app-field-label">Início da prova<span class="app-field-required" aria-hidden="true">*</span></label>
+      <div class="time-input">
+        <input type="text" inputmode="numeric" placeholder="hh:mm" value="14:30" aria-haspopup="dialog">
+        <button class="icon-btn" type="button" aria-label="Abrir seletor de hora" data-toggle>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+        </button>
+      </div>
+      <span class="app-field-hint">Use o formato hh:mm, por exemplo 14:30.</span>
+      <div class="popover" role="dialog" aria-label="Seletor de hora">
+        <div class="popover-head">
+          <span class="readout mono" data-readout>14:30</span>
+          <span class="caption">24 horas</span>
+        </div>
+        <div class="columns">
+          <div><div class="column-label">Hora</div><div class="column" role="listbox" aria-label="Hora" data-hours></div></div>
+          <div><div class="column-label">Minuto</div><div class="column" role="listbox" aria-label="Minuto" data-minutes></div></div>
+        </div>
+        <div class="popover-foot">
+          <button class="btn btn-text" type="button" data-now>Agora</button>
+          <button class="btn btn-primary" type="button" data-ok>Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Estados</h2>
+    <div class="states">
+      <div class="app-field">
+        <label class="app-field-label">Vazio</label>
+        <div class="time-input"><input placeholder="hh:mm" tabindex="-1">
+          <span class="icon-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></span></div>
+        <span class="app-field-hint">Formato hh:mm.</span>
+      </div>
+      <div class="app-field is-focus">
+        <label class="app-field-label">Com foco</label>
+        <div class="time-input"><input value="09:1" tabindex="-1">
+          <span class="icon-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></span></div>
+        <span class="app-field-hint">Formato hh:mm.</span>
+      </div>
+      <div class="app-field app-field-error">
+        <label class="app-field-label">Erro<span class="app-field-required" aria-hidden="true">*</span></label>
+        <div class="time-input"><input value="25:70" tabindex="-1">
+          <span class="icon-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></span></div>
+        <span class="app-field-error-text">Digite uma hora válida, de 00:00 a 23:59.</span>
+      </div>
+      <div class="app-field is-disabled">
+        <label class="app-field-label">Desativado</label>
+        <div class="time-input"><input value="08:00" disabled>
+          <span class="icon-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></span></div>
+        <span class="app-field-hint">Definida pela edição.</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+const tpl = document.getElementById('board');
+const pad = n => String(n).padStart(2, '0');
+const STEP = 5;
+
+document.querySelectorAll('[data-slot]').forEach(slot => {
+  slot.appendChild(tpl.content.cloneNode(true));
+  const field = slot.querySelector('[data-live]');
+  const input = field.querySelector('input');
+  const pop = field.querySelector('.popover');
+  const readout = field.querySelector('[data-readout]');
+  const hoursCol = field.querySelector('[data-hours]');
+  const minsCol = field.querySelector('[data-minutes]');
+  let h = 14, m = 30;
+
+  const build = (col, count, step, pick) => {
+    for (let i = 0; i < count; i += step) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'slot'; b.role = 'option'; b.textContent = pad(i); b.dataset.v = i;
+      b.addEventListener('click', () => { pick(i); render(); });
+      col.appendChild(b);
+    }
+  };
+  build(hoursCol, 24, 1, v => h = v);
+  build(minsCol, 60, STEP, v => m = v);
+
+  function render(scroll) {
+    const text = `${pad(h)}:${pad(m)}`;
+    readout.textContent = text; input.value = text;
+    [[hoursCol, h], [minsCol, m - m % STEP]].forEach(([col, v]) =>
+      col.querySelectorAll('.slot').forEach(s => {
+        const on = +s.dataset.v === v;
+        s.setAttribute('aria-selected', on);
+        if (on && scroll) col.scrollTop = s.offsetTop - col.offsetTop - 80;
+      }));
+  }
+
+  field.querySelector('[data-toggle]').addEventListener('click', () => { pop.hidden = !pop.hidden; if (!pop.hidden) render(true); });
+  field.querySelector('[data-ok]').addEventListener('click', () => { pop.hidden = true; input.focus(); });
+  field.querySelector('[data-now]').addEventListener('click', () => { const d = new Date(); h = d.getHours(); m = d.getMinutes(); render(true); });
+  input.addEventListener('change', () => {
+    const t = /^(\d{1,2}):?(\d{2})$/.exec(input.value.trim());
+    if (t && +t[1] < 24 && +t[2] < 60) { h = +t[1]; m = +t[2]; render(true); }
+  });
+  pop.addEventListener('keydown', e => { if (e.key === 'Escape') { pop.hidden = true; input.focus(); } });
+  requestAnimationFrame(() => render(true));
+});
+</script>
+</body>
+</html>
