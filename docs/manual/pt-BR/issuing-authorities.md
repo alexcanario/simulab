@@ -1,8 +1,8 @@
 ---
 page: issuing-authorities
 locale: pt-BR
-features: [F-34]
-updated: 2026-09-25
+features: [F-34, F-183]
+updated: 2026-10-29
 ---
 # Órgãos contratantes
 
@@ -44,8 +44,8 @@ a tela Órgãos contratantes. Para as demais, a página não é encontrada.
 | Campo | Significado | Regras |
 |---|---|---|
 | Nome | Como o órgão aparece em todo lugar | Obrigatório, de 2 a 150 caracteres, não pode repetir o nome de outro órgão, inclusive de um excluído. Maiúscula e acento não fazem um nome diferente |
-| Site oficial | Onde ler sobre o órgão | Opcional, endereço completo começando com `http://` ou `https://` |
-| Descrição | Texto livre sobre o órgão | Opcional, no máximo 500 caracteres |
+| Site oficial | Onde ler sobre o órgão | Opcional, endereço completo começando com `http://` ou `https://`. Sem o começo, o `https://` é acrescentado ao sair do campo; com um endereço válido aparece um botão que abre o site em outra aba |
+| Descrição | Texto livre sobre o órgão | Opcional, no máximo 500 caracteres. O campo cresce com o texto, até 10 linhas, e o contador mostra quanto resta |
 
 ## Mensagens
 | Mensagem | O que significa | O que fazer |

@@ -1,8 +1,8 @@
 ---
 page: two-factor
 locale: pt-BR
-features: [F-11]
-updated: 2026-09-21
+features: [F-11, F-183]
+updated: 2026-10-29
 ---
 # Verificação em duas etapas
 
@@ -44,8 +44,8 @@ Ativar ou desativar a verificação não desconecta você de nenhum lugar: vale 
 ## Campos
 | Campo | O que é | Regras |
 |---|---|---|
-| Código de seis dígitos | O código que o aplicativo autenticador mostra | Obrigatório; muda a cada 30 segundos e cada código funciona uma vez |
-| Código de recuperação | Um dos dez códigos que você guardou, como ABCDE-FGHJK | Obrigatório quando usado; maiúsculas ou minúsculas, com ou sem o traço; funciona uma vez |
+| Código de seis dígitos | O código que o aplicativo autenticador mostra | Obrigatório; muda a cada 30 segundos e cada código funciona uma vez. O campo aceita só dígitos, no máximo seis, e um código colado com espaço ou traço entra inteiro. Nada é enviado ao digitar o sexto dígito: use o botão |
+| Código de recuperação | Um dos dez códigos que você guardou, como ABCDE-FGHJK | Obrigatório quando usado; maiúsculas ou minúsculas, com ou sem o traço; funciona uma vez. Os espaços são removidos ao sair do campo, que mostra o código em letra de largura fixa |
 | Senha atual | A senha com que você entra | Obrigatória para desativar a verificação |
 
 ## Mensagens
