@@ -68,6 +68,11 @@ F-181, F-182, F-183, F-184, F-185, F-186
 - 2026-10-27 — Epic agreed — owner ("Aprovo o épico").
 
 ## Retro notes
+- F-183: lesson: the test phase locked a gallery test that only checks a state caption appears somewhere in the section, so a control missing a state passed; a state-matrix test should check each control's own column.
+- F-183: lesson: `validation-ticks.js evidence` printed 0 of 17 tested while the item file carried 9 hand-ticked boxes; the ticks live outside the file, so a tick typed into the file is lost from the evidence.
+- F-183: lesson: `gate.js ship --fresh` runs about 21 minutes and the shell tool stops a foreground command at 10 minutes, so the skill's "foreground, never background" cannot hold for this project's suite.
+- F-183: item decision: the search box keeps its aria-label and has no visible label, hint or error (BR7).
+- F-183: item decision: code and one-time code fields clean the value on leave, not on each key (Blazor Server rewrites the value under the caret).
 
 ## Related
 - Catalog: [data-type-controls.md](../design/data-type-controls.md)

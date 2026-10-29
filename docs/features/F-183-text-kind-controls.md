@@ -1,8 +1,8 @@
 ---
 feature: F-183
 epic: Data type controls
-status: validating
-Autopilot: stop 2
+status: done
+Autopilot: shipping
 board: 253
 version: 1
 ---
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: building (2026-10-28)
-- Stopped at: Built: controls, migrations, gallery, flow page; gate GREEN, screen checked; run stopped before the independent review (fresh context)
-- Next action: Resume with /agile:epic "data-type-controls" --autopilot: review, scan triage, validation script (Claude)
+- Status: done (2026-10-29)
+- Stopped at: Shipped: merge a2b47e40 on main, board 253 closed; worktree folder held by a running app host
+- Next action: Close the app host that runs from the F-183 worktree, then rerun worktree remove (Owner)
 - Waiting on: nothing
 
 ## Summary
@@ -250,25 +250,25 @@ cd D:\wt\simulab\f-183-text-kind-controls; $env:Database__Name = 'simulab_f183';
 Esperado: o endereço do painel do Aspire aparece e o Web responde em https://localhost:7125.
 
 2. Passo 2 de 6 (cerca de 6 min): crie a conta e confira o e-mail limpo.
-   - [x] 2.1 Abra https://localhost:7125/sign-up e, no campo de e-mail, digite ` Ana.F183@Exemplo.COM ` (com espaços e maiúsculas) e saia do campo.
+   - [ ] 2.1 Abra https://localhost:7125/sign-up e, no campo de e-mail, digite ` Ana.F183@Exemplo.COM ` (com espaços e maiúsculas) e saia do campo.
    Esperado: o campo mostra `ana.f183@exemplo.com`, sem espaços.
-   - [x] 2.2 Conclua o cadastro, abra o Mailpit pelo painel do Aspire e clique no link de verificação.
+   - [ ] 2.2 Conclua o cadastro, abra o Mailpit pelo painel do Aspire e clique no link de verificação.
    Esperado: a página de verificação confirma o e-mail.
-   - [x] 2.3 Em https://localhost:7125/sign-in entre com `ANA.F183@exemplo.com ` (maiúsculas e um espaço no fim) e a senha.
+   - [ ] 2.3 Em https://localhost:7125/sign-in entre com `ANA.F183@exemplo.com ` (maiúsculas e um espaço no fim) e a senha.
    Esperado: o campo limpa o e-mail e a entrada funciona, na mesma conta.
 
 3. Passo 3 de 6 (cerca de 6 min): ligue a verificação em dois fatores com o campo de código.
-   - [x] 3.1 No menu do usuário (canto superior direito da barra superior) abra Conta e clique no link "Segurança".
+   - [ ] 3.1 No menu do usuário (canto superior direito da barra superior) abra Conta e clique no link "Segurança".
    Esperado: aparecem o QR code e o campo "Código" de seis dígitos.
-   - [x] 3.2 Leia o QR code no app autenticador, digite no campo `12a3456` e saia do campo.
+   - [ ] 3.2 Leia o QR code no app autenticador, digite no campo `12a3456` e saia do campo.
    Esperado: ficam só dígitos, no máximo seis (`123456`), nunca letras; nada é enviado sozinho ao chegar no sexto dígito.
-   - [x] 3.3 Apague, digite o código real do app e clique em "Ativar".
+   - [ ] 3.3 Apague, digite o código real do app e clique em "Ativar".
    Esperado: os dois fatores ligam e a lista de códigos de recuperação aparece; guarde um deles.
 
 4. Passo 4 de 6 (cerca de 6 min): entre com os dois fatores.
-   - [x] 4.1 Saia da conta e entre de novo no /sign-in com e-mail e senha.
+   - [ ] 4.1 Saia da conta e entre de novo no /sign-in com e-mail e senha.
    Esperado: aparece o segundo passo com o campo "Código de autenticação".
-   - [x] 4.2 Cole `123 456` (com espaço) no campo.
+   - [ ] 4.2 Cole `123 456` (com espaço) no campo.
    Esperado: o campo fica com `123456`; o formulário só é enviado pelo botão Entrar, e um código errado volta ao passo da senha com o aviso.
    - [ ] 4.3 Clique em "Usar um código de recuperação" e digite o código guardado com um espaço no meio.
    Esperado: o campo está em letra monoespaçada, o espaço some ao sair do campo e a entrada funciona.
@@ -305,6 +305,10 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
 
 ## Delivery
 - Branch: feature/F-183
-- Merge:
-- Tests:
-- Manual pages:
+- Merge: a2b47e40 (--no-ff, pushed to origin/main, board #253)
+- Tests: full suite GREEN (ship --fresh): Web 2946, Identity 589 (6 new), Catalog 706, QuestionBank 857, ExamEngine 99, Api 83, AppHost 122; scan GREEN; app version 1.28.0
+- Manual pages: docs/manual/pt-BR/two-factor.md, sign-in-and-sign-out.md, issuing-authorities.md, organizers.md (pt-PT and en are frozen)
+- Validation evidence: the owner answered "Validado: merge F-183" in chat; the local tick store was empty (0 of 17 recorded) and the file had boxes 2.1 to 4.2 ticked by hand (reset here, since ticks live outside the file); steps 4.3 to 6.3 not ticked, recorded as not tested; the owner's chat answer is the validation.
+- Review follow-ups not built (ideas to register): the gallery state test is loose and its file is locked (review #6); four copies of the http(s) address check (review #7).
+Gate time: 11 passes, 34 min 53 s — turn 6 (3 min 18 s), ship 2 (21 min 41 s), scan 3 (9 min 54 s); 1 red
+Usage: 1455.3k weighted (estimate) — ship 31% · other 69% — agents 24% — context per turn 233k — 1 session, 72 turns
