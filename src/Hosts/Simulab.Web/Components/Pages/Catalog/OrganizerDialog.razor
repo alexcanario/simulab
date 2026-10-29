@@ -144,7 +144,7 @@
             return null;
         }
 
-        return Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+        return AppUrlField.IsValid(trimmed)
             ? null
             : Errors.For(CatalogErrorCodes.OrganizerWebsiteInvalid);
     }

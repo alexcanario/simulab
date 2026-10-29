@@ -54,6 +54,9 @@ The rule for a valid web address has one copy, in the kit control, so a change t
 - AC5 No new text is added, so the locale files do not change and the missing-key test stays green.
 
 ## Criterion → test
+
+Tests locked: a573b4f0274fbc8c71d9c17e18019879caa81caa (1 file); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | pending |

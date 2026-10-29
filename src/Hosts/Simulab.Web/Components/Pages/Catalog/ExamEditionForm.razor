@@ -705,8 +705,7 @@ else
         }
 
         var valid = url.Length <= CatalogLimits.ExamEditionNoticeUrlMaxLength
-            && Uri.TryCreate(url, UriKind.Absolute, out var uri)
-            && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+            && AppUrlField.IsValid(url);
 
         return valid ? null : Errors.For(CatalogErrorCodes.ExamEditionNoticeUrlInvalid);
     }
