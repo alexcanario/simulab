@@ -100,6 +100,9 @@ A period is picked in one named control and a moment in the past reads the way a
 - AC10 All new texts appear in every locale of `UI locales:` (pt-BR, pt-PT, en).
 
 ## Criterion → test
+
+Tests locked: b5ab96fd294bba550b30ccb1f873fdefbbfad6c0 (5 files); unlocks: 0
+
 | Criterion | Test |
 | --- | --- |
 | AC1 | `AppDateRangeFieldTests.Click_LastThirtyDays_IsTheLastThirtyDaysUpToToday`, `Render_TheChosenPreset_IsPressed_AndTheOthersAreNot`, `Click_All_IsTheEmptyRange`, `Render_OffersAllTheDayPresetsThisYearAndCustom_InThatOrder` |

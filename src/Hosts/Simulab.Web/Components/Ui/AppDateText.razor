@@ -1,3 +1,6 @@
+@* F-185 BR6: a calendar day as text in the culture of the user (`d`), a dash for none. *@
+<span class="app-date-text">@(Value?.ToString("d", CultureInfo.CurrentCulture) ?? "—")</span>
+
 @code {
     [Parameter] public DateOnly? Value { get; set; }
 }

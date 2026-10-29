@@ -1,3 +1,28 @@
+@* F-185 BR5: a moment in the past as a person says it ("3 days ago"), with the exact date and time in the tooltip.
+   Under a minute, and any moment in the future, read "Just now". The element is a <time> with its datetime. *@
+@inject IStringLocalizer<SharedResources> L
+@inject TimeProvider Clock
+
+<time class="app-relative-time" datetime="@Value.ToString("o", CultureInfo.InvariantCulture)" title="@Value.ToString("g", CultureInfo.CurrentCulture)">@Text</time>
+
 @code {
+    /// <summary>The moment; the tooltip shows it as given, so a page that shows the user's time zone passes it converted.</summary>
     [Parameter] public DateTimeOffset Value { get; set; }
+
+    private string Text
+    {
+        get
+        {
+            var span = Clock.GetUtcNow() - Value;
+            return span.TotalMinutes < 1 ? L["Relative.Now"].Value
+                : span.TotalHours < 1 ? Phrase((int)span.TotalMinutes, "Minute")
+                : span.TotalDays < 1 ? Phrase((int)span.TotalHours, "Hour")
+                : span.TotalDays < 30 ? Phrase((int)span.TotalDays, "Day")
+                : span.TotalDays < 365 ? Phrase((int)(span.TotalDays / 30), "Month")
+                : Phrase((int)(span.TotalDays / 365), "Year");
+        }
+    }
+
+    private string Phrase(int count, string unit) =>
+        string.Format(CultureInfo.CurrentCulture, L[count == 1 ? $"Relative.{unit}" : $"Relative.{unit}s"].Value, count);
 }

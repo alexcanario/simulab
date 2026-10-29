@@ -454,6 +454,45 @@
     </MudPaper>
 </section>
 
+@* F-185 AC7: the date range, the relative time and the date text. *@
+<section id="gallery-dates" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Dates"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Dates.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4">
+        <AppFormGrid Columns="2">
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Dates.Range"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Dates.State.Empty"]</p>
+                <AppDateRangeField Id="gallery-range-empty" Label="@L["Gallery.Dates.Label.Period"]" AllText="@L["Gallery.Dates.All"].Value"
+                                   Value="@_rangeEmpty" ValueChanged="@(value => _rangeEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Dates.State.Filled"]</p>
+                <AppDateRangeField Id="gallery-range-filled" Label="@L["Gallery.Dates.Label.Period"]" AllText="@L["Gallery.Dates.All"].Value"
+                                   Value="@_rangeFilled" ValueChanged="@(value => _rangeFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Dates.State.Error"]</p>
+                <AppDateRangeField Id="gallery-range-error" Label="@L["Gallery.Dates.Label.Period"]" AllText="@L["Gallery.Dates.All"].Value"
+                                   Error="@L["Gallery.TextKinds.SampleError"].Value" />
+                <p class="gallery-state-caption">@L["Gallery.Dates.State.Disabled"]</p>
+                <AppDateRangeField Id="gallery-range-disabled" Label="@L["Gallery.Dates.Label.Period"]" AllText="@L["Gallery.Dates.All"].Value"
+                                   Value="@(AppDateRange.OfDays(30))" Disabled="true" />
+            </div>
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Dates.Relative"]</MudText>
+                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddSeconds(-20))" /></p>
+                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddMinutes(-5))" /></p>
+                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddHours(-3))" /></p>
+                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddDays(-3))" /></p>
+                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddDays(-65))" /></p>
+                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddDays(-800))" /></p>
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.Dates.Text"]</MudText>
+                <p><AppDateText Value="@(new DateOnly(2026, 10, 27))" /></p>
+                <p><AppDateText Value="@((DateOnly?)null)" /></p>
+                <p>@(new AppDateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 27), null).Format())</p>
+            </div>
+        </AppFormGrid>
+    </MudPaper>
+</section>
+
 @* The section id never repeats a field id below it: two nodes with one id break every label and
    aria-describedby that points at it (found on screen, F-34). *@
 <section id="gallery-lookups" class="gallery-section">
@@ -1411,6 +1450,8 @@
     private string? _codeFilled = "ABCDE-FGHJK";
     private string? _otpEmpty;
     private string? _searchEmpty;
+    private AppDateRange _rangeEmpty = AppDateRange.Empty;
+    private AppDateRange _rangeFilled = AppDateRange.OfDays(30);
     private string? _searchFilled = "Direito";
     private string? _kindSelectEmpty = string.Empty;
     private string? _kindSelectValue = "Mathematics";

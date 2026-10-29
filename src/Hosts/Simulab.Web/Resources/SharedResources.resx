@@ -1542,4 +1542,32 @@
   <data name="exam_edition.essay_cut_off_without_max" xml:space="preserve"><value>Fill in the essay maximum before its cut-off.</value></data>
   <data name="exam_edition.essay_cut_off_above_max" xml:space="preserve"><value>The essay cut-off cannot be above the essay maximum.</value></data>
   <data name="notice_subject.points_per_question_invalid" xml:space="preserve"><value>Type a number from 0.01 to 100 with at most two decimal places, or leave it empty.</value></data>
+  <data name="DateRange.LastDays" xml:space="preserve"><value>Last {0} days</value></data>
+  <data name="DateRange.ThisYear" xml:space="preserve"><value>This year</value></data>
+  <data name="DateRange.Custom" xml:space="preserve"><value>Custom range</value></data>
+  <data name="DateRange.From" xml:space="preserve"><value>From</value></data>
+  <data name="DateRange.To" xml:space="preserve"><value>To</value></data>
+  <data name="DateRange.Invalid" xml:space="preserve"><value>The start date cannot be after the end date.</value></data>
+  <data name="Relative.Now" xml:space="preserve"><value>Just now</value></data>
+  <data name="Relative.Minute" xml:space="preserve"><value>{0} minute ago</value></data>
+  <data name="Relative.Minutes" xml:space="preserve"><value>{0} minutes ago</value></data>
+  <data name="Relative.Hour" xml:space="preserve"><value>{0} hour ago</value></data>
+  <data name="Relative.Hours" xml:space="preserve"><value>{0} hours ago</value></data>
+  <data name="Relative.Day" xml:space="preserve"><value>{0} day ago</value></data>
+  <data name="Relative.Days" xml:space="preserve"><value>{0} days ago</value></data>
+  <data name="Relative.Month" xml:space="preserve"><value>{0} month ago</value></data>
+  <data name="Relative.Months" xml:space="preserve"><value>{0} months ago</value></data>
+  <data name="Relative.Year" xml:space="preserve"><value>{0} year ago</value></data>
+  <data name="Relative.Years" xml:space="preserve"><value>{0} years ago</value></data>
+  <data name="Gallery.Section.Dates" xml:space="preserve"><value>Dates</value></data>
+  <data name="Gallery.Dates.Hint" xml:space="preserve"><value>A period is picked in one control and a moment in the past reads the way a person says it (docs/design/data-type-controls.md, 2.3).</value></data>
+  <data name="Gallery.Dates.Range" xml:space="preserve"><value>Date range (AppDateRangeField)</value></data>
+  <data name="Gallery.Dates.Relative" xml:space="preserve"><value>Relative time (AppRelativeTime)</value></data>
+  <data name="Gallery.Dates.Text" xml:space="preserve"><value>Date text (AppDateText)</value></data>
+  <data name="Gallery.Dates.State.Empty" xml:space="preserve"><value>Empty</value></data>
+  <data name="Gallery.Dates.State.Filled" xml:space="preserve"><value>Filled</value></data>
+  <data name="Gallery.Dates.State.Error" xml:space="preserve"><value>Error</value></data>
+  <data name="Gallery.Dates.State.Disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="Gallery.Dates.Label.Period" xml:space="preserve"><value>Period</value></data>
+  <data name="Gallery.Dates.All" xml:space="preserve"><value>All time</value></data>
 </root>
