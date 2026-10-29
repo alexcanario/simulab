@@ -126,9 +126,9 @@ Tests locked: a267338379abbf0fd32ea4f7b6559bd718b12136 (5 files); unlocks: 0
 | Criterion | Test |
 | --- | --- |
 | AC1 | `AppSwitchTests` (all) |
-| AC2 | `AppSegmentedFieldTests` (all) |
+| AC2 | `AppSegmentedFieldTests` (all), `ChoiceKeyboardFocusTests.SegmentedField_AnArrowKey_MovesTheFocusToTheNewOption` |
 | AC3 | `AppYesNoFieldTests` (all) |
-| AC4 | `AppLevelFieldTests` (all) |
+| AC4 | `AppLevelFieldTests` (all), `ChoiceKeyboardFocusTests.LevelField_AnArrowKey_MovesTheFocusToTheNewDot`, `LevelField_TwoArrowKeys_ReachTheSecondNeighbour` |
 | AC5 | `AppLevelFilterFieldTests` (all) |
 | AC6 | `ChoiceDisplayTests` (all), `AppBoolColumnTests.Column_ShowsTheWordsOfEachRow_WithAnIcon` |
 | AC7 | `AppLanguageFieldTests.Render_IsASelectFieldOfTheSupportedLanguages` |
@@ -154,8 +154,8 @@ Tests locked: a267338379abbf0fd32ea4f7b6559bd718b12136 (5 files); unlocks: 0
 - 2026-10-29 — `QuestionsPageTests` (not locked) changed with the badge: the difficulty cell reads the level name and "Not set" as text, in place of the number and a hidden dash with a spoken text; the key `Questions.Difficulty.NotSet.Spoken` is no longer used — assumed: technical
 - 2026-10-29 — Screen check in the app host not done in the build: other lanes of the run use the same ports and the same Docker at the same time, and a screen check needs a signed-in session; it is in the validation script (`Only you`) — assumed: technical
 - 2026-10-29 — Reuse: `AppRadioCards` and `AppSelectField` for the keyboard model and the select, `AppUrlField`'s wrapper pattern, `AppNumberColumn`'s column pattern; nothing new outside the kit.
-- 2026-10-29 — Shortcuts: none
-- 2026-10-29 — Independent review not run: risk medium, no door and no change-review trigger (no auth, schema, contract or data) — assumed: technical
+- 2026-10-29 — Independent review (agile:reviewer, risk high: `Account.razor` is a door): 7 findings, none a blocker. Fixed: the arrow keys now move the focus with the choice (`AppLevelField`, `AppSegmentedField`; major, new test file `ChoiceKeyboardFocusTests`, since the locked file stays); the word for "no level" is the page's (`NotSetText`, "Não definida" beside "Dificuldade"); the grammar of `Gallery.Choices.Hint` in pt-BR and pt-PT; the unused key `Questions.Difficulty.NotSet.Spoken` removed. Accepted: the arrow keys do not call `preventDefault`, as `AppRadioCards` (the page may scroll on ArrowUp and ArrowDown; a limit of the render model) — marked in Shortcuts below; a switch has no error state and the segmented, yes/no and language fields use Disabled for read-only (the gallery shows them disabled); `Questions.Filter.Difficulty.Placeholder` stays because a resource test still reads it — assumed: technical
+- 2026-10-29 — Shortcuts: 1 marked — arrow keys do not call `preventDefault` in `AppLevelField` and `AppSegmentedField` (the same limit as `AppRadioCards`); trigger: a report that the page scrolls on arrow keys — assumed: technical
 
 ## Out of scope
 - The colour ramp, the gauge and the slider (F-191); the enforcement tests (F-186); `AppRadioCards` stays for choices that need a description.
@@ -171,10 +171,11 @@ Tests locked: a267338379abbf0fd32ea4f7b6559bd718b12136 (5 files); unlocks: 0
 Necessário para validar: o app host local com o administrador da carga inicial `admin@simulab.local` (senha em `src/Hosts/Simulab.Api/appsettings.Development.json`, `Identity:SeedAdmin:Password`) — você fornece, está no lugar.
 
 #### Verificado pelo Claude
-- Os 9 controles novos, a coluna, os textos e as telas: 3099 testes do projeto Web verdes na suíte inteira, entre eles os testes novos dos controles, da galeria, das telas e dos textos (em c1675647).
+- Os 9 controles novos, a coluna, os textos e as telas: 3103 testes do projeto Web verdes na suíte inteira, entre eles os testes novos dos controles, da galeria, das telas, dos textos e do foco pelo teclado (em 01b719d6).
+- A revisão independente (risco alto): 7 achados, nenhum bloqueio; o principal (as setas não moviam o foco) foi corrigido com teste novo, 3 menores foram corrigidos e 3 aceitos com decisão em `## Decisions` (em 01b719d6).
 - Os testes de arquitetura (vocabulário, camadas, recursos): 310 verdes, com a solução inteira compilada sem erro (em c1675647).
-- O gate das mudanças: `agile gate GREEN`, sem aviso novo; a documentação técnica: `agile techdocs GREEN: 2 page(s)` (em c1675647).
-- O scan de segurança: `agile scan GREEN` (em c1675647).
+- O gate das mudanças: `agile gate GREEN`, sem aviso novo; a documentação técnica: `agile techdocs GREEN: 2 page(s)` (em 01b719d6).
+- O scan de segurança: `agile scan GREEN` (em 01b719d6).
 - Os textos novos existem em pt-BR, pt-PT e en: 96 verificações de `ChoiceResourcesTests` verdes (em c1675647).
 - Não conferido em tela pelo Claude: o app host não foi iniciado neste trabalho (a mesma porta e o mesmo Docker são usados por outras frentes em paralelo); a aparência fica nos passos abaixo (em c1675647).
 
@@ -219,3 +220,4 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
 ## Events
 
 - 2026-10-29 assumed — 9 answers
+- 2026-10-29 test-fail — 1 new warning(s): CA1826 in tests/Hosts/Simulab.Web.Tests/Ui/ChoiceKeyboardFocusTests.cs, 1 red
