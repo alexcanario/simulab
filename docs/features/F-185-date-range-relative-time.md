@@ -1,7 +1,7 @@
 ---
 feature: F-185
 epic: Data type controls
-status: approved
+status: building
 Autopilot: approved
 board: 255
 version: 1
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: approved (2026-10-29)
-- Stopped at: Refined and approved by autopilot (`--assume`); the build has not started.
-- Next action: Build it in the worktree (autopilot).
+- Status: building (2026-10-29)
+- Stopped at: Build started; tests written and locked
+- Next action: Write the controls and move the two lists (Claude)
 - Waiting on: nothing
 
 ## Summary
@@ -102,16 +102,16 @@ A period is picked in one named control and a moment in the past reads the way a
 ## Criterion → test
 | Criterion | Test |
 | --- | --- |
-| AC1 | pending |
-| AC2 | pending |
-| AC3 | pending |
-| AC4 | pending |
-| AC5 | pending |
-| AC6 | pending |
-| AC7 | pending |
-| AC8 | pending |
-| AC9 | pending |
-| AC10 | pending |
+| AC1 | `AppDateRangeFieldTests.Click_LastThirtyDays_IsTheLastThirtyDaysUpToToday`, `Render_TheChosenPreset_IsPressed_AndTheOthersAreNot`, `Click_All_IsTheEmptyRange`, `Render_OffersAllTheDayPresetsThisYearAndCustom_InThatOrder` |
+| AC2 | `AppDateRangeFieldTests.Click_ThisYear_IsTheFirstOfJanuaryUpToToday_WithNoDays` |
+| AC3 | `AppDateRangeFieldTests.Click_Custom_ShowsTwoDateFields`, `Custom_AStartAfterTheEnd_ShowsTheErrorAndDoesNotChangeTheValue`, `Custom_AValidRange_IsReported_AndAnEndMayBeLeftEmpty` |
+| AC4 | `AppDateRangeFieldTests.PresetsOnly_NoThisYearAndNoCustom_OffersJustTheDaysAndAll` |
+| AC5 | `AppRelativeTimeTests` (all) |
+| AC6 | `DateTextTests` (all) |
+| AC7 | `UiGalleryDatesTests` (all) |
+| AC8 | `AccountEventsPageTests.FiltersInTheAddress_AreSentAndShownOnTheFilters`, `FilterChanged_OnALaterPage_ReloadsFromTheFirstPageWithTheFilter`; `RoleHistoryPageTests` (same two); `DatePageFieldsTests.Period_IsTheRangeFieldInPresetsOnlyMode` |
+| AC9 | `AccountEventsPageTests.Load_TheWhenCell_HasTheExactTimeAndTheRelativeTime`, `RoleHistoryPageTests.Load_TheWhenCell_HasTheExactTimeAndTheRelativeTime`, `DatePageFieldsTests.WhenColumn_ShowsTheRelativeTime` |
+| AC10 | `DateResourcesTests.Key_HasATextInTheLanguage` |
 
 ## Decisions
 - 2026-10-27 — Epic Data type controls — breakdown of the epic — owner
@@ -121,6 +121,7 @@ A period is picked in one named control and a moment in the past reads the way a
 - 2026-10-29 — Screen design: no new mockup — the range field is a row of toggle buttons like the level filter chips of F-184 and two existing date fields; the text wireframes show the screens — assumed: screen-design
 - 2026-10-29 — No new package: everything uses MudBlazor and the framework already in the solution — assumed: packages
 - 2026-10-29 — This run is on Sonnet 5.5, not on the lane's opus: a session cannot switch its own model — lane jussara — assumed: model-choice
+- 2026-10-29 — plan — 1 kit tests and skeletons, locked; 2 AppDateRange and AppDateRangeField → range tests green; 3 AppRelativeTime and AppDateText → text tests green; 4 resx in three locales, gallery "Dates", styles → gallery and resource tests green; 5 AccountEvents and RoleHistory (period field, When cell) → page tests green; 6 flow page, manual pages, gate, scan, review, validation script — assumed: technical
 
 ## Out of scope
 - An Api that takes `from` and `to` for the audit lists (not captured here: the owner decides); the time field and the date-time field (F-187).

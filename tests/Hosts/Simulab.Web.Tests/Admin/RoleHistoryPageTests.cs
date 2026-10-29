@@ -69,6 +69,18 @@ public sealed class RoleHistoryPageTests : AdminPageTestContext
         page.WaitForAssertion(() => page.Find("tbody tr").TextContent.Should().Contain(local));
     }
 
+    // F-185 AC9: the exact time stays in the cell, and the relative time sits under it.
+    [Fact]
+    public void Load_TheWhenCell_HasTheExactTimeAndTheRelativeTime()
+    {
+        Api.RoleChanges = [Renamed];
+
+        var page = RenderPage();
+
+        page.WaitForAssertion(() => page.FindAll("tbody tr time.app-relative-time").Should().ContainSingle());
+        page.Find("tbody tr").TextContent.Should().Contain(At.ToString("g", CultureInfo.CurrentCulture));
+    }
+
     [Fact]
     public void Empty_WithoutFilters_SaysNothingWasRecorded_WithAFilter_SaysNothingMatches()
     {
@@ -101,7 +113,9 @@ public sealed class RoleHistoryPageTests : AdminPageTestContext
         selects[0].Instance.Options.Select(option => option.Text).Should().Equal("All roles", "Admin", "Content reviewer", "Old team (deleted)");
         selects[1].Instance.Options.Select(option => option.Text).Should().Equal("Anyone", "ana.souza@exemplo.com.br", "Erased account");
         page.WaitForAssertion(() => page.Find("#history-role-filter").GetAttribute("value").Should().Be("Content reviewer"));
-        page.Find("#history-period-filter").GetAttribute("value").Should().Be("Last 30 days");
+        // F-185 AC8: the period is the range field in presets-only mode.
+        page.Find("#history-period-filter-30").GetAttribute("aria-pressed").Should().Be("true");
+        page.Find("#history-period-filter-30").TextContent.Trim().Should().Be("Last 30 days");
     }
 
     [Fact]
@@ -130,8 +144,8 @@ public sealed class RoleHistoryPageTests : AdminPageTestContext
         page.InvokeAsync(() => grid.Instance.NavigateTo(MudBlazor.Page.Next));
         page.WaitForAssertion(() => LastListQuery().Single().Should().Contain("page=1&"));
 
-        var period = page.FindComponent<AppSelectField<int?>>();
-        page.InvokeAsync(() => period.Instance.ValueChanged.InvokeAsync(90));
+        var period = page.FindComponent<AppDateRangeField>();
+        page.InvokeAsync(() => period.Instance.ValueChanged.InvokeAsync(AppDateRange.OfDays(90)));
 
         page.WaitForAssertion(() => LastListQuery().Single().Should().Contain("page=0&").And.Contain("days=90"));
         Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("days=90");
