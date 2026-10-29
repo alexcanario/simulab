@@ -34,6 +34,7 @@ Every data type has one input control, one display formatter and one table colum
 | F-188 | Reserve controls: phone, tax id, color, tree pick, slider, image, user | The rest of the catalog is ready in the kit | Should | L | F-183 | - | yes | idea |
 | F-189 | Gallery state matrix test for the kit controls | A control that loses a state in the gallery fails a test | Should | S | - | - | no | idea |
 | F-190 | One http(s) address check for the URL fields | The rule has one copy instead of four | Should | S | - | - | no | idea |
+| F-191 | Level colour ramp, gauge and slider | Difficulty reads at a glance: colour per level, a gauge and a fader | Could | M | F-184 | - | yes | idea |
 
 ## Execution plan
 1. F-183 — waits on nothing, the most fields migrated (6 e-mail, 4 one-time code, URL, 3 text areas) — path: `/agile:refine` → `/agile:build` — parallel with: F-184

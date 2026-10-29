@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AppLevelField mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Tokens: docs/design/DESIGN.md only. The ramp is success -> warning -> error (light); in dark its red end is errorLighten of light, a true red, since the dark error is salmon. */
+:root, [data-theme="light"] {
+  --primary: #0F3266; --primary-selected: #D1E4FE;
+  --success: #1A9E8C; --warning: #D98B1A; --error: #B83232; --ramp-end: #B83232;
+  --info: #2478C5; --link: #1D64A8;
+  --text-primary: #0B1B2E; --text-secondary: #52647A;
+  --disabled-bg: #E6ECF5;
+  --background: #F2F5FB; --surface: #FFFFFF; --background-gray: #E6ECF5;
+  --lines-default: #D9E1EE; --lines-inputs: #6B7C91;
+}
+[data-theme="dark"] {
+  --primary: #47A0EB; --primary-selected: #1A4583;
+  --success: #1A9E8C; --warning: #D98B1A; --error: #FF9C94; --ramp-end: #CD4747;
+  --info: #47A0EB; --link: #8CC4F5;
+  --text-primary: #F2F5FB; --text-secondary: #B8C4D2;
+  --disabled-bg: #081938;
+  --background: #0B2149; --surface: #12386F; --background-gray: #081938;
+  --lines-default: #24497F; --lines-inputs: #7F9BC0;
+}
+/* Colour of level 1..5: five points of one ramp. */
+.board {
+  --lvl-1: var(--success);
+  --lvl-2: color-mix(in srgb, var(--success) 50%, var(--warning));
+  --lvl-3: var(--warning);
+  --lvl-4: color-mix(in srgb, var(--warning) 50%, var(--ramp-end));
+  --lvl-5: var(--ramp-end);
+}
+@property --a { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Bricolage Grotesque", system-ui, sans-serif; font-weight: 500; }
+.mono { font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; }
+
+.boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); }
+.board { background: var(--background); color: var(--text-primary); padding: 32px 16px 48px; }
+.board-inner { max-width: 480px; margin: 0 auto; }
+.board h1 { font-size: 1.75rem; line-height: 2rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 4px; }
+.lead { font-size: 0.875rem; color: var(--text-secondary); margin: 0 0 24px; }
+.card { background: var(--surface); border: 1px solid var(--lines-default); border-radius: 20px; padding: 20px; margin-bottom: 16px; }
+.card h2 { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary); margin: 0 0 14px; }
+
+/* Field anatomy of AppTextField. */
+.app-field { margin-bottom: 4px; }
+.app-field-label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
+.app-field-required { color: var(--error); margin-left: 3px; }
+.app-field-hint { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; line-height: 1.45; }
+.app-field-error-text { display: block; font-size: 0.75rem; font-weight: 600; color: var(--error); margin-top: 5px; }
+
+/* The control: a radiogroup of dots + the level name. Each dot carries the colour of its level (--lvl). */
+.level-input { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 4px 0 8px;
+  border: 1px solid var(--lines-inputs); border-radius: 12px; background: var(--surface); }
+.level-input:focus-within, .is-focus .level-input { border: 2px solid var(--primary); padding-left: 7px; padding-right: 3px; }
+.app-field-error .level-input { border: 2px solid var(--error); padding-left: 7px; padding-right: 3px; }
+.is-disabled .level-input { background: var(--disabled-bg); border-color: transparent; }
+.is-readonly .level-input { background: transparent; border-style: dashed; }
+
+.dots { display: flex; }
+.dot { width: 32px; height: 40px; border: 0; background: transparent; padding: 0; display: grid; place-items: center; cursor: pointer; border-radius: 10px; }
+.dot::before { content: ""; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--lines-inputs); background: transparent; transition: background .12s, border-color .12s; }
+/* The edge of a filled dot is its colour darkened toward the ink, so the mark holds 3:1 on the surface even in amber. */
+.dot[data-on="true"]::before { background: var(--lvl); border-color: color-mix(in srgb, var(--lvl) 62%, var(--text-primary)); }
+.dot[data-preview="true"]::before { background: color-mix(in srgb, var(--lvl) 28%, var(--surface)); border-color: color-mix(in srgb, var(--lvl) 62%, var(--text-primary)); }
+.dot:focus-visible, .icon-btn:focus-visible, .chip:focus-visible, .btn-text:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+.is-disabled .dot, .is-readonly .dot { cursor: default; }
+.is-disabled .dot::before { opacity: .55; }
+.level-name { flex: 1; min-width: 0; font-size: 0.9375rem; line-height: 1.375rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.level-name.unset, .is-disabled .level-name { color: var(--text-secondary); }
+
+.icon-btn { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.icon-btn:hover { background: var(--background-gray); }
+.icon-btn[hidden] { display: none; }
+.icon-btn svg { width: 20px; height: 20px; }
+
+/* AppLevelBadge: small dots in their level colours + the name. */
+.badge { display: inline-flex; align-items: center; gap: 8px; font-size: 0.875rem; line-height: 1.25rem; }
+.badge.unset { color: var(--text-secondary); }
+.mini { display: inline-flex; gap: 3px; }
+.mini i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--lines-inputs); }
+.mini i.on { background: var(--lvl); border-color: color-mix(in srgb, var(--lvl) 62%, var(--text-primary)); }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+th { text-align: left; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-secondary); padding: 0 8px 8px 0; border-bottom: 1px solid var(--lines-default); }
+td { padding: 10px 8px 10px 0; border-bottom: 1px solid var(--lines-default); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+
+/* Filter mode: many levels, chips with a 2px primary border when marked. */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; border-radius: 6px; cursor: pointer;
+  background: var(--surface); color: var(--text-primary); border: 1px solid var(--lines-inputs); font: 500 0.875rem/1.25rem "Bricolage Grotesque", system-ui, sans-serif; }
+.chip[aria-pressed="true"] { background: var(--primary-selected); border: 2px solid var(--primary); padding: 0 11px; font-weight: 800; }
+.chip:hover { background: var(--background-gray); }
+.chip[aria-pressed="true"]:hover { background: var(--primary-selected); }
+.chip .mini { gap: 2px; }
+.chip .mini i { width: 7px; height: 7px; }
+
+/* AppLevelGauge: a half ring. The ramp is one conic gradient; the part past the level is covered with the empty colour,
+   so the colour changes smoothly as the level grows. --a (an angle) is the animated fill. */
+.gauge { --w: 260px; width: var(--w); max-width: 100%; margin: 0 auto; transition: --a .5s ease; }
+.gauge-arc { position: relative; width: 100%; aspect-ratio: 2 / 1; overflow: hidden; }
+.gauge-ring { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 1;  border-radius: 50%;
+  background:
+    repeating-conic-gradient(from 270deg, var(--surface) 0 1.2deg, transparent 1.2deg 36deg),
+    conic-gradient(from 270deg, transparent var(--a), var(--lines-default) var(--a) 180deg, transparent 180deg),
+    conic-gradient(from 270deg, var(--success) 0deg, var(--warning) 90deg, var(--ramp-end) 180deg, transparent 180deg);
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 59%); mask: radial-gradient(circle, transparent 58%, #000 59%); }
+.gauge-needle { position: absolute; left: calc(50% - 1.5px); bottom: 0; width: 3px; height: 46%; border-radius: 2px;
+  background: var(--text-primary); transform-origin: 50% 100%; transform: rotate(calc(var(--a) - 90deg)); }
+.gauge-hub { position: absolute; left: calc(50% - 7px); bottom: -7px; width: 14px; height: 14px; border-radius: 50%; background: var(--text-primary); }
+.gauge.unset .gauge-needle { opacity: .35; }
+.gauge-ends { display: flex; justify-content: space-between; padding: 0 3%; margin-top: 4px; font-size: 0.75rem; color: var(--text-secondary); }
+.gauge-read { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; min-height: 32px; }
+.gauge-read b { font-size: 1.75rem; line-height: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+.gauge-read .swatch { width: 14px; height: 14px; border-radius: 50%; background: var(--lvl); border: 2px solid color-mix(in srgb, var(--lvl) 62%, var(--text-primary)); }
+.gauge-read .nm { font-size: 0.9375rem; }
+.gauge.unset .gauge-read .nm { color: var(--text-secondary); }
+.gauge.compact { --w: 100px; margin: 0; }
+.gauge.compact .gauge-read { margin-top: 4px; min-height: 0; }
+.gauge.compact .gauge-read b { font-size: 1rem; line-height: 1.25rem; }
+.gauge.compact .gauge-read .nm, .gauge.compact .gauge-ends, .gauge.compact .swatch { display: none; }
+.gauge.compact .gauge-hub { width: 10px; height: 10px; left: calc(50% - 5px); bottom: -5px; }
+.gauge.compact .gauge-needle { width: 2px; left: calc(50% - 1px); }
+.gauge-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--lines-default); }
+.gauge-tools { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+.btn-text { min-height: 36px; padding: 0 12px; background: none; border: 0; border-radius: 12px; color: var(--link); text-decoration: underline;
+  font: 800 0.875rem/1.25rem "Bricolage Grotesque", system-ui, sans-serif; cursor: pointer; }
+
+/* The ramp: the gradient is the slider's track; the thumb takes the colour of the chosen level. */
+.ramp-slider { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 32px; margin: 0 0 6px; background: transparent; cursor: pointer; }
+.ramp-slider::-webkit-slider-runnable-track { height: 12px; border-radius: 6px; border: 1px solid var(--lines-default); background: linear-gradient(90deg, var(--success), var(--warning), var(--ramp-end)); }
+.ramp-slider::-moz-range-track { height: 12px; border-radius: 6px; border: 1px solid var(--lines-default); background: linear-gradient(90deg, var(--success), var(--warning), var(--ramp-end)); }
+/* A sliding potentiometer: a fader cap with grip lines and a stripe in the colour of the level, over a groove with ticks. */
+.ramp-slider { height: 40px; margin-bottom: 0; }
+.ramp-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; box-sizing: border-box; width: 22px; height: 36px; margin-top: -12px; border-radius: 6px;
+  border: 2px solid var(--text-primary);
+  background: linear-gradient(var(--lvl, var(--surface)), var(--lvl, var(--surface))) 0 50% / 100% 5px no-repeat,
+              repeating-linear-gradient(0deg, transparent 0 4px, color-mix(in srgb, var(--text-primary) 30%, transparent) 4px 5px), var(--surface); }
+.ramp-slider::-moz-range-thumb { box-sizing: border-box; width: 22px; height: 36px; border-radius: 6px; border: 2px solid var(--text-primary);
+  background: linear-gradient(var(--lvl, var(--surface)), var(--lvl, var(--surface))) 0 50% / 100% 5px no-repeat,
+              repeating-linear-gradient(0deg, transparent 0 4px, color-mix(in srgb, var(--text-primary) 30%, transparent) 4px 5px), var(--surface); }
+.ramp-slider.unset::-webkit-slider-thumb { opacity: .6; }
+.ramp-slider.unset::-moz-range-thumb { opacity: .6; }
+.ticks { display: flex; justify-content: space-between; padding: 0 11px; margin: 2px 0 6px; }
+.ticks i { width: 2px; height: 8px; border-radius: 1px; background: var(--lines-inputs); }
+.ramp-slider:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; border-radius: 12px; }
+.legend { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); }
+.states { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (prefers-reduced-motion: reduce) { .dot::before { transition: none; } .gauge { transition: none; } }
+</style>
+</head>
+<body>
+<div class="boards">
+  <section class="board" data-theme="light"><div class="board-inner" data-slot></div></section>
+  <section class="board" data-theme="dark"><div class="board-inner" data-slot></div></section>
+</div>
+
+<template id="tpl-field">
+  <div class="app-field">
+    <label class="app-field-label" data-label></label>
+    <div class="level-input">
+      <div class="dots" role="radiogroup"></div>
+      <span class="level-name"></span>
+      <button class="icon-btn" type="button" data-clear aria-label="Limpar dificuldade" hidden>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+    <span class="app-field-hint" data-hint></span>
+  </div>
+</template>
+
+<template id="tpl-gauge">
+  <div class="gauge unset">
+    <div class="gauge-arc" aria-hidden="true">
+      <div class="gauge-ring"></div><div class="gauge-needle"></div><div class="gauge-hub"></div>
+    </div>
+    <div class="gauge-ends" aria-hidden="true"><span>1</span><span>5</span></div>
+    <div class="gauge-read" role="img"><span class="swatch" aria-hidden="true"></span><b></b><span class="nm"></span></div>
+  </div>
+</template>
+
+<template id="board">
+  <h1>AppLevelField</h1>
+  <p class="lead">Nível de 1 a 5 (<span class="mono">int?</span>). A cor sobe do verde-azulado ao vermelho com a dificuldade, mas o nome e o número sempre aparecem: a cor nunca fala sozinha.</p>
+
+  <div class="card">
+    <h2>Rampa de cor</h2>
+    <input class="ramp-slider" type="range" min="1" max="5" step="1" value="3" aria-label="Dificuldade, de 1 a 5" data-slider>
+    <div class="ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="legend"><span>1 · Muito fácil</span><span>3 · Média</span><span>5 · Muito difícil</span></div>
+    <span class="app-field-hint">Deslize o botão, de 1 a 5: o campo e o medidor acompanham. Setas do teclado também.</span>
+  </div>
+
+  <div class="card">
+    <h2>Interativo — dificuldade da questão</h2>
+    <div data-live></div>
+  </div>
+
+  <div class="card">
+    <h2>Medidor — AppLevelGauge</h2>
+    <div data-gauge></div>
+    <div class="gauge-tools">
+      <button class="btn-text" type="button" data-less>Menos</button>
+      <button class="btn-text" type="button" data-more>Mais</button>
+    </div>
+    <div class="gauge-row" data-gauge-row></div>
+  </div>
+
+  <div class="card">
+    <h2>Estados</h2>
+    <div class="states">
+      <div data-state="empty"></div>
+      <div data-state="focus"></div>
+      <div data-state="error"></div>
+      <div data-state="disabled"></div>
+      <div data-state="readonly"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Exibição — AppLevelBadge na tabela</h2>
+    <table>
+      <thead><tr><th>Questão</th><th>Dificuldade</th></tr></thead>
+      <tbody>
+        <tr><td>Q-0412 · Princípios da administração</td><td><span class="badge" data-badge="2"></span></td></tr>
+        <tr><td>Q-0413 · Controle de constitucionalidade</td><td><span class="badge" data-badge="5"></span></td></tr>
+        <tr><td>Q-0414 · Atos administrativos</td><td><span class="badge" data-badge="3"></span></td></tr>
+        <tr><td>Q-0415 · Crase</td><td><span class="badge" data-badge="0"></span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Modo filtro — vários níveis</h2>
+    <div class="chips" role="group" aria-label="Filtrar por dificuldade" data-filter></div>
+    <span class="app-field-hint" data-filter-hint></span>
+  </div>
+</template>
+
+<script>
+const NAMES = ['', 'Muito fácil', 'Fácil', 'Média', 'Difícil', 'Muito difícil'];
+const NOT_SET = 'Não definida';
+const MAX = 5;
+const mini = n => Array.from({ length: MAX }, (_, i) => `<i class="${i < n ? 'on' : ''}" style="--lvl:var(--lvl-${i + 1})"></i>`).join('');
+
+function makeGauge(host, compact) {
+  host.appendChild(document.getElementById('tpl-gauge').content.cloneNode(true));
+  const g = host.querySelector('.gauge');
+  if (compact) g.classList.add('compact');
+  const read = g.querySelector('.gauge-read');
+  const set = n => {
+    g.style.setProperty('--a', `${(n || 0) / MAX * 180}deg`);
+    g.classList.toggle('unset', !n);
+    g.style.setProperty('--lvl', n ? `var(--lvl-${n})` : 'transparent');
+    read.querySelector('b').textContent = n || '–';
+    read.querySelector('.nm').textContent = n ? NAMES[n] : NOT_SET;
+    read.querySelector('.swatch').style.visibility = n ? 'visible' : 'hidden';
+    read.setAttribute('aria-label', n ? `Dificuldade ${n} de ${MAX}: ${NAMES[n]}` : 'Dificuldade não definida');
+  };
+  set(0);
+  return { set };
+}
+
+function buildField(host, o) {
+  host.appendChild(document.getElementById('tpl-field').content.cloneNode(true));
+  const root = host.querySelector('.app-field');
+  const group = root.querySelector('.dots');
+  const name = root.querySelector('.level-name');
+  const clear = root.querySelector('[data-clear]');
+  const inert = o.disabled || o.readonly;
+  const listeners = [];
+  let value = o.value ?? null, preview = null;
+
+  root.querySelector('[data-label]').innerHTML = o.label + (o.required ? '<span class="app-field-required" aria-hidden="true">*</span>' : '');
+  group.setAttribute('aria-label', o.label);
+  const hint = root.querySelector('[data-hint]');
+  if (o.error) { root.classList.add('app-field-error'); hint.className = 'app-field-error-text'; hint.textContent = o.error; }
+  else hint.textContent = o.hint ?? '';
+  if (o.focus) root.classList.add('is-focus');
+  if (o.disabled) { root.classList.add('is-disabled'); group.setAttribute('aria-disabled', 'true'); }
+  if (o.readonly) root.classList.add('is-readonly');
+
+  const commit = v => { value = v; render(); listeners.forEach(f => f(value)); };
+  const dots = [];
+  for (let n = 1; n <= MAX; n++) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'dot'; b.setAttribute('role', 'radio');
+    b.style.setProperty('--lvl', `var(--lvl-${n})`);
+    b.setAttribute('aria-label', `${n} — ${NAMES[n]}`);
+    if (inert) b.tabIndex = -1;
+    else {
+      b.addEventListener('click', () => commit(value === n && !o.required ? null : n));
+      b.addEventListener('mouseenter', () => { preview = n; render(); });
+      b.addEventListener('keydown', e => {
+        const d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[e.key];
+        if (d) { e.preventDefault(); commit(Math.min(MAX, Math.max(1, (value ?? (d > 0 ? 0 : MAX + 1)) + d))); dots[value - 1].focus(); }
+        if (e.key === 'Home') { e.preventDefault(); commit(1); dots[0].focus(); }
+        if (e.key === 'End') { e.preventDefault(); commit(MAX); dots[MAX - 1].focus(); }
+        if (e.key === 'Escape' && !o.required) commit(null);
+      });
+    }
+    group.appendChild(b); dots.push(b);
+  }
+  if (!inert) {
+    group.addEventListener('mouseleave', () => { preview = null; render(); });
+    clear.addEventListener('click', () => { commit(null); dots[0].focus(); });
+  }
+
+  function render() {
+    const shown = preview ?? value;
+    dots.forEach((b, i) => {
+      const n = i + 1;
+      b.dataset.on = String(value !== null && n <= value && preview === null);
+      b.dataset.preview = String(preview !== null && n <= preview);
+      b.setAttribute('aria-checked', String(value === n));
+      b.tabIndex = inert ? -1 : (value === n || (value === null && n === 1)) ? 0 : -1;
+    });
+    name.textContent = shown ? `${shown} · ${NAMES[shown]}` : NOT_SET;
+    name.classList.toggle('unset', !shown);
+    clear.hidden = inert || o.required || value === null;
+  }
+  render();
+  return { get: () => value, set: v => commit(v), onChange: f => listeners.push(f) };
+}
+
+document.querySelectorAll('[data-slot]').forEach(slot => {
+  slot.appendChild(document.getElementById('board').content.cloneNode(true));
+  const live = buildField(slot.querySelector('[data-live]'), { label: 'Dificuldade', value: 3, hint: 'De 1 (mais fácil) a 5 (mais difícil). Opcional. Setas do teclado mudam o nível.' });
+
+  const slider = slot.querySelector('[data-slider]');
+  const syncSlider = v => {
+    slider.classList.toggle('unset', !v);
+    slider.value = v ?? 1;
+    slider.style.setProperty('--lvl', v ? `var(--lvl-${v})` : 'var(--surface)');
+    slider.setAttribute('aria-valuetext', v ? `${v}, ${NAMES[v]}` : NOT_SET);
+  };
+  syncSlider(live.get());
+  live.onChange(syncSlider);
+  slider.addEventListener('input', () => live.set(+slider.value));
+
+  const gauge = makeGauge(slot.querySelector('[data-gauge]'), false);
+  gauge.set(3);
+  live.onChange(gauge.set);
+  const step = d => live.set(Math.min(MAX, Math.max(1, (live.get() ?? (d > 0 ? 0 : MAX + 1)) + d)));
+  slot.querySelector('[data-less]').addEventListener('click', () => step(-1));
+  slot.querySelector('[data-more]').addEventListener('click', () => step(1));
+  slot.querySelectorAll('[data-gauge-row]').forEach(row => {
+    for (let n = 1; n <= MAX; n++) { const cell = document.createElement('div'); row.appendChild(cell); makeGauge(cell, true).set(n); }
+  });
+
+  const st = k => slot.querySelector(`[data-state="${k}"]`);
+  buildField(st('empty'), { label: 'Vazio', hint: 'Opcional.' });
+  buildField(st('focus'), { label: 'Com foco', value: 4, focus: true });
+  buildField(st('error'), { label: 'Erro', required: true, error: 'Escolha a dificuldade da questão.' });
+  buildField(st('disabled'), { label: 'Desativado', value: 2, disabled: true, hint: 'Definida pela edição.' });
+  buildField(st('readonly'), { label: 'Somente leitura', value: 5, readonly: true });
+
+  slot.querySelectorAll('[data-badge]').forEach(el => {
+    const n = +el.dataset.badge;
+    el.classList.toggle('unset', !n);
+    el.innerHTML = `<span class="mini" aria-hidden="true">${mini(n)}</span><span>${n ? NAMES[n] : NOT_SET}</span>`;
+  });
+
+  const fb = slot.querySelector('[data-filter]'), fh = slot.querySelector('[data-filter-hint]');
+  const on = new Set([4, 5]);
+  const draw = () => {
+    fb.innerHTML = '';
+    for (let n = 1; n <= MAX; n++) {
+      const c = document.createElement('button');
+      c.type = 'button'; c.className = 'chip'; c.setAttribute('aria-pressed', on.has(n));
+      c.innerHTML = `<span class="mini" aria-hidden="true">${mini(n)}</span>${NAMES[n]}`;
+      c.addEventListener('click', () => { on.has(n) ? on.delete(n) : on.add(n); draw(); });
+      fb.appendChild(c);
+    }
+    fh.textContent = on.size ? `${on.size} ${on.size === 1 ? 'nível marcado' : 'níveis marcados'}.` : 'Nenhum nível marcado: todas as dificuldades.';
+  };
+  draw();
+});
+</script>
+</body>
+</html>
