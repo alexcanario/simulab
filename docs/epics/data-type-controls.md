@@ -26,12 +26,14 @@ Every data type has one input control, one display formatter and one table colum
 |---|---|---|---|---|---|---|---|---|
 | F-181 | Number controls: integer, decimal, score and year | Points, cut-offs, counts and years are typed as numbers in the user's culture | Must | L | F-168 | - | no | idea |
 | F-182 | Duration and numeric range controls | Exam duration is one field; answer size is one range | Must | M | F-181, F-168 | - | no | idea |
-| F-183 | Text kind controls: text area, e-mail, URL, code, one-time code, search | Identity and catalog fields stop repeating their setup page by page | Must | L | - | - | no | building |
+| F-183 | Text kind controls: text area, e-mail, URL, code, one-time code, search | Identity and catalog fields stop repeating their setup page by page | Must | L | - | - | no | done |
 | F-184 | Choice controls: switch, segmented, yes/no, level, language | Difficulty shows as a level, settings apply at once, yes/no/unset is one control | Must | L | - | - | yes | idea |
 | F-185 | Date range and relative time | Period filters take a custom range; audit lists say "3 days ago" | Should | M | - | - | no | idea |
 | F-186 | Data type controls enforced by the build | A page cannot go back to `InputType.Number` or a raw MudBlazor picker | Must | S | F-181, F-182, F-183, F-184, F-185 | - | no | idea |
 | F-187 | Reserve controls: money, percentage, time, date-time, month | The types the app will hold are ready in the kit | Should | L | F-181 | - | no | idea |
 | F-188 | Reserve controls: phone, tax id, color, tree pick, slider, image, user | The rest of the catalog is ready in the kit | Should | L | F-183 | - | yes | idea |
+| F-189 | Gallery state matrix test for the kit controls | A control that loses a state in the gallery fails a test | Should | S | - | - | no | idea |
+| F-190 | One http(s) address check for the URL fields | The rule has one copy instead of four | Should | S | - | - | no | idea |
 
 ## Execution plan
 1. F-183 — waits on nothing, the most fields migrated (6 e-mail, 4 one-time code, URL, 3 text areas) — path: `/agile:refine` → `/agile:build` — parallel with: F-184
