@@ -122,3 +122,4 @@ Tests locked: 1ecfb7d33d5453ccbff959baf2a01eb31c631378 (1 file); unlocks: 2
 - 2026-10-29 assumed — 5 answers
 - 2026-10-29 blocked — test wrong: helper skeleton GalleryStateMatrix.cs locked by mistake with the tests; owner answered 'continue' in the olinda session (2026-10-29)
 - 2026-10-29 blocked — test wrong: Problems_Development_SearchHoldsEmptyFilledAndLongValue rendered the section twice and bUnit refused the second service registration; owner answered 'Yes, unlock' in the olinda session ...
+- 2026-10-29 test-fail — tests failed (Simulab.slnx): Simulab.Catalog.Tests.NoticeSubjectMappingEndpointTests.Taxonomy_ReturnsLiveSubjectsAndTopi, 2 reds
