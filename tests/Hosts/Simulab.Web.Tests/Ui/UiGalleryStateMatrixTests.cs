@@ -60,8 +60,10 @@ public sealed class UiGalleryStateMatrixTests : KitTestContext
     {
         var kind = Kinds.Single(candidate => candidate.Title == "Search (AppSearchField)");
 
-        GalleryStateMatrix.Problems(RenderSection(), [kind]).Should().BeEmpty();
-        GalleryStateMatrix.Read(RenderSection()).Single(block => block.Title == kind.Title).Cells
+        var section = RenderSection();
+
+        GalleryStateMatrix.Problems(section, [kind]).Should().BeEmpty();
+        GalleryStateMatrix.Read(section).Single(block => block.Title == kind.Title).Cells
             .Select(cell => cell.Caption).Should().Equal(SearchStates);
     }
 
