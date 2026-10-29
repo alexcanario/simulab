@@ -1,7 +1,7 @@
 ---
 feature: F-190
 epic: Data type controls
-status: approved
+status: building
 board: 260
 version: 1
 ---
@@ -66,6 +66,7 @@ The rule for a valid web address has one copy, in the kit control, so a change t
 - 2026-10-29 — Scope is the three pages only; the Domain and Api checks stay — the Domain cannot reference the Web project and a shared copy there is another item — assumed: scope (CLAUDE.md, modular-monolith profile)
 - 2026-10-29 — The exam edition form keeps its length check before calling `IsValid` — it is a separate rule (`ExamEditionNoticeUrlMaxLength`) — assumed: scope
 - 2026-10-29 — AC4 is a source-scan test in `Simulab.Web.Tests`, so the single copy cannot come back — the cheapest way to hold "one copy" — assumed: tests
+- 2026-10-29: plan — 1 `WebAddressRuleTests` red on the three pages → run it; 2 the three pages call `AppUrlField.IsValid` → the new test and the Catalog page tests green; 3 gate, coverage, validation script → `agile gate GREEN`
 - 2026-10-29 — No question reached the owner: no package, permission, schema, money or screen change — assumed by autopilot (`--assume`) as lane nanda of the lanes run
 
 ## Out of scope
