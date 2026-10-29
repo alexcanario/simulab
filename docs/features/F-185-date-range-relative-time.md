@@ -24,6 +24,7 @@ The kit gains `AppDateRangeField` (presets "last 7, 30, 90 days" and "this year"
 - Waits on (to start): nothing.
 - Needed to validate: nothing.
 - Model: opus (lane jussara; the kit and two admin lists change).
+- Risk: high (door: src/Hosts/Simulab.Web/Components/Pages/Admin/AccountEvents.razor)
 - Suggested path: `/agile:autopilot F-185 --assume --worktree`.
 - Parallel with: F-181, F-182.
 
