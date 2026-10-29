@@ -83,6 +83,7 @@ Tests locked: 1ecfb7d33d5453ccbff959baf2a01eb31c631378 (1 file); unlocks: 2
 - 2026-10-29 — The session ran on Sonnet 5.5 up to the first lock, then on Opus 5.5 (owner's `/model`); the lane asked opus — confirmed: lane-run.js WORK line
 - 2026-10-29 — Reuse: the gallery render of `UiGalleryTextKindsTests` (`KitTestContext`, `FakeHostEnvironment`, `SourceDelay`) and AngleSharp's DOM; nothing else found for reading a section by structure (searched `tests/Hosts/Simulab.Web.Tests/Ui`).
 - 2026-10-29 — Shortcuts: none.
+- 2026-10-29: validated by the owner — validado e autorizo o merge de F-189 e F-190 (relayed by the orchestrator, round 1: "- F-189 (olinda) validation: F-189 is ready: do you validate it and authorize its merge?")
 
 ## Out of scope
 - Adding error, disabled or read-only states to the search control.
