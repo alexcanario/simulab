@@ -40,29 +40,27 @@
                           Hint="@L["NoticeSubjects.Field.Label.Hint"]"
                           Error="@_labelError" />
 
-            @* Bound as text: a typed value that is not a whole number (1.5) never reaches an int? binding, and the field
-                 would show no message; here it is read, and refused with the same code the Api answers. *@
-            <AppTextField TValue="string"
-                          Id="notice-subject-question-count"
-                          Label="@L["NoticeSubjects.Field.QuestionCount"]"
-                          Placeholder="@L["NoticeSubjects.Field.QuestionCount.Placeholder"]"
-                          Value="_questionCountText"
-                          ValueChanged="@((string? value) => OnQuestionCountChanged(value))"
-                          InputType="InputType.Number"
-                          Autocomplete="off"
-                          Hint="@L["NoticeSubjects.Field.QuestionCount.Hint"]"
-                          Error="@_questionCountError" />
+            @* F-181: typed number controls. A text that is not a number keeps what was typed, shows the control's own
+                 message and blocks the save (_countInvalid, _pointsInvalid); a number out of range gets the Api's message. *@
+            <AppIntegerField Id="notice-subject-question-count"
+                             Label="@L["NoticeSubjects.Field.QuestionCount"]"
+                             Placeholder="@L["NoticeSubjects.Field.QuestionCount.Placeholder"]"
+                             Value="_questionCount"
+                             ValueChanged="OnQuestionCountChanged"
+                             InvalidChanged="@(invalid => _countInvalid = invalid)"
+                             Hint="@L["NoticeSubjects.Field.QuestionCount.Hint"]"
+                             Error="@(_countInvalid ? Errors.For(CatalogErrorCodes.NoticeSubjectQuestionCountInvalid) : _questionCountError)" />
 
-            @* F-168 UC2: bound as text for the same reason, read in the reader's culture ("1,50" in pt-BR). *@
-            <AppTextField TValue="string"
-                          Id="notice-subject-points"
-                          Label="@L["NoticeSubjects.Field.PointsPerQuestion"]"
-                          Placeholder="@ScoreText.ForField(1.5m)"
-                          Value="_pointsText"
-                          ValueChanged="@((string? value) => OnPointsChanged(value))"
-                          Autocomplete="off"
-                          Hint="@L["NoticeSubjects.Field.PointsPerQuestion.Hint"]"
-                          Error="@_pointsError" />
+            @* F-168 UC2: points per question, read in the reader's culture ("1,50" in pt-BR). *@
+            <AppScoreField Id="notice-subject-points"
+                           Label="@L["NoticeSubjects.Field.PointsPerQuestion"]"
+                           Decimals="CatalogLimits.ScoreDecimalPlaces"
+                           Placeholder="@ScoreText.ForField(1.5m)"
+                           Value="_points"
+                           ValueChanged="OnPointsChanged"
+                           InvalidChanged="@(invalid => _pointsInvalid = invalid)"
+                           Hint="@L["NoticeSubjects.Field.PointsPerQuestion.Hint"]"
+                           Error="@(_pointsInvalid ? Errors.For(CatalogErrorCodes.NoticeSubjectPointsPerQuestionInvalid) : _pointsError)" />
 
             <AppMultiPickField Id="@CoversId"
                                Label="@L["NoticeSubjects.Field.Covers"]"
@@ -127,8 +125,10 @@
 
     private string? _group;
     private string? _label;
-    private string? _questionCountText;
-    private string? _pointsText;
+    private int? _questionCount;
+    private decimal? _points;
+    private bool _countInvalid;
+    private bool _pointsInvalid;
     private string? _groupError;
     private string? _labelError;
     private string? _questionCountError;
@@ -153,8 +153,10 @@
     private bool HasChanges =>
         Trimmed(_group) != StartGroup
         || Trimmed(_label) != (NoticeSubject?.Label ?? string.Empty)
-        || Trimmed(_questionCountText) != (NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture) ?? string.Empty)
-        || Trimmed(_pointsText) != (ScoreText.ForField(NoticeSubject?.PointsPerQuestion) ?? string.Empty)
+        || _questionCount != NoticeSubject?.QuestionCount
+        || _points != NoticeSubject?.PointsPerQuestion
+        || _countInvalid
+        || _pointsInvalid
         || !_picks.Select(pick => pick.Key).ToHashSet().SetEquals(_initialKeys);
 
     // BR7: in edit mode a group that differs from the saved one (case and accents do not count) sends the row to the
@@ -182,8 +184,8 @@
     {
         _group = StartGroup;
         _label = NoticeSubject?.Label ?? string.Empty;
-        _questionCountText = NoticeSubject?.QuestionCount?.ToString(CultureInfo.InvariantCulture);
-        _pointsText = ScoreText.ForField(NoticeSubject?.PointsPerQuestion);
+        _questionCount = NoticeSubject?.QuestionCount;
+        _points = NoticeSubject?.PointsPerQuestion;
         _focusFirstField = true;
 
         // The row's own chips: they show and can be removed before, and without, the taxonomy.
@@ -245,47 +247,25 @@
         _labelError = LabelError(value);
     }
 
-    private void OnQuestionCountChanged(string? value)
+    private void OnQuestionCountChanged(int? value)
     {
-        _questionCountText = value;
+        _questionCount = value;
         _questionCountError = QuestionCountError(value);
     }
 
-    private void OnPointsChanged(string? value)
+    private void OnPointsChanged(decimal? value)
     {
-        _pointsText = value;
+        _points = value;
         _pointsError = PointsError(value);
     }
 
-    // F-168 BR3, comfort only: a number from 0.01 to 100 with at most two places; the Api runs the same check.
-    private string? PointsError(string? text) =>
-        !ScoreText.TryParse(text, out var points)
-        || (points is { } value
-            && (value < CatalogLimits.NoticeSubjectPointsPerQuestionMin
-                || value > CatalogLimits.NoticeSubjectPointsPerQuestionMax
-                || decimal.Round(value, CatalogLimits.ScoreDecimalPlaces) != value))
+    // F-168 BR3, comfort only: a number from 0.01 to 100; the control already rounds to two places, and the Api runs
+    // the same check.
+    private string? PointsError(decimal? points) =>
+        points is { } value
+        && (value < CatalogLimits.NoticeSubjectPointsPerQuestionMin || value > CatalogLimits.NoticeSubjectPointsPerQuestionMax)
             ? Errors.For(CatalogErrorCodes.NoticeSubjectPointsPerQuestionInvalid)
             : null;
-
-    private decimal? ParsedPoints() => ScoreText.TryParse(_pointsText, out var points) ? points : null;
-
-    // Blank means "the notice does not say" (null); anything else must be a whole number.
-    private static bool TryParseCount(string? text, out int? count)
-    {
-        count = null;
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            return true;
-        }
-
-        if (!int.TryParse(text.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
-        {
-            return false;
-        }
-
-        count = parsed;
-        return true;
-    }
 
     // Comfort only: the Api is the authority and runs the same checks (rule: ui-project).
     private string? GroupError(string? value) =>
@@ -307,13 +287,10 @@
         return length > CatalogLimits.NoticeSubjectLabelMaxLength ? Errors.For(CatalogErrorCodes.NoticeSubjectLabelTooLong) : null;
     }
 
-    private string? QuestionCountError(string? text) =>
-        !TryParseCount(text, out var count)
-        || (count is { } value && (value < CatalogLimits.NoticeSubjectQuestionCountMin || value > CatalogLimits.NoticeSubjectQuestionCountMax))
+    private string? QuestionCountError(int? count) =>
+        count is { } value && (value < CatalogLimits.NoticeSubjectQuestionCountMin || value > CatalogLimits.NoticeSubjectQuestionCountMax)
             ? Errors.For(CatalogErrorCodes.NoticeSubjectQuestionCountInvalid)
             : null;
-
-    private int? ParsedCount() => TryParseCount(_questionCountText, out var count) ? count : null;
 
     // ---- Covers (F-75) ----
 
@@ -542,9 +519,10 @@
     {
         _groupError = GroupError(_group);
         _labelError = LabelError(_label);
-        _questionCountError = QuestionCountError(_questionCountText);
-        _pointsError = PointsError(_pointsText);
-        if (_groupError is not null || _labelError is not null || _questionCountError is not null || _pointsError is not null)
+        _questionCountError = QuestionCountError(_questionCount);
+        _pointsError = PointsError(_points);
+        if (_groupError is not null || _labelError is not null || _questionCountError is not null || _pointsError is not null
+            || _countInvalid || _pointsInvalid)
         {
             return;
         }
@@ -563,7 +541,7 @@
                 pick.TopicId))
             .ToList();
         var result = await Save(new SaveNoticeSubjectRequest(
-            group.Length == 0 ? null : group, Trimmed(_label), ParsedCount(), mappings, ParsedPoints()));
+            group.Length == 0 ? null : group, Trimmed(_label), _questionCount, mappings, _points));
 
         _saving = false;
         if (result.IsSuccess)
