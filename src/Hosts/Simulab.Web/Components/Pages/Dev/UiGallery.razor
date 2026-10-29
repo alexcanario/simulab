@@ -10,6 +10,7 @@
 @inject ISnackbar Snackbar
 @inject ErrorText ErrorText
 @inject ThemeState ThemeState
+@inject TimeProvider Clock
 
 @if (!_allowed)
 {
@@ -477,12 +478,12 @@
             </div>
             <div>
                 <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Dates.Relative"]</MudText>
-                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddSeconds(-20))" /></p>
-                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddMinutes(-5))" /></p>
-                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddHours(-3))" /></p>
-                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddDays(-3))" /></p>
-                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddDays(-65))" /></p>
-                <p><AppRelativeTime Value="@(DateTimeOffset.UtcNow.AddDays(-800))" /></p>
+                <p><AppRelativeTime Value="@(Clock.GetUtcNow().AddSeconds(-20))" /></p>
+                <p><AppRelativeTime Value="@(Clock.GetUtcNow().AddMinutes(-5))" /></p>
+                <p><AppRelativeTime Value="@(Clock.GetUtcNow().AddHours(-3))" /></p>
+                <p><AppRelativeTime Value="@(Clock.GetUtcNow().AddDays(-3))" /></p>
+                <p><AppRelativeTime Value="@(Clock.GetUtcNow().AddDays(-65))" /></p>
+                <p><AppRelativeTime Value="@(Clock.GetUtcNow().AddDays(-800))" /></p>
 
                 <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.Dates.Text"]</MudText>
                 <p><AppDateText Value="@(new DateOnly(2026, 10, 27))" /></p>

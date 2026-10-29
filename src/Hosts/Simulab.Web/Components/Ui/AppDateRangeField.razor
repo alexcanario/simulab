@@ -4,7 +4,7 @@
 @inject IStringLocalizer<SharedResources> L
 @inject TimeProvider Clock
 
-<div class="app-field app-date-range-field @Class @(HasError ? "app-field-error" : null)">
+<div class="app-field app-date-range-field @Class @(HasError || _rangeError ? "app-field-error" : null)">
     <span class="app-field-label" id="@LabelId">@Label</span>
     <div class="app-range-presets" id="@Id" role="group" aria-labelledby="@LabelId" aria-describedby="@DescriptionId">
         @if (!string.IsNullOrEmpty(AllText))
@@ -33,8 +33,10 @@
     @if (AllowCustom && CustomSelected)
     {
         <div class="app-range-custom">
-            <AppDateField Id="@($"{Id}-from")" Label="@L["DateRange.From"]" Value="@_from" ValueChanged="FromChanged" Disabled="Disabled" />
-            <AppDateField Id="@($"{Id}-to")" Label="@L["DateRange.To"]" Value="@_to" ValueChanged="ToChanged" Disabled="Disabled" />
+            <AppDateField Id="@($"{Id}-from")" Label="@L["DateRange.From"]" Value="@_from" ValueChanged="FromChanged" Disabled="Disabled"
+                          Error="@(_rangeError ? L["DateRange.Invalid"].Value : null)" />
+            <AppDateField Id="@($"{Id}-to")" Label="@L["DateRange.To"]" Value="@_to" ValueChanged="ToChanged" Disabled="Disabled"
+                          Error="@(_rangeError ? L["DateRange.Invalid"].Value : null)" />
         </div>
     }
     <span id="@DescriptionId" class="app-field-description">
@@ -94,7 +96,10 @@
 
     private string DescriptionId => $"{Id}-description";
 
-    private DateOnly Today => DateOnly.FromDateTime(Clock.GetLocalNow().DateTime);
+    /// <summary>The user's time zone, so "today" is the user's day (a page passes <c>TimeZone.Current</c>); UTC when not set.</summary>
+    [Parameter] public TimeZoneInfo? Zone { get; set; }
+
+    private DateOnly Today => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(Clock.GetUtcNow(), Zone ?? TimeZoneInfo.Utc).DateTime);
 
     private bool AllSelected => !_custom && Value.IsEmpty;
 
@@ -114,6 +119,7 @@
             _from = Value.From;
             _to = Value.To;
             _rangeError = false;
+            _custom = false;
         }
     }
 
