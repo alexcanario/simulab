@@ -1,0 +1,133 @@
+@* F-184 BR2: two to four short options in one row, one chosen. A real radiogroup: one tab stop, arrows move the choice,
+   Space and Enter choose (rule: ui). The group carries the field's id: the label points at it and the error summary
+   jumps to it. Options that need a sentence are AppRadioCards. *@
+@typeparam TValue
+@inject IJSRuntime JS
+
+<div class="app-field app-segmented-field @Class @(HasError ? "app-field-error" : null)">
+    <span class="app-field-label" id="@LabelId">
+        @Label
+        @if (Required)
+        {
+            <span class="app-field-required" aria-hidden="true">*</span>
+        }
+    </span>
+    <div class="app-segments"
+         id="@Id"
+         role="radiogroup"
+         aria-labelledby="@LabelId"
+         aria-describedby="@DescriptionId"
+         aria-required="@(Required ? "true" : null)"
+         aria-invalid="@(HasError ? "true" : null)"
+         aria-disabled="@(Disabled ? "true" : null)">
+        @foreach (var option in Options)
+        {
+            var selected = IsSelected(option);
+            <button type="button"
+                    id="@OptionId(option)"
+                    class="@($"app-segment {(selected ? "app-segment-selected" : null)}")"
+                    role="radio"
+                    aria-checked="@(selected ? "true" : "false")"
+                    tabindex="@TabIndexOf(option, selected)"
+                    disabled="@Disabled"
+                    @onclick="() => SelectAsync(option)"
+                    @onkeydown="args => OnKeyDownAsync(args, option)">
+                @option.Text
+            </button>
+        }
+    </div>
+    <span id="@DescriptionId" class="app-field-description">
+        @if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>Two to four options, in the order the reader should see them.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<AppSegmentOption<TValue>> Options { get; set; } = [];
+
+    [Parameter] public TValue? Value { get; set; }
+
+    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The validation message. While it is set, the field is in error and the hint is replaced.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>A class on the field's root, so a control built on this one can be found and styled.</summary>
+    [Parameter] public string? Class { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string LabelId => $"{Id}-label";
+
+    private string DescriptionId => $"{Id}-description";
+
+    private bool IsSelected(AppSegmentOption<TValue> option) => EqualityComparer<TValue>.Default.Equals(option.Value, Value);
+
+    // The id of an option is the field's id and the option's value ("none" for no value), so a test and a link find it.
+    private string OptionId(AppSegmentOption<TValue> option) => $"{Id}-{option.Value?.ToString() ?? "none"}";
+
+    /// <summary>One tab stop for the whole group: the chosen option, or the first one while nothing is chosen.</summary>
+    private string TabIndexOf(AppSegmentOption<TValue> option, bool selected)
+    {
+        var nothingChosen = Options.All(candidate => !IsSelected(candidate));
+        return selected || (nothingChosen && ReferenceEquals(option, Options[0])) ? "0" : "-1";
+    }
+
+    private Task SelectAsync(AppSegmentOption<TValue> option)
+    {
+        if (Disabled)
+        {
+            return Task.CompletedTask;
+        }
+
+        Value = option.Value;
+        return ValueChanged.InvokeAsync(option.Value);
+    }
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs args, AppSegmentOption<TValue> option)
+    {
+        var target = args.Key switch
+        {
+            " " or "Enter" => option,
+            "ArrowRight" or "ArrowDown" => Neighbour(option, 1),
+            "ArrowLeft" or "ArrowUp" => Neighbour(option, -1),
+            _ => null
+        };
+        if (target is null)
+        {
+            return;
+        }
+
+        await SelectAsync(target);
+
+        // The focus follows the choice (a radio group): the next key starts from the new option and a screen reader
+        // announces it. The roving tabindex keeps one tab stop.
+        if (!Disabled)
+        {
+            await JS.InvokeVoidAsync("simulabShell.focusOption", OptionId(target));
+        }
+    }
+
+    private AppSegmentOption<TValue> Neighbour(AppSegmentOption<TValue> option, int step)
+    {
+        var index = Options.ToList().FindIndex(candidate => ReferenceEquals(candidate, option));
+        return Options[(((index + step) % Options.Count) + Options.Count) % Options.Count];
+    }
+}

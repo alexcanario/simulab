@@ -13,6 +13,15 @@ public static class QuestionText
     /// <summary>The longest excerpt of a statement that is part of a button's accessible name.</summary>
     public const int RowNameLength = 60;
 
+    /// <summary>F-184: the names of the difficulty levels, from <see cref="QuestionLimits.DifficultyMin"/> up ("Very easy" … "Very hard").</summary>
+    public static IReadOnlyList<string> DifficultyNames(IStringLocalizer<SharedResources> l)
+    {
+        ArgumentNullException.ThrowIfNull(l);
+
+        return [.. Enumerable.Range(QuestionLimits.DifficultyMin, QuestionLimits.DifficultyMax - QuestionLimits.DifficultyMin + 1)
+            .Select(level => l[$"Questions.Difficulty.Level.{level}"].Value)];
+    }
+
     public static string StatusName(IStringLocalizer<SharedResources> l, QuestionStatus status)
     {
         ArgumentNullException.ThrowIfNull(l);

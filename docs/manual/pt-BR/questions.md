@@ -1,8 +1,8 @@
 ---
 page: questions
 locale: pt-BR
-features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105, F-106, F-107, F-108, F-109, F-110]
-updated: 2026-10-25
+features: [F-95, F-96, F-97, F-98, F-99, F-100, F-101, F-102, F-103, F-104, F-105, F-106, F-107, F-108, F-109, F-110, F-184]
+updated: 2026-10-29
 ---
 # Questões
 
@@ -34,7 +34,8 @@ revisão também são de quem gerencia o banco. Aprovar ou rejeitar é de quem t
    quando combina com pelo menos um valor de cada filtro usado:
    - **Situação**: rascunhos, questões em revisão, questões publicadas, questões anuladas ou qualquer combinação.
    - **Tipo**: múltipla escolha, certo/errado ou os dois.
-   - **Dificuldade**: de 1 a 5, e **Não definida** para questões sem dificuldade.
+   - **Dificuldade**: botões com os pontos e o nome do nível (Muito fácil, Fácil, Média, Difícil, Muito difícil),
+     e **Não definida** para questões sem dificuldade. Clique nos níveis para ligar ou desligar cada um.
    - **Disciplina e tópico**: escolha uma disciplina inteira (vale todos os tópicos dela, até os que forem
      criados depois) ou tópicos avulsos.
    - **Banca**: as bancas de cujas provas as questões vieram. Questão autoral não tem banca e fica de fora
@@ -65,7 +66,9 @@ já estiver em uso.
    questão salva ele aparece como um valor.
 2. Escolha a **disciplina** e depois o **tópico** (a lista mostra só os tópicos daquela disciplina). O
    **idioma do conteúdo** começa com o seu idioma; troque pelo idioma em que a questão está escrita. Informe
-   uma **dificuldade** de 1 (mais fácil) a 5 (mais difícil), se quiser.
+   uma **dificuldade** clicando em um dos cinco pontos, de 1 (mais fácil) a 5 (mais difícil); o nome do nível aparece
+   ao lado e o botão de limpar volta a "Não definido". No certo/errado, a resposta correta é a escolha entre os
+   botões "Certo" e "Errado".
 3. Escreva o **enunciado**. A barra oferece negrito, itálico, sublinhado, tachado, sobrescrito, subscrito,
    listas, citação, link, imagem e limpar formatação. Para pôr uma figura no enunciado, veja
    [Pôr imagens no texto](#por-imagens-no-texto).

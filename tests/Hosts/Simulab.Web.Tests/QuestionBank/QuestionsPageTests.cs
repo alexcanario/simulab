@@ -45,11 +45,12 @@ public sealed class QuestionsPageTests : QuestionPageTestContext
         topicCell.TextContent.Should().Contain("Crase").And.Contain("Português");
         topicCell.QuerySelector(".app-cell-secondary")!.TextContent.Should().Contain("Português");
 
-        // A difficulty is a number; an empty one is a dash that is hidden from a screen reader and spoken instead.
-        CellsOf(page, 3)[0].Should().Contain("3");
+        // F-184 AC10: a difficulty is its dots with the level name as text; an empty one reads "Not set" (the dots are
+        // decoration, so nothing is left for a screen reader to skip).
+        CellsOf(page, 3)[0].Should().Contain("Medium");
         var empty = page.FindAll("tbody tr")[1].QuerySelectorAll("td")[3];
-        empty.QuerySelector("[aria-hidden='true']")!.TextContent.Should().Be("—");
-        empty.QuerySelector(".app-visually-hidden")!.TextContent.Should().Be("No difficulty set");
+        empty.QuerySelector(".app-level-badge-name")!.TextContent.Should().Be("Not set");
+        empty.QuerySelectorAll(".app-level-dot-on").Should().BeEmpty();
 
         // The language is in its own name and marked with its own tag.
         CellsOf(page, 4)[0].Should().Be("Português (Brasil)");

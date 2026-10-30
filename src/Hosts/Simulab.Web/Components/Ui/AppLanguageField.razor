@@ -1,0 +1,53 @@
+@* F-184 BR7: the language of a content (a question, an exam, a base text) or of a person, picked in its own name
+   ("Português (Brasil)"), whatever the language of the screen. An AppSelectField with the supported languages. *@
+
+@using Simulab.Web.Localization
+
+<div class="app-language-field">
+    <AppSelectField TValue="string"
+                    Id="@Id"
+                    Label="@Label"
+                    Options="Options"
+                    Value="@Value"
+                    ValueChanged="ValueChanged"
+                    Required="Required"
+                    Disabled="Disabled"
+                    LabelVisuallyHidden="LabelVisuallyHidden"
+                    LeadingIcon="@LeadingIcon"
+                    Hint="@Hint"
+                    Error="@Error" />
+</div>
+
+@code {
+    private static readonly IReadOnlyList<AppSelectOption<string>> Languages =
+        [.. SupportedCultures.All.Select(culture =>
+            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
+
+    /// <summary>A filter's first option, with the empty value, that means every language ("All"); none when not set.</summary>
+    [Parameter] public string? AllText { get; set; }
+
+    private IReadOnlyList<AppSelectOption<string>> Options =>
+        string.IsNullOrEmpty(AllText) ? Languages : [new(string.Empty, AllText), .. Languages];
+
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>The label is read but not drawn, for a filter whose heading already says what it is.</summary>
+    [Parameter] public bool LabelVisuallyHidden { get; set; }
+
+    /// <summary>A decorative icon at the start of the field; the language icon when not set.</summary>
+    [Parameter] public string? LeadingIcon { get; set; } = AppIcons.Language;
+}

@@ -976,7 +976,6 @@
   <data name="Questions.Filter.Limit" xml:space="preserve"><value>Up to 100 subjects, topics and organizers can be picked together.</value></data>
   <data name="Questions.Empty.Search" xml:space="preserve"><value>No question matches "{0}".</value></data>
   <data name="Questions.Difficulty.NotSet" xml:space="preserve"><value>Not set</value></data>
-  <data name="Questions.Difficulty.NotSet.Spoken" xml:space="preserve"><value>No difficulty set</value></data>
   <data name="Questions.Row.Name" xml:space="preserve"><value>question "{0}"</value></data>
   <data name="Questions.Action.Publish" xml:space="preserve"><value>Publish</value></data>
   <data name="Questions.Action.Unpublish" xml:space="preserve"><value>Unpublish</value></data>
@@ -1542,6 +1541,38 @@
   <data name="exam_edition.essay_cut_off_without_max" xml:space="preserve"><value>Fill in the essay maximum before its cut-off.</value></data>
   <data name="exam_edition.essay_cut_off_above_max" xml:space="preserve"><value>The essay cut-off cannot be above the essay maximum.</value></data>
   <data name="notice_subject.points_per_question_invalid" xml:space="preserve"><value>Type a number from 0.01 to 100 with at most two decimal places, or leave it empty.</value></data>
+  <data name="Choice.Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="Choice.No" xml:space="preserve"><value>No</value></data>
+  <data name="Choice.NotSet" xml:space="preserve"><value>Not set</value></data>
+  <data name="Level.Clear" xml:space="preserve"><value>Clear the level</value></data>
+  <data name="Level.DotName" xml:space="preserve"><value>{0} — {1}</value></data>
+  <data name="Questions.Difficulty.Level.1" xml:space="preserve"><value>Very easy</value></data>
+  <data name="Questions.Difficulty.Level.2" xml:space="preserve"><value>Easy</value></data>
+  <data name="Questions.Difficulty.Level.3" xml:space="preserve"><value>Medium</value></data>
+  <data name="Questions.Difficulty.Level.4" xml:space="preserve"><value>Hard</value></data>
+  <data name="Questions.Difficulty.Level.5" xml:space="preserve"><value>Very hard</value></data>
+  <data name="Gallery.Section.Choices" xml:space="preserve"><value>Choices</value></data>
+  <data name="Gallery.Choices.Hint" xml:space="preserve"><value>One control per kind of choice, picked by how many options there are and whether the effect is immediate (docs/design/data-type-controls.md, 2.4).</value></data>
+  <data name="Gallery.Choices.Switch" xml:space="preserve"><value>Switch (AppSwitch)</value></data>
+  <data name="Gallery.Choices.Segmented" xml:space="preserve"><value>Segmented (AppSegmentedField)</value></data>
+  <data name="Gallery.Choices.YesNo" xml:space="preserve"><value>Yes / no (AppYesNoField)</value></data>
+  <data name="Gallery.Choices.Level" xml:space="preserve"><value>Level (AppLevelField)</value></data>
+  <data name="Gallery.Choices.LevelFilter" xml:space="preserve"><value>Level filter (AppLevelFilterField)</value></data>
+  <data name="Gallery.Choices.Text" xml:space="preserve"><value>Level and yes / no as text (AppLevelBadge, AppBoolText)</value></data>
+  <data name="Gallery.Choices.Language" xml:space="preserve"><value>Language (AppLanguageField)</value></data>
+  <data name="Gallery.Choices.State.Empty" xml:space="preserve"><value>Empty</value></data>
+  <data name="Gallery.Choices.State.Filled" xml:space="preserve"><value>Filled</value></data>
+  <data name="Gallery.Choices.State.Error" xml:space="preserve"><value>Error</value></data>
+  <data name="Gallery.Choices.State.Disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="Gallery.Choices.State.ReadOnly" xml:space="preserve"><value>Read-only</value></data>
+  <data name="Gallery.Choices.Label.Reminders" xml:space="preserve"><value>Send me reminders</value></data>
+  <data name="Gallery.Choices.Label.Period" xml:space="preserve"><value>Period</value></data>
+  <data name="Gallery.Choices.Label.Key" xml:space="preserve"><value>Correct answer</value></data>
+  <data name="Gallery.Choices.Label.Difficulty" xml:space="preserve"><value>Difficulty</value></data>
+  <data name="Gallery.Choices.Label.Language" xml:space="preserve"><value>Language of the content</value></data>
+  <data name="Gallery.Choices.Option.Day" xml:space="preserve"><value>Day</value></data>
+  <data name="Gallery.Choices.Option.Week" xml:space="preserve"><value>Week</value></data>
+  <data name="Gallery.Choices.Option.Month" xml:space="preserve"><value>Month</value></data>
   <data name="Number.Invalid" xml:space="preserve"><value>Enter a number, using "{0}" as the decimal separator.</value></data>
   <data name="Number.InvalidInteger" xml:space="preserve"><value>Enter a whole number, with no separators.</value></data>
   <data name="Number.Range" xml:space="preserve"><value>Enter a value from {0} to {1}.</value></data>
