@@ -1,8 +1,8 @@
 ---
 page: role-history
 locale: pt-BR
-features: [F-14, F-150]
-updated: 2026-10-26
+features: [F-14, F-150, F-185]
+updated: 2026-10-29
 ---
 # Histórico de papéis
 
@@ -30,8 +30,10 @@ As mudanças que o próprio Simulab faz não são registradas: o papel Estudante
 ### Filtrar a lista
 - **Papel**: mudanças nesse papel e mudanças que o deram a uma conta ou o tiraram dela. Papéis excluídos aparecem como "(excluído)". Uma troca de tenant não envolve papel, então não aparece neste filtro: use o histórico da conta.
 - **Alterado por**: mudanças feitas por essa conta.
-- **Período**: últimos 7, 30 ou 90 dias, ou todo o período.
+- **Período**: uma fila de botões — **Todo o período**, **Últimos 7 dias**, **Últimos 30 dias** e **Últimos 90 dias**. O botão escolhido fica com a borda mais grossa e o texto em negrito; escolha outro para trocar.
 - O campo de busca acha a conta cujos papéis mudaram, pelo e-mail ou pelo nome.
+
+Na coluna **Quando**, cada linha mostra a data e a hora exatas e, embaixo, há quanto tempo foi ("há 3 dias"); passe o mouse sobre o "há 3 dias" para ver a data e a hora de novo.
 
 Os filtros ficam no endereço da página, então recarregar ou compartilhar o link os mantém.
 

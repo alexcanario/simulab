@@ -54,6 +54,20 @@ public sealed class AccountEventsPageTests : AdminPageTestContext
         LastListQuery().Should().Contain("page=0&").And.Contain("ascending=false");
     }
 
+    // F-185 AC9: the exact time stays in the cell, and the relative time sits under it.
+    [Fact]
+    public void Load_TheWhenCell_HasTheExactTimeAndTheRelativeTime()
+    {
+        Api.AccountEvents = [SignedIn];
+
+        var page = RenderPage();
+
+        page.WaitForAssertion(() => page.FindAll("tbody tr .app-relative-time").Should().ContainSingle());
+        var cell = page.Find("tbody tr");
+        cell.TextContent.Should().Contain(At.ToString("g", CultureInfo.CurrentCulture));
+        page.Find("tbody tr time.app-relative-time").GetAttribute("title").Should().Be(At.ToString("g", CultureInfo.CurrentCulture));
+    }
+
     // AC12: the states.
     [Fact]
     public void Empty_WithoutFilters_SaysNothingWasRecorded_WithAFilter_SaysNothingMatches()
@@ -92,7 +106,10 @@ public sealed class AccountEventsPageTests : AdminPageTestContext
                 // F-29 AC21: linking and unlinking Google are account events, so they are offered here too.
                 "Google connected", "Google disconnected");
         page.Find("#account-events-type-filter").GetAttribute("value").Should().Be("Sign-in failed");
-        page.Find("#account-events-period-filter").GetAttribute("value").Should().Be("Last 30 days");
+        // F-185 AC8: the period is the range field in presets-only mode.
+        page.Find("#account-events-period-filter-30").GetAttribute("aria-pressed").Should().Be("true");
+        page.Find("#account-events-period-filter-30").TextContent.Trim().Should().Be("Last 30 days");
+        page.FindAll("#account-events-period-filter button.app-range-preset").Should().HaveCount(4, "all time and the three periods the Api takes");
     }
 
     // AC12: an account in the address becomes a removable chip instead of the search box.
@@ -142,8 +159,8 @@ public sealed class AccountEventsPageTests : AdminPageTestContext
         page.InvokeAsync(() => grid.Instance.NavigateTo(MudBlazor.Page.Next));
         page.WaitForAssertion(() => LastListQuery().Should().Contain("page=1&"));
 
-        var period = page.FindComponent<AppSelectField<int?>>();
-        page.InvokeAsync(() => period.Instance.ValueChanged.InvokeAsync(90));
+        var period = page.FindComponent<AppDateRangeField>();
+        page.InvokeAsync(() => period.Instance.ValueChanged.InvokeAsync(AppDateRange.OfDays(90)));
 
         page.WaitForAssertion(() => LastListQuery().Should().Contain("page=0&").And.Contain("days=90"));
         Services.GetRequiredService<NavigationManager>().Uri.Should().EndWith("days=90");

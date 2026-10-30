@@ -39,12 +39,16 @@
                             ValueChanged="@((string value) => FilterChangedAsync("event", value, () => EventFilter = value))" />
         </div>
         <div class="app-table-filter">
-            <AppSelectField TValue="int?"
-                            Id="account-events-period-filter"
-                            Label="@L["AccountEvents.Filter.Period"]"
-                            Options="_periodOptions"
-                            Value="DaysFilter"
-                            ValueChanged="@((int? value) => FilterChangedAsync("days", value, () => DaysFilter = value))" />
+            @* F-185: the Api takes 7, 30 or 90 days, so the range field is in its presets-only mode. *@
+            <AppDateRangeField Id="account-events-period-filter"
+                               Label="@L["AccountEvents.Filter.Period"]"
+                               AllText="@L["AccountEvents.Filter.Period.All"].Value"
+                               DayPresets="AccountEventListQuery.Periods"
+                               ThisYear="false"
+                               AllowCustom="false"
+                               Zone="TimeZone.Current"
+                               Value="@AppDateRange.OfDays(DaysFilter)"
+                               ValueChanged="OnPeriodChangedAsync" />
         </div>
     </ToolBarContent>
     <Columns>
@@ -52,7 +56,13 @@
                        TProperty="DateTimeOffset"
                        Property="accountEvent => TimeZone.ToLocal(accountEvent.OccurredAt)"
                        Format="g"
-                       Title="@L["AccountEvents.Column.When"]" />
+                       Title="@L["AccountEvents.Column.When"]">
+            <CellTemplate>
+                @* F-185 BR7: the exact time stays (an audit record), the relative time sits under it. *@
+                <span>@TimeZone.ToLocal(context.Item.OccurredAt).ToString("g", CultureInfo.CurrentCulture)</span>
+                <span class="app-cell-secondary"><AppRelativeTime Value="@TimeZone.ToLocal(context.Item.OccurredAt)" /></span>
+            </CellTemplate>
+        </AppDateColumn>
         <TemplateColumn T="AccountEventResponse" Title="@L["AccountEvents.Column.Account"]" Sortable="false">
             <CellTemplate>@AccountText(context.Item.Account)</CellTemplate>
         </TemplateColumn>
@@ -93,8 +103,10 @@
     private AppDataTable<AccountEventResponse> _table = default!;
     private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
     private IReadOnlyList<AppSelectOption<string>> _eventOptions = [];
-    private IReadOnlyList<AppSelectOption<int?>> _periodOptions = [];
     private string? _accountText;
+
+    // F-185: the period is the Api's number of days (7, 30, 90), or none for all time.
+    private Task OnPeriodChangedAsync(AppDateRange range) => FilterChangedAsync("days", range.Days, () => DaysFilter = range.Days);
 
     private bool HasFilters =>
         UserFilter is not null || !string.IsNullOrEmpty(EventFilter) || !string.IsNullOrEmpty(AddressFilter) || DaysFilter is not null;
@@ -114,12 +126,6 @@
         [
             new AppSelectOption<string>(string.Empty, L["AccountEvents.Filter.AllEvents"]),
             .. AccountEventTypes.All.Select(name => new AppSelectOption<string>(name, L[$"AccountEvents.Event.{name}"]))
-        ];
-
-        _periodOptions =
-        [
-            new AppSelectOption<int?>(null, L["AccountEvents.Filter.Period.All"]),
-            .. AccountEventListQuery.Periods.Select(days => new AppSelectOption<int?>(days, L[$"AccountEvents.Filter.Period.Days{days}"]))
         ];
     }
 

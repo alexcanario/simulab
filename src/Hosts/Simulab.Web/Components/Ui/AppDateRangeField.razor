@@ -1,0 +1,179 @@
+@* F-185 BR1 to BR4: a period for a filter: "all time", the last n days, this year or two dates. A group of toggle buttons
+   (aria-pressed, the chosen one bold: colour never speaks alone) and, for the custom range, two AppDateFields. A page
+   whose Api takes days only turns off ThisYear and AllowCustom and reads Value.Days. *@
+@inject IStringLocalizer<SharedResources> L
+@inject TimeProvider Clock
+
+<div class="app-field app-date-range-field @Class @(HasError || _rangeError ? "app-field-error" : null)">
+    <span class="app-field-label" id="@LabelId">@Label</span>
+    <div class="app-range-presets" id="@Id" role="group" aria-labelledby="@LabelId" aria-describedby="@DescriptionId">
+        @if (!string.IsNullOrEmpty(AllText))
+        {
+            <button type="button" id="@($"{Id}-all")" class="@PresetClass(AllSelected)" aria-pressed="@(AllSelected ? "true" : "false")"
+                    disabled="@Disabled" @onclick="ChooseAllAsync">@AllText</button>
+        }
+        @foreach (var days in DayPresets)
+        {
+            var preset = days;
+            var selected = !_custom && Value.Days == preset;
+            <button type="button" id="@($"{Id}-{preset}")" class="@PresetClass(selected)" aria-pressed="@(selected ? "true" : "false")"
+                    disabled="@Disabled" @onclick="() => ChooseDaysAsync(preset)">@L["DateRange.LastDays", preset]</button>
+        }
+        @if (ThisYear)
+        {
+            <button type="button" id="@($"{Id}-year")" class="@PresetClass(YearSelected)" aria-pressed="@(YearSelected ? "true" : "false")"
+                    disabled="@Disabled" @onclick="ChooseYearAsync">@L["DateRange.ThisYear"]</button>
+        }
+        @if (AllowCustom)
+        {
+            <button type="button" id="@($"{Id}-custom")" class="@PresetClass(CustomSelected)" aria-pressed="@(CustomSelected ? "true" : "false")"
+                    disabled="@Disabled" @onclick="ChooseCustom">@L["DateRange.Custom"]</button>
+        }
+    </div>
+    @if (AllowCustom && CustomSelected)
+    {
+        <div class="app-range-custom">
+            <AppDateField Id="@($"{Id}-from")" Label="@L["DateRange.From"]" Value="@_from" ValueChanged="FromChanged" Disabled="Disabled"
+                          Error="@(_rangeError ? L["DateRange.Invalid"].Value : null)" />
+            <AppDateField Id="@($"{Id}-to")" Label="@L["DateRange.To"]" Value="@_to" ValueChanged="ToChanged" Disabled="Disabled"
+                          Error="@(_rangeError ? L["DateRange.Invalid"].Value : null)" />
+        </div>
+    }
+    <span id="@DescriptionId" class="app-field-description">
+        @if (_rangeError)
+        {
+            <span id="@($"{Id}-range-error")" class="app-field-error-text">@L["DateRange.Invalid"]</span>
+        }
+        else if (HasError)
+        {
+            <span class="app-field-error-text">@Error</span>
+        }
+        else if (!string.IsNullOrEmpty(Hint))
+        {
+            <span class="app-field-hint">@Hint</span>
+        }
+    </span>
+</div>
+
+@code {
+    private bool _custom;
+    private bool _rangeError;
+    private DateOnly? _from;
+    private DateOnly? _to;
+    private AppDateRange _lastValue = AppDateRange.Empty;
+
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter] public AppDateRange Value { get; set; } = AppDateRange.Empty;
+
+    [Parameter] public EventCallback<AppDateRange> ValueChanged { get; set; }
+
+    /// <summary>The "last n days" buttons, in order. The default is 7, 30 and 90.</summary>
+    [Parameter] public IReadOnlyList<int> DayPresets { get; set; } = [7, 30, 90];
+
+    /// <summary>The "This year" button (1 January up to today). A page whose Api takes days only turns it off.</summary>
+    [Parameter] public bool ThisYear { get; set; } = true;
+
+    /// <summary>The "Custom range" button and its two date fields. A page whose Api takes days only turns it off.</summary>
+    [Parameter] public bool AllowCustom { get; set; } = true;
+
+    /// <summary>The word of the first button, which clears the period ("All time"); none without it.</summary>
+    [Parameter] public string? AllText { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+
+    private string LabelId => $"{Id}-label";
+
+    private string DescriptionId => $"{Id}-description";
+
+    /// <summary>The user's time zone, so "today" is the user's day (a page passes <c>TimeZone.Current</c>); UTC when not set.</summary>
+    [Parameter] public TimeZoneInfo? Zone { get; set; }
+
+    private DateOnly Today => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(Clock.GetUtcNow(), Zone ?? TimeZoneInfo.Utc).DateTime);
+
+    private bool AllSelected => !_custom && Value.IsEmpty;
+
+    private bool YearSelected => ThisYear && !_custom && Value.Days is null && Value == AppDateRange.YearToDate(Today);
+
+    private bool CustomSelected =>
+        AllowCustom && (_custom || (!Value.IsEmpty && Value.Days is null && !YearSelected));
+
+    private static string PresetClass(bool selected) => $"app-range-preset {(selected ? "app-range-preset-on" : null)}";
+
+    protected override void OnParametersSet()
+    {
+        // The dates of the custom range follow the page's value when the page changed it.
+        if (Value != _lastValue)
+        {
+            _lastValue = Value;
+            _from = Value.From;
+            _to = Value.To;
+            _rangeError = false;
+            _custom = false;
+        }
+    }
+
+    private Task ChooseAllAsync() => ChooseAsync(AppDateRange.Empty, custom: false);
+
+    private Task ChooseDaysAsync(int days) => ChooseAsync(AppDateRange.LastDays(days, Today), custom: false);
+
+    private Task ChooseYearAsync() => ChooseAsync(AppDateRange.YearToDate(Today), custom: false);
+
+    private void ChooseCustom()
+    {
+        _custom = true;
+        _rangeError = false;
+    }
+
+    // Callbacks with no receiver: the field re-renders itself through InvokeAsync, so a date field's callback works from
+    // any thread, not only the renderer's (the tests of this control invoke it directly).
+    private EventCallback<DateOnly?> FromChanged => new(null, (Func<DateOnly?, Task>)OnFromChangedAsync);
+
+    private EventCallback<DateOnly?> ToChanged => new(null, (Func<DateOnly?, Task>)OnToChangedAsync);
+
+    private Task OnFromChangedAsync(DateOnly? from) => ChangeCustomAsync(from, _to);
+
+    private Task OnToChangedAsync(DateOnly? to) => ChangeCustomAsync(_from, to);
+
+    private async Task ChangeCustomAsync(DateOnly? from, DateOnly? to)
+    {
+        _from = from;
+        _to = to;
+        if (from is { } start && to is { } end && start > end)
+        {
+            _rangeError = true;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        _rangeError = false;
+        await ChooseAsync(new AppDateRange(from, to, null), custom: true);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ChooseAsync(AppDateRange range, bool custom)
+    {
+        if (Disabled)
+        {
+            return;
+        }
+
+        _custom = custom;
+        _rangeError = false;
+        Value = range;
+        _lastValue = range;
+        _from = range.From;
+        _to = range.To;
+        await ValueChanged.InvokeAsync(range);
+    }
+}

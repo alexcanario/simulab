@@ -1541,6 +1541,34 @@
   <data name="exam_edition.essay_cut_off_without_max" xml:space="preserve"><value>Preencha a nota máxima da redação antes da nota mínima.</value></data>
   <data name="exam_edition.essay_cut_off_above_max" xml:space="preserve"><value>A nota mínima da redação não pode ficar acima da nota máxima.</value></data>
   <data name="notice_subject.points_per_question_invalid" xml:space="preserve"><value>Escreva um número de 0,01 a 100 com no máximo duas casas decimais, ou deixe vazio.</value></data>
+  <data name="DateRange.LastDays" xml:space="preserve"><value>Últimos {0} dias</value></data>
+  <data name="DateRange.ThisYear" xml:space="preserve"><value>Este ano</value></data>
+  <data name="DateRange.Custom" xml:space="preserve"><value>Período personalizado</value></data>
+  <data name="DateRange.From" xml:space="preserve"><value>De</value></data>
+  <data name="DateRange.To" xml:space="preserve"><value>Até</value></data>
+  <data name="DateRange.Invalid" xml:space="preserve"><value>A data inicial não pode ser posterior à data final.</value></data>
+  <data name="Relative.Now" xml:space="preserve"><value>Agora mesmo</value></data>
+  <data name="Relative.Minute" xml:space="preserve"><value>há {0} minuto</value></data>
+  <data name="Relative.Minutes" xml:space="preserve"><value>há {0} minutos</value></data>
+  <data name="Relative.Hour" xml:space="preserve"><value>há {0} hora</value></data>
+  <data name="Relative.Hours" xml:space="preserve"><value>há {0} horas</value></data>
+  <data name="Relative.Day" xml:space="preserve"><value>há {0} dia</value></data>
+  <data name="Relative.Days" xml:space="preserve"><value>há {0} dias</value></data>
+  <data name="Relative.Month" xml:space="preserve"><value>há {0} mês</value></data>
+  <data name="Relative.Months" xml:space="preserve"><value>há {0} meses</value></data>
+  <data name="Relative.Year" xml:space="preserve"><value>há {0} ano</value></data>
+  <data name="Relative.Years" xml:space="preserve"><value>há {0} anos</value></data>
+  <data name="Gallery.Section.Dates" xml:space="preserve"><value>Datas</value></data>
+  <data name="Gallery.Dates.Hint" xml:space="preserve"><value>Um período escolhe-se num só controlo e um momento do passado lê-se como uma pessoa diria (docs/design/data-type-controls.md, 2.3).</value></data>
+  <data name="Gallery.Dates.Range" xml:space="preserve"><value>Período (AppDateRangeField)</value></data>
+  <data name="Gallery.Dates.Relative" xml:space="preserve"><value>Tempo relativo (AppRelativeTime)</value></data>
+  <data name="Gallery.Dates.Text" xml:space="preserve"><value>Texto de data (AppDateText)</value></data>
+  <data name="Gallery.Dates.State.Empty" xml:space="preserve"><value>Vazio</value></data>
+  <data name="Gallery.Dates.State.Filled" xml:space="preserve"><value>Preenchido</value></data>
+  <data name="Gallery.Dates.State.Error" xml:space="preserve"><value>Erro</value></data>
+  <data name="Gallery.Dates.State.Disabled" xml:space="preserve"><value>Desativado</value></data>
+  <data name="Gallery.Dates.Label.Period" xml:space="preserve"><value>Período</value></data>
+  <data name="Gallery.Dates.All" xml:space="preserve"><value>Todo o período</value></data>
   <data name="Choice.Yes" xml:space="preserve"><value>Sim</value></data>
   <data name="Choice.No" xml:space="preserve"><value>Não</value></data>
   <data name="Choice.NotSet" xml:space="preserve"><value>Não definido</value></data>

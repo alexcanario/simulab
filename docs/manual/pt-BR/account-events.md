@@ -1,8 +1,8 @@
 ---
 page: account-events
 locale: pt-BR
-features: [F-21]
-updated: 2026-09-23
+features: [F-21, F-185]
+updated: 2026-10-29
 ---
 # Eventos de conta
 
@@ -34,8 +34,10 @@ Escolha o endereço na coluna **De**. Aparece uma etiqueta "De: …" e a lista p
 
 ### Filtrar a lista
 - **Evento**: apenas aquele tipo de evento.
-- **Período**: os últimos 7, 30 ou 90 dias, ou todo o período.
+- **Período**: uma fila de botões — **Todo o período**, **Últimos 7 dias**, **Últimos 30 dias** e **Últimos 90 dias**. O botão escolhido fica com a borda mais grossa e o texto em negrito; escolha outro para trocar.
 - O campo de busca encontra a conta por e-mail ou nome.
+
+Na coluna **Quando**, cada linha mostra a data e a hora exatas e, embaixo, há quanto tempo foi ("há 3 dias"); passe o mouse sobre o "há 3 dias" para ver a data e a hora de novo.
 
 Os filtros ficam no endereço da página, então recarregar ou compartilhar o link mantém o que você escolheu.
 

@@ -41,12 +41,16 @@
                             ValueChanged="@((Guid? value) => FilterChangedAsync("author", value, () => AuthorFilter = value))" />
         </div>
         <div class="app-table-filter">
-            <AppSelectField TValue="int?"
-                            Id="history-period-filter"
-                            Label="@L["RoleHistory.Filter.Period"]"
-                            Options="_periodOptions"
-                            Value="DaysFilter"
-                            ValueChanged="@((int? value) => FilterChangedAsync("days", value, () => DaysFilter = value))" />
+            @* F-185: the Api takes 7, 30 or 90 days, so the range field is in its presets-only mode. *@
+            <AppDateRangeField Id="history-period-filter"
+                               Label="@L["RoleHistory.Filter.Period"]"
+                               AllText="@L["RoleHistory.Filter.Period.All"].Value"
+                               DayPresets="RoleChangeListQuery.Periods"
+                               ThisYear="false"
+                               AllowCustom="false"
+                               Zone="TimeZone.Current"
+                               Value="@AppDateRange.OfDays(DaysFilter)"
+                               ValueChanged="OnPeriodChangedAsync" />
         </div>
     </ToolBarContent>
     <Columns>
@@ -54,7 +58,13 @@
                        TProperty="DateTimeOffset"
                        Property="change => TimeZone.ToLocal(change.OccurredAt)"
                        Format="g"
-                       Title="@L["RoleHistory.Column.When"]" />
+                       Title="@L["RoleHistory.Column.When"]">
+            <CellTemplate>
+                @* F-185 BR7: the exact time stays (an audit record), the relative time sits under it. *@
+                <span>@TimeZone.ToLocal(context.Item.OccurredAt).ToString("g", CultureInfo.CurrentCulture)</span>
+                <span class="app-cell-secondary"><AppRelativeTime Value="@TimeZone.ToLocal(context.Item.OccurredAt)" /></span>
+            </CellTemplate>
+        </AppDateColumn>
         <TemplateColumn T="RoleChangeResponse" Title="@L["RoleHistory.Column.Author"]" Sortable="false">
             <CellTemplate>@PersonText(context.Item.Author)</CellTemplate>
         </TemplateColumn>
@@ -103,8 +113,10 @@
     private IReadOnlyList<BreadcrumbItem> _breadcrumbs = [];
     private IReadOnlyList<AppSelectOption<Guid?>> _roleOptions = [];
     private IReadOnlyList<AppSelectOption<Guid?>> _authorOptions = [];
-    private IReadOnlyList<AppSelectOption<int?>> _periodOptions = [];
     private string? _userText;
+
+    // F-185: the period is the Api's number of days (7, 30, 90), or none for all time.
+    private Task OnPeriodChangedAsync(AppDateRange range) => FilterChangedAsync("days", range.Days, () => DaysFilter = range.Days);
 
     private bool HasFilters => RoleFilter is not null || UserFilter is not null || AuthorFilter is not null || DaysFilter is not null;
 
@@ -116,12 +128,6 @@
         [
             new BreadcrumbItem(L["Nav.Section.Administration"], href: null, disabled: true),
             new BreadcrumbItem(L["RoleHistory.Title"], href: null, disabled: true)
-        ];
-
-        _periodOptions =
-        [
-            new AppSelectOption<int?>(null, L["RoleHistory.Filter.Period.All"]),
-            .. RoleChangeListQuery.Periods.Select(days => new AppSelectOption<int?>(days, L[$"RoleHistory.Filter.Period.Days{days}"]))
         ];
 
         await LoadFiltersAsync();
