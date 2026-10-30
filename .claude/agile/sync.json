@@ -1,5 +1,5 @@
 {
-  "version": "0.235.1",
+  "version": "0.240.0",
   "files": {
     ".claude/rules/agile/api-contracts.md": "b89627eeff25fdd7",
     ".claude/rules/agile/build-config.md": "10036965f8131836",
@@ -23,10 +23,11 @@
     "docs/agile/templates/infra.md": "7c354d6af463b757",
     "docs/agile/templates/manual-page.md": "9530df7334bc5df1",
     "docs/agile/templates/project-claude.md": "40bbcf1486028301",
+    "docs/agile/templates/review.md": "c36618232f983bb5",
     "docs/agile/templates/tech-page.md": "2eff0cc69175555a",
     "docs/agile/templates/ui-map.md": "b05a64b27a3e73a4",
-    "docs/agile/workflow.pt-BR.md": "bb83e7b29f51f3de",
-    "docs/agile/workflow-examples.pt-BR.md": "1c509d1e8568c07b",
+    "docs/agile/workflow.pt-BR.md": "2c3914a5eb7a1adf",
+    "docs/agile/workflow-examples.pt-BR.md": "6deb2e89319c8c09",
     "docs/agile/profile.md": "87d0409a29e89d3b",
     "docs/agile/profile-sections/runtime-themes-mudblazor.md": "3d317f0e21339906",
     "docs/agile/profile-sections/local-services.md": "6f6463ddcd02c9a0",
