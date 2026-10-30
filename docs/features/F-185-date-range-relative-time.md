@@ -102,7 +102,7 @@ A period is picked in one named control and a moment in the past reads the way a
 
 ## Criterion → test
 
-Tests locked: b5ab96fd294bba550b30ccb1f873fdefbbfad6c0 (5 files); unlocks: 0
+Tests locked: bc0eb75e2bba2987c0191229b1f588c9197f59a2 (5 files); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
