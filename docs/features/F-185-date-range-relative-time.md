@@ -1,7 +1,7 @@
 ---
 feature: F-185
 epic: Data type controls
-status: validating
+status: done
 Autopilot: stop 2
 board: 255
 version: 1
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-29)
-- Stopped at: Built; waiting for the owner's validation on screen
-- Next action: Follow the validation script and say if it passes (Owner)
+- Status: done (2026-10-30)
+- Stopped at: Shipped: merge 60692c6d on main, board 255 closed
+- Next action: Nothing: the item is done
 - Waiting on: nothing
 
 ## Summary
@@ -191,6 +191,17 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
    Esperado: o mesmo comportamento da lista de eventos.
    - [ ] 4.2 Só com o teclado: use Tab até a fila de botões do período e Enter ou Espaço em "Últimos 90 dias".
    Esperado: cada botão recebe o foco visível, uma parada de Tab por botão, e Enter ou Espaço escolhe o período.
+
+## Delivery
+
+Gate time: ship run about 7 min (fresh run); 0 red on the ship run
+- Branch: feature/F-185
+- Merge: 60692c6d (`Merge feature/F-185`, no fast-forward, on main after F-184)
+- Tests: full suite green on the merged tree (Web, Catalog 706, Identity 589, QuestionBank 872, ExamEngine 99 and the rest); architecture tests green; `agile gate GREEN`, `agile scan GREEN`, `agile docs GREEN`, `techdocs check F-185` GREEN
+- Manual pages: docs/manual/pt-BR/account-events.md, docs/manual/pt-BR/role-history.md
+- Technical pages: docs/flows/date-range-relative-time.md (new)
+- App version: 1.32.0 -> 1.33.0
+- Validation evidence: the owner typed "autorizo o merge de F-185" in chat (twice, the second time directly to this session after the first unlock attempt was denied), after being told the rule (feature-ship precondition 1) asks for the validation words on an item that is not `Risk: low`; it was taken as the validation and the merge authorization. Screen steps of the validation script: `not tested`.
 
 ## Events
 

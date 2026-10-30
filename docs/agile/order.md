@@ -33,79 +33,78 @@
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
 |---|---|---|---|---|---|---|---|---|
 | 12 | F-182 | Duration and numeric range controls | idea | - | Data type controls | - | F-186 | in cut data-type-controls; level 1; feature; Must; size M |
-| 13 | F-185 | Date range and relative time | validating | opus | Data type controls | - | F-186 | in cut data-type-controls; level 1; feature; Should; size M |
-| 14 | F-186 | Data type controls enforced by the build | idea | - | Data type controls | F-182, F-185 | - | in cut data-type-controls; level 2: waits on F-182, F-185; feature; Must; size S |
+| 13 | F-186 | Data type controls enforced by the build | idea | - | Data type controls | F-182 | - | in cut data-type-controls; level 2: waits on F-182; feature; Must; size S |
 
 ## MVP: exam-simulator
 
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
 |---|---|---|---|---|---|---|---|---|
-| 15 | F-170 | Exam timer | idea | - | Exam Simulator | - | F-176 | in cut exam-simulator; level 1; feature; Must; size M |
-| 16 | F-171 | Score and result of an attempt | idea | - | Exam Simulator | - | F-172, F-173, F-174, F-175, F-176, F-180 | in cut exam-simulator; level 1; feature; Must; size M |
+| 14 | F-170 | Exam timer | idea | - | Exam Simulator | - | F-176 | in cut exam-simulator; level 1; feature; Must; size M |
+| 15 | F-171 | Score and result of an attempt | idea | - | Exam Simulator | - | F-172, F-173, F-174, F-175, F-176, F-180 | in cut exam-simulator; level 1; feature; Must; size M |
 
 ## MVP: interface-and-screen-composition
 
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
 |---|---|---|---|---|---|---|---|---|
-| 17 | F-129 | Base text form in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size S |
-| 18 | F-140 | Check library class names against the package CSS | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size S |
-| 19 | F-159 | Review screens in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size S |
-| 20 | F-127 | Exam form in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size M |
-| 21 | F-128 | Exam edition form in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size M |
-| 22 | F-132 | Question bank lists in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size M |
-| 23 | F-131 | Catalog screens in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size L |
-| 24 | F-133 | Identity screens in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size L |
+| 16 | F-129 | Base text form in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size S |
+| 17 | F-140 | Check library class names against the package CSS | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size S |
+| 18 | F-159 | Review screens in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size S |
+| 19 | F-127 | Exam form in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size M |
+| 20 | F-128 | Exam edition form in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size M |
+| 21 | F-132 | Question bank lists in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size M |
+| 22 | F-131 | Catalog screens in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size L |
+| 23 | F-133 | Identity screens in the new composition | idea | - | Interface and screen composition | - | - | in cut interface-and-screen-composition; level 1; feature; Must; size L |
 
 ## Later
 
 | # | Id | Title | Status | Model | Epic | Depends on | Unlocks | Why |
 |---|---|---|---|---|---|---|---|---|
-| 25 | B-37 | Starting an attempt with a malformed body answers a 400 with no code | idea | - | Exam Simulator | - | - | level 1; bug |
-| 26 | F-178 | Written and structured answers in the simulator | idea | - | Exam Simulator | - | - | level 1; feature; closes F-169; Must; size M |
-| 27 | F-119 | A list that keeps its state in the address follows a menu click to the plain URL | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size S |
-| 28 | F-120 | Architecture test for section id selectors | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size S |
-| 29 | F-143 | Align the external ingestion lab with E-9 | idea | - | AI-assisted exam import | - | - | level 1; feature; Should; size S |
-| 30 | F-130 | Admin screens in the new composition | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size M |
-| 31 | F-177 | Bring the full test suite back under its five-minute budget | idea | - | test-infrastructure | - | - | level 1; feature; Should; size M |
-| 32 | F-187 | Reserve controls: money, percentage, time, date-time, month | idea | - | Data type controls | - | - | level 1; feature; Should; size L |
-| 33 | F-188 | Reserve controls: phone, tax id, color, tree pick, slider, image, user | idea | - | Data type controls | - | - | level 1; feature; Should; size L |
-| 34 | F-160 | Seed the development admin with the legal documents accepted | idea | - | test-infrastructure | - | - | level 1; feature; Could; size S |
-| 35 | F-142 | Question similarity search | idea | - | Question bank | - | - | level 1; feature; Could; size M |
-| 36 | F-151 | Essay and open-answer correction queue | idea | - | Question bank | - | F-152, F-175 | level 1; feature; Could; size M |
-| 37 | F-191 | Level colour ramp, gauge and slider | idea | - | Data type controls | - | - | level 1; feature; Could; size M |
-| 38 | F-40 | Eval suite for model calls | idea | - | Foundation and identity | - | - | level 1; feature |
-| 39 | F-72 | EU representative before selling in Portugal | idea | - | Foundation and identity | - | - | level 1; feature |
-| 40 | F-82 | Update the CI workflow actions to current majors | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 41 | F-87 | Production emails leave from our own domain | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 42 | F-88 | Handle bounced and spam-flagged emails | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 43 | F-91 | Glossary sweep of technical terms | idea | - | Foundation and identity | - | - | level 1; feature |
-| 44 | F-92 | An admin requires a user to change their password | idea | - | Foundation and identity | - | - | level 1; feature |
-| 45 | F-111 | A release migrates the production database | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 46 | F-113 | Table button in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
-| 47 | F-115 | One test helper for every module's permissions | idea | - | Foundation and identity | - | - | level 1; feature |
-| 48 | F-116 | A GitHub Actions workflow publishes a release | idea | - | Cloud hosting and operations | - | - | level 1; feature |
-| 49 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | - | Cloud hosting and operations | - | F-147 | level 1; feature |
-| 50 | F-118 | Sort and extra filters of the question list | idea | - | Question bank | - | - | level 1; feature |
-| 51 | F-121 | Email the author of a review decision | idea | - | Question bank | - | - | level 1; feature |
-| 52 | F-122 | Assign a reviewer to a question | idea | - | Question bank | - | - | level 1; feature |
-| 53 | F-123 | Review edits of a published question | idea | - | Question bank | - | - | level 1; feature |
-| 54 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - | level 1; feature |
-| 55 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
-| 56 | F-145 | E-mail notice of a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
-| 57 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
-| 58 | F-161 | Keep only the Manaus 2026 edition in the guard catalog seed | idea | - | assessment-catalog | - | - | level 1; feature |
-| 59 | F-162 | Tenant-scoped visibility for curators and graders | idea | - | Partner tenants | - | - | level 1; feature |
-| 60 | F-164 | Text alignment in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
-| 61 | F-165 | Stable error code for an unreadable request body | idea | - | Foundation and identity | - | - | level 1; feature |
-| 62 | F-179 | Flag a question for review | idea | - | Exam Simulator | - | - | level 1; feature |
-| 63 | F-173 | My exam attempts | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size S |
-| 64 | F-172 | Answer review after an attempt | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size M |
-| 65 | F-174 | Wrong-answer penalty and other scoring models | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size M |
-| 66 | F-175 | Essay grade in the result | idea | - | Exam Simulator | F-171, F-151 | - | level 2: waits on F-171, F-151; feature; Could; size S |
-| 67 | F-176 | End-to-end test of a timed exam | idea | - | Exam Simulator | F-170, F-171 | - | level 2: waits on F-170, F-171; feature; Could; size S |
-| 68 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 2: waits on F-151; feature; Could; size M |
-| 69 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
-| 70 | F-180 | Minimum score per notice subject | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature |
+| 24 | B-37 | Starting an attempt with a malformed body answers a 400 with no code | idea | - | Exam Simulator | - | - | level 1; bug |
+| 25 | F-178 | Written and structured answers in the simulator | idea | - | Exam Simulator | - | - | level 1; feature; closes F-169; Must; size M |
+| 26 | F-119 | A list that keeps its state in the address follows a menu click to the plain URL | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size S |
+| 27 | F-120 | Architecture test for section id selectors | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size S |
+| 28 | F-143 | Align the external ingestion lab with E-9 | idea | - | AI-assisted exam import | - | - | level 1; feature; Should; size S |
+| 29 | F-130 | Admin screens in the new composition | idea | - | Interface and screen composition | - | - | level 1; feature; Should; size M |
+| 30 | F-177 | Bring the full test suite back under its five-minute budget | idea | - | test-infrastructure | - | - | level 1; feature; Should; size M |
+| 31 | F-187 | Reserve controls: money, percentage, time, date-time, month | idea | - | Data type controls | - | - | level 1; feature; Should; size L |
+| 32 | F-188 | Reserve controls: phone, tax id, color, tree pick, slider, image, user | idea | - | Data type controls | - | - | level 1; feature; Should; size L |
+| 33 | F-160 | Seed the development admin with the legal documents accepted | idea | - | test-infrastructure | - | - | level 1; feature; Could; size S |
+| 34 | F-142 | Question similarity search | idea | - | Question bank | - | - | level 1; feature; Could; size M |
+| 35 | F-151 | Essay and open-answer correction queue | idea | - | Question bank | - | F-152, F-175 | level 1; feature; Could; size M |
+| 36 | F-191 | Level colour ramp, gauge and slider | idea | - | Data type controls | - | - | level 1; feature; Could; size M |
+| 37 | F-40 | Eval suite for model calls | idea | - | Foundation and identity | - | - | level 1; feature |
+| 38 | F-72 | EU representative before selling in Portugal | idea | - | Foundation and identity | - | - | level 1; feature |
+| 39 | F-82 | Update the CI workflow actions to current majors | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 40 | F-87 | Production emails leave from our own domain | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 41 | F-88 | Handle bounced and spam-flagged emails | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 42 | F-91 | Glossary sweep of technical terms | idea | - | Foundation and identity | - | - | level 1; feature |
+| 43 | F-92 | An admin requires a user to change their password | idea | - | Foundation and identity | - | - | level 1; feature |
+| 44 | F-111 | A release migrates the production database | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 45 | F-113 | Table button in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
+| 46 | F-115 | One test helper for every module's permissions | idea | - | Foundation and identity | - | - | level 1; feature |
+| 47 | F-116 | A GitHub Actions workflow publishes a release | idea | - | Cloud hosting and operations | - | - | level 1; feature |
+| 48 | F-117 | The deploy pipeline checks the cloud account before it signs in | idea | - | Cloud hosting and operations | - | F-147 | level 1; feature |
+| 49 | F-118 | Sort and extra filters of the question list | idea | - | Question bank | - | - | level 1; feature |
+| 50 | F-121 | Email the author of a review decision | idea | - | Question bank | - | - | level 1; feature |
+| 51 | F-122 | Assign a reviewer to a question | idea | - | Question bank | - | - | level 1; feature |
+| 52 | F-123 | Review edits of a published question | idea | - | Question bank | - | - | level 1; feature |
+| 53 | F-139 | Partner brand in place of Control Alt Systems | idea | - | Partner tenants | - | - | level 1; feature |
+| 54 | F-144 | Bring the full test suite back under its time budget | idea | - | none | - | - | level 1; feature |
+| 55 | F-145 | E-mail notice of a new legal document version | idea | - | Foundation and identity | - | - | level 1; feature |
+| 56 | F-146 | Acceptance history on the account page | idea | - | Foundation and identity | - | - | level 1; feature |
+| 57 | F-161 | Keep only the Manaus 2026 edition in the guard catalog seed | idea | - | assessment-catalog | - | - | level 1; feature |
+| 58 | F-162 | Tenant-scoped visibility for curators and graders | idea | - | Partner tenants | - | - | level 1; feature |
+| 59 | F-164 | Text alignment in the rich text editor | idea | - | Question bank | - | - | level 1; feature |
+| 60 | F-165 | Stable error code for an unreadable request body | idea | - | Foundation and identity | - | - | level 1; feature |
+| 61 | F-179 | Flag a question for review | idea | - | Exam Simulator | - | - | level 1; feature |
+| 62 | F-173 | My exam attempts | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size S |
+| 63 | F-172 | Answer review after an attempt | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size M |
+| 64 | F-174 | Wrong-answer penalty and other scoring models | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature; Should; size M |
+| 65 | F-175 | Essay grade in the result | idea | - | Exam Simulator | F-171, F-151 | - | level 2: waits on F-171, F-151; feature; Could; size S |
+| 66 | F-176 | End-to-end test of a timed exam | idea | - | Exam Simulator | F-170, F-171 | - | level 2: waits on F-170, F-171; feature; Could; size S |
+| 67 | F-152 | AI-suggested essay grade | idea | - | Question bank | F-151 | - | level 2: waits on F-151; feature; Could; size M |
+| 68 | F-147 | Scheduled re-park of staging every 6 days | idea | - | Cloud hosting and operations | F-117 | - | level 2: waits on F-117; feature |
+| 69 | F-180 | Minimum score per notice subject | idea | - | Exam Simulator | F-171 | - | level 2: waits on F-171; feature |
 
 ## Checklist
 
@@ -132,86 +131,85 @@
 ### MVP: data-type-controls
 
 - [ ] 12. F-182 — Duration and numeric range controls [idea] — unlocks F-186 — why in cut data-type-controls; level 1; feature; Must; size M
-- [ ] 13. F-185 — Date range and relative time [validating] — model opus — unlocks F-186 — why in cut data-type-controls; level 1; feature; Should; size M
-- [ ] 14. F-186 — Data type controls enforced by the build [idea] — waits on F-182, F-185 — why in cut data-type-controls; level 2: waits on F-182, F-185; feature; Must; size S
+- [ ] 13. F-186 — Data type controls enforced by the build [idea] — waits on F-182 — why in cut data-type-controls; level 2: waits on F-182; feature; Must; size S
 
 ### MVP: exam-simulator
 
-- [ ] 15. F-170 — Exam timer [idea] — unlocks F-176 — why in cut exam-simulator; level 1; feature; Must; size M
-- [ ] 16. F-171 — Score and result of an attempt [idea] — unlocks F-172, F-173, F-174, F-175, F-176, F-180 — why in cut exam-simulator; level 1; feature; Must; size M
+- [ ] 14. F-170 — Exam timer [idea] — unlocks F-176 — why in cut exam-simulator; level 1; feature; Must; size M
+- [ ] 15. F-171 — Score and result of an attempt [idea] — unlocks F-172, F-173, F-174, F-175, F-176, F-180 — why in cut exam-simulator; level 1; feature; Must; size M
 
 ### MVP: interface-and-screen-composition
 
-- [ ] 17. F-129 — Base text form in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size S
-- [ ] 18. F-140 — Check library class names against the package CSS [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size S
-- [ ] 19. F-159 — Review screens in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size S
-- [ ] 20. F-127 — Exam form in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size M
-- [ ] 21. F-128 — Exam edition form in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size M
-- [ ] 22. F-132 — Question bank lists in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size M
-- [ ] 23. F-131 — Catalog screens in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size L
-- [ ] 24. F-133 — Identity screens in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size L
+- [ ] 16. F-129 — Base text form in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size S
+- [ ] 17. F-140 — Check library class names against the package CSS [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size S
+- [ ] 18. F-159 — Review screens in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size S
+- [ ] 19. F-127 — Exam form in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size M
+- [ ] 20. F-128 — Exam edition form in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size M
+- [ ] 21. F-132 — Question bank lists in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size M
+- [ ] 22. F-131 — Catalog screens in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size L
+- [ ] 23. F-133 — Identity screens in the new composition [idea] — why in cut interface-and-screen-composition; level 1; feature; Must; size L
 
 ### Later
 
-- [ ] 25. B-37 — Starting an attempt with a malformed body answers a 400 with no code [idea] — why level 1; bug
-- [ ] 26. F-178 — Written and structured answers in the simulator [idea] — why level 1; feature; closes F-169; Must; size M
-- [ ] 27. F-119 — A list that keeps its state in the address follows a menu click to the plain URL [idea] — why level 1; feature; Should; size S
-- [ ] 28. F-120 — Architecture test for section id selectors [idea] — why level 1; feature; Should; size S
-- [ ] 29. F-143 — Align the external ingestion lab with E-9 [idea] — why level 1; feature; Should; size S
-- [ ] 30. F-130 — Admin screens in the new composition [idea] — why level 1; feature; Should; size M
-- [ ] 31. F-177 — Bring the full test suite back under its five-minute budget [idea] — why level 1; feature; Should; size M
-- [ ] 32. F-187 — Reserve controls: money, percentage, time, date-time, month [idea] — why level 1; feature; Should; size L
-- [ ] 33. F-188 — Reserve controls: phone, tax id, color, tree pick, slider, image, user [idea] — why level 1; feature; Should; size L
-- [ ] 34. F-160 — Seed the development admin with the legal documents accepted [idea] — why level 1; feature; Could; size S
-- [ ] 35. F-142 — Question similarity search [idea] — why level 1; feature; Could; size M
-- [ ] 36. F-151 — Essay and open-answer correction queue [idea] — unlocks F-152, F-175 — why level 1; feature; Could; size M
-- [ ] 37. F-191 — Level colour ramp, gauge and slider [idea] — why level 1; feature; Could; size M
-- [ ] 38. F-40 — Eval suite for model calls [idea] — why level 1; feature
-- [ ] 39. F-72 — EU representative before selling in Portugal [idea] — why level 1; feature
-- [ ] 40. F-82 — Update the CI workflow actions to current majors [idea] — why level 1; feature
-- [ ] 41. F-87 — Production emails leave from our own domain [idea] — why level 1; feature
-- [ ] 42. F-88 — Handle bounced and spam-flagged emails [idea] — why level 1; feature
-- [ ] 43. F-91 — Glossary sweep of technical terms [idea] — why level 1; feature
-- [ ] 44. F-92 — An admin requires a user to change their password [idea] — why level 1; feature
-- [ ] 45. F-111 — A release migrates the production database [idea] — why level 1; feature
-- [ ] 46. F-113 — Table button in the rich text editor [idea] — why level 1; feature
-- [ ] 47. F-115 — One test helper for every module's permissions [idea] — why level 1; feature
-- [ ] 48. F-116 — A GitHub Actions workflow publishes a release [idea] — why level 1; feature
-- [ ] 49. F-117 — The deploy pipeline checks the cloud account before it signs in [idea] — unlocks F-147 — why level 1; feature
-- [ ] 50. F-118 — Sort and extra filters of the question list [idea] — why level 1; feature
-- [ ] 51. F-121 — Email the author of a review decision [idea] — why level 1; feature
-- [ ] 52. F-122 — Assign a reviewer to a question [idea] — why level 1; feature
-- [ ] 53. F-123 — Review edits of a published question [idea] — why level 1; feature
-- [ ] 54. F-139 — Partner brand in place of Control Alt Systems [idea] — why level 1; feature
-- [ ] 55. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
-- [ ] 56. F-145 — E-mail notice of a new legal document version [idea] — why level 1; feature
-- [ ] 57. F-146 — Acceptance history on the account page [idea] — why level 1; feature
-- [ ] 58. F-161 — Keep only the Manaus 2026 edition in the guard catalog seed [idea] — why level 1; feature
-- [ ] 59. F-162 — Tenant-scoped visibility for curators and graders [idea] — why level 1; feature
-- [ ] 60. F-164 — Text alignment in the rich text editor [idea] — why level 1; feature
-- [ ] 61. F-165 — Stable error code for an unreadable request body [idea] — why level 1; feature
-- [ ] 62. F-179 — Flag a question for review [idea] — why level 1; feature
-- [ ] 63. F-173 — My exam attempts [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size S
-- [ ] 64. F-172 — Answer review after an attempt [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size M
-- [ ] 65. F-174 — Wrong-answer penalty and other scoring models [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size M
-- [ ] 66. F-175 — Essay grade in the result [idea] — waits on F-171, F-151 — why level 2: waits on F-171, F-151; feature; Could; size S
-- [ ] 67. F-176 — End-to-end test of a timed exam [idea] — waits on F-170, F-171 — why level 2: waits on F-170, F-171; feature; Could; size S
-- [ ] 68. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 2: waits on F-151; feature; Could; size M
-- [ ] 69. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
-- [ ] 70. F-180 — Minimum score per notice subject [idea] — waits on F-171 — why level 2: waits on F-171; feature
+- [ ] 24. B-37 — Starting an attempt with a malformed body answers a 400 with no code [idea] — why level 1; bug
+- [ ] 25. F-178 — Written and structured answers in the simulator [idea] — why level 1; feature; closes F-169; Must; size M
+- [ ] 26. F-119 — A list that keeps its state in the address follows a menu click to the plain URL [idea] — why level 1; feature; Should; size S
+- [ ] 27. F-120 — Architecture test for section id selectors [idea] — why level 1; feature; Should; size S
+- [ ] 28. F-143 — Align the external ingestion lab with E-9 [idea] — why level 1; feature; Should; size S
+- [ ] 29. F-130 — Admin screens in the new composition [idea] — why level 1; feature; Should; size M
+- [ ] 30. F-177 — Bring the full test suite back under its five-minute budget [idea] — why level 1; feature; Should; size M
+- [ ] 31. F-187 — Reserve controls: money, percentage, time, date-time, month [idea] — why level 1; feature; Should; size L
+- [ ] 32. F-188 — Reserve controls: phone, tax id, color, tree pick, slider, image, user [idea] — why level 1; feature; Should; size L
+- [ ] 33. F-160 — Seed the development admin with the legal documents accepted [idea] — why level 1; feature; Could; size S
+- [ ] 34. F-142 — Question similarity search [idea] — why level 1; feature; Could; size M
+- [ ] 35. F-151 — Essay and open-answer correction queue [idea] — unlocks F-152, F-175 — why level 1; feature; Could; size M
+- [ ] 36. F-191 — Level colour ramp, gauge and slider [idea] — why level 1; feature; Could; size M
+- [ ] 37. F-40 — Eval suite for model calls [idea] — why level 1; feature
+- [ ] 38. F-72 — EU representative before selling in Portugal [idea] — why level 1; feature
+- [ ] 39. F-82 — Update the CI workflow actions to current majors [idea] — why level 1; feature
+- [ ] 40. F-87 — Production emails leave from our own domain [idea] — why level 1; feature
+- [ ] 41. F-88 — Handle bounced and spam-flagged emails [idea] — why level 1; feature
+- [ ] 42. F-91 — Glossary sweep of technical terms [idea] — why level 1; feature
+- [ ] 43. F-92 — An admin requires a user to change their password [idea] — why level 1; feature
+- [ ] 44. F-111 — A release migrates the production database [idea] — why level 1; feature
+- [ ] 45. F-113 — Table button in the rich text editor [idea] — why level 1; feature
+- [ ] 46. F-115 — One test helper for every module's permissions [idea] — why level 1; feature
+- [ ] 47. F-116 — A GitHub Actions workflow publishes a release [idea] — why level 1; feature
+- [ ] 48. F-117 — The deploy pipeline checks the cloud account before it signs in [idea] — unlocks F-147 — why level 1; feature
+- [ ] 49. F-118 — Sort and extra filters of the question list [idea] — why level 1; feature
+- [ ] 50. F-121 — Email the author of a review decision [idea] — why level 1; feature
+- [ ] 51. F-122 — Assign a reviewer to a question [idea] — why level 1; feature
+- [ ] 52. F-123 — Review edits of a published question [idea] — why level 1; feature
+- [ ] 53. F-139 — Partner brand in place of Control Alt Systems [idea] — why level 1; feature
+- [ ] 54. F-144 — Bring the full test suite back under its time budget [idea] — why level 1; feature
+- [ ] 55. F-145 — E-mail notice of a new legal document version [idea] — why level 1; feature
+- [ ] 56. F-146 — Acceptance history on the account page [idea] — why level 1; feature
+- [ ] 57. F-161 — Keep only the Manaus 2026 edition in the guard catalog seed [idea] — why level 1; feature
+- [ ] 58. F-162 — Tenant-scoped visibility for curators and graders [idea] — why level 1; feature
+- [ ] 59. F-164 — Text alignment in the rich text editor [idea] — why level 1; feature
+- [ ] 60. F-165 — Stable error code for an unreadable request body [idea] — why level 1; feature
+- [ ] 61. F-179 — Flag a question for review [idea] — why level 1; feature
+- [ ] 62. F-173 — My exam attempts [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size S
+- [ ] 63. F-172 — Answer review after an attempt [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size M
+- [ ] 64. F-174 — Wrong-answer penalty and other scoring models [idea] — waits on F-171 — why level 2: waits on F-171; feature; Should; size M
+- [ ] 65. F-175 — Essay grade in the result [idea] — waits on F-171, F-151 — why level 2: waits on F-171, F-151; feature; Could; size S
+- [ ] 66. F-176 — End-to-end test of a timed exam [idea] — waits on F-170, F-171 — why level 2: waits on F-170, F-171; feature; Could; size S
+- [ ] 67. F-152 — AI-suggested essay grade [idea] — waits on F-151 — why level 2: waits on F-151; feature; Could; size M
+- [ ] 68. F-147 — Scheduled re-park of staging every 6 days [idea] — waits on F-117 — why level 2: waits on F-117; feature
+- [ ] 69. F-180 — Minimum score per notice subject [idea] — waits on F-171 — why level 2: waits on F-171; feature
 
 ## Summary
 
-- Delivered: 152
+- Delivered: 153
 - MVP mockup-stitch-1-formulario: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-2-navegacao: 4 open (4 in the cuts, 0 their dependencies)
 - MVP mockup-stitch-3-barra-app: 3 open (3 in the cuts, 0 their dependencies)
-- MVP data-type-controls: 3 open (3 in the cuts, 0 their dependencies)
+- MVP data-type-controls: 2 open (2 in the cuts, 0 their dependencies)
 - MVP exam-simulator: 2 open (2 in the cuts, 0 their dependencies)
 - MVP interface-and-screen-composition: 8 open (8 in the cuts, 0 their dependencies)
 - First release (ai-assisted-exam-import): cut not defined
 - First release (assessment-catalog, mvp-cadastro-provas): complete: /agile:publish
-- First release (data-type-controls): 3 of 6 delivered; missing: F-182, F-185, F-186
+- First release (data-type-controls): 4 of 6 delivered; missing: F-182, F-186
 - First release (exam-simulator): 4 of 6 delivered; missing: F-170, F-171
 - First release (foundation-and-identity, mvp-cadastro-provas): complete: /agile:publish
 - First release (interface-and-screen-composition): 0 of 8 delivered; missing: F-140, F-133, F-129, F-127, F-128, F-132, F-131, F-159
