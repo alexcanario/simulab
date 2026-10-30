@@ -426,6 +426,10 @@ Exemplos 14.193, 14.197, 14.198 e 14.200.
 
 **O painel dentro do Code desktop (#418).** No Code desktop o painel agile tem painel próprio e uma faixa acima do prompt, sem navegador. O comando `dashboard` abre o painel com os quatro blocos, atualizado a cada 3 segundos; a faixa mostra `⚠ <n> espera você · <faixa> <item> <estado> · semana <n>%`. O painel só lê arquivos do repositório da sessão. A página HTML continua para a CLI e para compartilhar (exemplo 14.239).
 
+**O painel redesenhado (#421).** No Code desktop o painel mostra o progresso da execução, com o término estimado (o da lane mais lenta); Sua vez, um cartão por pergunta com um botão que põe a resposta no prompt, sem enviar; a esteira; e a evolução de cada lane, item a item. A estimativa usa a média dos itens prontos da lane; sem nenhum pronto, diz "sem média ainda". Na CLI ficam os blocos de texto (exemplo 14.243).
+
+**O painel em largura estreita (#425).** Os cartões de Sua vez quebram a linha do título e, sem espaço ao lado, põem o botão embaixo do texto, dentro do cartão. Um item que a lane já construiu mas que espera a sua validação conta como "com você", não como pronto, e sai da coluna Prontas. Uma lane sem custo registrado não mostra "US$ 0.00".
+
 **Retomar as faixas depois de uma queda (#404).** Se a sessão que coordena as faixas fechar, abra outra e digite `/agile:resolve --resume`. O Claude lê as faixas e as paradas que ficaram no disco, manda seguir cada sessão que ainda existe, abre uma nova com o nome da faixa quando a antiga sumiu e repete a pergunta de uma rodada que você ainda não respondeu. Nada é refeito: filas, itens, gastos e respostas continuam como estavam (exemplo 14.232).
 
 **O bloco de tempo num projeto (#414).** Num projeto, Tempo e progresso não procura o histórico de ships, o `delivered.json` nem o veredito noturno, que só o repositório do plugin tem, e não os chama de indisponíveis. Mostra o que o projeto tem: os itens prontos hoje e por dia, pela data de cada arquivo de item pronto, e, por faixa, quantos itens dela já estão prontos (exemplo 14.237).

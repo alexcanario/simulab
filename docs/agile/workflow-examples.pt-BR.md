@@ -8594,3 +8594,34 @@ agile lane jussara: US$ 0.02 spent (estimated from session aaaaaaaa-1111-2222-33
 ```
 
 O valor é uma estimativa pelo preço de cada modelo, lida da transcrição da própria sessão. No item seguinte o total cresce e substitui o anterior; ele nunca soma de novo o que já tinha contado. O painel e a cota da semana passam a ver esse gasto.
+
+### 14.243 O painel redesenhado mostra o término e o botão da resposta
+
+Você roda o `/agile:resolve` com oito issues em duas lanes. No Code desktop o painel `dashboard` mostra, no topo, o projeto e a execução, e logo abaixo o progresso:
+
+```
+simulab
+/agile:resolve · 8 issues em 2 lanes · começou 15:15 · semana 8% de 80%
+5 de 8 features · faltam 3 · 1 construindo · 1 com você · 1 na fila
+~21:01 · término estimado · em 46 min
+ritmo: 1 feature a cada 60 min
+```
+
+Em "Sua vez" aparece um cartão com um botão cujo texto é a resposta exata:
+
+```
+merge F-196 Color picker
+validação e merge · esperando há 8 min · trava a lane nanda
+[autorizo o merge de F-196]
+```
+
+Apertar o botão só põe a frase no prompt; você a envia quando quiser. Mais abaixo, cada lane mostra seus itens em ordem e quanto falta:
+
+```
+jussara  3 de 5  termina ~21:01
+F-191 construindo há 22 min · média da lane 34 min
+nanda    2 de 3  termina quando você validar
+F-196 aguardando você há 8 min · validação e merge
+```
+
+O término da execução é o da lane mais lenta (a jussara); a nanda espera por você. Na CLI continuam os blocos de texto do painel.
