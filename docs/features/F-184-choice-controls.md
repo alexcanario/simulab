@@ -156,6 +156,8 @@ Tests locked: a267338379abbf0fd32ea4f7b6559bd718b12136 (5 files); unlocks: 0
 - 2026-10-29 — Reuse: `AppRadioCards` and `AppSelectField` for the keyboard model and the select, `AppUrlField`'s wrapper pattern, `AppNumberColumn`'s column pattern; nothing new outside the kit.
 - 2026-10-29 — Independent review (agile:reviewer, risk high: `Account.razor` is a door): 7 findings, none a blocker. Fixed: the arrow keys now move the focus with the choice (`AppLevelField`, `AppSegmentedField`; major, new test file `ChoiceKeyboardFocusTests`, since the locked file stays); the word for "no level" is the page's (`NotSetText`, "Não definida" beside "Dificuldade"); the grammar of `Gallery.Choices.Hint` in pt-BR and pt-PT; the unused key `Questions.Difficulty.NotSet.Spoken` removed. Accepted: the arrow keys do not call `preventDefault`, as `AppRadioCards` (the page may scroll on ArrowUp and ArrowDown; a limit of the render model) — marked in Shortcuts below; a switch has no error state and the segmented, yes/no and language fields use Disabled for read-only (the gallery shows them disabled); `Questions.Filter.Difficulty.Placeholder` stays because a resource test still reads it — assumed: technical
 - 2026-10-29 — Shortcuts: 1 marked — arrow keys do not call `preventDefault` in `AppLevelField` and `AppSegmentedField` (the same limit as `AppRadioCards`); trigger: a report that the page scrolls on arrow keys — assumed: technical
+- 2026-10-30 — Unlock of `GallerySections.cs` (locked by the tests of this item) to merge `main`, which brought F-181's `gallery-numbers` line at the same place as `gallery-choices`; both lines kept, tests locked again — owner, round 5: "autorizo o merge de F-184" (the owner typed it three times, never an explicit yes to the unlock; the orchestrator read it as consent to this one narrow unlock)
+- 2026-10-30 — Merge authorized by the owner's words "autorizo o merge de F-184" while the item is `Risk: high` and the validation script was not run on screen; the owner repeated the words after being told that rule. Screen steps: `not tested`.
 
 ## Out of scope
 - The colour ramp, the gauge and the slider (F-191); the enforcement tests (F-186); `AppRadioCards` stays for choices that need a description.
@@ -221,3 +223,4 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
 
 - 2026-10-29 assumed — 9 answers
 - 2026-10-29 test-fail — 1 new warning(s): CA1826 in tests/Hosts/Simulab.Web.Tests/Ui/ChoiceKeyboardFocusTests.cs, 1 red
+- 2026-10-30 blocked — test wrong: the owner, round 5: "autorizo o merge de F-184" (unlock of GallerySections.cs only, keep gallery-choices and gallery-numbers)

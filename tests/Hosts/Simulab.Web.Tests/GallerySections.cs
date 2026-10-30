@@ -34,5 +34,7 @@ internal static class GallerySections
         "gallery-answer-options", "gallery-answer-sheet", "gallery-save-status",
         // F-184: the choice controls and their texts.
         "gallery-choices",
+        // F-181: the number controls and their texts.
+        "gallery-numbers",
     ];
 }

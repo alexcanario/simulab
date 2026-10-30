@@ -1573,4 +1573,32 @@
   <data name="Gallery.Choices.Option.Day" xml:space="preserve"><value>Day</value></data>
   <data name="Gallery.Choices.Option.Week" xml:space="preserve"><value>Week</value></data>
   <data name="Gallery.Choices.Option.Month" xml:space="preserve"><value>Month</value></data>
+  <data name="Number.Invalid" xml:space="preserve"><value>Enter a number, using "{0}" as the decimal separator.</value></data>
+  <data name="Number.InvalidInteger" xml:space="preserve"><value>Enter a whole number, with no separators.</value></data>
+  <data name="Number.Range" xml:space="preserve"><value>Enter a value from {0} to {1}.</value></data>
+  <data name="Number.Unit.Points" xml:space="preserve"><value>pts</value></data>
+  <data name="Number.Stepper.Increase" xml:space="preserve"><value>Increase by one</value></data>
+  <data name="Number.Stepper.Decrease" xml:space="preserve"><value>Decrease by one</value></data>
+  <data name="Number.None" xml:space="preserve"><value>No value</value></data>
+  <data name="Gallery.Section.Numbers" xml:space="preserve"><value>Numbers</value></data>
+  <data name="Gallery.Numbers.Hint" xml:space="preserve"><value>One control per kind of number. It is a text input with the numeric keyboard, never type=number, and only the decimal separator of the language is accepted (docs/design/data-type-controls.md, 2.2).</value></data>
+  <data name="Gallery.Numbers.Integer" xml:space="preserve"><value>Integer (AppIntegerField)</value></data>
+  <data name="Gallery.Numbers.Decimal" xml:space="preserve"><value>Decimal (AppDecimalField)</value></data>
+  <data name="Gallery.Numbers.Score" xml:space="preserve"><value>Score (AppScoreField)</value></data>
+  <data name="Gallery.Numbers.Year" xml:space="preserve"><value>Year (AppYearField)</value></data>
+  <data name="Gallery.Numbers.Text" xml:space="preserve"><value>Number and score text (AppNumberText, AppScoreText)</value></data>
+  <data name="Gallery.Numbers.State.Empty" xml:space="preserve"><value>Empty</value></data>
+  <data name="Gallery.Numbers.State.Filled" xml:space="preserve"><value>Filled</value></data>
+  <data name="Gallery.Numbers.State.Error" xml:space="preserve"><value>Error</value></data>
+  <data name="Gallery.Numbers.State.Disabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="Gallery.Numbers.State.ReadOnly" xml:space="preserve"><value>Read-only</value></data>
+  <data name="Gallery.Numbers.State.LongLabel" xml:space="preserve"><value>Long label</value></data>
+  <data name="Gallery.Numbers.State.Stepper" xml:space="preserve"><value>With stepper</value></data>
+  <data name="Gallery.Numbers.Label.Questions" xml:space="preserve"><value>Number of questions</value></data>
+  <data name="Gallery.Numbers.Label.Weight" xml:space="preserve"><value>Weight of the subject</value></data>
+  <data name="Gallery.Numbers.Label.Points" xml:space="preserve"><value>Points per question</value></data>
+  <data name="Gallery.Numbers.Label.Year" xml:space="preserve"><value>Notice year</value></data>
+  <data name="Gallery.Numbers.Label.Long" xml:space="preserve"><value>Number of questions of the objective part of the exam that the notice leaves for the subject of the same name</value></data>
+  <data name="Gallery.Numbers.Unit.Questions" xml:space="preserve"><value>questions</value></data>
+  <data name="Gallery.Numbers.Hint.Questions" xml:space="preserve"><value>From 1 to 500.</value></data>
 </root>

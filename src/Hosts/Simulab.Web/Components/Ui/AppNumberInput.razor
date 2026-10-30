@@ -1,0 +1,187 @@
+@* F-181: the one text input behind AppIntegerField and AppDecimalField (rule: ui). It holds the raw text, so a text that
+   is not a number keeps what the user typed and shows the error; the page only ever sees a real number (BR6). *@
+@inject IStringLocalizer<SharedResources> L
+
+<AppTextField TValue="string"
+              Id="@Id"
+              Label="@Label"
+              Class="@Class"
+              Value="@_text"
+              ValueChanged="OnTextChangedAsync"
+              InputMode="@(Decimals > 0 ? InputMode.@decimal : InputMode.numeric)"
+              InputAttributes="InputAttributes"
+              Placeholder="@Placeholder"
+              Hint="@Hint"
+              Error="@ShownError"
+              Required="Required"
+              Disabled="Disabled"
+              ReadOnly="ReadOnly"
+              MaxLength="MaxLength"
+              Autocomplete="off"
+              EndContent="@End" />
+
+@code {
+    private static readonly IReadOnlyDictionary<string, object?> InputAttributes = new Dictionary<string, object?>
+    {
+        ["spellcheck"] = "false"
+    };
+
+    private string? _text;
+    private decimal? _reported;
+    private bool _started;
+    private bool _invalid;
+    private bool _outOfRange;
+
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter] public string? Class { get; set; }
+
+    [Parameter] public decimal? Value { get; set; }
+
+    [Parameter] public EventCallback<decimal?> ValueChanged { get; set; }
+
+    /// <summary>True while the text does not parse or is out of range; the page treats it as blocking (BR6).</summary>
+    [Parameter] public EventCallback<bool> InvalidChanged { get; set; }
+
+    /// <summary>0 for a whole number.</summary>
+    [Parameter] public int Decimals { get; set; }
+
+    [Parameter] public decimal? Min { get; set; }
+
+    [Parameter] public decimal? Max { get; set; }
+
+    [Parameter] public string? Unit { get; set; }
+
+    [Parameter] public bool Stepper { get; set; }
+
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    /// <summary>The page's message; while it is set it replaces the field's own.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    [Parameter] public bool Required { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public bool ReadOnly { get; set; }
+
+    [Parameter] public int? MaxLength { get; set; }
+
+    private bool IntegerOnly => Decimals == 0;
+
+    protected override void OnParametersSet()
+    {
+        // The text follows the page's value only when the page changed it: an unchanged value keeps what was typed.
+        if (!_started || Value != _reported)
+        {
+            _started = true;
+            _reported = Value;
+            _invalid = false;
+            _outOfRange = false;
+            _text = ForInput(Value);
+        }
+    }
+
+    private string? ForInput(decimal? value) =>
+        value is null ? string.Empty
+        : IntegerOnly ? AppNumberFormat.FormatForInput((int)value.Value, CultureInfo.CurrentCulture)
+        : AppNumberFormat.FormatForInput(value.Value, Decimals, CultureInfo.CurrentCulture);
+
+    private string? ShownError =>
+        !string.IsNullOrEmpty(Error) ? Error
+        : !_invalid ? null
+        : _outOfRange ? RangeText
+        : IntegerOnly ? L["Number.InvalidInteger"].Value
+        : string.Format(CultureInfo.CurrentCulture, L["Number.Invalid"].Value, CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+
+    private string RangeText => string.Format(
+        CultureInfo.CurrentCulture,
+        L["Number.Range"].Value,
+        Min is null ? "…" : AppNumberFormat.FormatForInput(Min.Value, Decimals, CultureInfo.CurrentCulture),
+        Max is null ? "…" : AppNumberFormat.FormatForInput(Max.Value, Decimals, CultureInfo.CurrentCulture));
+
+    private async Task OnTextChangedAsync(string? text)
+    {
+        _text = text;
+        var culture = CultureInfo.CurrentCulture;
+        decimal? parsed;
+        bool ok;
+        if (IntegerOnly)
+        {
+            ok = AppNumberFormat.TryParseInteger(text, culture, out var whole);
+            parsed = whole;
+        }
+        else
+        {
+            ok = AppNumberFormat.TryParseDecimal(text, culture, out parsed);
+        }
+
+        var outOfRange = ok && parsed is not null && ((Min is not null && parsed < Min) || (Max is not null && parsed > Max));
+        if (!ok || outOfRange)
+        {
+            await SetInvalidAsync(true, outOfRange);
+            return;
+        }
+
+        if (parsed is not null && !IntegerOnly)
+        {
+            parsed = AppNumberFormat.Round(parsed.Value, Decimals);
+        }
+
+        _text = ForInput(parsed);
+        await SetInvalidAsync(false, false);
+        _reported = parsed;
+        await ValueChanged.InvokeAsync(parsed);
+    }
+
+    private async Task SetInvalidAsync(bool invalid, bool outOfRange)
+    {
+        var changed = invalid != _invalid;
+        _invalid = invalid;
+        _outOfRange = outOfRange;
+        if (changed)
+        {
+            await InvalidChanged.InvokeAsync(invalid);
+        }
+    }
+
+    private async Task StepAsync(int direction)
+    {
+        var current = _invalid ? Value : AppNumberFormat.TryParseInteger(_text, CultureInfo.CurrentCulture, out var whole) ? (decimal?)whole : Value;
+        var next = (current ?? 0) + direction;
+        if ((Min is not null && next < Min) || (Max is not null && next > Max))
+        {
+            return;
+        }
+
+        await OnTextChangedAsync(AppNumberFormat.FormatForInput((int)next, CultureInfo.CurrentCulture));
+    }
+
+    private bool AtMin => !_invalid && Value is not null && Min is not null && Value <= Min;
+
+    private bool AtMax => !_invalid && Value is not null && Max is not null && Value >= Max;
+
+    private RenderFragment? End => string.IsNullOrEmpty(Unit) && !Stepper
+        ? null
+        : @<span class="app-number-end">
+              @if (!string.IsNullOrEmpty(Unit))
+              {
+                  <span class="app-number-unit">@Unit</span>
+              }
+              @if (Stepper)
+              {
+                  <button type="button" id="@($"{Id}-decrease")" class="app-number-step" aria-label="@L["Number.Stepper.Decrease"]"
+                          title="@L["Number.Stepper.Decrease"]" disabled="@(Disabled || ReadOnly || AtMin)" @onclick="() => StepAsync(-1)">
+                      <MudIcon Icon="@AppIcons.Remove" Size="Size.Small" />
+                  </button>
+                  <button type="button" id="@($"{Id}-increase")" class="app-number-step" aria-label="@L["Number.Stepper.Increase"]"
+                          title="@L["Number.Stepper.Increase"]" disabled="@(Disabled || ReadOnly || AtMax)" @onclick="() => StepAsync(1)">
+                      <MudIcon Icon="@AppIcons.Add" Size="Size.Small" />
+                  </button>
+              }
+          </span>;
+}

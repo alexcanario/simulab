@@ -1573,4 +1573,32 @@
   <data name="Gallery.Choices.Option.Day" xml:space="preserve"><value>Dia</value></data>
   <data name="Gallery.Choices.Option.Week" xml:space="preserve"><value>Semana</value></data>
   <data name="Gallery.Choices.Option.Month" xml:space="preserve"><value>Mês</value></data>
+  <data name="Number.Invalid" xml:space="preserve"><value>Indique um número, usando "{0}" como separador decimal.</value></data>
+  <data name="Number.InvalidInteger" xml:space="preserve"><value>Indique um número inteiro, sem separadores.</value></data>
+  <data name="Number.Range" xml:space="preserve"><value>Indique um valor de {0} a {1}.</value></data>
+  <data name="Number.Unit.Points" xml:space="preserve"><value>pts</value></data>
+  <data name="Number.Stepper.Increase" xml:space="preserve"><value>Aumentar uma unidade</value></data>
+  <data name="Number.Stepper.Decrease" xml:space="preserve"><value>Diminuir uma unidade</value></data>
+  <data name="Number.None" xml:space="preserve"><value>Sem valor</value></data>
+  <data name="Gallery.Section.Numbers" xml:space="preserve"><value>Números</value></data>
+  <data name="Gallery.Numbers.Hint" xml:space="preserve"><value>Um controlo por tipo de número. É um campo de texto com teclado numérico, nunca type=number, e só o separador decimal do idioma é aceite (docs/design/data-type-controls.md, 2.2).</value></data>
+  <data name="Gallery.Numbers.Integer" xml:space="preserve"><value>Inteiro (AppIntegerField)</value></data>
+  <data name="Gallery.Numbers.Decimal" xml:space="preserve"><value>Decimal (AppDecimalField)</value></data>
+  <data name="Gallery.Numbers.Score" xml:space="preserve"><value>Nota (AppScoreField)</value></data>
+  <data name="Gallery.Numbers.Year" xml:space="preserve"><value>Ano (AppYearField)</value></data>
+  <data name="Gallery.Numbers.Text" xml:space="preserve"><value>Texto de número e de nota (AppNumberText, AppScoreText)</value></data>
+  <data name="Gallery.Numbers.State.Empty" xml:space="preserve"><value>Vazio</value></data>
+  <data name="Gallery.Numbers.State.Filled" xml:space="preserve"><value>Preenchido</value></data>
+  <data name="Gallery.Numbers.State.Error" xml:space="preserve"><value>Erro</value></data>
+  <data name="Gallery.Numbers.State.Disabled" xml:space="preserve"><value>Desativado</value></data>
+  <data name="Gallery.Numbers.State.ReadOnly" xml:space="preserve"><value>Só de leitura</value></data>
+  <data name="Gallery.Numbers.State.LongLabel" xml:space="preserve"><value>Rótulo longo</value></data>
+  <data name="Gallery.Numbers.State.Stepper" xml:space="preserve"><value>Com botões de passo</value></data>
+  <data name="Gallery.Numbers.Label.Questions" xml:space="preserve"><value>Número de questões</value></data>
+  <data name="Gallery.Numbers.Label.Weight" xml:space="preserve"><value>Peso da disciplina</value></data>
+  <data name="Gallery.Numbers.Label.Points" xml:space="preserve"><value>Pontos por questão</value></data>
+  <data name="Gallery.Numbers.Label.Year" xml:space="preserve"><value>Ano do edital</value></data>
+  <data name="Gallery.Numbers.Label.Long" xml:space="preserve"><value>Número de questões da parte objetiva da prova que o edital reserva para a disciplina com o mesmo nome</value></data>
+  <data name="Gallery.Numbers.Unit.Questions" xml:space="preserve"><value>questões</value></data>
+  <data name="Gallery.Numbers.Hint.Questions" xml:space="preserve"><value>De 1 a 500.</value></data>
 </root>

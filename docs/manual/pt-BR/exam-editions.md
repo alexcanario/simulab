@@ -1,8 +1,8 @@
 ---
 page: exam-editions
 locale: pt-BR
-features: [F-35, F-74, F-75, F-78, F-86, F-89, F-96, F-99, F-168]
-updated: 2026-10-27
+features: [F-35, F-74, F-75, F-78, F-86, F-89, F-96, F-99, F-168, F-181]
+updated: 2026-10-29
 ---
 # Edições de um exame
 
@@ -40,6 +40,7 @@ O cartão **Regras da prova**, logo abaixo de **Prova**, guarda o que o edital d
 - Abaixo da nota de corte aparece o **total da prova objetiva**: a soma, em todas as disciplinas do edital, do número de questões vezes os pontos por questão. Ele só aparece quando toda disciplina tem número de questões e pontos; enquanto falta algum, o total aparece como desconhecido.
 - O aviso **Ainda falta** lista as regras ainda vazias e as disciplinas sem número de questões ou sem pontos. É só um lembrete: nada é bloqueado.
 - Quando a nota de corte passa do total da prova objetiva, um alerta amarelo avisa, mas a edição é salva mesmo assim: confira a nota de corte ou os pontos das disciplinas.
+- Os campos de nota e o ano do edital aceitam só números: nas notas, use a **vírgula** como separador decimal (por exemplo 60,5); o ponto não é aceito. Ao sair do campo, a nota ganha as duas casas decimais ("60,50"). Se o texto não é um número, o campo mostra o aviso embaixo, mantém o que você digitou e o **Salvar** espera você corrigir.
 - O resumo à direita mostra a duração e a nota de corte (com o total, quando conhecido, como "60 / 100").
 - Os alunos veem as regras de cada edição publicada numa linha da página do exame no [catálogo](catalog.md).
 

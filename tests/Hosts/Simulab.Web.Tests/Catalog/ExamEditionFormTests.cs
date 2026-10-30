@@ -106,7 +106,8 @@ public sealed class ExamEditionFormTests : CatalogPageTestContext
         var page = RenderAdd();
         WaitForForm(page);
 
-        page.Find("#edition-notice-year").GetAttribute("type").Should().Be("number");
+        page.Find("#edition-notice-year").GetAttribute("type").Should().Be("text");
+        page.Find("#edition-notice-year").GetAttribute("inputmode").Should().Be("numeric");
         page.Find("#edition-notice-year").GetAttribute("maxlength").Should().Be(CatalogLimits.ExamEditionNoticeYearDigits.ToString(CultureInfo.InvariantCulture));
         page.Find("#edition-position").GetAttribute("maxlength").Should().Be(CatalogLimits.ExamEditionPositionMaxLength.ToString(CultureInfo.InvariantCulture));
         page.Find("#edition-notice-reference").GetAttribute("maxlength").Should().Be(CatalogLimits.ExamEditionNoticeReferenceMaxLength.ToString(CultureInfo.InvariantCulture));
