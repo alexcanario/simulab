@@ -74,20 +74,15 @@
                                OnRemove="@ToggleTypeAsync"
                                OnClear="@(() => ChangeAsync(state => state with { Types = null }))" />
 
-            <AppMultiPickField Id="questions-filter-difficulty"
-                               Label="@L["Questions.Filter.Difficulty"]"
-                               Placeholder="@L["Questions.Filter.Difficulty.Placeholder"]"
-                               OptionsLabel="@L["Questions.Filter.Options", L["Questions.Filter.Difficulty"]]"
-                               PickedLabel="@L["Questions.Filter.Picked", L["Questions.Filter.Difficulty"]]"
-                               CountText="@CountOf((_state.Difficulties?.Count ?? 0) + (_state.DifficultyNotSet ? 1 : 0))"
-                               ClearText="@L["Questions.Filter.ClearField"]"
-                               NoneText="@L["Questions.Filter.None"]"
-                               RemoveLabelFor="@RemoveLabel"
-                               Groups="@DifficultyGroups()"
-                               Picked="@DifficultyItems()"
-                               OnToggle="@ToggleDifficultyAsync"
-                               OnRemove="@ToggleDifficultyAsync"
-                               OnClear="@(() => ChangeAsync(state => state with { Difficulties = null, DifficultyNotSet = false }))" />
+            @* F-184 UC3: the levels are chips with their dots and names; the set is the page's state (and the address). *@
+            <AppLevelFilterField Id="questions-filter-difficulty"
+                                 Label="@L["Questions.Filter.Difficulty"]"
+                                 Names="@DifficultyNames"
+                                 Min="QuestionLimits.DifficultyMin"
+                                 NotSetText="@L["Questions.Difficulty.NotSet"].Value"
+                                 Selected="@(_state.Difficulties ?? [])"
+                                 NotSetSelected="@_state.DifficultyNotSet"
+                                 OnToggle="@ToggleLevelAsync" />
 
             <AppMultiPickField Id="questions-filter-subject"
                                Label="@L["Questions.Filter.Subject"]"
@@ -196,16 +191,9 @@
         <AppNumberColumn TItem="QuestionListItemResponse" TProperty="int?" Property="row => row.Difficulty"
                          Title="@L["Questions.Column.Difficulty"]" Sortable="false">
             <CellTemplate>
-                @if (context.Item.Difficulty is { } difficulty)
-                {
-                    <span>@difficulty.ToString(CultureInfo.CurrentCulture)</span>
-                }
-                else
-                {
-                    @* The dash is a symbol, not a word: a screen reader skips it and reads the hidden text instead. *@
-                    <span aria-hidden="true">—</span>
-                    <span class="app-visually-hidden">@L["Questions.Difficulty.NotSet.Spoken"]</span>
-                }
+                @* F-184 UC3: the dots and the level name as text; a question with no difficulty reads "Not set". *@
+                <AppLevelBadge Value="@context.Item.Difficulty" Names="@DifficultyNames" Min="QuestionLimits.DifficultyMin"
+                                NotSetText="@L["Questions.Difficulty.NotSet"].Value" />
             </CellTemplate>
         </AppNumberColumn>
         <PropertyColumn T="QuestionListItemResponse" TProperty="string" Property="row => row.ContentLanguage"
@@ -425,24 +413,7 @@
     private IReadOnlyList<AppMultiPickItem> TypeItems() =>
         [.. (_state.Types ?? []).Select(type => new AppMultiPickItem(type.ToString(), QuestionText.TypeName(L, type), QuestionText.TypeName(L, type)))];
 
-    private IReadOnlyList<AppMultiPickGroup> DifficultyGroups() =>
-    [
-        new("difficulty", L["Questions.Filter.Difficulty"],
-        [
-            .. Enumerable.Range(1, 5).Select(number =>
-                new AppMultiPickOption(number.ToString(CultureInfo.InvariantCulture), number.ToString(CultureInfo.CurrentCulture), _state.Difficulties?.Contains(number) == true)),
-            new AppMultiPickOption(QuestionListQueryString.DifficultyNone, L["Questions.Difficulty.NotSet"], _state.DifficultyNotSet)
-        ])
-    ];
-
-    private IReadOnlyList<AppMultiPickItem> DifficultyItems() =>
-    [
-        .. (_state.Difficulties ?? []).Select(number =>
-            new AppMultiPickItem(number.ToString(CultureInfo.InvariantCulture), number.ToString(CultureInfo.CurrentCulture), number.ToString(CultureInfo.CurrentCulture))),
-        .. _state.DifficultyNotSet
-            ? [new AppMultiPickItem(QuestionListQueryString.DifficultyNone, L["Questions.Difficulty.NotSet"], L["Questions.Difficulty.NotSet"])]
-            : Array.Empty<AppMultiPickItem>()
-    ];
+    private IReadOnlyList<string> DifficultyNames => QuestionText.DifficultyNames(L);
 
     private static string WholeKey(Guid subjectId) => $"s-{subjectId}";
 
@@ -522,17 +493,11 @@
             ? ChangeAsync(state => state with { Types = Toggled(state.Types, type) })
             : Task.CompletedTask;
 
-    private Task ToggleDifficultyAsync(string key)
-    {
-        if (key == QuestionListQueryString.DifficultyNone)
-        {
-            return ChangeAsync(state => state with { DifficultyNotSet = !state.DifficultyNotSet });
-        }
-
-        return int.TryParse(key, NumberStyles.None, CultureInfo.InvariantCulture, out var number)
+    // A level chip was clicked: its level, or null for the "not set" chip.
+    private Task ToggleLevelAsync(int? level) =>
+        level is { } number
             ? ChangeAsync(state => state with { Difficulties = Toggled(state.Difficulties, number) })
-            : Task.CompletedTask;
-    }
+            : ChangeAsync(state => state with { DifficultyNotSet = !state.DifficultyNotSet });
 
     // The two kinds of pick share one limit (BR11); a pick that would pass it is ignored, and the options say why.
     private Task ToggleSubjectAsync(string key)

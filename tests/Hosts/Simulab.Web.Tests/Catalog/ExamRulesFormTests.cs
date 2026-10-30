@@ -228,6 +228,37 @@ public sealed class ExamRulesFormTests : CatalogPageTestContext
         Flat(page.Find("#edition-objective-total").TextContent).Should().NotContain(15m.ToString("N2", CultureInfo.CurrentCulture));
     }
 
+    // F-181 AC11: the score fields and the year are typed controls with the keyboard of a number.
+    [Fact]
+    public void Edit_TheScoreFieldsAndTheYear_AreTypedNumberControls()
+    {
+        var page = RenderEdit(WithRules);
+
+        page.FindAll(".app-score-field #edition-objective-cut-off").Should().ContainSingle();
+        page.FindAll(".app-score-field #edition-essay-max-score").Should().ContainSingle();
+        page.FindAll(".app-score-field #edition-essay-cut-off").Should().ContainSingle();
+        page.FindAll(".app-year-field #edition-notice-year").Should().ContainSingle();
+        page.Find("#edition-objective-cut-off").GetAttribute("inputmode").Should().Be("decimal");
+    }
+
+    // F-181 AC11: a text that is not a number blocks the save (a stale number is never sent).
+    [Theory]
+    [InlineData("edition-objective-cut-off", "6o")]
+    [InlineData("edition-essay-max-score", "abc")]
+    [InlineData("edition-essay-cut-off", "5,5")]
+    [InlineData("edition-notice-year", "20x6")]
+    public void Edit_ATextThatIsNotANumber_BlocksTheSave(string field, string typed)
+    {
+        var page = RenderEdit(WithRules);
+
+        page.Find($"#{field}").Change(typed);
+        page.Find(".app-form-save").Click();
+
+        page.Find($"#{field}").GetAttribute("aria-invalid").Should().Be("true");
+        page.Find($"#{field}").GetAttribute("value").Should().Be(typed);
+        Api.Received.Should().NotContain(call => call.Method == HttpMethod.Put);
+    }
+
     // AC6 and BR5: a cut-off above the known total is a warning; the save is still sent.
     [Fact]
     public void Edit_CutOffAboveTheKnownTotal_ShowsTheWarningAndStillSaves()

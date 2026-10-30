@@ -1,9 +1,9 @@
 {
-  "version": "0.229.0",
+  "version": "0.240.0",
   "files": {
     ".claude/rules/agile/api-contracts.md": "b89627eeff25fdd7",
     ".claude/rules/agile/build-config.md": "10036965f8131836",
-    ".claude/rules/agile/definition-of-done.md": "6e80244667ac6537",
+    ".claude/rules/agile/definition-of-done.md": "6cb36daa3c5eea5f",
     ".claude/rules/agile/git.md": "2ab823e571e9e2b2",
     ".claude/rules/agile/i18n.md": "b0feb6a98271d55d",
     ".claude/rules/agile/naming-dotnet.md": "6bf849c658864f1e",
@@ -23,10 +23,11 @@
     "docs/agile/templates/infra.md": "7c354d6af463b757",
     "docs/agile/templates/manual-page.md": "9530df7334bc5df1",
     "docs/agile/templates/project-claude.md": "40bbcf1486028301",
+    "docs/agile/templates/review.md": "c36618232f983bb5",
     "docs/agile/templates/tech-page.md": "2eff0cc69175555a",
     "docs/agile/templates/ui-map.md": "b05a64b27a3e73a4",
-    "docs/agile/workflow.pt-BR.md": "cb9abec2faa431fa",
-    "docs/agile/workflow-examples.pt-BR.md": "24c7a997a6aa03a3",
+    "docs/agile/workflow.pt-BR.md": "2c3914a5eb7a1adf",
+    "docs/agile/workflow-examples.pt-BR.md": "6deb2e89319c8c09",
     "docs/agile/profile.md": "87d0409a29e89d3b",
     "docs/agile/profile-sections/runtime-themes-mudblazor.md": "3d317f0e21339906",
     "docs/agile/profile-sections/local-services.md": "6f6463ddcd02c9a0",
@@ -42,5 +43,9 @@
     "global.json": "b48d6da8fa62c0da",
     "tests/Directory.Build.props": "ce5fa4c25ae4980c",
     ".github/workflows/deploy.yml": "fb91a1233ef6117f"
+  },
+  "context": {
+    "words": 2765,
+    "cap": 3461
   }
 }

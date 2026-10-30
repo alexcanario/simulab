@@ -62,7 +62,7 @@
                 <CellTemplate><AppTruncatedText Text="@context.Item.Description" MaxWidth="18rem" /></CellTemplate>
             </TemplateColumn>
             <AppNumberColumn TItem="GallerySample" TProperty="int" Property="x => x.Questions" Title="@L["Gallery.Table.Questions"]" />
-            <AppNumberColumn TItem="GallerySample" TProperty="decimal" Property="x => x.Score" Format="N1" Title="@L["Gallery.Table.Score"]" />
+            <AppScoreColumn TItem="GallerySample" TProperty="decimal" Property="x => x.Score" Decimals="1" Title="@L["Gallery.Table.Score"]" />
             <AppDateColumn TItem="GallerySample" TProperty="DateTimeOffset" Property="x => x.UpdatedAt" Title="@L["Gallery.Table.UpdatedAt"]" />
         </Columns>
         <RowActions>
@@ -489,6 +489,183 @@
                 <p><AppDateText Value="@(new DateOnly(2026, 10, 27))" /></p>
                 <p><AppDateText Value="@((DateOnly?)null)" /></p>
                 <p>@(new AppDateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 27), null).Format())</p>
+            </div>
+        </AppFormGrid>
+    </MudPaper>
+</section>
+
+@* F-184 AC8: one control per kind of choice, each in the states of the shared contract. *@
+<section id="gallery-choices" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Choices"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Choices.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4">
+        <AppFormGrid Columns="3">
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Choices.Switch"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Empty"]</p>
+                <AppSwitch Id="gallery-switch-off" Label="@L["Gallery.Choices.Label.Reminders"]"
+                           Value="@_switchOff" ValueChanged="@(value => _switchOff = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Filled"]</p>
+                <AppSwitch Id="gallery-switch-on" Label="@L["Gallery.Choices.Label.Reminders"]"
+                           Value="@_switchOn" ValueChanged="@(value => _switchOn = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Disabled"]</p>
+                <AppSwitch Id="gallery-switch-disabled" Label="@L["Gallery.Choices.Label.Reminders"]" Value="true" Disabled="true" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.Choices.Segmented"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Empty"]</p>
+                <AppSegmentedField TValue="string" Id="gallery-segmented-empty" Label="@L["Gallery.Choices.Label.Period"]"
+                                   Options="@SegmentOptions" Value="@_segmentEmpty" ValueChanged="@(value => _segmentEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Filled"]</p>
+                <AppSegmentedField TValue="string" Id="gallery-segmented-filled" Label="@L["Gallery.Choices.Label.Period"]"
+                                   Options="@SegmentOptions" Required="true" Value="@_segmentFilled" ValueChanged="@(value => _segmentFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Error"]</p>
+                <AppSegmentedField TValue="string" Id="gallery-segmented-error" Label="@L["Gallery.Choices.Label.Period"]"
+                                   Options="@SegmentOptions" Error="@L["Gallery.TextKinds.SampleError"].Value" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Disabled"]</p>
+                <AppSegmentedField TValue="string" Id="gallery-segmented-disabled" Label="@L["Gallery.Choices.Label.Period"]"
+                                   Options="@SegmentOptions" Value="@("week")" Disabled="true" />
+            </div>
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Choices.YesNo"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Empty"]</p>
+                <AppYesNoField Id="gallery-yes-no-empty" Label="@L["Gallery.Choices.Label.Key"]"
+                               Value="@_yesNoEmpty" ValueChanged="@(value => _yesNoEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Filled"]</p>
+                <AppYesNoField Id="gallery-yes-no-filled" Label="@L["Gallery.Choices.Label.Key"]" Required="true"
+                               TrueText="@L["Questions.TrueFalse.True"].Value" FalseText="@L["Questions.TrueFalse.False"].Value"
+                               Value="@_yesNoFilled" ValueChanged="@(value => _yesNoFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Error"]</p>
+                <AppYesNoField Id="gallery-yes-no-error" Label="@L["Gallery.Choices.Label.Key"]"
+                               Error="@L["Gallery.TextKinds.SampleError"].Value" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Disabled"]</p>
+                <AppYesNoField Id="gallery-yes-no-disabled" Label="@L["Gallery.Choices.Label.Key"]" Value="true" Disabled="true" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.Choices.Language"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Empty"]</p>
+                <AppLanguageField Id="gallery-language-empty" Label="@L["Gallery.Choices.Label.Language"]"
+                                  Value="@_languageEmpty" ValueChanged="@(value => _languageEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Filled"]</p>
+                <AppLanguageField Id="gallery-language-filled" Label="@L["Gallery.Choices.Label.Language"]" Required="true"
+                                  Value="@_languageFilled" ValueChanged="@(value => _languageFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Error"]</p>
+                <AppLanguageField Id="gallery-language-error" Label="@L["Gallery.Choices.Label.Language"]"
+                                  Error="@L["Gallery.TextKinds.SampleError"].Value" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Disabled"]</p>
+                <AppLanguageField Id="gallery-language-disabled" Label="@L["Gallery.Choices.Label.Language"]" Value="pt-BR" Disabled="true" />
+            </div>
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Choices.Level"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Empty"]</p>
+                <AppLevelField Id="gallery-level-empty" Label="@L["Gallery.Choices.Label.Difficulty"]" Names="@LevelNames"
+                               Value="@_levelEmpty" ValueChanged="@(value => _levelEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Filled"]</p>
+                <AppLevelField Id="gallery-level-filled" Label="@L["Gallery.Choices.Label.Difficulty"]" Names="@LevelNames" Required="true"
+                               Value="@_levelFilled" ValueChanged="@(value => _levelFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Error"]</p>
+                <AppLevelField Id="gallery-level-error" Label="@L["Gallery.Choices.Label.Difficulty"]" Names="@LevelNames" Value="2"
+                               Error="@L["Gallery.TextKinds.SampleError"].Value" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.Disabled"]</p>
+                <AppLevelField Id="gallery-level-disabled" Label="@L["Gallery.Choices.Label.Difficulty"]" Names="@LevelNames" Value="4" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.Choices.State.ReadOnly"]</p>
+                <AppLevelField Id="gallery-level-read-only" Label="@L["Gallery.Choices.Label.Difficulty"]" Names="@LevelNames" Value="3" ReadOnly="true" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.Choices.LevelFilter"]</MudText>
+                <AppLevelFilterField Id="gallery-level-filter" Label="@L["Gallery.Choices.Label.Difficulty"]" Names="@LevelNames"
+                                     NotSetText="@L["Choice.NotSet"].Value" Selected="@_levelFilter" NotSetSelected="@_levelFilterNone"
+                                     OnToggle="@ToggleLevelFilter" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.Choices.Text"]</MudText>
+                <p><AppLevelBadge Value="3" Names="@LevelNames" /></p>
+                <p><AppLevelBadge Value="@((int?)null)" Names="@LevelNames" /></p>
+                <p><AppBoolText Value="true" ShowIcon="true" /> · <AppBoolText Value="false" ShowIcon="true" /> · <AppBoolText Value="@((bool?)null)" /></p>
+            </div>
+        </AppFormGrid>
+    </MudPaper>
+</section>
+
+@* F-181 AC9: one control per kind of number, each in the states of the shared contract. *@
+<section id="gallery-numbers" class="gallery-section">
+    <MudText Typo="Typo.h2">@L["Gallery.Section.Numbers"]</MudText>
+    <MudText Typo="Typo.body2" Class="mb-2">@L["Gallery.Numbers.Hint"]</MudText>
+    <MudPaper Outlined="true" Class="pa-4">
+        <AppFormGrid Columns="3">
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Numbers.Integer"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Empty"]</p>
+                <AppIntegerField Id="gallery-integer-empty" Label="@L["Gallery.Numbers.Label.Questions"]"
+                                 Unit="@L["Gallery.Numbers.Unit.Questions"].Value" Hint="@L["Gallery.Numbers.Hint.Questions"]"
+                                 Value="@_integerEmpty" ValueChanged="@(value => _integerEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Filled"]</p>
+                <AppIntegerField Id="gallery-integer-filled" Label="@L["Gallery.Numbers.Label.Questions"]"
+                                 Unit="@L["Gallery.Numbers.Unit.Questions"].Value" Required="true"
+                                 Value="@_integerFilled" ValueChanged="@(value => _integerFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Error"]</p>
+                <AppIntegerField Id="gallery-integer-error" Label="@L["Gallery.Numbers.Label.Questions"]"
+                                 Unit="@L["Gallery.Numbers.Unit.Questions"].Value" Value="20"
+                                 Error="@L["Gallery.TextKinds.SampleError"].Value" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Disabled"]</p>
+                <AppIntegerField Id="gallery-integer-disabled" Label="@L["Gallery.Numbers.Label.Questions"]"
+                                 Unit="@L["Gallery.Numbers.Unit.Questions"].Value" Value="20" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.ReadOnly"]</p>
+                <AppIntegerField Id="gallery-integer-read-only" Label="@L["Gallery.Numbers.Label.Questions"]"
+                                 Unit="@L["Gallery.Numbers.Unit.Questions"].Value" Value="20" ReadOnly="true" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.LongLabel"]</p>
+                <AppIntegerField Id="gallery-integer-long" Label="@L["Gallery.Numbers.Label.Long"]"
+                                 Unit="@L["Gallery.Numbers.Unit.Questions"].Value" Value="20" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Stepper"]</p>
+                <AppIntegerField Id="gallery-integer-stepper" Label="@L["Gallery.Numbers.Label.Questions"]"
+                                 Min="1" Max="500" Stepper="true"
+                                 Value="@_integerStepper" ValueChanged="@(value => _integerStepper = value)" />
+            </div>
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Numbers.Decimal"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Empty"]</p>
+                <AppDecimalField Id="gallery-decimal-empty" Label="@L["Gallery.Numbers.Label.Weight"]" Decimals="1"
+                                 Value="@_decimalEmpty" ValueChanged="@(value => _decimalEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Filled"]</p>
+                <AppDecimalField Id="gallery-decimal-filled" Label="@L["Gallery.Numbers.Label.Weight"]" Decimals="1" Required="true"
+                                 Value="@_decimalFilled" ValueChanged="@(value => _decimalFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Error"]</p>
+                <AppDecimalField Id="gallery-decimal-error" Label="@L["Gallery.Numbers.Label.Weight"]" Decimals="1" Value="2.5m"
+                                 Error="@L["Gallery.TextKinds.SampleError"].Value" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Disabled"]</p>
+                <AppDecimalField Id="gallery-decimal-disabled" Label="@L["Gallery.Numbers.Label.Weight"]" Decimals="1" Value="2.5m" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.ReadOnly"]</p>
+                <AppDecimalField Id="gallery-decimal-read-only" Label="@L["Gallery.Numbers.Label.Weight"]" Decimals="1" Value="2.5m" ReadOnly="true" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.LongLabel"]</p>
+                <AppDecimalField Id="gallery-decimal-long" Label="@L["Gallery.Numbers.Label.Long"]" Decimals="1" Value="2.5m" />
+            </div>
+            <div>
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title">@L["Gallery.Numbers.Score"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Empty"]</p>
+                <AppScoreField Id="gallery-score-empty" Label="@L["Gallery.Numbers.Label.Points"]" Decimals="CatalogLimits.ScoreDecimalPlaces"
+                               Value="@_scoreEmpty" ValueChanged="@(value => _scoreEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Filled"]</p>
+                <AppScoreField Id="gallery-score-filled" Label="@L["Gallery.Numbers.Label.Points"]" Decimals="CatalogLimits.ScoreDecimalPlaces" Required="true"
+                               Value="@_scoreFilled" ValueChanged="@(value => _scoreFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Error"]</p>
+                <AppScoreField Id="gallery-score-error" Label="@L["Gallery.Numbers.Label.Points"]" Decimals="CatalogLimits.ScoreDecimalPlaces" Value="1.5m"
+                               Error="@L["Gallery.TextKinds.SampleError"].Value" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Disabled"]</p>
+                <AppScoreField Id="gallery-score-disabled" Label="@L["Gallery.Numbers.Label.Points"]" Decimals="CatalogLimits.ScoreDecimalPlaces" Value="1.5m" Disabled="true" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.ReadOnly"]</p>
+                <AppScoreField Id="gallery-score-read-only" Label="@L["Gallery.Numbers.Label.Points"]" Decimals="CatalogLimits.ScoreDecimalPlaces" Value="1.5m" ReadOnly="true" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.Numbers.Year"]</MudText>
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Empty"]</p>
+                <AppYearField Id="gallery-year-empty" Label="@L["Gallery.Numbers.Label.Year"]"
+                              Value="@_yearEmpty" ValueChanged="@(value => _yearEmpty = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Filled"]</p>
+                <AppYearField Id="gallery-year-filled" Label="@L["Gallery.Numbers.Label.Year"]" Required="true"
+                              Value="@_yearFilled" ValueChanged="@(value => _yearFilled = value)" />
+                <p class="gallery-state-caption">@L["Gallery.Numbers.State.Error"]</p>
+                <AppYearField Id="gallery-year-error" Label="@L["Gallery.Numbers.Label.Year"]" Value="2026"
+                              Error="@L["Gallery.TextKinds.SampleError"].Value" />
+
+                <MudText Typo="Typo.subtitle1" HtmlTag="h3" Class="gallery-kind-title mt-4">@L["Gallery.Numbers.Text"]</MudText>
+                <p><AppNumberText Value="1234.5m" Decimals="1" /></p>
+                <p><AppScoreText Value="2.5m" Decimals="CatalogLimits.ScoreDecimalPlaces" /></p>
+                <p><AppScoreText Value="@((decimal?)null)" Decimals="CatalogLimits.ScoreDecimalPlaces" /></p>
             </div>
         </AppFormGrid>
     </MudPaper>
@@ -1453,7 +1630,45 @@
     private string? _searchEmpty;
     private AppDateRange _rangeEmpty = AppDateRange.Empty;
     private AppDateRange _rangeFilled = AppDateRange.OfDays(30);
+    private bool _switchOff;
+    private bool _switchOn = true;
+    private string? _segmentEmpty;
+    private string? _segmentFilled = "week";
+    private bool? _yesNoEmpty;
+    private bool? _yesNoFilled = true;
+    private string? _languageEmpty;
+    private string? _languageFilled = "pt-BR";
+    private int? _levelEmpty;
+    private int? _levelFilled = 3;
+    private IReadOnlyList<int> _levelFilter = [2, 4];
+    private bool _levelFilterNone;
+
+    private IReadOnlyList<AppSegmentOption<string>> SegmentOptions =>
+        [new("day", L["Gallery.Choices.Option.Day"]), new("week", L["Gallery.Choices.Option.Week"]), new("month", L["Gallery.Choices.Option.Month"])];
+
+    private IReadOnlyList<string> LevelNames => [.. Enumerable.Range(1, 5).Select(level => L[$"Questions.Difficulty.Level.{level}"].Value)];
+
+    private void ToggleLevelFilter(int? level)
+    {
+        if (level is null)
+        {
+            _levelFilterNone = !_levelFilterNone;
+        }
+        else
+        {
+            _levelFilter = _levelFilter.Contains(level.Value) ? [.. _levelFilter.Where(item => item != level.Value)] : [.. _levelFilter, level.Value];
+        }
+    }
     private string? _searchFilled = "Direito";
+    private int? _integerEmpty;
+    private int? _integerFilled = 20;
+    private int? _integerStepper = 10;
+    private decimal? _decimalEmpty;
+    private decimal? _decimalFilled = 2.5m;
+    private decimal? _scoreEmpty;
+    private decimal? _scoreFilled = 1.5m;
+    private int? _yearEmpty;
+    private int? _yearFilled = 2026;
     private string? _kindSelectEmpty = string.Empty;
     private string? _kindSelectValue = "Mathematics";
     private string? _kindSelectOpen = string.Empty;

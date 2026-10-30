@@ -10,7 +10,7 @@ An item is `done` only when every line is true. "Almost" is `validating`.
 - Test time is inside the profile budget. An overrun is reported and becomes a retro finding.
 - Every UI text exists in each locale of `UI locales:` and the missing-key test is green.
 - Every `paths:`-scoped rule whose files the diff touches holds (API contracts, UI, i18n, build config).
-- The owner followed the validation script and said it passed, in this conversation.
+- The owner said the validation passed here, or `validated by delegation` (`delegation.js eligible`).
 - The item file reflects what was built: decisions, change notes, `## Delivery`.
 - The app manual is updated in the three languages when visible behavior changed; the generated docs (`docs/architecture/`) pass `DocGen --check`; each page of the item's `## Docs` exists and is indexed (`techdocs.js check`).
 - The merge gate passed and was verified, and the board item is closed with evidence.

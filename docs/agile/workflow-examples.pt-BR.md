@@ -8457,3 +8457,317 @@ Delegation: epic #379 — "Delego a validacao do epico #379" (2026-10-29)
 ```
 
 Quando o épico fechar, ou quando você digitar `revogo a delegação`, a linha some, e o próximo item volta a parar na sua validação.
+
+### 14.234 O sync mostra quanto o contexto pesa
+
+Depois de atualizar o plugin, você digita `/agile:sync` num projeto com o `CLAUDE.md` de 2.900 palavras. Ao gravar o registro, o Claude repete a linha de contexto que o `sync.js` imprimiu:
+
+```
+context: 2903 of 3461 words (no earlier measure)
+```
+
+Em português: 2.903 de 3.461 palavras, e nenhuma medida anterior para comparar. Três semanas depois o `CLAUDE.md` tem 3.300 palavras, e o próximo sync mostra:
+
+```
+⚠ context: 3303 of 3461 words (+400 since the last sync) — run /agile:doctor
+```
+
+O aviso diz que passou de 95% do teto e cresceu mais de 150 palavras. O sync não abre card nenhum; o `/agile:doctor` continua sendo seu para digitar. Quando você digita, a primeira linha do relatório avisa quanto sobra:
+
+```
+agile doctor WARNING: always-loaded context at 95% of the cap (3303 of 3461 words, room 158): run the cuts first
+```
+
+### 14.235 Sob a delegação, o médio passa e o alto para
+
+Você delegou o épico #378. Dois itens dele chegam à validação. O primeiro é de risco médio, com todos os passos marcados e sem achado grave; o Claude confere e ele segue sozinho para o ship:
+
+```
+agile delegation ELIGIBLE: F-71 under epic #378 — "delego a validação do épico #378" (2026-10-29)
+```
+
+O outro é de risco alto. Ele para na validação, como sempre, e o relatório diz por quê:
+
+```
+agile delegation STOP: F-74: risk high
+```
+
+### 14.236 O --delegate: um épico inteiro sem paradas
+
+Você quer o épico #378 rodando até o fim sem precisar de você em cada item. Em vez de digitar a frase, você põe a delegação no próprio comando:
+
+```
+/agile:epic #378 --autopilot --delegate
+```
+
+A delegação fica registrada com o comando que você digitou:
+
+```
+agile delegation: epic #378 — "/agile:epic #378 --autopilot --delegate" (2026-10-29)
+```
+
+Cada item que chega à validação seguro o bastante passa sozinho. Um item de risco alto, um check vermelho, um achado grave, um corte de tamanho L ou os 80% da sua cota semanal ainda param em você. Sem o `--delegate`, o mesmo comando para em cada validação, como antes.
+### 14.237 O painel de um projeto mostra o que o projeto tem
+
+Você abre o painel de um projeto com três itens prontos e uma faixa trabalhando. Em vez de "histórico de ships indisponível", o bloco mostra o que existe:
+
+```
+Tempo e progresso
+  hoje: 2 itens
+  por dia: 2026-10-29 2 · 2026-10-28 1
+  lane jussara: 2 de 4 itens prontos
+```
+
+Dois itens ficaram prontos hoje e um ontem. A faixa jussara recebeu quatro itens e já entregou dois.
+### 14.238 O resolve abre o painel
+
+Você digita `/agile:resolve` com três issues. Depois de abrir as faixas, o Claude mostra o painel. Na CLI ele inicia o painel em segundo plano; a primeira linha dele é:
+
+```
+agile dashboard WATCH: every 30 s -> D:/dev/_icontrol/agile-canary/.git/agile/dashboard.html
+```
+
+No app não há nada para iniciar: o painel agile do Code desktop abre sozinho quando uma faixa começa a trabalhar (exemplo 14.239). Na CLI, a página se recarrega sozinha a cada 30 segundos e o Claude escreve `Dashboard: D:/dev/_icontrol/agile-canary/.git/agile/dashboard.html` e você abre o arquivo onde quiser. Quando as faixas terminam, o Claude para o painel.
+
+### 14.239 O painel agile no Code desktop
+
+Três faixas trabalham e uma espera por você. Acima do prompt do Code desktop aparece a faixa:
+
+```
+⚠ 2 espera você · jussara F-5 aguardando você · olinda F-6 trabalhando · semana 40%
+```
+
+O painel abre sozinho quando a primeira faixa começa a trabalhar. Se você o fechar, digite `dashboard` para abri-lo de novo. Ele mostra os quatro blocos:
+
+```
+O que espera por você
+  F-5 Cinco — validação e merge — diga: autorizo o merge de F-5
+  lane jussara · F-5 · aguardando você
+Sessões
+  orçamento: a semana usou 40% (reduz o modelo em 70%, pergunta em 80%) · ok
+  jussara · opus · F-5 · aguardando você · 1 h · US$ 1.50
+  olinda · sonnet · F-6 · trabalhando · 30 min · US$ 0.50
+Itens em andamento
+  F-5 Cinco — aguardando validação · você (o dono) · o dono valida
+Tempo e progresso
+  hoje: 0 itens
+  por dia: —
+  lane jussara: 0 de 1 itens prontos
+  lane olinda: 0 de 1 itens prontos
+```
+
+Nenhuma página é aberta e nada é gravado: o painel só lê os arquivos do repositório.
+
+No app, a página abre no painel do navegador e se recarrega sozinha a cada 30 segundos. Na CLI, o Claude escreve `Dashboard: D:/dev/_icontrol/agile-canary/.git/agile/dashboard.html` e você abre o arquivo onde quiser. Quando as faixas terminam, o Claude para o painel.
+
+### 14.240 Uma faixa abre num modelo abaixo do plano e o Claude a troca
+
+O plano dá opus para o item da jussara, mas a sessão que coordena roda em sonnet, e o app abre a faixa em sonnet. O Claude confere cada faixa:
+
+```
+MODEL jussara s1 wants opus
+MODEL olinda s2 wants haiku
+```
+
+A sessão da jussara está em sonnet, abaixo do que o item pede. O Claude troca o modelo dela para opus, e o app pede o seu sim, porque o opus custa mais. Você aceita, e a jussara segue em opus a partir da próxima resposta. Se você recusar, ela segue em sonnet, e o item anota isso nas suas decisões.
+
+### 14.241 O board do épico atrasado, acertado antes da fila
+
+Você roda `/agile:epic data-type-controls --autopilot`. O arquivo do épico tem as features F-189 e F-190 e a F-183 entregue, mas a issue do épico no board ficou para trás. Antes da primeira feature, a execução mostra:
+
+```
+MISSING F-189: in the file, not on the board
+MISSING F-190: in the file, not on the board
+STATUS F-183: file done, board idea
+AUTOPILOT: the header names F-183, which is done
+agile epic-mirror DRIFT: 4 differences
+```
+
+Nada disso é pergunta sua: o Claude acerta a linha `Autopilot:` para a primeira feature da fila, manda o corpo do épico de novo a partir do arquivo, confere, e a fila começa. Só uma linha a mais no board, que o arquivo não tem, para e pergunta.
+
+### 14.242 O gasto de uma faixa visível, tirado da própria sessão
+
+A jussara termina o F-1 e anota o gasto da sessão até ali:
+
+```
+agile lane jussara: US$ 0.02 spent (estimated from session aaaaaaaa-1111-2222-3333-444444444444)
+```
+
+O valor é uma estimativa pelo preço de cada modelo, lida da transcrição da própria sessão. No item seguinte o total cresce e substitui o anterior; ele nunca soma de novo o que já tinha contado. O painel e a cota da semana passam a ver esse gasto.
+
+### 14.243 O painel redesenhado mostra o término e o botão da resposta
+
+Você roda o `/agile:resolve` com oito issues em duas lanes. No Code desktop o painel `dashboard` mostra, no topo, o projeto e a execução, e logo abaixo o progresso:
+
+```
+simulab
+/agile:resolve · 8 issues em 2 lanes · começou 15:15 · semana 8% de 80%
+5 de 8 features · faltam 3 · 1 construindo · 1 com você · 1 na fila
+~21:01 · término estimado · em 46 min
+ritmo: 1 feature a cada 60 min
+```
+
+Em "Sua vez" aparece um cartão com um botão cujo texto é a resposta exata:
+
+```
+merge F-196 Color picker
+validação e merge · esperando há 8 min · trava a lane nanda
+[autorizo o merge de F-196]
+```
+
+Apertar o botão envia a frase ao agente na hora, como se você a digitasse: não há confirmação, então um merge autorizado assim acontece em seguida. Com vários cartões, os botões ficam alinhados à direita; se você estreitar o painel até um deles não caber, todos descem juntos para baixo do texto. Mais abaixo, cada lane mostra seus itens em ordem e quanto falta:
+
+```
+jussara  3 de 5  termina ~21:01
+F-191 construindo há 22 min · média da lane 34 min
+nanda    2 de 3  termina quando você validar
+F-196 aguardando você há 8 min · validação e merge
+```
+
+O término da execução é o da lane mais lenta (a jussara); a nanda espera por você. Na CLI continuam os blocos de texto do painel.
+
+### 14.244 Uma faixa começa o próximo item numa sessão nova
+
+A jussara leva o F-1 até a validação e a olinda termina o F-3, o último da sua fila. As duas encerram o turno, e o Claude lê quais sessões trocar:
+
+```
+FRESH jussara s1 -> F-2 (sonnet)
+DONE olinda s2
+```
+
+O Claude abre uma sessão nova para a jussara, em sonnet, para o F-2, registra essa sessão na faixa e arquiva a s1. A olinda não tem mais item, então a s2 só é arquivada. A sua parada do F-1 continua aberta e a resposta chega à sessão nova da jussara. O gasto da faixa passa a somar as duas sessões.
+
+### 14.245 O teste de integração de uma extensão do VS Code: o `/agile:ship` abre um VS Code de verdade
+
+A Ana tem a extensão `review-helper`, criada pelo bootstrap já com o teste de integração. No ship o `docs.check` roda `npm run package` e depois `npm run test:integration`: o `tsc` compila `src/integration/`, o `run.ts` abre um VS Code com a extensão carregada e o `suite.ts`, dentro dele, ativa a extensão, confere que `review-helper.hello` está registrado e o executa.
+
+Na máquina da Ana o VS Code já está instalado, e ela aponta para ele na variável do shell (sem a variável, a primeira execução baixa uma vez o mínimo de `engines.vscode` para `.vscode-test/`). O fim da saída de uma execução:
+
+```
+Exit code:   0
+integration attempt 1: passed
+```
+
+A janela do VS Code abre e fecha sozinha, em cerca de 10 s.
+
+Se uma tentativa falhar, o `run.ts` imprime `integration attempt 1: failed` com o erro, repete uma vez e imprime `integration attempt 2: ...`; a segunda decide o código de saída. Quando a Ana renomeia o comando só em `src/extension.ts`, as duas tentativas falham com `the command review-helper.hello is registered` e o ship fica vermelho, o que os dois testes unitários, que não abrem o VS Code, não percebem.
+
+Um projeto criado antes desta versão não ganha o `src/integration/`: o perfil manda copiar os arquivos, o script, o pacote, as duas linhas de ignorar e o `docs.check` do template à mão.
+
+### 14.246 As faixas respondem em português
+
+A regra `output-style` do seu projeto diz "Talk to the owner in Brazilian Portuguese (pt-BR)". O `/agile:resolve` abre a jussara, e o prompt da faixa agora traz, logo depois da linha que apresenta a faixa:
+
+```
+The owner reads this session: write every message to the owner in Brazilian Portuguese (pt-BR), though this prompt is English (#416). Files, commits, issues and the texts you give the orchestrator stay English, as the rules say.
+```
+
+A jussara escreve "F-181 está em `idea`; confiro se a F-168, de que ele depende, já foi entregue." em vez da frase em inglês, enquanto o arquivo do item e os commits seguem em inglês. Quando o orquestrador manda a faixa rodar o `relay`, a mensagem termina com "write to the owner in Brazilian Portuguese (pt-BR)".
+
+### 14.247 Um passo abre o Claude Code na worktree e manda fechá-lo antes do ship
+
+O F-7 muda o plugin, e o roteiro pede que você teste a versão da worktree numa sessão do Claude Code aberta nela:
+
+```bash
+claude --plugin-dir D:/wt/agile-canary/f-7-sample
+```
+
+Na primeira versão do roteiro o passo não dizia para fechar a sessão. O validador que o Claude roda sobre o roteiro aponta o passo:
+
+```
+step 1 opens a Claude Code session (`claude --plugin-dir D:/wt/agile-canary/f-7-sample`) and no line at or after it tells the owner to close it before the ship: an open session holds the worktree and worktree.js remove answers HELD (#349)
+```
+
+O Claude acrescenta o subpasso "1.2 Feche essa sessão do Claude Code antes do `/agile:ship`.", com o esperado "nenhuma janela do Claude Code aberta na worktree", e o validador responde `OK`. Sem esse subpasso, a sua sessão ainda aberta seguraria a pasta, e o ship pararia em `HELD` ao remover a worktree. Um `claude -p` ou um `claude plugin ...` termina sozinho e não pede o subpasso.
+
+### 14.248 O corpo que perdeu uma seção da issue, parado antes do envio
+
+Na sessão do plugin, o Claude troca a tabela de testes do corpo salvo da issue #298 com um script inline. O `$1` dentro de aspas duplas foi expandido pelo bash e levou junto o título `## Validation script`; a linha 1 continua certa. Antes de o `gh issue edit` sair, a guarda de corpo lê o corpo atual da issue no GitHub, compara os títulos `## ` e responde:
+
+```
+Claude: gh issue edit 298 --body-file <scratch>/body-298.md
+[agile body-guard] #298 lost ## Validation script (the issue's current body has it) (<scratch>/body-298.md).
+This body would replace the item's issue as it is. Write the whole body with the Write tool and read line 1 back before the send (.claude/rules/ship.md, "Editing").
+If this body is meant to be sent as it is, ask the owner; with a yes, repeat the command ending with the comment  # agile:body-ok
+```
+
+Nada foi enviado. O Claude busca o corpo da issue de novo, refaz a troca com a ferramenta Write e envia; o corpo novo tem todos os títulos do atual e passa sem uma palavra. Uma seção nova no corpo não é perda, e uma seção removida de propósito só sai com o seu sim e o comentário de bypass. Se o GitHub não responde em 5 s, a guarda não compara e o envio segue.
+
+### 14.249 A revisão de um item para na terceira rodada e pede outra abordagem
+
+O F-7 (códigos de desconto) roda no `/agile:autopilot`, sem ninguém olhando. Antes de cada chamada do `reviewer`, o Claude pergunta ao script em que rodada está; depois do relatório, grava a rodada:
+
+```
+ROUND 1 of 3: whole diff
+- 2026-10-30: review round 1 at 4f1c2a9 — 1 blocker, 2 major, 1 minor
+ROUND 2 of 3: since 4f1c2a9
+- 2026-10-30: review round 2 at 8b03d17 — 0 blocker, 1 major, 2 minor
+- 2026-10-30: review round 3 at c91e5a0 — 0 blocker, 1 major, 0 minor
+```
+
+Na rodada 2 o revisor lê só o que mudou desde `4f1c2a9` e confere se os achados da rodada 1 foram corrigidos. A rodada 3 lista só bloqueadores e graves; como sobrou um grave, o relatório termina numa linha `Rethink:`, com o padrão que se repete e outra abordagem. Um defeito vem sempre com todos os lugares da mesma classe, para um conserto só.
+
+Na quarta vez o script não deixa chamar o revisor:
+
+```
+CAP: 3 review rounds done (4f1c2a9, 8b03d17, c91e5a0); rethink the approach; a 4th round only after the owner's reset
+```
+
+O autopilot para aí (no `/agile:resolve`, é uma parada grave). Num `/agile:review` com você, vem um cartão: `Rethink with /agile:change` ou `One more round`. Só com as suas palavras o Claude abre mais uma contagem, e a linha `- 2026-10-30: review rounds reset — owner: "mais uma rodada"` fica em `## Decisions`.
+
+### 14.250 O `docs/agile/REVIEW.md` diz ao revisor o que é falha e o que ignorar
+
+O F-2 conserta o total de pedidos dentro de `legacy/total.js`, e a regra do projeto diz "nunca `var`". O código antigo de `legacy/` usa `var` em tudo, e reescrever `legacy/` está fora do escopo. O projeto ainda não tem `docs/agile/REVIEW.md`: o `/agile:review F-2` o cria vazio a partir de `docs/agile/templates/review.md`, e o revisor relata o `var` novo:
+
+```
+| 1 | rules | major | legacy/total.js:3 | The new loop declares its counter with `var i`. ...
+Criteria without a test: none
+Ignored by REVIEW.md: none
+```
+
+Você rejeita o achado pela segunda vez (já tinha rejeitado o mesmo num item anterior), e o Claude propõe uma linha; com o seu sim, a seção `## Ignore` do `docs/agile/REVIEW.md` ganha:
+
+```
+- `var` in files under legacy/ (the old style stays until legacy/ is rewritten).
+```
+
+Na revisão seguinte, o mesmo `var` não vira linha da tabela; só é contado:
+
+```
+Criteria without a test: none
+Ignored by REVIEW.md: 1 (`var` in files under legacy/, at `legacy/total.js:2` and `:3`)
+```
+
+Uma linha de `## Failures` faz o contrário: o que ela descreve vem no mínimo como grave. Nenhuma linha cala um bloqueador de segurança ou de trava, nem um critério sem teste. No `/agile:autopilot` a proposta da linha não é feita: quem rejeita é você.
+
+### 14.251 A limpeza do ship lê só o caminho da linha `Worktrees:`
+
+O `CLAUDE.md` do projeto tem a linha que o bootstrap escreve, com o caminho entre crases e uma frase depois. Na raiz das worktrees sobrou `f-12-old-report`, que o git não lista. Antes desta versão, a limpeza lia a frase junto com o caminho e não olhava pasta nenhuma (saída de uma execução de verdade do script nesse cenário):
+
+```
+orphans: D:\dev\_scratch\ship-317\fx\wt\app` — one folder per item does not exist, nothing to look at.
+agile cleanup DRY-RUN
+```
+
+Agora ela lê só o caminho entre as crases e mostra a pasta órfã (mesmo cenário):
+
+```
+would remove (after a yes): D:\dev\_scratch\ship-317\fx\wt\app\f-12-old-report
+orphans: 1 under D:\dev\_scratch\ship-317\fx\wt\app.
+agile cleanup DRY-RUN
+```
+
+Sem crases, o caminho termina no primeiro ` (`, travessão entre espaços, `, `, `; ` ou ponto seguido de espaço. Um caminho com espaço no meio é lido inteiro.
+
+### 14.252 Um script inline que o shell mudaria, parado antes de rodar
+
+Na sessão do plugin, o Claude vai filtrar as linhas da tabela de testes do corpo salvo de uma issue com um `node -e` no Bash. As expressões regulares do script têm barras invertidas, e a ferramenta Bash entregaria ao node outra coisa: um `\\` chega como `\`, e o `node --check` continua verde no texto mudado. A guarda de comandos responde antes de o comando rodar:
+
+```
+Claude: node -e "const rows = body.split(/\r?\n/).filter(l => /^\| AC/.test(l))"
+[agile literal-guard] This command hands node a script text (node -e) holding a backslash: the shell, or the Bash tool, changes it before node reads it (`\\` arrives as `\`, even in single quotes and a quoted heredoc; a backtick or `$(` in double quotes runs as a command), and node --check stays green on the changed text.
+rules/core/workflow.md (the Write and Edit tools): write the script with the Write tool to a file and run node <file>.
+If it really has to run this way, ask the owner; with a yes, repeat the command ending with the comment  # agile:literal-ok
+```
+
+Nada rodou. O Claude escreve o script com a ferramenta Write num arquivo da pasta de rascunho e roda `node <arquivo>`; o arquivo guarda cada barra invertida como foi escrita. Um `node -e` sem barra invertida (nem crase ou `$(` entre aspas duplas) passa sem uma palavra, e no PowerShell um texto entre aspas simples ou num here-string `@'...'@` também.

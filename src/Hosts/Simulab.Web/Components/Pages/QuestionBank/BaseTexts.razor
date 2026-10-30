@@ -39,12 +39,12 @@
     <ToolBarContent>
         <div class="app-table-filters">
             @* A short fixed list (the three languages): a select, not a lookup (rule ui-project, F-114). *@
-            <AppSelectField TValue="string"
-                            Id="base-texts-filter-language"
-                            Label="@L["BaseTexts.Filter.Language"]"
-                            Value="_language"
-                            ValueChanged="OnLanguageChangedAsync"
-                            Options="LanguageOptions" />
+            <AppLanguageField Id="base-texts-filter-language"
+                              Label="@L["BaseTexts.Filter.Language"]"
+                              Value="@_language"
+                              ValueChanged="OnLanguageChangedAsync"
+                              AllText="@L["BaseTexts.Filter.Language.All"].Value"
+                              LeadingIcon="@null" />
         </div>
     </ToolBarContent>
     <Columns>
@@ -87,14 +87,6 @@
 
     // The empty state says which emptiness it is: nothing stored, or nothing in the chosen language.
     private string EmptyMessage => _language.Length == 0 ? L["BaseTexts.Empty"] : L["BaseTexts.Empty.Filters"];
-
-    // A language is shown in its own name: it does not depend on the reader's UI language. Empty means all.
-    private IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
-    [
-        new(string.Empty, L["BaseTexts.Filter.Language.All"]),
-        .. SupportedCultures.All.Select(culture =>
-            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))
-    ];
 
     protected override void OnInitialized() =>
         _breadcrumbs =

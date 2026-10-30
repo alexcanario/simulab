@@ -1,0 +1,49 @@
+@* F-184 BR1: a setting that takes effect the moment it changes, so there is no Save button behind it. A real switch:
+   role=switch, Space and Enter toggle (a button does both). A choice saved with a form is an AppCheckbox. *@
+
+<div class="app-field app-switch-field @Class @(Disabled ? "app-switch-disabled" : null)">
+    <button type="button"
+            id="@Id"
+            class="@($"app-switch {(Value ? "app-switch-on" : null)}")"
+            role="switch"
+            aria-checked="@(Value ? "true" : "false")"
+            aria-describedby="@(string.IsNullOrEmpty(Hint) ? null : DescriptionId)"
+            disabled="@Disabled"
+            @onclick="ToggleAsync">
+        <span class="app-switch-track" aria-hidden="true"><span class="app-switch-thumb"></span></span>
+        <span class="app-switch-label">@Label</span>
+    </button>
+    @if (!string.IsNullOrEmpty(Hint))
+    {
+        <span id="@DescriptionId" class="app-field-description"><span class="app-field-hint">@Hint</span></span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter] public bool Value { get; set; }
+
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+
+    [Parameter] public string? Hint { get; set; }
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+
+    private string DescriptionId => $"{Id}-description";
+
+    private Task ToggleAsync()
+    {
+        if (Disabled)
+        {
+            return Task.CompletedTask;
+        }
+
+        Value = !Value;
+        return ValueChanged.InvokeAsync(Value);
+    }
+}

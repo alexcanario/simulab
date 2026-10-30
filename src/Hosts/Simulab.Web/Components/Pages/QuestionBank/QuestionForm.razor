@@ -148,27 +148,25 @@ else
                                     Hint="@(_subject is null ? L["Questions.Field.Topic.DisabledHint"].Value : L["Questions.Field.Topic.Hint"].Value)"
                                     Error="@_topicError" />
 
-                    <AppSelectField TValue="string"
-                                    Id="question-content-language"
-                                    Label="@L["Questions.Field.ContentLanguage"]"
-                                    Value="_contentLanguage"
-                                    ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
-                                    Options="LanguageOptions"
-                                    Required="true"
-                                    Disabled="IsFrozen"
-                                    LeadingIcon="@AppIcons.Language"
-                                    Hint="@L["Questions.Field.ContentLanguage.Hint"]"
-                                    Error="@_languageError" />
+                    <AppLanguageField Id="question-content-language"
+                                      Label="@L["Questions.Field.ContentLanguage"]"
+                                      Value="@_contentLanguage"
+                                      ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
+                                      Required="true"
+                                      Disabled="IsFrozen"
+                                      Hint="@L["Questions.Field.ContentLanguage.Hint"]"
+                                      Error="@_languageError" />
 
-                    <AppSelectField TValue="int?"
-                                    Id="question-difficulty"
-                                    Label="@L["Questions.Field.Difficulty"]"
-                                    Value="_difficulty"
-                                    ValueChanged="@((int? value) => OnDifficultyChanged(value))"
-                                    Options="DifficultyOptions"
-                                    Disabled="IsFrozen"
-                                    Hint="@L["Questions.Field.Difficulty.Hint"]"
-                                    Error="@_difficultyError" />
+                    <AppLevelField Id="question-difficulty"
+                                   Label="@L["Questions.Field.Difficulty"]"
+                                   Names="DifficultyNames"
+                                   NotSetText="@L["Questions.Difficulty.NotSet"].Value"
+                                   Min="QuestionLimits.DifficultyMin"
+                                   Value="_difficulty"
+                                   ValueChanged="@((int? value) => OnDifficultyChanged(value))"
+                                   Disabled="IsFrozen"
+                                   Hint="@L["Questions.Field.Difficulty.Hint"]"
+                                   Error="@_difficultyError" />
                 </AppFormGrid>
             </AppSectionCard>
 
@@ -341,13 +339,12 @@ else
                     }
                     else
                     {
-                        <AppRadioCards TValue="bool?"
-                                       Id="question-true-false-key"
+                        <AppYesNoField Id="question-true-false-key"
                                        Label="@L["Questions.TrueFalseKey.Label"]"
+                                       TrueText="@L["Questions.TrueFalse.True"]"
+                                       FalseText="@L["Questions.TrueFalse.False"]"
                                        Value="_trueFalseKey"
                                        ValueChanged="@((bool? value) => OnTrueFalseKeyChanged(value))"
-                                       Options="TrueFalseCards"
-                                       Columns="2"
                                        Hint="@L["Questions.TrueFalseKey.Hint"]"
                                        Error="@_trueFalseKeyError" />
                     }
@@ -924,12 +921,6 @@ else
         new(QuestionType.Essay, L["Questions.Type.Essay"], L["Questions.Type.Essay.Description"], AppIcons.Essay)
     ];
 
-    private IReadOnlyList<AppRadioCardOption<bool?>> TrueFalseCards =>
-    [
-        new(true, L["Questions.TrueFalse.True"], string.Empty),
-        new(false, L["Questions.TrueFalse.False"], string.Empty)
-    ];
-
     // F-99: the transcription route opens this form with the edition locked and a batch counter (BR2, BR6).
     private bool IsTranscribing =>
         Id is null
@@ -949,17 +940,8 @@ else
 
     private static string ActionsId(int position) => $"question-option-actions-{position}";
 
-    // A language is shown in its own name: it does not depend on the reader's UI language.
-    private static IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
-        [.. SupportedCultures.All.Select(culture =>
-            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
-
-    private IReadOnlyList<AppSelectOption<int?>> DifficultyOptions =>
-    [
-        new(null, L["Questions.Difficulty.NotSet"]),
-        .. Enumerable.Range(QuestionLimits.DifficultyMin, QuestionLimits.DifficultyMax - QuestionLimits.DifficultyMin + 1)
-            .Select(value => new AppSelectOption<int?>(value, value.ToString(CultureInfo.CurrentCulture)))
-    ];
+    // F-184: the names of the levels 1 to 5, read from the resources (the difficulty label of F-154).
+    private IReadOnlyList<string> DifficultyNames => QuestionText.DifficultyNames(L);
 
     private int? CorrectPosition
     {

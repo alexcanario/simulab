@@ -1,0 +1,56 @@
+@* F-184 BR5: the filter mode of the level control: one toggle chip per level, with the mini dots and the name, and an
+   optional "not set" chip. Many may be on, so it is a group of toggle buttons (aria-pressed), not a radiogroup. The page
+   keeps the set (the address of the list) and answers OnToggle. *@
+
+<div class="app-field app-level-filter-field @Class">
+    <span class="app-field-label" id="@LabelId">@Label</span>
+    <div class="app-level-filter" id="@Id" role="group" aria-labelledby="@LabelId">
+        @for (var level = Min; level < Min + Names.Count; level++)
+        {
+            var current = level;
+            var on = Selected.Contains(current);
+            <button type="button" id="@($"{Id}-{current}")" class="@($"app-level-chip {(on ? "app-level-chip-on" : null)}")"
+                    aria-pressed="@(on ? "true" : "false")" @onclick="() => OnToggle.InvokeAsync(current)">
+                <span class="app-level-mini" aria-hidden="true">
+                    @for (var dot = Min; dot < Min + Names.Count; dot++)
+                    {
+                        <span class="@($"app-level-dot {(dot <= current ? "app-level-dot-on" : null)}")"></span>
+                    }
+                </span>
+                <span class="app-level-chip-name">@Names[current - Min]</span>
+            </button>
+        }
+        @if (!string.IsNullOrEmpty(NotSetText))
+        {
+            <button type="button" id="@($"{Id}-none")" class="@($"app-level-chip {(NotSetSelected ? "app-level-chip-on" : null)}")"
+                    aria-pressed="@(NotSetSelected ? "true" : "false")" @onclick="() => OnToggle.InvokeAsync(null)">
+                <span class="app-level-chip-name">@NotSetText</span>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    /// <summary>One name per level, from the first level up.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<string> Names { get; set; } = [];
+
+    [Parameter] public int Min { get; set; } = 1;
+
+    /// <summary>The text of the "not set" chip; without it the chip is not drawn.</summary>
+    [Parameter] public string? NotSetText { get; set; }
+
+    [Parameter] public IReadOnlyList<int> Selected { get; set; } = [];
+
+    [Parameter] public bool NotSetSelected { get; set; }
+
+    /// <summary>A chip was clicked: its level, or null for "not set".</summary>
+    [Parameter] public EventCallback<int?> OnToggle { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+
+    private string LabelId => $"{Id}-label";
+}

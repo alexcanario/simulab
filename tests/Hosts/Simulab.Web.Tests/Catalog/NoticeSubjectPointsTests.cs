@@ -118,6 +118,42 @@ public sealed class NoticeSubjectPointsTests : CatalogPageTestContext
         dialogs.WaitForAssertion(() => SentBody(Api, HttpMethod.Put).PointsPerQuestion.Should().BeNull());
     }
 
+    // F-181 AC10: both fields are typed controls, and a text that is not a number never reaches the Api.
+    [Fact]
+    public void Dialog_TheTwoFields_AreTypedNumberControls()
+    {
+        var (dialogs, _) = RenderProviders();
+        var section = RenderSection();
+        section.WaitForAssertion(() => section.FindAll("#notice-subject-add").Should().ContainSingle());
+
+        section.Find("#notice-subject-add").Click();
+        WaitForDialog(dialogs);
+
+        dialogs.FindAll(".app-integer-field #notice-subject-question-count").Should().ContainSingle();
+        dialogs.FindAll(".app-score-field #notice-subject-points").Should().ContainSingle();
+        dialogs.Find("#notice-subject-points").GetAttribute("inputmode").Should().Be("decimal");
+    }
+
+    [Theory]
+    [InlineData("notice-subject-question-count", "abc")]
+    [InlineData("notice-subject-points", "1,5")]
+    public void Dialog_ATextThatIsNotANumber_IsRefusedAndNothingIsSent(string field, string typed)
+    {
+        var (dialogs, _) = RenderProviders();
+        var section = RenderSection();
+        section.WaitForAssertion(() => section.FindAll("#notice-subject-add").Should().ContainSingle());
+        section.Find("#notice-subject-add").Click();
+        WaitForDialog(dialogs);
+        dialogs.Find("#notice-subject-label").Change("Língua Portuguesa");
+
+        dialogs.Find($"#{field}").Change(typed);
+        dialogs.Find("button.app-form-save").Click();
+
+        dialogs.Find($"#{field}").GetAttribute("aria-invalid").Should().Be("true");
+        dialogs.Find($"#{field}").GetAttribute("value").Should().Be(typed);
+        Api.Received.Should().NotContain(call => call.Method == HttpMethod.Post);
+    }
+
     // AC4: the refusal of the Api lands on the points field.
     [Fact]
     public void Dialog_PointsRefused_ShowsTheMessageOnThePointsField()

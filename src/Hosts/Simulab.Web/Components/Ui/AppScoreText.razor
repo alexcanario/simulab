@@ -1,0 +1,15 @@
+@* F-181 BR7: a score with its unit ("2,5 pts"); a dash, with no unit, for none. *@
+@inject IStringLocalizer<SharedResources> L
+
+<span class="app-score-text">@Text</span>
+
+@code {
+    [Parameter] public decimal? Value { get; set; }
+
+    /// <summary>Decimal places shown; they come from the exam rule, so there is no default.</summary>
+    [Parameter, EditorRequired] public int Decimals { get; set; }
+
+    private string Text => Value is null
+        ? AppNumberFormat.None
+        : $"{AppNumberFormat.Format(Value, Decimals)} {L["Number.Unit.Points"].Value}";
+}

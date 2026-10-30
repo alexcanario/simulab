@@ -1,0 +1,30 @@
+@* F-184 BR3: a yes/no as text: "Yes" and "No" (or the page's words), a dash for none. `ShowIcon` is for a table cell. *@
+@inject IStringLocalizer<SharedResources> L
+
+<span class="app-bool-text">
+    @if (ShowIcon && Value is { } known)
+    {
+        <MudIcon Icon="@(known ? AppIcons.Check : AppIcons.Close)" Size="Size.Small" Class="app-bool-icon" aria-hidden="true" />
+    }
+    @Text
+</span>
+
+@code {
+    [Parameter] public bool? Value { get; set; }
+
+    /// <summary>The word for true; "Yes" when not set.</summary>
+    [Parameter] public string? TrueText { get; set; }
+
+    /// <summary>The word for false; "No" when not set.</summary>
+    [Parameter] public string? FalseText { get; set; }
+
+    /// <summary>An icon before the word (a check or a cross); the word stays, so the icon never speaks alone.</summary>
+    [Parameter] public bool ShowIcon { get; set; }
+
+    private string Text => Value switch
+    {
+        true => TrueText ?? L["Choice.Yes"].Value,
+        false => FalseText ?? L["Choice.No"].Value,
+        _ => "—"
+    };
+}

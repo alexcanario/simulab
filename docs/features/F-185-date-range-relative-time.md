@@ -130,6 +130,8 @@ Tests locked: b5ab96fd294bba550b30ccb1f873fdefbbfad6c0 (5 files); unlocks: 0
 - 2026-10-29 — Screen check in the app host not done in the build: other lanes of the run use the same ports and the same Docker at the same time, and a screen check needs a signed-in session; it is in the validation script (`Only you`) — assumed: technical
 - 2026-10-29 — Reuse: `AppDateField` for the custom range, `AppDateColumn` for the column, the toggle-button look of the level chips of F-184, `UserTimeZone` for the zone; nothing new outside the kit.
 - 2026-10-29 — Shortcuts: none
+- 2026-10-30 — Unlock of `GallerySections.cs` (locked by the tests of this item) to merge `main`, which brought the `gallery-numbers` and `gallery-choices` lines at the same place as `gallery-dates`; all three lines kept, tests locked again — owner, in chat: "autorizo o merge de F-185" (the first attempt to unlock was denied; the owner typed the words again directly)
+- 2026-10-30 — Merge authorized by the owner's words "autorizo o merge de F-185" while the item is not `Risk: low` and the validation script was not run on screen; the owner repeated the words after being told that rule. Screen steps: `not tested`.
 - 2026-10-29 — plan — 1 kit tests and skeletons, locked; 2 AppDateRange and AppDateRangeField → range tests green; 3 AppRelativeTime and AppDateText → text tests green; 4 resx in three locales, gallery "Dates", styles → gallery and resource tests green; 5 AccountEvents and RoleHistory (period field, When cell) → page tests green; 6 flow page, manual pages, gate, scan, review, validation script — assumed: technical
 
 ## Out of scope
@@ -193,3 +195,4 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
 ## Events
 
 - 2026-10-29 assumed — 6 answers
+- 2026-10-30 blocked — test wrong: the owner, in chat: "autorizo o merge de F-185" (unlock of GallerySections.cs only, to keep gallery-numbers, gallery-choices and gallery-dates)

@@ -1,7 +1,7 @@
 ---
 title: Exam rules of an edition
 summary: How an admin records the duration, cut-offs and points of an edition, and where the student and other modules read them
-items: [F-168]
+items: [F-168, F-181]
 ---
 # Exam rules of an edition
 
@@ -11,7 +11,7 @@ Technical terms: [glossary](../glossary.md)
 An admin (`catalog.manage`) saves the edition form at `/admin/exams/{examId}/editions/{id}`, or saves a notice subject in its dialog on the same page.
 
 ## Steps
-1. The edition form sends `DurationMinutes`, `ObjectiveCutOffScore`, `EssayMaxScore` and `EssayCutOffScore` with the rest of the edition (`POST/PUT /api/v1/catalog/exams/{examId}/editions[/{id}]`). The duration is typed as hours and minutes and sent as whole minutes; the scores are typed in the reader's culture (`ScoreText`).
+1. The edition form sends `DurationMinutes`, `ObjectiveCutOffScore`, `EssayMaxScore` and `EssayCutOffScore` with the rest of the edition (`POST/PUT /api/v1/catalog/exams/{examId}/editions[/{id}]`). The duration is typed as hours and minutes and sent as whole minutes; the scores are typed in `AppScoreField` in the reader's culture (F-181, [number controls](number-controls.md)): only the culture's decimal separator is accepted, the value is rounded to two places when the field is left, and a text that is not a number blocks the save.
 2. `SaveExamEditionHandler` calls `ExamEdition.SetRules` after the shape of the edition is valid; a PUT replaces every rule, so a field left empty clears it.
 3. The notice subject dialog sends `PointsPerQuestion` (`POST/PUT .../notice-subjects[/{id}]`); `NoticeSubject.Create`/`Update` check it, and `CopyTo` carries it to another edition (F-86).
 4. Reads compute the objective total with `ObjectiveMaxScores.Compute` (Catalog contracts), never stored: `ExamEditionQueries` and `IExamEditionDirectory` read the live notice subjects of the editions they return in one batched query (`ObjectiveMaxScoreReads`); `PublishedExamQueries` computes it from the syllabus it already loads.

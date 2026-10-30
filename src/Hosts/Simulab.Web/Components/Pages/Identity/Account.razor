@@ -56,14 +56,13 @@ else
                       Value="@_fullName"
                       ValueChanged="OnFullNameChanged" />
 
-        <AppSelectField TValue="string"
-                        Id="account-preferred-language"
-                        Label="@I["Account.PreferredLanguage.Label"]"
-                        Hint="@I["Account.PreferredLanguage.Hint"]"
-                        Required="true"
-                        Disabled="_saving"
-                        Options="LanguageOptions"
-                        Value="@_language"
+        <AppLanguageField Id="account-preferred-language"
+                          Label="@I["Account.PreferredLanguage.Label"]"
+                          Hint="@I["Account.PreferredLanguage.Hint"]"
+                          Required="true"
+                          Disabled="_saving"
+                          LeadingIcon="@null"
+                          Value="@_language"
                         ValueChanged="@(value => { _language = value ?? _profile.PreferredLanguage; _error = null; })" />
 
         <AppLink Href="/account/password" Class="app-account-password d-inline-block mb-4">@I["ChangePassword.Title"]</AppLink>
@@ -99,9 +98,6 @@ else
 
     /// <summary>Set by the reload that follows a save (BR8): the success alert shows in the new language.</summary>
     [SupplyParameterFromQuery] public bool? Saved { get; set; }
-
-    private static readonly IReadOnlyList<AppSelectOption<string>> LanguageOptions =
-        [.. SupportedCultures.All.Select(culture => new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
 
     private ProfileResponse? _profile;
     private bool _loadFailed;

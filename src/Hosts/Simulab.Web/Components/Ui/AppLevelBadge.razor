@@ -1,0 +1,26 @@
+@* F-184 BR6: the display of a level: the mini dots and the name as text, so a table or a card never shows a bare number. *@
+@inject IStringLocalizer<SharedResources> L
+
+<span class="app-level-badge">
+    <span class="app-level-mini" aria-hidden="true">
+        @for (var dot = Min; dot < Min + Names.Count; dot++)
+        {
+            <span class="@($"app-level-dot {(Value >= dot ? "app-level-dot-on" : null)}")"></span>
+        }
+    </span>
+    <span class="app-level-badge-name">@Text</span>
+</span>
+
+@code {
+    [Parameter] public int? Value { get; set; }
+
+    /// <summary>One name per level, from the first level up.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<string> Names { get; set; } = [];
+
+    [Parameter] public int Min { get; set; } = 1;
+
+    /// <summary>The word for no level, in the gender of what is measured; "Not set" when not set.</summary>
+    [Parameter] public string? NotSetText { get; set; }
+
+    private string Text => Value is { } level && level >= Min && level < Min + Names.Count ? Names[level - Min] : NotSetText ?? L["Choice.NotSet"].Value;
+}

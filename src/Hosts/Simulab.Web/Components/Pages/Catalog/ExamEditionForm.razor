@@ -75,18 +75,15 @@ else
                                     Hint="@L["ExamEditions.Field.Organizer.Hint"]"
                                     Error="@_organizerError" />
 
-                    <AppTextField TValue="int?"
-                                  Id="edition-notice-year"
+                    <AppYearField Id="edition-notice-year"
                                   Label="@L["ExamEditions.Field.NoticeYear"]"
                                   Value="_noticeYear"
-                                  ValueChanged="@((int? value) => OnNoticeYearChanged(value))"
-                                  InputType="InputType.Number"
+                                  ValueChanged="OnNoticeYearChanged"
+                                  InvalidChanged="@(invalid => _noticeYearInvalid = invalid)"
                                   Required="true"
-                                  MaxLength="CatalogLimits.ExamEditionNoticeYearDigits"
-                                  Autocomplete="off"
                                   Placeholder="@L["ExamEditions.Field.NoticeYear.Placeholder"]"
                                   Hint="@L["ExamEditions.Field.NoticeYear.Hint", MaxNoticeYear]"
-                                  Error="@_noticeYearError" />
+                                  Error="@(_noticeYearInvalid ? Errors.For(CatalogErrorCodes.ExamEditionNoticeYearInvalid) : _noticeYearError)" />
                 </AppFormGrid>
                 <AppFormGrid Columns="1">
                     <AppTextField TValue="string"
@@ -128,35 +125,35 @@ else
                                   InputType="InputType.Number"
                                   Autocomplete="off" />
 
-                    <AppTextField TValue="string"
-                                  Id="edition-objective-cut-off"
-                                  Label="@L["ExamRules.Field.ObjectiveCutOff"]"
-                                  Value="_objectiveCutOff"
-                                  ValueChanged="@((string? value) => OnObjectiveCutOffChanged(value))"
-                                  Autocomplete="off"
-                                  Hint="@L["ExamRules.Field.ObjectiveCutOff.Hint"]"
-                                  Error="@_objectiveCutOffError" />
+                    <AppScoreField Id="edition-objective-cut-off"
+                                   Label="@L["ExamRules.Field.ObjectiveCutOff"]"
+                                   Decimals="CatalogLimits.ScoreDecimalPlaces"
+                                   Value="_objectiveCutOff"
+                                   ValueChanged="OnObjectiveCutOffChanged"
+                                   InvalidChanged="@(invalid => _objectiveCutOffInvalid = invalid)"
+                                   Hint="@L["ExamRules.Field.ObjectiveCutOff.Hint"]"
+                                   Error="@(_objectiveCutOffInvalid ? Errors.For(CatalogErrorCodes.ExamEditionObjectiveCutOffInvalid) : _objectiveCutOffError)" />
 
                     <div class="app-exam-rules-total">
                         <p id="edition-objective-total" class="app-muted">@ObjectiveTotalText</p>
                     </div>
 
-                    <AppTextField TValue="string"
-                                  Id="edition-essay-max-score"
-                                  Label="@L["ExamRules.Field.EssayMaxScore"]"
-                                  Value="_essayMax"
-                                  ValueChanged="@((string? value) => OnEssayMaxChanged(value))"
-                                  Autocomplete="off"
-                                  Error="@_essayMaxError" />
+                    <AppScoreField Id="edition-essay-max-score"
+                                   Label="@L["ExamRules.Field.EssayMaxScore"]"
+                                   Decimals="CatalogLimits.ScoreDecimalPlaces"
+                                   Value="_essayMax"
+                                   ValueChanged="OnEssayMaxChanged"
+                                   InvalidChanged="@(invalid => _essayMaxInvalid = invalid)"
+                                   Error="@(_essayMaxInvalid ? Errors.For(CatalogErrorCodes.ExamEditionEssayMaxScoreInvalid) : _essayMaxError)" />
 
-                    <AppTextField TValue="string"
-                                  Id="edition-essay-cut-off"
-                                  Label="@L["ExamRules.Field.EssayCutOff"]"
-                                  Value="_essayCutOff"
-                                  ValueChanged="@((string? value) => OnEssayCutOffChanged(value))"
-                                  Autocomplete="off"
-                                  Hint="@L["ExamRules.Field.EssayCutOff.Hint"]"
-                                  Error="@_essayCutOffError" />
+                    <AppScoreField Id="edition-essay-cut-off"
+                                   Label="@L["ExamRules.Field.EssayCutOff"]"
+                                   Decimals="CatalogLimits.ScoreDecimalPlaces"
+                                   Value="_essayCutOff"
+                                   ValueChanged="OnEssayCutOffChanged"
+                                   InvalidChanged="@(invalid => _essayCutOffInvalid = invalid)"
+                                   Hint="@L["ExamRules.Field.EssayCutOff.Hint"]"
+                                   Error="@(_essayCutOffInvalid ? Errors.For(CatalogErrorCodes.ExamEditionEssayCutOffInvalid) : _essayCutOffError)" />
                 </AppFormGrid>
 
                 @if (CutOffAboveTotal)
@@ -313,9 +310,14 @@ else
     private string? _documentError;
     private int? _durationHours;
     private int? _durationMinutes;
-    private string? _objectiveCutOff;
-    private string? _essayMax;
-    private string? _essayCutOff;
+    private decimal? _objectiveCutOff;
+    private decimal? _essayMax;
+    private decimal? _essayCutOff;
+    // F-181 BR6: true while a number control holds a text that is not a number; the save waits.
+    private bool _noticeYearInvalid;
+    private bool _objectiveCutOffInvalid;
+    private bool _essayMaxInvalid;
+    private bool _essayCutOffInvalid;
     private string? _durationError;
     private string? _objectiveCutOffError;
     private string? _essayMaxError;
@@ -382,7 +384,7 @@ else
 
     // "60 / 100" once the total is known, "60" before it (F-168, aside).
     private string? CutOffSummary =>
-        ParsedScore(_objectiveCutOff) is not { } cutOff
+        _objectiveCutOff is not { } cutOff
             ? null
             : _objectiveTotal is { } total
                 ? L["ExamRules.Aside.CutOffOfTotal", ScoreText.Compact(cutOff), ScoreText.Compact(total)]
@@ -398,7 +400,7 @@ else
 
     // F-168 BR5: a warning, never a refusal.
     private bool CutOffAboveTotal =>
-        _objectiveTotal is { } total && ParsedScore(_objectiveCutOff) is { } cutOff && cutOff > total;
+        _objectiveTotal is { } total && _objectiveCutOff is { } cutOff && cutOff > total;
 
     // F-168 UC3 and AC8: what the reader may still want to fill; publishing is never blocked by it (BR1).
     private IReadOnlyList<string> MissingRules
@@ -411,12 +413,12 @@ else
                 missing.Add(L["ExamRules.Missing.Duration"]);
             }
 
-            if (ParsedScore(_objectiveCutOff) is null)
+            if (_objectiveCutOff is null)
             {
                 missing.Add(L["ExamRules.Missing.ObjectiveCutOff"]);
             }
 
-            if (ParsedScore(_essayMax) is null)
+            if (_essayMax is null)
             {
                 missing.Add(L["ExamRules.Missing.EssayMaxScore"]);
             }
@@ -442,12 +444,12 @@ else
         .. new (string? Error, string FieldId, string Label)[]
         {
             (_organizerError, "edition-organizer", L["ExamEditions.Field.Organizer"]),
-            (_noticeYearError, "edition-notice-year", L["ExamEditions.Field.NoticeYear"]),
+            (_noticeYearError ?? InvalidMark(_noticeYearInvalid), "edition-notice-year", L["ExamEditions.Field.NoticeYear"]),
             (_positionError, "edition-position", L["ExamEditions.Field.Position"]),
             (_durationError, "edition-duration-hours", L["ExamRules.Field.Duration"]),
-            (_objectiveCutOffError, "edition-objective-cut-off", L["ExamRules.Field.ObjectiveCutOff"]),
-            (_essayMaxError, "edition-essay-max-score", L["ExamRules.Field.EssayMaxScore"]),
-            (_essayCutOffError, "edition-essay-cut-off", L["ExamRules.Field.EssayCutOff"]),
+            (_objectiveCutOffError ?? InvalidMark(_objectiveCutOffInvalid), "edition-objective-cut-off", L["ExamRules.Field.ObjectiveCutOff"]),
+            (_essayMaxError ?? InvalidMark(_essayMaxInvalid), "edition-essay-max-score", L["ExamRules.Field.EssayMaxScore"]),
+            (_essayCutOffError ?? InvalidMark(_essayCutOffInvalid), "edition-essay-cut-off", L["ExamRules.Field.EssayCutOff"]),
             (_noticeReferenceError, "edition-notice-reference", L["ExamEditions.Field.NoticeReference"]),
             (_noticeUrlError, "edition-notice-url", L["ExamEditions.Field.NoticeUrl"]),
             (_appliedOnError, "edition-applied-on", L["ExamEditions.Field.AppliedOn"]),
@@ -456,6 +458,10 @@ else
         }.Where(item => item.Error is not null)
          .Select(item => new AppErrorSummaryItem(item.FieldId, item.Label))
     ];
+
+    // F-181 BR6: a number control holding text that is not a number has shown its own message under the field; the
+    // summary only needs to know the field is not fixed (the text is never shown, the field's message is).
+    private static string? InvalidMark(bool invalid) => invalid ? "invalid" : null;
 
     // Against the saved edition, or the empty new form with its Draft status.
     private bool HasChanges =>
@@ -467,9 +473,13 @@ else
         || _appliedOn != _saved?.AppliedOn
         || _status != (_saved?.Status ?? ExamEditionStatus.Draft)
         || ParsedDuration() != _saved?.DurationMinutes
-        || Trimmed(_objectiveCutOff) != (ScoreText.ForField(_saved?.ObjectiveCutOffScore) ?? string.Empty)
-        || Trimmed(_essayMax) != (ScoreText.ForField(_saved?.EssayMaxScore) ?? string.Empty)
-        || Trimmed(_essayCutOff) != (ScoreText.ForField(_saved?.EssayCutOffScore) ?? string.Empty)
+        || _objectiveCutOff != _saved?.ObjectiveCutOffScore
+        || _essayMax != _saved?.EssayMaxScore
+        || _essayCutOff != _saved?.EssayCutOffScore
+        || _noticeYearInvalid
+        || _objectiveCutOffInvalid
+        || _essayMaxInvalid
+        || _essayCutOffInvalid
         || _chosen is not null
         || _removeDocument;
 
@@ -533,16 +543,15 @@ else
         _status = edition.Status;
         _durationHours = edition.DurationMinutes / 60;
         _durationMinutes = edition.DurationMinutes % 60;
-        _objectiveCutOff = ScoreText.ForField(edition.ObjectiveCutOffScore);
-        _essayMax = ScoreText.ForField(edition.EssayMaxScore);
-        _essayCutOff = ScoreText.ForField(edition.EssayCutOffScore);
+        _objectiveCutOff = edition.ObjectiveCutOffScore;
+        _essayMax = edition.EssayMaxScore;
+        _essayCutOff = edition.EssayCutOffScore;
+        _noticeYearInvalid = _objectiveCutOffInvalid = _essayMaxInvalid = _essayCutOffInvalid = false;
     }
 
     // F-168 BR2: hours and minutes become whole minutes; both empty is no time limit.
     private int? ParsedDuration() =>
         _durationHours is null && _durationMinutes is null ? null : ((_durationHours ?? 0) * 60) + (_durationMinutes ?? 0);
-
-    private static decimal? ParsedScore(string? text) => ScoreText.TryParse(text, out var value) ? value : null;
 
     private void OnDurationHoursChanged(int? value)
     {
@@ -556,20 +565,20 @@ else
         _durationError = DurationError();
     }
 
-    private void OnObjectiveCutOffChanged(string? value)
+    private void OnObjectiveCutOffChanged(decimal? value)
     {
         _objectiveCutOff = value;
         _objectiveCutOffError = ScoreError(value, CatalogErrorCodes.ExamEditionObjectiveCutOffInvalid);
     }
 
-    private void OnEssayMaxChanged(string? value)
+    private void OnEssayMaxChanged(decimal? value)
     {
         _essayMax = value;
         _essayMaxError = ScoreError(value, CatalogErrorCodes.ExamEditionEssayMaxScoreInvalid);
         _essayCutOffError = EssayCutOffError();
     }
 
-    private void OnEssayCutOffChanged(string? value)
+    private void OnEssayCutOffChanged(decimal? value)
     {
         _essayCutOff = value;
         _essayCutOffError = EssayCutOffError();
@@ -592,8 +601,8 @@ else
             ? Errors.For(CatalogErrorCodes.ExamEditionDurationInvalid)
             : null;
 
-    private string? ScoreError(string? text, string code) =>
-        !ScoreText.TryParse(text, out var value) || (value is { } score && !IsScore(score)) ? Errors.For(code) : null;
+    private string? ScoreError(decimal? value, string code) =>
+        value is { } score && !IsScore(score) ? Errors.For(code) : null;
 
     private string? EssayCutOffError()
     {
@@ -602,12 +611,12 @@ else
             return invalid;
         }
 
-        if (ParsedScore(_essayCutOff) is not { } cutOff)
+        if (_essayCutOff is not { } cutOff)
         {
             return null;
         }
 
-        return ParsedScore(_essayMax) switch
+        return _essayMax switch
         {
             null => Errors.For(CatalogErrorCodes.ExamEditionEssayCutOffWithoutMax),
             { } max when cutOff > max => Errors.For(CatalogErrorCodes.ExamEditionEssayCutOffAboveMax),
@@ -705,8 +714,7 @@ else
         }
 
         var valid = url.Length <= CatalogLimits.ExamEditionNoticeUrlMaxLength
-            && Uri.TryCreate(url, UriKind.Absolute, out var uri)
-            && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+            && AppUrlField.IsValid(url);
 
         return valid ? null : Errors.For(CatalogErrorCodes.ExamEditionNoticeUrlInvalid);
     }
@@ -768,9 +776,9 @@ else
             _appliedOn,
             _status!.Value.ToString(),
             ParsedDuration(),
-            ParsedScore(_objectiveCutOff),
-            ParsedScore(_essayMax),
-            ParsedScore(_essayCutOff));
+            _objectiveCutOff,
+            _essayMax,
+            _essayCutOff);
 
         var result = token is null
             ? ApiResult.Failed<ExamEditionResponse>(ErrorText.UnexpectedCode)

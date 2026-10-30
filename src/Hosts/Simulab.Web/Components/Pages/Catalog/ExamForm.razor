@@ -93,15 +93,12 @@ else
                                     LeadingIcon="@AppIcons.AssessmentType"
                                     Error="@_assessmentTypeError" />
 
-                    <AppSelectField TValue="string"
-                                    Id="exam-content-language"
-                                    Label="@L["Exams.Field.ContentLanguage"]"
-                                    Value="_contentLanguage"
-                                    ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
-                                    Options="LanguageOptions"
-                                    Required="true"
-                                    LeadingIcon="@AppIcons.Language"
-                                    Hint="@L["Exams.Field.ContentLanguage.Hint"]"
+                    <AppLanguageField Id="exam-content-language"
+                                      Label="@L["Exams.Field.ContentLanguage"]"
+                                      Value="@_contentLanguage"
+                                      ValueChanged="@((string? value) => OnContentLanguageChanged(value))"
+                                      Required="true"
+                                      Hint="@L["Exams.Field.ContentLanguage.Hint"]"
                                     Error="@_contentLanguageError" />
                 </AppFormGrid>
             </AppSectionCard>
@@ -264,17 +261,11 @@ else
             L[$"Exams.Scope.{value}.Description"],
             value == ExamScope.National ? null : AppIcons.Place))];
 
-    // A language is shown in its own name (BR9): it does not depend on the reader's UI language, so it
-    // needs no resource key. Lang marks it as written in that language, for a screen reader.
-    private static IReadOnlyList<AppSelectOption<string>> LanguageOptions =>
-        [.. SupportedCultures.All.Select(culture =>
-            new AppSelectOption<string>(culture.Name, SupportedCultures.NativeName(culture), culture.Name))];
-
     private string? AssessmentTypeSummary =>
         _assessmentType is null ? null : ExamText.AssessmentTypeName(L, _assessmentType.Value);
 
     private string? ContentLanguageSummary =>
-        LanguageOptions.FirstOrDefault(option => option.Value == _contentLanguage)?.Text;
+        SupportedCultures.All.Where(culture => culture.Name == _contentLanguage).Select(SupportedCultures.NativeName).FirstOrDefault();
 
     private string? ScopeSummary =>
         _scope is null
