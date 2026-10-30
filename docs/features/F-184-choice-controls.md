@@ -121,7 +121,7 @@ Each kind of choice has one named control, one text and one column in the kit, s
 
 ## Criterion → test
 
-Tests locked: a267338379abbf0fd32ea4f7b6559bd718b12136 (5 files); unlocks: 0
+Tests locked: 47af0f663ad6bb8365f6cd6491c289ae29f2ac76 (5 files); unlocks: 1
 
 | Criterion | Test |
 | --- | --- |
