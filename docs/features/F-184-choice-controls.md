@@ -1,7 +1,7 @@
 ---
 feature: F-184
 epic: Data type controls
-status: validating
+status: done
 Autopilot: stop 2
 board: 254
 version: 1
@@ -11,9 +11,9 @@ version: 1
 Technical terms: [glossary](../glossary.md)
 
 ## Resume here
-- Status: validating (2026-10-29)
-- Stopped at: Built; waiting for the owner's validation on screen
-- Next action: Follow the validation script and say if it passes (Owner)
+- Status: done (2026-10-30)
+- Stopped at: Shipped: merge 8c820f34 on main, board 254 closed
+- Next action: Nothing: the item is done
 - Waiting on: nothing
 
 ## Summary
@@ -218,6 +218,17 @@ Esperado: o endereço do painel do Aspire aparece e o Web responde em https://lo
    Esperado: cada linha mostra os pontos e o nome do nível ("Média", "Difícil"); sem dificuldade, o texto "Não definido".
    - [ ] 4.2 Na barra de filtros clique no chip "Difícil" e no chip "Não definida".
    Esperado: a lista filtra só pelas dificuldades ligadas e o endereço da página ganha `difficulty=4` e `difficulty=none`; recarregar a página mantém os chips ligados.
+
+## Delivery
+
+Gate time: ship run 7 min 7 s (test phase 419 s); 0 red on the ship run
+- Branch: feature/F-184
+- Merge: 8c820f34 (`Merge feature/F-184`, no fast-forward, on main after F-181)
+- Tests: full suite green on the merged tree — Web 3259, Catalog 706, Identity 589, QuestionBank 872, ExamEngine 99, AppHost 122, Api 83, Persistence 25, Jobs 25, Ai 10, Email 19, Storage 8; architecture tests 312 green; `agile gate GREEN`, `agile scan GREEN`, `agile docs GREEN`, `techdocs check F-184` GREEN
+- Manual pages: docs/manual/pt-BR/questions.md
+- Technical pages: docs/flows/choice-controls.md (new), docs/flows/question-form-composition.md (updated)
+- App version: 1.31.0 -> 1.32.0
+- Validation evidence: the owner typed "autorizo o merge de F-184" in chat (three times), after being told the rule (feature-ship precondition 1) asks for the validation words on an item that is not `Risk: low`; it was taken as the validation and the merge authorization. Screen steps of the validation script: `not tested`.
 
 ## Events
 
